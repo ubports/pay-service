@@ -7,6 +7,7 @@ add_library(pay-service-lib STATIC
             item-null.hpp
             item-memory.hpp
             item-memory.cpp)
+target_link_libraries(pay-service-lib ${SERVICE_DEPS_LIBRARIES})
 
 add_executable(pay-service main.cpp)
 target_link_libraries(pay-service
