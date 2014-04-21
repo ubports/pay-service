@@ -24,6 +24,8 @@ class Interface {
 	public:
 		virtual std::list<std::string> listApplications (void) = 0;
 		virtual std::list<std::shared_ptr<Item::Interface>> getItems (std::string& application) = 0;
+
+	typedef std::shared_ptr<Interface> Ptr;
 };}
 
 } // namespace Item
