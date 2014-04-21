@@ -1,30 +1,41 @@
+#include <string>
+#include "item-interface.hpp"
 
-class ItemNull : public Item {
+namespace Item {
+
+namespace Item {
+class Null : public Item::Interface {
 		std::string _id;
 
 	public:
-		ItemNull (std::string id) : _id(id) {};
+		Null (std::string id) : _id(id) {};
 
-		std::string getId (void) {
+		std::string &getId (void) {
 			return _id;
 		}
 
-		std::string getStatus (void) {
-			return Item::Status::UNKNOWN;
+		Interface::Status getStatus (void) {
+			return Interface::Status::UNKNOWN;
 		}
-}
+};
+}; // ns Item
 
-class ItemDBNull : public ItemDB {
+namespace DB {
+class Null : public Interface {
 	public:
 		std::list<std::string> listApplications (void) {
 			return std::list<std::string>();
 		}
 
-		std::list<Item> getItems (std::string application) {
-			return std::list<Item>();
+		std::list<std::shared_ptr<Item::Interface>> getItems (std::string& application) {
+			return std::list<std::shared_ptr<Item::Interface>>();
 		}
 
-		Item newItem (std::string application, std::string itemid) {
-			return new ItemNull(itemid);
+		std::shared_ptr<Item::Interface> newItem (std::string application, std::string itemid) {
+			std::shared_ptr<Item::Interface> retval(new Item::Null(itemid));
+			return retval;
 		}
-}
+};
+}; // ns DB
+
+}; // ns Item

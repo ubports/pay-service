@@ -3,6 +3,9 @@
 #include <string>
 #include <memory>
 
+#ifndef ITEM_INTERFACE_HPP__
+#define ITEM_INTERFACE_HPP__ 1
+
 namespace Item {
 
 namespace Item {
@@ -24,3 +27,6 @@ class Interface {
 };}
 
 } // namespace Item
+
+#endif // ITEM_INTERFACE_HPP__
+

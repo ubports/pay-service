@@ -2,6 +2,7 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g ${GCOV_FLAGS}")
 
 add_library(pay-service-lib STATIC
+            dbus-interface.cpp
             item-interface.hpp
             item-null.hpp
             item-memory.hpp
