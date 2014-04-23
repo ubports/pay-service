@@ -17,6 +17,9 @@ protected:
 			static const std::string s {"GetApplications"};
 			return s;
 		}
+		inline static const std::chrono::milliseconds default_timeout() {
+			return std::chrono::seconds{1};
+		}
 	};
 
 public:
