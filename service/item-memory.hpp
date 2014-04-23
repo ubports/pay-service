@@ -4,14 +4,12 @@
 #include <iostream>
 
 namespace Item {
-namespace DB {
 
-class Memory : public Interface {
+class MemoryStore : public IStore {
 	public:
 		std::list<std::string> listApplications (void);
-		std::list<std::shared_ptr<Item::Interface>> getItems (std::string& application);
-		std::shared_ptr<Item::Interface> newItem (std::string& application, std::string& itemid);
+		std::list<IItem::Ptr> getItems (std::string& application);
+		IItem::Ptr newItem (std::string& application, std::string& itemid);
 };
 
-} // namespace DB
 } // namespace Item

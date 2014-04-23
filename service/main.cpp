@@ -27,7 +27,7 @@ main (int argv, char * argc[])
 	bus->install_executor(core::dbus::asio::make_executor(bus));
 	std::thread t {std::bind(&dbus::Bus::run, bus)};
 
-	std::shared_ptr<Item::DB::Null> items(new Item::DB::Null);
+	std::shared_ptr<Item::NullStore> items(new Item::NullStore);
 	DBusInterface * dbus(new DBusInterface(bus, items));
 
 	/* If we get an INT or TERM we're just gonna shut this whole thing down! */

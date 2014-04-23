@@ -3,39 +3,35 @@
 
 namespace Item {
 
-namespace Item {
-class Null : public Item::Interface {
+class NullItem : public IItem {
 		std::string _id;
 
 	public:
-		Null (std::string id) : _id(id) {};
+		NullItem (std::string id) : _id(id) {};
 
 		std::string &getId (void) {
 			return _id;
 		}
 
-		Interface::Status getStatus (void) {
-			return Interface::Status::UNKNOWN;
+		IItem::Status getStatus (void) {
+			return IItem::Status::UNKNOWN;
 		}
 };
-}; // ns Item
 
-namespace DB {
-class Null : public Interface {
+class NullStore : public IStore {
 	public:
 		std::list<std::string> listApplications (void) {
 			return std::list<std::string>();
 		}
 
-		std::list<std::shared_ptr<Item::Interface>> getItems (std::string& application) {
-			return std::list<std::shared_ptr<Item::Interface>>();
+		std::list<IItem::Ptr> getItems (std::string& application) {
+			return std::list<IItem::Ptr>();
 		}
 
-		std::shared_ptr<Item::Interface> newItem (std::string application, std::string itemid) {
-			std::shared_ptr<Item::Interface> retval(new Item::Null(itemid));
+		IItem::Ptr newItem (std::string application, std::string itemid) {
+			IItem::Ptr retval(new NullItem(itemid));
 			return retval;
 		}
 };
-}; // ns DB
 
 }; // ns Item

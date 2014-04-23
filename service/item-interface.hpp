@@ -8,8 +8,7 @@
 
 namespace Item {
 
-namespace Item {
-class Interface {
+class IItem {
 	public:
 		enum Status {
 			UNKNOWN
@@ -17,16 +16,17 @@ class Interface {
 
 		virtual std::string& getId (void) = 0;
 		virtual Status getStatus (void) = 0;
-}; }
 
-namespace DB {
-class Interface {
+	typedef std::shared_ptr<IItem> Ptr;
+};
+
+class IStore {
 	public:
 		virtual std::list<std::string> listApplications (void) = 0;
-		virtual std::list<std::shared_ptr<Item::Interface>> getItems (std::string& application) = 0;
+		virtual std::list<std::shared_ptr<IItem>> getItems (std::string& application) = 0;
 
-	typedef std::shared_ptr<Interface> Ptr;
-};}
+	typedef std::shared_ptr<IStore> Ptr;
+};
 
 } // namespace Item
 

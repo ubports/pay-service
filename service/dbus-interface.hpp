@@ -10,12 +10,12 @@ class Applications;
 class DBusInterface {
 
 public:
-	DBusInterface (core::dbus::Bus::Ptr& in_bus, std::shared_ptr<Item::DB::Interface> in_items);
+	DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::IStore::Ptr in_items);
 	~DBusInterface () { };
 
 
 private:
-	std::shared_ptr<Item::DB::Interface> items;
+	Item::IStore::Ptr items;
 	core::dbus::Bus::Ptr bus;
 	std::shared_ptr<Applications> base;
 };
