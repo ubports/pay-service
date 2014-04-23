@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <signal.h>
 
+#include <unistd.h>
+
 #include "dbus-interface.hpp"
 #include "item-null.hpp"
 
@@ -37,6 +39,7 @@ main (int argv, char * argc[])
 	sigwait(&signal_set, &signal);
 
 	delete dbus;
+	bus->stop();
 
 	if (t.joinable())
 		t.join();
