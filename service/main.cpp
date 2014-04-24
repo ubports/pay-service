@@ -1,10 +1,8 @@
 
 #include <core/dbus/bus.h>
 #include <core/dbus/asio/executor.h>
-#include <sys/types.h>
-#include <signal.h>
 
-#include <unistd.h>
+#include <core/posix/signal.h>
 
 #include "dbus-interface.hpp"
 #include "item-null.hpp"
@@ -23,22 +21,22 @@ dbus::Bus::Ptr the_session_bus()
 int
 main (int argv, char * argc[])
 {
+    auto trap = core::posix::trap_signals_for_all_subsequent_threads(
+    {
+        core::posix::Signal::sig_int,
+        core::posix::Signal::sig_term
+    });
+
+    trap->signal_raised().connect([trap](core::posix::Signal) { trap->stop(); });
+
 	auto bus = the_session_bus();
 	bus->install_executor(core::dbus::asio::make_executor(bus));
 	std::thread t {std::bind(&dbus::Bus::run, bus)};
 
 	std::shared_ptr<Item::NullStore> items(new Item::NullStore);
-	DBusInterface * dbus(new DBusInterface(bus, items));
+    std::shared_ptr<DBusInterface> dbus(new DBusInterface(bus, items));
 
-	/* If we get an INT or TERM we're just gonna shut this whole thing down! */
-	sigset_t signal_set;
-	sigemptyset(&signal_set);
-	sigaddset(&signal_set, SIGINT);
-	sigaddset(&signal_set, SIGTERM);
-	int signal;
-	sigwait(&signal_set, &signal);
-
-	delete dbus;
+    trap->run();
 	bus->stop();
 
 	if (t.joinable())

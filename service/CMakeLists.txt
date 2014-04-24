@@ -7,9 +7,13 @@ add_library(pay-service-lib STATIC
             item-null.hpp
             item-memory.hpp
             item-memory.cpp)
+
+message(${SERVICE_DEPS_LIBRARIES})
 target_link_libraries(pay-service-lib ${SERVICE_DEPS_LIBRARIES})
 
 add_executable(pay-service main.cpp)
 target_link_libraries(pay-service
-                      pay-service-lib)
+                      pay-service-lib
+                      ${PROCESS_CPP_LIBRARIES})
+
 install(TARGETS pay-service RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
