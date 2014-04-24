@@ -2,6 +2,25 @@
 
 namespace Item {
 
+class MemoryItem : public IItem {
+public:
+	MemoryItem (std::string& in_id) :
+		id(in_id)
+	{
+	}
+
+	std::string &getId (void) {
+		return id;
+	}
+
+	IItem::Status getStatus (void) {
+		return IItem::Status::UNKNOWN;
+	}
+private:
+	std::string id;
+
+};
+
 std::list<std::string>
 MemoryStore::listApplications (void)
 {
@@ -17,8 +36,17 @@ MemoryStore::getItems (std::string& application)
 IItem::Ptr
 MemoryStore::newItem (std::string& application, std::string& itemid)
 {
+	auto app = data[application];
 
+	if (app == nullptr) {
+		app = std::shared_ptr<std::map<std::string, IItem::Ptr>>(new std::map<std::string, IItem::Ptr>());
+		data[application] = app;
+	}
 
+	MemoryItem::Ptr newitem(MemoryItem::Ptr(new MemoryItem(itemid)));
+	(*app)[itemid] = newitem;
+
+	return newitem;
 }
 
 } // namespace Item
