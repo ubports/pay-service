@@ -7,43 +7,13 @@
 
 #include "dbus-interface.hpp"
 
-class IApplications
-{
-protected:
-	struct GetApplications
-	{
-		typedef IApplications Interface;
-		inline static const std::string & name () {
-			static const std::string s {"GetApplications"};
-			return s;
-		}
-		inline static const std::chrono::milliseconds default_timeout() {
-			return std::chrono::seconds{1};
-		}
-	};
-
-public:
-	virtual ~IApplications() = default;
-	virtual std::vector<core::dbus::types::ObjectPath> get_applications (void) = 0;
-};
-
-namespace core { namespace dbus { namespace traits {
-template<> struct Service<IApplications>
-{
-	inline static const std::string& interface_name() {
-		static const std::string s {"com.canonical.pay"};
-		return s;
-	}
-};
-}}} /* namespaces */
-
-class ApplicationsSkeleton : public core::dbus::Skeleton<IApplications>
+class ApplicationsSkeleton : public core::dbus::Skeleton<DBusInterface::IApplications>
 {
 public:
-	ApplicationsSkeleton(const core::dbus::Bus::Ptr& bus) : core::dbus::Skeleton<IApplications>(bus),
+	ApplicationsSkeleton(const core::dbus::Bus::Ptr& bus) : core::dbus::Skeleton<DBusInterface::IApplications>(bus),
 		object(access_service()->add_object_for_path(core::dbus::types::ObjectPath("/com/canonical/pay")))
 	{
-		object->install_method_handler<IApplications::GetApplications>(std::bind(&ApplicationsSkeleton::handle_get_applications, this, std::placeholders::_1));
+		object->install_method_handler<DBusInterface::IApplications::GetApplications>(std::bind(&ApplicationsSkeleton::handle_get_applications, this, std::placeholders::_1));
 	}
 
 private:
@@ -88,7 +58,7 @@ private:
 DBusInterface::DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::IStore::Ptr in_items) :
 		bus(in_bus),
 		items(in_items),
-		base(core::dbus::announce_service_on_bus<IApplications, Applications>(in_bus, in_items))
+		base(core::dbus::announce_service_on_bus<DBusInterface::IApplications, Applications>(in_bus, in_items))
 {
 	return;
 }

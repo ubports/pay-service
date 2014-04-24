@@ -98,6 +98,12 @@ TEST_F(Service, is_reachable_on_the_bus)
             auto service = dbus::Service::use_service(bus, "com.canonical.pay");
             auto object = service->object_for_path(dbus::types::ObjectPath{"/com/canonical/pay"});
 
+			auto reply = object->invoke_method_synchronously<DBusInterface::IApplications::GetApplications, std::vector<dbus::types::ObjectPath>>();
+			EXPECT_FALSE(reply.is_error());
+
+			auto retval = reply.value();
+			EXPECT_EQ(0, retval.size());
+
             bus->stop();
 
             if (t.joinable())
