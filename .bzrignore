@@ -3,3 +3,7 @@ CMakeFiles
 *.cmake
 Makefile
 pay-service
+Testing
+tests/dbus-interface-tests
+tests/gmock
+tests/test_data.h
