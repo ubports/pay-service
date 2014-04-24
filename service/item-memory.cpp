@@ -24,13 +24,15 @@ private:
 std::list<std::string>
 MemoryStore::listApplications (void)
 {
-
+	std::list<std::string> retval;
+	return retval;
 }
 
 std::list<IItem::Ptr>
 MemoryStore::getItems (std::string& application)
 {
-
+	std::list<IItem::Ptr> retval;
+	return retval;
 }
 
 IItem::Ptr
