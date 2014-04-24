@@ -25,12 +25,12 @@ include_directories(
 )
 
 add_executable(
-  acceptance_tests
-  acceptance_tests.cpp
+  dbus-interface-tests
+  dbus-interface-tests.cpp
   )
 
 target_link_libraries(
-  acceptance_tests
+  dbus-interface-tests
 
   pay-service-lib
 
@@ -40,4 +40,4 @@ target_link_libraries(
   ${GMOCK_BOTH_LIBRARIES}
 )
 
-add_test(acceptance_tests ${CMAKE_CURRENT_BINARY_DIR}/acceptance_tests)
+add_test(dbus-interface-tests ${CMAKE_CURRENT_BINARY_DIR}/dbus-interface-tests)
