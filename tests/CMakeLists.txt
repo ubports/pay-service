@@ -24,6 +24,10 @@ include_directories(
   ${PROCESS_CPP_INCLUDE_DIRS}
 )
 
+#############################
+# DBus Interface
+#############################
+
 add_executable(
   dbus-interface-tests
   dbus-interface-tests.cpp
@@ -41,3 +45,23 @@ target_link_libraries(
 )
 
 add_test(dbus-interface-tests ${CMAKE_CURRENT_BINARY_DIR}/dbus-interface-tests)
+
+#############################
+# Memory Item Store
+#############################
+
+add_executable(
+  item-memory-tests
+  item-memory-tests.cpp
+  )
+
+target_link_libraries(
+  item-memory-tests
+
+  pay-service-lib
+
+  ${SERVICE_DEPS_LIBRARIES}
+  ${GMOCK_BOTH_LIBRARIES}
+)
+
+add_test(item-memory-tests ${CMAKE_CURRENT_BINARY_DIR}/item-memory-tests)
