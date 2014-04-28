@@ -52,4 +52,9 @@ TEST_F(MemoryItemTests, StoreItems) {
 	auto items_after = store->getItems(appname);
 	EXPECT_EQ(1, items_after->size());
 	EXPECT_EQ(items, items_after);
+
+	auto item_later = store->getItem(appname, itemname);
+	EXPECT_NE(nullptr, item_later);
+	EXPECT_EQ(itemname, item_later->getId());
+	EXPECT_EQ(item, item_later);
 }
