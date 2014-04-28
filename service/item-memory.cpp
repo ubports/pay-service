@@ -16,9 +16,10 @@ public:
 	IItem::Status getStatus (void) {
 		return IItem::Status::UNKNOWN;
 	}
+
+	typedef std::shared_ptr<MemoryItem> Ptr;
 private:
 	std::string id;
-
 };
 
 std::list<std::string>
@@ -41,7 +42,7 @@ MemoryStore::newItem (std::string& application, std::string& itemid)
 	auto app = data[application];
 
 	if (app == nullptr) {
-		app = std::shared_ptr<std::map<std::string, IItem::Ptr>>(new std::map<std::string, IItem::Ptr>());
+		app = std::make_shared<std::map<std::string, IItem::Ptr>>();
 		data[application] = app;
 	}
 
