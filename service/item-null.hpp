@@ -24,11 +24,11 @@ class NullStore : public IStore {
 			return std::list<std::string>();
 		}
 
-		std::list<IItem::Ptr> getItems (std::string& application) {
-			return std::list<IItem::Ptr>();
+		std::shared_ptr<std::map<std::string, IItem::Ptr>> getItems (std::string& application) {
+			return std::make_shared<std::map<std::string, IItem::Ptr>>();
 		}
 
-		IItem::Ptr newItem (std::string application, std::string itemid) {
+		IItem::Ptr getItem (std::string& application, std::string& itemid) {
 			IItem::Ptr retval(new NullItem(itemid));
 			return retval;
 		}

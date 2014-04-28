@@ -29,15 +29,8 @@ MemoryStore::listApplications (void)
 	return retval;
 }
 
-std::list<IItem::Ptr>
+std::shared_ptr<std::map<std::string, IItem::Ptr>>
 MemoryStore::getItems (std::string& application)
-{
-	std::list<IItem::Ptr> retval;
-	return retval;
-}
-
-IItem::Ptr
-MemoryStore::newItem (std::string& application, std::string& itemid)
 {
 	auto app = data[application];
 
@@ -46,10 +39,21 @@ MemoryStore::newItem (std::string& application, std::string& itemid)
 		data[application] = app;
 	}
 
-	MemoryItem::Ptr newitem(MemoryItem::Ptr(new MemoryItem(itemid)));
-	(*app)[itemid] = newitem;
+	return app;
+}
 
-	return newitem;
+IItem::Ptr
+MemoryStore::getItem (std::string& application, std::string& itemid)
+{
+	auto app = getItems(application);
+	IItem::Ptr item = (*app)[itemid];
+
+	if (item == nullptr) {
+		item = std::shared_ptr<IItem>(new MemoryItem(itemid));
+		(*app)[itemid] = item;
+	}
+
+	return item;
 }
 
 } // namespace Item
