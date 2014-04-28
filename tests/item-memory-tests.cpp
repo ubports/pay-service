@@ -27,5 +27,29 @@ TEST_F(MemoryItemTests, InitialState) {
 
 	std::string appname("my-application");
 	auto items = store->getItems(appname);
-	EXPECT_EQ(0, items.size());
+	EXPECT_EQ(0, items->size());
+}
+
+/* Verify that the memory store saves things */
+TEST_F(MemoryItemTests, StoreItems) {
+	Item::IStore::Ptr store(new Item::MemoryStore());
+
+	auto apps = store->listApplications();
+	EXPECT_EQ(0, apps.size());
+
+	std::string appname("my-application");
+	auto items = store->getItems(appname);
+	EXPECT_EQ(0, items->size());
+
+	auto apps_after = store->listApplications();
+	EXPECT_EQ(1, apps_after.size());
+
+	std::string itemname("my-item");
+	auto item = store->getItem(appname, itemname);
+	EXPECT_NE(nullptr, item);
+	EXPECT_EQ(itemname, item->getId());
+
+	auto items_after = store->getItems(appname);
+	EXPECT_EQ(1, items_after->size());
+	EXPECT_EQ(items, items_after);
 }
