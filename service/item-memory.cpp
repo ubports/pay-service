@@ -1,5 +1,7 @@
 #include "item-memory.hpp"
 
+#include <algorithm>
+
 namespace Item {
 
 class MemoryItem : public IItem {
@@ -25,8 +27,14 @@ private:
 std::list<std::string>
 MemoryStore::listApplications (void)
 {
-	std::list<std::string> retval;
-	return retval;
+	std::list<std::string> apps;
+
+	std::transform(data.begin(),
+	               data.end(),
+	               std::back_inserter(apps),
+	               [](const std::pair<std::string, std::shared_ptr<std::map<std::string, IItem::Ptr>>> &pair){return pair.first;});
+
+	return apps;
 }
 
 std::shared_ptr<std::map<std::string, IItem::Ptr>>
