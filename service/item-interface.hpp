@@ -30,11 +30,13 @@ namespace Item {
 class IItem {
 	public:
 		enum Status {
-			UNKNOWN
+			UNKNOWN,
+			VERIFYING
 		};
 
 		virtual std::string& getId (void) = 0;
 		virtual Status getStatus (void) = 0;
+		virtual bool verify (void) = 0;
 
 		typedef std::shared_ptr<IItem> Ptr;
 };

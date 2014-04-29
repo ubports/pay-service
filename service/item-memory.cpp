@@ -25,8 +25,11 @@ namespace Item {
 
 class MemoryItem : public IItem {
 public:
-	MemoryItem (std::string& in_id) :
-		id(in_id)
+	MemoryItem (std::string& in_app, std::string& in_id, Verification::IFactory::Ptr& in_vfactory) :
+		app(in_app),
+		id(in_id),
+		vfactory(in_vfactory),
+		vitem(nullptr)
 	{
 	}
 
@@ -35,12 +38,30 @@ public:
 	}
 
 	IItem::Status getStatus (void) {
+		if (vitem != nullptr)
+			return IItem::Status::VERIFYING;
+
 		return IItem::Status::UNKNOWN;
+	}
+
+	bool verify (void) {
+		if (vitem != nullptr)
+			return true;
+		if (!vfactory->running())
+			return false;
+
+		vitem = std::make_shared<Verification::IItem>(vfactory->verifyItem(app, id));
+		/* TODO: Signal work */
+
+		return vitem != nullptr;
 	}
 
 	typedef std::shared_ptr<MemoryItem> Ptr;
 private:
 	std::string id;
+	std::string app;
+	Verification::IFactory::Ptr vfactory;
+	Verification::IItem::Ptr vitem;
 };
 
 std::list<std::string>
@@ -76,7 +97,7 @@ MemoryStore::getItem (std::string& application, std::string& itemid)
 	IItem::Ptr item = (*app)[itemid];
 
 	if (item == nullptr) {
-		item = std::shared_ptr<IItem>(new MemoryItem(itemid));
+		item = std::shared_ptr<IItem>(new MemoryItem(application, itemid, verificationFactory));
 		(*app)[itemid] = item;
 	}
 

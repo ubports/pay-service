@@ -35,6 +35,10 @@ class NullItem : public IItem {
 		IItem::Status getStatus (void) {
 			return IItem::Status::UNKNOWN;
 		}
+
+		bool verify (void) {
+			return false;
+		}
 };
 
 class NullStore : public IStore {
