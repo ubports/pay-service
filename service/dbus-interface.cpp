@@ -78,6 +78,18 @@ DBusInterface::DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::IStore::Ptr in
 		items(in_items),
 		base(core::dbus::announce_service_on_bus<DBusInterface::IApplications, Applications>(in_bus, in_items))
 {
+	items->itemChanged.connect([this](std::string& app, std::string& item, Item::IItem::Status status) {
+		/* TODO: transpose the name */
+		auto signal = core::dbus::Message::make_signal("/com/canonical/pay/application/" + app + "/" + item,
+		                                               "com.canonical.pay.item",
+		                                               "statusChanged");
+
+		/* TODO: Get status string from the obj */
+		std::string strstatus("status");
+		signal->writer() << strstatus;
+		bus->send(signal);
+	});
+
 	return;
 }
 
