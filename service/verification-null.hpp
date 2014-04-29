@@ -17,28 +17,29 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#ifndef VERIFICATION_FACTORY_HPP__
-#define VERIFICATION_FACTORY_HPP__ 1
+#include "verification-factory.hpp"
+
+#ifndef VERIFICATION_NULL_HPP__
+#define VERIFICATION_NULL_HPP__ 1
 
 namespace Verification {
 
-class IItem {
-public:
-	virtual ~IItem() = default;
+class NullItem : public IItem {
 
-	typedef std::shared_ptr<IItem> Ptr;
 };
 
-class IFactory {
+class NullFactory {
 public:
-	virtual ~IFactory() = default;
+	virtual bool running () {
+		return false;
+	}
 
-	virtual bool running () = 0;
-	virtual IItem& verifyItem (std::string& appid, std::string& itemid) = 0;
-
-	typedef std::shared_ptr<IFactory> Ptr;
+	virtual IItem& verifyItem (std::string& appid, std::string& itemid) {
+		NullItem * item = new NullItem();
+		return *item;
+	}
 };
 
 } // ns Verification
 
-#endif /* VERIFICATION_FACTORY_HPP__ */
+#endif /* VERIFICATION_NULL_HPP__ */
