@@ -20,6 +20,7 @@
 #include "item-memory.hpp"
 
 #include <algorithm>
+#include <core/signal.h>
 
 namespace Item {
 
@@ -31,6 +32,10 @@ public:
 		vfactory(in_vfactory),
 		vitem(nullptr)
 	{
+	}
+
+	std::string &getApp (void) {
+		return app;
 	}
 
 	std::string &getId (void) {
@@ -51,12 +56,19 @@ public:
 			return false;
 
 		vitem = std::make_shared<Verification::IItem>(vfactory->verifyItem(app, id));
-		/* TODO: Signal work */
-
-		return vitem != nullptr;
+		if (vitem != nullptr) {
+			/* New verification instance, tell the world! */
+			statusChanged(IItem::Status::VERIFYING);
+			return true;
+		} else {
+			/* Uhg, failed */
+			return false;
+		}
 	}
 
 	typedef std::shared_ptr<MemoryItem> Ptr;
+	core::Signal<IItem::Status> statusChanged;
+
 private:
 	std::string id;
 	std::string app;
@@ -97,7 +109,12 @@ MemoryStore::getItem (std::string& application, std::string& itemid)
 	IItem::Ptr item = (*app)[itemid];
 
 	if (item == nullptr) {
-		item = std::shared_ptr<IItem>(new MemoryItem(application, itemid, verificationFactory));
+		auto mitem = new MemoryItem(application, itemid, verificationFactory);
+		mitem->statusChanged.connect([this, mitem](IItem::Status status) {
+			itemChanged(mitem->getApp(), mitem->getId(), status);
+		});
+
+		item = std::shared_ptr<IItem>(mitem);
 		(*app)[itemid] = item;
 	}
 

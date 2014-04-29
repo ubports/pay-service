@@ -22,6 +22,8 @@
 #include <memory>
 #include <map>
 
+#include <core/signal.h>
+
 #ifndef ITEM_INTERFACE_HPP__
 #define ITEM_INTERFACE_HPP__ 1
 
@@ -48,6 +50,8 @@ class IStore {
 		virtual IItem::Ptr getItem (std::string& application, std::string& item) = 0;
 
 		typedef std::shared_ptr<IStore> Ptr;
+
+		core::Signal<std::string&, std::string&, IItem::Status> itemChanged;
 };
 
 } // namespace Item
