@@ -17,26 +17,23 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "item-interface.hpp"
-#include "verification-factory.hpp"
-#include <memory>
-#include <iostream>
-#include <map>
+namespace Verification {
 
-namespace Item {
+class IItem {
+public:
+	virtual ~IItem() = default;
 
-class MemoryStore : public IStore {
-	public:
-		MemoryStore (const Verification::IFactory::Ptr& factory) :
-			verificationFactory(factory)
-			{}
-		std::list<std::string> listApplications (void);
-		std::shared_ptr<std::map<std::string, IItem::Ptr>> getItems (std::string& application);
-		IItem::Ptr getItem (std::string& application, std::string& itemid);
-
-	private:
-		std::map<std::string, std::shared_ptr<std::map<std::string, IItem::Ptr>>> data;
-		Verification::IFactory::Ptr verificationFactory;
+	typedef std::shared_ptr<IItem> Ptr;
 };
 
-} // namespace Item
+class IFactory {
+public:
+	virtual ~IFactory() = default;
+
+	virtual bool running () = 0;
+	virtual IItem& verifyItem (std::string& appid, std::string& itemid) = 0;
+
+	typedef std::shared_ptr<IFactory> Ptr;
+};
+
+} // ns Verification
