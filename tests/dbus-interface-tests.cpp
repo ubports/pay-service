@@ -50,6 +50,22 @@ auto system_bus_config_file =
         core::testing::system_bus_configuration_file();
 }
 
+/**
+ Doesn't work with DBus Fixture
+
+TEST_F(Service, BasicAllocation)
+{
+	auto bus = session_bus();
+	auto store = std::make_shared<Item::NullStore>();
+	DBusInterface * dbus = new DBusInterface(bus, store);
+
+	EXPECT_NE(nullptr, dbus);
+
+	delete dbus;
+	return;
+}
+ **/
+
 TEST_F(Service, is_reachable_on_the_bus)
 {
         core::testing::CrossProcessSync cps1;
