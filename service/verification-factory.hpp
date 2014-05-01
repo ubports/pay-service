@@ -26,11 +26,17 @@ namespace Verification {
 
 class IItem {
 public:
+	enum Status {
+		ERROR,
+		NOT_PURCHASED,
+		PURCHASED
+	};
+
 	virtual bool run (void) = 0;
 
 	typedef std::shared_ptr<IItem> Ptr;
 
-	core::Signal<bool> verificationComplete;
+	core::Signal<Status> verificationComplete;
 };
 
 class IFactory {

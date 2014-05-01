@@ -33,7 +33,9 @@ class IItem {
 	public:
 		enum Status {
 			UNKNOWN,
-			VERIFYING
+			VERIFYING,
+			NOT_PURCHASED,
+			PURCHASED
 		};
 
 		virtual std::string& getId (void) = 0;

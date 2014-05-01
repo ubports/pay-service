@@ -69,8 +69,21 @@ public:
 		/* When the verification item has run it's course we need to
 		   update our status */
 		/* NOTE: This will execute on the verification item's thread */
-		vitem->verificationComplete.connect([this](bool error) {
+		vitem->verificationComplete.connect([this](Verification::IItem::Status status) {
+			switch (status) {
+			case Verification::IItem::PURCHASED:
+				statusChanged(IItem::Status::PURCHASED);
+				break;
+			case Verification::IItem::NOT_PURCHASED:
+				statusChanged(IItem::Status::NOT_PURCHASED);
+				break;
+			case Verification::IItem::ERROR:
+			default: /* Fall through, an error is same as status we don't know */
+				statusChanged(IItem::Status::UNKNOWN);
+				break;
+			}
 
+			vitem = nullptr;
 		});
 
 		return vitem->run();
@@ -80,12 +93,15 @@ public:
 	core::Signal<IItem::Status> statusChanged;
 
 private:
+	/***** Only set at init *********/
 	/* Item ID */
 	std::string id;
 	/* Application ID */
 	std::string app;
 	/* Pointer to the factory to use */
 	Verification::IFactory::Ptr vfactory;
+
+	/****** std::shared_ptr<> is threadsafe **********/
 	/* Verification item if we're in the state of verifying or null otherwise */
 	Verification::IItem::Ptr vitem;
 };
