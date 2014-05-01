@@ -59,6 +59,9 @@ private:
 	Item::IStore::Ptr items;
 	core::dbus::Bus::Ptr bus;
 	std::shared_ptr<Applications> base;
+
+	static std::string encodePath (const std::string& input);
+	static std::string decodePath (const std::string& input);
 };
 
 namespace core { namespace dbus { namespace traits {

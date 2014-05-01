@@ -79,8 +79,10 @@ DBusInterface::DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::IStore::Ptr in
 		base(core::dbus::announce_service_on_bus<DBusInterface::IApplications, Applications>(in_bus, in_items))
 {
 	items->itemChanged.connect([this](std::string& app, std::string& item, Item::IItem::Status status) {
-		/* TODO: transpose the name */
-		auto signal = core::dbus::Message::make_signal("/com/canonical/pay/application/" + app + "/" + item,
+		std::string app_encode = encodePath(app);
+		std::string item_encode = encodePath(item);
+
+		auto signal = core::dbus::Message::make_signal("/com/canonical/pay/application/" + app_encode + "/" + item_encode,
 		                                               "com.canonical.pay.item",
 		                                               "statusChanged");
 
@@ -93,3 +95,57 @@ DBusInterface::DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::IStore::Ptr in
 	return;
 }
 
+std::string
+DBusInterface::encodePath (const std::string& input)
+{
+	std::string output;
+
+	std::transform(input.cbegin(),
+	               input.cend(),
+	               std::back_inserter(output),
+	               [](const char c){
+	                   std::string retval;
+
+	                   if ((c >= 'a' && c <= 'z') ||
+		                   (c >= 'A' && c <= 'Z') ||
+		                   (c >= '0' && c <= '9')) {
+		                   retval = std::string(&c, 1);
+	                   } else {
+		                   char buffer[4] = {0};
+		                   std::snprintf(buffer, 3, "_%2X", c);
+		                   retval = std::string(buffer);
+	                   }
+
+	                   std::back_insert_iterator<std::string> iterator(retval);
+	                   return iterator;
+	               });
+
+	return output;
+}
+
+std::string
+DBusInterface::decodePath (const std::string& input)
+{
+	std::string output;
+
+	try {
+		for (int i = 0; i < input.size(); i++) {
+			if (input[i] == '_') {
+				char buffer[3] = {0};
+				buffer[0] = input[i + 1];
+				buffer[1] = input[i + 2];
+
+				unsigned char value = std::stoi(buffer, nullptr, 16);
+				output += value;
+				i += 2;
+			} else {
+				output += input[i];
+			}
+		}
+	} catch (...) {
+		/* We can get out of bounds on the parsing if the
+		   string is invalid. Just return what we have. */
+	}
+
+	return output;
+}
