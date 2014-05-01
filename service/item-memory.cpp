@@ -30,7 +30,8 @@ public:
 		app(in_app),
 		id(in_id),
 		vfactory(in_vfactory),
-		vitem(nullptr)
+		vitem(nullptr),
+		status(IItem::Status::UNKNOWN)
 	{
 		/* We init into the unknown state and then wait for someone
 		   to ask us to do something about it. */
@@ -45,10 +46,7 @@ public:
 	}
 
 	IItem::Status getStatus (void) {
-		if (vitem != nullptr)
-			return IItem::Status::VERIFYING;
-
-		return IItem::Status::UNKNOWN;
+		return status;
 	}
 
 	bool verify (void) {
@@ -64,7 +62,7 @@ public:
 		}
 
 		/* New verification instance, tell the world! */
-		statusChanged(IItem::Status::VERIFYING);
+		setStatus(IItem::Status::VERIFYING);
 
 		/* When the verification item has run it's course we need to
 		   update our status */
@@ -72,14 +70,14 @@ public:
 		vitem->verificationComplete.connect([this](Verification::IItem::Status status) {
 			switch (status) {
 			case Verification::IItem::PURCHASED:
-				statusChanged(IItem::Status::PURCHASED);
+				setStatus(IItem::Status::PURCHASED);
 				break;
 			case Verification::IItem::NOT_PURCHASED:
-				statusChanged(IItem::Status::NOT_PURCHASED);
+				setStatus(IItem::Status::NOT_PURCHASED);
 				break;
 			case Verification::IItem::ERROR:
 			default: /* Fall through, an error is same as status we don't know */
-				statusChanged(IItem::Status::UNKNOWN);
+				setStatus(IItem::Status::UNKNOWN);
 				break;
 			}
 
@@ -93,6 +91,19 @@ public:
 	core::Signal<IItem::Status> statusChanged;
 
 private:
+	void setStatus (IItem::Status in_status) {
+		std::unique_lock<std::mutex> ul(status_mutex);
+		bool signal = (status != in_status);
+
+		status = in_status;
+		ul.unlock();
+
+		if (signal)
+			/* NOTE: in_status here as it's on the stack and the status
+			   that this signal should be associated with */
+			statusChanged(in_status);
+	}
+
 	/***** Only set at init *********/
 	/* Item ID */
 	std::string id;
@@ -104,6 +115,10 @@ private:
 	/****** std::shared_ptr<> is threadsafe **********/
 	/* Verification item if we're in the state of verifying or null otherwise */
 	Verification::IItem::Ptr vitem;
+
+	/****** status is protected with it's own mutex *******/
+	std::mutex status_mutex;
+	IItem::Status status;
 };
 
 std::list<std::string>
