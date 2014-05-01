@@ -24,20 +24,10 @@
 
 namespace Verification {
 
-class NullItem : public IItem {
-
-};
-
 class NullFactory {
 public:
-	virtual bool running () {
-		return false;
-	}
-
-	virtual IItem& verifyItem (std::string& appid, std::string& itemid) {
-		NullItem * item = new NullItem();
-		return *item;
-	}
+	virtual bool running ();
+	virtual IItem::Ptr verifyItem (std::string& appid, std::string& itemid);
 };
 
 } // ns Verification

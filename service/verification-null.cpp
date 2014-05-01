@@ -17,32 +17,35 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <core/signal.h>
-
-#ifndef VERIFICATION_FACTORY_HPP__
-#define VERIFICATION_FACTORY_HPP__ 1
+#include "verification-null.hpp"
 
 namespace Verification {
 
-class IItem {
+class NullItem : public IItem {
 public:
-	virtual bool run (void) = 0;
+	NullItem (void) {
+	}
 
-	typedef std::shared_ptr<IItem> Ptr;
+	~NullItem (void) {
+	}
 
-	core::Signal<bool> verificationComplete;
+	virtual bool run (void) {
+		return false;
+	}
 };
 
-class IFactory {
-public:
-	virtual ~IFactory() = default;
 
-	virtual bool running () = 0;
-	virtual IItem::Ptr verifyItem (std::string& appid, std::string& itemid) = 0;
+bool
+NullFactory::running ()
+{
+	return false;
+}
 
-	typedef std::shared_ptr<IFactory> Ptr;
-};
+IItem::Ptr
+NullFactory::verifyItem (std::string& appid, std::string& itemid)
+{
+//	return std::make_shared<IItem>(new NullItem());
+	return IItem::Ptr();
+}
 
 } // ns Verification
-
-#endif /* VERIFICATION_FACTORY_HPP__ */

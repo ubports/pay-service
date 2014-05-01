@@ -32,6 +32,8 @@ public:
 		vfactory(in_vfactory),
 		vitem(nullptr)
 	{
+		/* We init into the unknown state and then wait for someone
+		   to ask us to do something about it. */
 	}
 
 	std::string &getApp (void) {
@@ -55,24 +57,36 @@ public:
 		if (!vfactory->running())
 			return false;
 
-		vitem = std::make_shared<Verification::IItem>(vfactory->verifyItem(app, id));
-		if (vitem != nullptr) {
-			/* New verification instance, tell the world! */
-			statusChanged(IItem::Status::VERIFYING);
-			return true;
-		} else {
+		vitem = vfactory->verifyItem(app, id);
+		if (vitem == nullptr) {
 			/* Uhg, failed */
 			return false;
 		}
+
+		/* New verification instance, tell the world! */
+		statusChanged(IItem::Status::VERIFYING);
+
+		/* When the verification item has run it's course we need to
+		   update our status */
+		/* NOTE: This will execute on the verification item's thread */
+		vitem->verificationComplete.connect([this](bool error) {
+
+		});
+
+		return vitem->run();
 	}
 
 	typedef std::shared_ptr<MemoryItem> Ptr;
 	core::Signal<IItem::Status> statusChanged;
 
 private:
+	/* Item ID */
 	std::string id;
+	/* Application ID */
 	std::string app;
+	/* Pointer to the factory to use */
 	Verification::IFactory::Ptr vfactory;
+	/* Verification item if we're in the state of verifying or null otherwise */
 	Verification::IItem::Ptr vitem;
 };
 
