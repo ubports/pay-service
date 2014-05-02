@@ -44,8 +44,20 @@ public:
 		exec = nullptr;
 		transferBuffer.clear();
 
+		/* Do the execution in another thread so we can wait on the
+		   network socket. */
 		exec = std::shared_ptr<std::thread>(new std::thread([this]() {
-			curl_easy_perform(handle);
+			auto status = curl_easy_perform(handle);
+
+			if (status == CURLE_OK) {
+				/* TODO: Clearly we need to be a bit more sophisticated here */
+				verificationComplete(Status::PURCHASED);
+			} else {
+				verificationComplete(Status::ERROR);
+			}
+
+			/* Clear the thread */
+			exec = nullptr;
 		}));
 
 		return true;
