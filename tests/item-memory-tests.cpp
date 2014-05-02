@@ -21,6 +21,8 @@
 #include "service/item-memory.hpp"
 #include "service/verification-null.hpp"
 
+#include "verification-test.hpp"
+
 struct MemoryItemTests : public ::testing::Test
 {
 	protected:
