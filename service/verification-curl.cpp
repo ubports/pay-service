@@ -27,20 +27,47 @@ namespace Verification {
 class CurlItem : public IItem {
 public:
 	CurlItem (void) {
+		handle = curl_easy_init();
+
+		/* Helps with threads */
+		curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1);
+		curl_easy_setopt(handle, CURLOPT_URL, "https://ubuntu.com/");
+		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
+		curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
 	}
 
 	~CurlItem (void) {
+		curl_easy_cleanup(handle);
 	}
 
 	virtual bool run (void) {
-		return false;
+		exec = nullptr;
+		transferBuffer.clear();
+
+		exec = std::shared_ptr<std::thread>(new std::thread([this]() {
+			curl_easy_perform(handle);
+		}));
+
+		return true;
+	}
+private:
+	CURL * handle;
+	std::string transferBuffer;
+	std::shared_ptr<std::thread> exec;
+
+	/* This is the callback from cURL as it does the transfer. We're
+	   pretty simple in that we're just putting it into a string. */
+	static size_t curlWrite (void * buffer, size_t size, size_t nmemb, void * user_data) {
+		CurlItem * item = static_cast<CurlItem *>(user_data);
+		item->transferBuffer.append(static_cast<char *>(buffer), size);
+		return size;
 	}
 };
 
 CurlFactory::CurlFactory (core::dbus::Bus::Ptr& in_bus)
 {
 	/* TODO: We should use the dbus bus to check to see if we have networking, someday */
-	curl_global_init(0);
+	curl_global_init(CURL_GLOBAL_SSL);
 }
 
 CurlFactory::~CurlFactory ()
