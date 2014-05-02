@@ -86,13 +86,7 @@ TEST_F(MemoryItemTests, StoreItems) {
 
 TEST_F(MemoryItemTests, VerifyItem) {
 	Verification::TestFactory::Ptr vfactory(new Verification::TestFactory());
-
-	/* Don't ask */
-	Verification::TestFactory::Ptr * pvfactory = &vfactory;
-	Verification::IFactory::Ptr * pifactory = static_cast<Verification::IFactory::Ptr *>(static_cast<void *>(pvfactory));
-	/* end don't ask */
-
-	Item::IStore::Ptr store(new Item::MemoryStore(*pifactory));
+	Item::IStore::Ptr store(new Item::MemoryStore(std::dynamic_pointer_cast<Verification::IFactory, Verification::TestFactory>(vfactory)));
 
 	std::string appname("my-application");
 	std::string itemname("my-item");
