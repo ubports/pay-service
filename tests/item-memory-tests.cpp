@@ -83,3 +83,25 @@ TEST_F(MemoryItemTests, StoreItems) {
 	EXPECT_EQ(itemname, item_later->getId());
 	EXPECT_EQ(item, item_later);
 }
+
+TEST_F(MemoryItemTests, VerifyItem) {
+	Verification::TestFactory::Ptr vfactory(new Verification::TestFactory());
+
+	/* Don't ask */
+	Verification::TestFactory::Ptr * pvfactory = &vfactory;
+	Verification::IFactory::Ptr * pifactory = static_cast<Verification::IFactory::Ptr *>(static_cast<void *>(pvfactory));
+	/* end don't ask */
+
+	Item::IStore::Ptr store(new Item::MemoryStore(*pifactory));
+
+	std::string appname("my-application");
+	std::string itemname("my-item");
+	auto item = store->getItem(appname, itemname);
+
+	EXPECT_EQ(Item::IItem::Status::UNKNOWN, item->getStatus());
+
+	item->verify();
+	sleep(20);
+
+	EXPECT_EQ(Item::IItem::Status::NOT_PURCHASED, item->getStatus());
+}

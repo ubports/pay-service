@@ -22,8 +22,8 @@
 #include <thread>
 #include <chrono>
 
-#ifndef VERIFICATION_NULL_HPP__
-#define VERIFICATION_NULL_HPP__ 1
+#ifndef VERIFICATION_TEST_HPP__
+#define VERIFICATION_TEST_HPP__ 1
 
 namespace Verification {
 
@@ -38,8 +38,8 @@ public:
 	virtual bool run (void) {
 		t = std::thread([this]() {
 			/* Fastest website in the world */
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			verificationComplete(purchased ? Status::PURCHASED : Status::NOT_PURCHASED);
+			sleep(10);
+			verificationComplete(m_purchased ? Status::PURCHASED : Status::NOT_PURCHASED);
 		});
 		return true;
 	}
@@ -50,7 +50,7 @@ private:
 
 class TestFactory {
 public:
-	TestFactory : m_running(false) {
+	TestFactory() : m_running(false) {
 	}
 
 	virtual bool running () {
@@ -78,6 +78,7 @@ public:
 		itemStatus[key] = purchased;
 	}
 
+	typedef std::shared_ptr<TestFactory> Ptr;
 private:
 	bool m_running;
 	std::map<std::pair<std::string, std::string>, bool> itemStatus;
@@ -85,4 +86,4 @@ private:
 
 } // ns Verification
 
-#endif /* VERIFICATION_NULL_HPP__ */
+#endif /* VERIFICATION_TEST_HPP__ */
