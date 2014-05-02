@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 #include "service/item-memory.hpp"
+#include "service/verification-null.hpp"
 
 struct MemoryItemTests : public ::testing::Test
 {
@@ -32,14 +33,16 @@ struct MemoryItemTests : public ::testing::Test
 
 /* Test to make sure the basic stuff doesn't crash to ensure we can move forward */
 TEST_F(MemoryItemTests, BasicCreate) {
-	Item::MemoryStore * store = new Item::MemoryStore();
+	Verification::IFactory::Ptr vfactory(dynamic_cast<Verification::IFactory *>(new Verification::NullFactory()));
+	Item::MemoryStore * store = new Item::MemoryStore(vfactory);
 	EXPECT_NE(nullptr, store);
 	delete store;
 }
 
 /* Verify that the initial state is empty */
 TEST_F(MemoryItemTests, InitialState) {
-	Item::IStore::Ptr store(new Item::MemoryStore());
+	Verification::IFactory::Ptr vfactory(dynamic_cast<Verification::IFactory *>(new Verification::NullFactory()));
+	Item::IStore::Ptr store(new Item::MemoryStore(vfactory));
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -51,7 +54,8 @@ TEST_F(MemoryItemTests, InitialState) {
 
 /* Verify that the memory store saves things */
 TEST_F(MemoryItemTests, StoreItems) {
-	Item::IStore::Ptr store(new Item::MemoryStore());
+	Verification::IFactory::Ptr vfactory(dynamic_cast<Verification::IFactory *>(new Verification::NullFactory()));
+	Item::IStore::Ptr store(new Item::MemoryStore(vfactory));
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
