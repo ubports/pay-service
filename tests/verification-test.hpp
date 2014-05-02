@@ -19,6 +19,9 @@
 
 #include "service/verification-factory.hpp"
 
+#include <thread>
+#include <chrono>
+
 #ifndef VERIFICATION_NULL_HPP__
 #define VERIFICATION_NULL_HPP__ 1
 
@@ -33,10 +36,16 @@ public:
 	}
 
 	virtual bool run (void) {
-		return false;
+		t = std::thread([this]() {
+			/* Fastest website in the world */
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			verificationComplete(purchased ? Status::PURCHASED : Status::NOT_PURCHASED);
+		});
+		return true;
 	}
 private:
 	bool m_purchased;
+	std::thread t;
 };
 
 class TestFactory {
