@@ -37,11 +37,22 @@ public:
 	}
 };
 
+CurlFactory::CurlFactory (core::dbus::Bus::Ptr& in_bus)
+{
+	/* TODO: We should use the dbus bus to check to see if we have networking, someday */
+	curl_global_init(0);
+}
+
+CurlFactory::~CurlFactory ()
+{
+	curl_global_cleanup();
+}
 
 bool
 CurlFactory::running ()
 {
-	return false;
+	/* TODO: Check if we have networking */
+	return true;
 }
 
 IItem::Ptr

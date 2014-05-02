@@ -31,6 +31,7 @@ include (FindPkgConfig)
 pkg_check_modules (PROCESS_CPP REQUIRED process-cpp)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
+                   libcurl
                    dbus-cpp
                    process-cpp
                    properties-cpp>=0.0.1)

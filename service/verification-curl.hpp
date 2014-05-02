@@ -18,6 +18,7 @@
  */
 
 #include "verification-factory.hpp"
+#include <core/dbus/bus.h>
 
 #ifndef VERIFICATION_CURL_HPP__
 #define VERIFICATION_CURL_HPP__ 1
@@ -26,6 +27,9 @@ namespace Verification {
 
 class CurlFactory {
 public:
+	CurlFactory (core::dbus::Bus::Ptr& in_bus);
+	~CurlFactory ();
+
 	virtual bool running ();
 	virtual IItem::Ptr verifyItem (std::string& appid, std::string& itemid);
 };
