@@ -64,7 +64,12 @@ set (CXX_WARNING_ARGS " -Wall -Wextra -pedantic -Wno-missing-field-initializers"
 if (${enable_tests})
   enable_testing ()
   if (${enable_lcov})
-    include(GCov)
+    include(EnableCoverageReport) # Using gcov CMake modules from https://code.cor-lab.org/projects/rsc
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage" )
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage" )
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} --coverage" )
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage" )
+    ENABLE_COVERAGE_REPORT(TARGETS ${SCOPE_LIB_UNVERSIONED} FILTER /usr/include ${CMAKE_SOURCE_DIR}/tests/* ${CMAKE_BINARY_DIR}/*)
   endif ()
 endif ()
 
