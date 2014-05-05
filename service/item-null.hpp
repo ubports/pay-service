@@ -55,6 +55,8 @@ class NullStore : public IStore {
 			IItem::Ptr retval(new NullItem(itemid));
 			return retval;
 		}
+
+		typedef std::shared_ptr<NullStore> Ptr;
 };
 
 }; // ns Item

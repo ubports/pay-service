@@ -35,6 +35,7 @@ public:
 	{
 		/* We init into the unknown state and then wait for someone
 		   to ask us to do something about it. */
+		// vfactory->running() ? printf("Running") : printf("Not running");
 	}
 
 	std::string &getApp (void) {
@@ -150,6 +151,9 @@ MemoryStore::getItems (std::string& application)
 IItem::Ptr
 MemoryStore::getItem (std::string& application, std::string& itemid)
 {
+	if (verificationFactory == nullptr)
+		return IItem::Ptr(nullptr);
+
 	auto app = getItems(application);
 	IItem::Ptr item = (*app)[itemid];
 

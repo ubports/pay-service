@@ -35,16 +35,18 @@ struct MemoryItemTests : public ::testing::Test
 
 /* Test to make sure the basic stuff doesn't crash to ensure we can move forward */
 TEST_F(MemoryItemTests, BasicCreate) {
-	Verification::IFactory::Ptr vfactory(dynamic_cast<Verification::IFactory *>(new Verification::NullFactory()));
-	Item::MemoryStore * store = new Item::MemoryStore(vfactory);
+	auto vfactory = std::make_shared<Verification::NullFactory>();
+	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::IFactory, Verification::NullFactory>(vfactory));
 	EXPECT_NE(nullptr, store);
-	delete store;
+	/* Force a destruction in the test */
+	store.reset();
+	EXPECT_EQ(nullptr, store);
 }
 
 /* Verify that the initial state is empty */
 TEST_F(MemoryItemTests, InitialState) {
-	Verification::IFactory::Ptr vfactory(dynamic_cast<Verification::IFactory *>(new Verification::NullFactory()));
-	Item::IStore::Ptr store(new Item::MemoryStore(vfactory));
+	auto vfactory = std::make_shared<Verification::NullFactory>();
+	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::IFactory, Verification::NullFactory>(vfactory));
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -56,8 +58,10 @@ TEST_F(MemoryItemTests, InitialState) {
 
 /* Verify that the memory store saves things */
 TEST_F(MemoryItemTests, StoreItems) {
-	Verification::IFactory::Ptr vfactory(dynamic_cast<Verification::IFactory *>(new Verification::NullFactory()));
-	Item::IStore::Ptr store(new Item::MemoryStore(vfactory));
+	auto vfactory = std::make_shared<Verification::NullFactory>();
+	ASSERT_NE(nullptr, vfactory);
+
+	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::IFactory, Verification::NullFactory>(vfactory));
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -71,7 +75,7 @@ TEST_F(MemoryItemTests, StoreItems) {
 
 	std::string itemname("my-item");
 	auto item = store->getItem(appname, itemname);
-	EXPECT_NE(nullptr, item);
+	ASSERT_NE(nullptr, item);
 	EXPECT_EQ(itemname, item->getId());
 
 	auto items_after = store->getItems(appname);
@@ -85,13 +89,16 @@ TEST_F(MemoryItemTests, StoreItems) {
 }
 
 TEST_F(MemoryItemTests, VerifyItem) {
-	Verification::TestFactory::Ptr vfactory(new Verification::TestFactory());
-	Item::IStore::Ptr store(new Item::MemoryStore(std::dynamic_pointer_cast<Verification::IFactory, Verification::TestFactory>(vfactory)));
+	auto vfactory = std::make_shared<Verification::TestFactory>();
+	ASSERT_NE(nullptr, vfactory);
+
+	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::IFactory, Verification::TestFactory>(vfactory));
 
 	std::string appname("my-application");
 	std::string itemname("my-item");
 	auto item = store->getItem(appname, itemname);
 
+	ASSERT_NE(nullptr, item);
 	EXPECT_EQ(Item::IItem::Status::UNKNOWN, item->getStatus());
 
 	item->verify();

@@ -28,6 +28,8 @@ class NullFactory {
 public:
 	virtual bool running ();
 	virtual IItem::Ptr verifyItem (std::string& appid, std::string& itemid);
+
+	typedef std::shared_ptr<NullFactory> Ptr;
 };
 
 } // ns Verification
