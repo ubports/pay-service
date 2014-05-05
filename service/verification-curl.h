@@ -28,10 +28,16 @@ namespace Verification {
 class CurlFactory {
 public:
 	CurlFactory ();
+	CurlFactory (const std::string& endpoint);
 	~CurlFactory ();
 
 	virtual bool running ();
 	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
+
+	void setEndpoint (std::string& endpoint);
+
+private:
+	std::string endpoint;
 };
 
 } // ns Verification

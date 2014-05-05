@@ -24,15 +24,20 @@ struct VerificationCurlTests : public ::testing::Test
 {
 	protected:
 		virtual void SetUp() {
+			endpoint = "file://";
+			endpoint += VERIFICATION_CURL_ENDPOINTS_DIR;
 		}
 
 		virtual void TearDown() {
 		}
+
+		std::string endpoint;
 };
 
 TEST_F(VerificationCurlTests, InitTest) {
 	auto verify = std::make_shared<Verification::CurlFactory>();
 	EXPECT_NE(nullptr, verify);
+	verify->setEndpoint(endpoint);
 	verify.reset();
 	EXPECT_EQ(nullptr, verify);
 }

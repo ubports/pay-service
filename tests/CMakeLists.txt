@@ -70,6 +70,8 @@ add_test(item-memory-tests ${CMAKE_CURRENT_BINARY_DIR}/item-memory-tests)
 # Verification Curl Factory
 #############################
 
+add_definitions("-DVERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints\"")
+
 add_executable(
   verification-curl-tests
   verification-curl-tests.cpp

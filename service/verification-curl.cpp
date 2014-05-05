@@ -26,12 +26,12 @@ namespace Verification {
 
 class CurlItem : public Item {
 public:
-	CurlItem (void) {
+	CurlItem (std::string& app, std::string& item, std::string& endpoint) {
 		handle = curl_easy_init();
 
 		/* Helps with threads */
 		curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1);
-		curl_easy_setopt(handle, CURLOPT_URL, "https://ubuntu.com/");
+		curl_easy_setopt(handle, CURLOPT_URL, endpoint.c_str());
 		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
 		curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
 	}
@@ -76,7 +76,8 @@ private:
 	}
 };
 
-CurlFactory::CurlFactory ()
+CurlFactory::CurlFactory () :
+	endpoint("https://ubuntu.com")
 {
 	/* TODO: We should check to see if we have networking someday */
 	curl_global_init(CURL_GLOBAL_SSL);
@@ -97,7 +98,13 @@ CurlFactory::running ()
 Item::Ptr
 CurlFactory::verifyItem (std::string& appid, std::string& itemid)
 {
-	return std::make_shared<CurlItem>();
+	return std::make_shared<CurlItem>(appid, itemid, endpoint);
+}
+
+void
+CurlFactory::setEndpoint (std::string& in_endpoint)
+{
+	endpoint = in_endpoint;
 }
 
 } // ns Verification
