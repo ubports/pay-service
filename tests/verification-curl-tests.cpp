@@ -41,3 +41,23 @@ TEST_F(VerificationCurlTests, InitTest) {
 	verify.reset();
 	EXPECT_EQ(nullptr, verify);
 }
+
+TEST_F(VerificationCurlTests, PurchaseItem) {
+	auto verify = std::make_shared<Verification::CurlFactory>();
+	ASSERT_NE(nullptr, verify);
+	verify->setEndpoint(endpoint);
+
+	std::string appid("good");
+	std::string itemid("simple");
+
+	auto item = verify->verifyItem(appid, itemid);
+	ASSERT_NE(nullptr, item);
+
+	Verification::Item::Status status = Verification::Item::Status::ERROR;
+	item->verificationComplete.connect([&status] (Verification::Item::Status in_status) { status = in_status; });
+
+	ASSERT_TRUE(item->run());
+	usleep(20 * 1000);
+
+	EXPECT_EQ(Verification::Item::Status::PURCHASED, status);
+}

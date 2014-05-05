@@ -26,22 +26,24 @@ namespace Verification {
 
 class CurlItem : public Item {
 public:
-	CurlItem (std::string& app, std::string& item, std::string& endpoint) {
+	CurlItem (std::string& app, std::string& item, std::string& endpoint) : exec(nullptr){
 		handle = curl_easy_init();
 
 		/* Helps with threads */
 		curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1);
-		curl_easy_setopt(handle, CURLOPT_URL, endpoint.c_str());
+		curl_easy_setopt(handle, CURLOPT_URL, (endpoint + "/" + app + "-" + item).c_str());
 		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
 		curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
 	}
 
 	~CurlItem (void) {
+		if (exec->joinable())
+			exec->join();
+
 		curl_easy_cleanup(handle);
 	}
 
 	virtual bool run (void) {
-		exec = nullptr;
 		transferBuffer.clear();
 
 		/* Do the execution in another thread so we can wait on the
@@ -55,9 +57,6 @@ public:
 			} else {
 				verificationComplete(Status::ERROR);
 			}
-
-			/* Clear the thread */
-			exec = nullptr;
 		});
 
 		return true;
