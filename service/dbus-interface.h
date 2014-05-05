@@ -19,7 +19,7 @@
 
 #include <core/dbus/bus.h>
 #include <core/dbus/service.h>
-#include "item-interface.hpp"
+#include "item-interface.h"
 
 #ifndef DBUS_INTERFACE_HPP__
 #define DBUS_INTERFACE_HPP__ 1

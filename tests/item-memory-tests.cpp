@@ -18,7 +18,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "service/item-memory.hpp"
+#include "service/item-memory.h"
 
 struct MemoryItemTests : public ::testing::Test
 {

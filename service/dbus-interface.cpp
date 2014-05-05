@@ -23,7 +23,7 @@
 #include <core/dbus/stub.h>
 #include <vector>
 
-#include "dbus-interface.hpp"
+#include "dbus-interface.h"
 
 class ApplicationsSkeleton : public core::dbus::Skeleton<DBusInterface::IApplications>
 {

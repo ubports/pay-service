@@ -17,7 +17,7 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "item-interface.hpp"
+#include "item-interface.h"
 #include <memory>
 #include <iostream>
 #include <map>

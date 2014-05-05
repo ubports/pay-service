@@ -17,7 +17,7 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "item-memory.hpp"
+#include "item-memory.h"
 
 #include <algorithm>
 

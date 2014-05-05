@@ -18,7 +18,7 @@
  */
 
 #include <string>
-#include "item-interface.hpp"
+#include "item-interface.h"
 
 namespace Item {
 

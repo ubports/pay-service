@@ -22,8 +22,8 @@
 
 #include <core/posix/signal.h>
 
-#include "dbus-interface.hpp"
-#include "item-null.hpp"
+#include "dbus-interface.h"
+#include "item-null.h"
 
 namespace dbus = core::dbus;
 
