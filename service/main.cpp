@@ -52,7 +52,7 @@ main (int argv, char * argc[])
 	bus->install_executor(core::dbus::asio::make_executor(bus));
 	std::thread t {std::bind(&dbus::Bus::run, bus)};
 
-	Verification::IFactory::Ptr vfactory(dynamic_cast<Verification::IFactory *>(new Verification::NullFactory));
+	Verification::Factory::Ptr vfactory(dynamic_cast<Verification::Factory *>(new Verification::NullFactory));
 	std::shared_ptr<Item::MemoryStore> items(new Item::MemoryStore(vfactory));
     std::shared_ptr<DBusInterface> dbus(new DBusInterface(bus, items));
 

@@ -31,7 +31,7 @@ public:
 	~CurlFactory ();
 
 	virtual bool running ();
-	virtual IItem::Ptr verifyItem (std::string& appid, std::string& itemid);
+	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
 };
 
 } // ns Verification

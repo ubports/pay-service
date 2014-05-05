@@ -27,7 +27,7 @@
 
 namespace Verification {
 
-class TestItem : public IItem {
+class TestItem : public Item {
 public:
 	TestItem (bool purchased) : m_purchased(purchased) {
 	}
@@ -50,7 +50,7 @@ private:
 	std::thread t;
 };
 
-class TestFactory : public IFactory {
+class TestFactory : public Factory {
 public:
 	TestFactory() : m_running(false) {
 	}
@@ -59,7 +59,7 @@ public:
 		return m_running;
 	}
 
-	virtual IItem::Ptr verifyItem (std::string& appid, std::string& itemid) {
+	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid) {
 		bool purchased = false;
 		try {
 			std::pair<std::string, std::string> key(appid, itemid);
@@ -68,7 +68,7 @@ public:
 			/* If it's not there, we'll assume it's not purchased */
 		}
 
-		return IItem::Ptr(new TestItem(purchased));
+		return Item::Ptr(new TestItem(purchased));
 	}
 
 	void test_setRunning (bool running) {

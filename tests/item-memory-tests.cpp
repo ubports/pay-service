@@ -38,7 +38,7 @@ TEST_F(MemoryItemTests, BasicCreate) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::IFactory, Verification::NullFactory>(vfactory));
+	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::NullFactory>(vfactory));
 	EXPECT_NE(nullptr, store);
 	/* Force a destruction in the test */
 	store.reset();
@@ -48,7 +48,7 @@ TEST_F(MemoryItemTests, BasicCreate) {
 /* Verify that the initial state is empty */
 TEST_F(MemoryItemTests, InitialState) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::IFactory, Verification::NullFactory>(vfactory));
+	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::NullFactory>(vfactory));
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -63,7 +63,7 @@ TEST_F(MemoryItemTests, StoreItems) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::IFactory, Verification::NullFactory>(vfactory));
+	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::NullFactory>(vfactory));
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -94,7 +94,7 @@ TEST_F(MemoryItemTests, VerifyItem) {
 	auto vfactory = std::make_shared<Verification::TestFactory>();
 	ASSERT_NE(nullptr, vfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::IFactory, Verification::TestFactory>(vfactory));
+	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::TestFactory>(vfactory));
 
 	std::string appname("my-application");
 	std::string itemname("my-item");

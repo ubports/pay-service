@@ -24,7 +24,7 @@
 
 namespace Verification {
 
-class IItem {
+class Item {
 public:
 	enum Status {
 		ERROR,
@@ -34,19 +34,19 @@ public:
 
 	virtual bool run (void) = 0;
 
-	typedef std::shared_ptr<IItem> Ptr;
+	typedef std::shared_ptr<Item> Ptr;
 
 	core::Signal<Status> verificationComplete;
 };
 
-class IFactory {
+class Factory {
 public:
-	virtual ~IFactory() = default;
+	virtual ~Factory() = default;
 
 	virtual bool running () = 0;
-	virtual IItem::Ptr verifyItem (std::string& appid, std::string& itemid) = 0;
+	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid) = 0;
 
-	typedef std::shared_ptr<IFactory> Ptr;
+	typedef std::shared_ptr<Factory> Ptr;
 };
 
 } // ns Verification

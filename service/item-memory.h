@@ -27,7 +27,7 @@ namespace Item {
 
 class MemoryStore : public Store {
 	public:
-		MemoryStore (const Verification::IFactory::Ptr& factory) :
+		MemoryStore (const Verification::Factory::Ptr& factory) :
 			verificationFactory(factory) {
 				if (verificationFactory == nullptr)
 					throw std::invalid_argument("factory");
@@ -38,7 +38,7 @@ class MemoryStore : public Store {
 
 	private:
 		std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
-		Verification::IFactory::Ptr verificationFactory;
+		Verification::Factory::Ptr verificationFactory;
 };
 
 } // namespace Item

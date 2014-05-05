@@ -27,7 +27,7 @@ namespace Item {
 
 class MemoryItem : public Item {
 public:
-	MemoryItem (std::string& in_app, std::string& in_id, Verification::IFactory::Ptr& in_vfactory) :
+	MemoryItem (std::string& in_app, std::string& in_id, Verification::Factory::Ptr& in_vfactory) :
 		app(in_app),
 		id(in_id),
 		vfactory(in_vfactory),
@@ -68,15 +68,15 @@ public:
 		/* When the verification item has run it's course we need to
 		   update our status */
 		/* NOTE: This will execute on the verification item's thread */
-		vitem->verificationComplete.connect([this](Verification::IItem::Status status) {
+		vitem->verificationComplete.connect([this](Verification::Item::Status status) {
 			switch (status) {
-			case Verification::IItem::PURCHASED:
+			case Verification::Item::PURCHASED:
 				setStatus(Item::Status::PURCHASED);
 				break;
-			case Verification::IItem::NOT_PURCHASED:
+			case Verification::Item::NOT_PURCHASED:
 				setStatus(Item::Status::NOT_PURCHASED);
 				break;
-			case Verification::IItem::ERROR:
+			case Verification::Item::ERROR:
 			default: /* Fall through, an error is same as status we don't know */
 				setStatus(Item::Status::UNKNOWN);
 				break;
@@ -109,11 +109,11 @@ private:
 	/* Application ID */
 	std::string app;
 	/* Pointer to the factory to use */
-	Verification::IFactory::Ptr vfactory;
+	Verification::Factory::Ptr vfactory;
 
 	/****** std::shared_ptr<> is threadsafe **********/
 	/* Verification item if we're in the state of verifying or null otherwise */
-	Verification::IItem::Ptr vitem;
+	Verification::Item::Ptr vitem;
 
 	/****** status is protected with it's own mutex *******/
 	std::mutex status_mutex;

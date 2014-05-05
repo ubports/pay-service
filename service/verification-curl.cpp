@@ -24,7 +24,7 @@
 
 namespace Verification {
 
-class CurlItem : public IItem {
+class CurlItem : public Item {
 public:
 	CurlItem (void) {
 		handle = curl_easy_init();
@@ -94,11 +94,11 @@ CurlFactory::running ()
 	return true;
 }
 
-IItem::Ptr
+Item::Ptr
 CurlFactory::verifyItem (std::string& appid, std::string& itemid)
 {
 	CurlItem * item = new CurlItem();
-	return IItem::Ptr(item);
+	return Item::Ptr(item);
 }
 
 } // ns Verification

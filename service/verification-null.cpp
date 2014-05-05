@@ -21,7 +21,7 @@
 
 namespace Verification {
 
-class NullItem : public IItem {
+class NullItem : public Item {
 public:
 	NullItem (void) {
 	}
@@ -41,11 +41,11 @@ NullFactory::running ()
 	return false;
 }
 
-IItem::Ptr
+Item::Ptr
 NullFactory::verifyItem (std::string& appid, std::string& itemid)
 {
 	NullItem * item = new NullItem();
-	return IItem::Ptr(item);
+	return Item::Ptr(item);
 }
 
 } // ns Verification
