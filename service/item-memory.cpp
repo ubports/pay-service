@@ -35,7 +35,6 @@ public:
 	{
 		/* We init into the unknown state and then wait for someone
 		   to ask us to do something about it. */
-		// vfactory->running() ? printf("Running") : printf("Not running");
 	}
 
 	std::string &getApp (void) {
@@ -81,8 +80,6 @@ public:
 				setStatus(IItem::Status::UNKNOWN);
 				break;
 			}
-
-			vitem = nullptr;
 		});
 
 		return vitem->run();

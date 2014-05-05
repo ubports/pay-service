@@ -103,8 +103,12 @@ TEST_F(MemoryItemTests, VerifyItem) {
 	ASSERT_NE(nullptr, item);
 	EXPECT_EQ(Item::IItem::Status::UNKNOWN, item->getStatus());
 
-	item->verify();
-	sleep(20);
+	/* It's not running yet */
+	EXPECT_FALSE(item->verify());
+
+	vfactory->test_setRunning(true);
+	ASSERT_TRUE(item->verify());
+	usleep(50 * 1000);
 
 	EXPECT_EQ(Item::IItem::Status::NOT_PURCHASED, item->getStatus());
 }

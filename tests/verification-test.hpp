@@ -33,12 +33,14 @@ public:
 	}
 
 	~TestItem (void) {
+		if (t.joinable())
+			t.join();
 	}
 
 	virtual bool run (void) {
 		t = std::thread([this]() {
 			/* Fastest website in the world */
-			sleep(10);
+			usleep(10 * 1000);
 			verificationComplete(m_purchased ? Status::PURCHASED : Status::NOT_PURCHASED);
 		});
 		return true;
