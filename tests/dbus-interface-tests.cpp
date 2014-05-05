@@ -91,8 +91,8 @@ TEST_F(Service, is_reachable_on_the_bus)
 
             std::thread t{[bus](){ bus->run(); }};
 
-            auto null_store = std::shared_ptr<Item::NullStore>(new Item::NullStore);
-            auto pay_service = std::shared_ptr<DBusInterface>(new DBusInterface(bus, null_store));
+            auto null_store = std::make_shared<Item::NullStore>();
+            auto pay_service = std::make_shared<DBusInterface>(bus, null_store);
 
             cps1.try_signal_ready_for(std::chrono::milliseconds{500});
 

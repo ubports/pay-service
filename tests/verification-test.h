@@ -68,7 +68,7 @@ public:
 			/* If it's not there, we'll assume it's not purchased */
 		}
 
-		return Item::Ptr(new TestItem(purchased));
+		return std::make_shared<TestItem>(purchased);
 	}
 
 	void test_setRunning (bool running) {

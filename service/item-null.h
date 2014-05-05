@@ -52,7 +52,7 @@ class NullStore : public Store {
 		}
 
 		Item::Ptr getItem (std::string& application, std::string& itemid) {
-			Item::Ptr retval(new NullItem(itemid));
+			auto retval = std::make_shared<NullItem>(itemid);
 			return retval;
 		}
 

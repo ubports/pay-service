@@ -46,7 +46,7 @@ public:
 
 		/* Do the execution in another thread so we can wait on the
 		   network socket. */
-		exec = std::shared_ptr<std::thread>(new std::thread([this]() {
+		exec = std::make_shared<std::thread>([this]() {
 			auto status = curl_easy_perform(handle);
 
 			if (status == CURLE_OK) {
@@ -58,7 +58,7 @@ public:
 
 			/* Clear the thread */
 			exec = nullptr;
-		}));
+		});
 
 		return true;
 	}
@@ -97,8 +97,7 @@ CurlFactory::running ()
 Item::Ptr
 CurlFactory::verifyItem (std::string& appid, std::string& itemid)
 {
-	CurlItem * item = new CurlItem();
-	return Item::Ptr(item);
+	return std::make_shared<CurlItem>();
 }
 
 } // ns Verification

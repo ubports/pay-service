@@ -44,8 +44,7 @@ NullFactory::running ()
 Item::Ptr
 NullFactory::verifyItem (std::string& appid, std::string& itemid)
 {
-	NullItem * item = new NullItem();
-	return Item::Ptr(item);
+	return std::make_shared<NullItem>();
 }
 
 } // ns Verification
