@@ -17,23 +17,22 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-factory.h"
-#include <core/dbus/bus.h>
+#include <gtest/gtest.h>
+#include "service/verification-curl.h"
 
-#ifndef VERIFICATION_CURL_HPP__
-#define VERIFICATION_CURL_HPP__ 1
+struct VerificationCurlTests : public ::testing::Test
+{
+	protected:
+		virtual void SetUp() {
+		}
 
-namespace Verification {
-
-class CurlFactory {
-public:
-	CurlFactory ();
-	~CurlFactory ();
-
-	virtual bool running ();
-	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
+		virtual void TearDown() {
+		}
 };
 
-} // ns Verification
-
-#endif /* VERIFICATION_CURL_HPP__ */
+TEST_F(VerificationCurlTests, InitTest) {
+	auto verify = std::make_shared<Verification::CurlFactory>();
+	EXPECT_NE(nullptr, verify);
+	verify.reset();
+	EXPECT_EQ(nullptr, verify);
+}

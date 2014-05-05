@@ -76,9 +76,9 @@ private:
 	}
 };
 
-CurlFactory::CurlFactory (core::dbus::Bus::Ptr& in_bus)
+CurlFactory::CurlFactory ()
 {
-	/* TODO: We should use the dbus bus to check to see if we have networking, someday */
+	/* TODO: We should check to see if we have networking someday */
 	curl_global_init(CURL_GLOBAL_SSL);
 }
 

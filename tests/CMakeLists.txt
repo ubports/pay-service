@@ -65,3 +65,23 @@ target_link_libraries(
 )
 
 add_test(item-memory-tests ${CMAKE_CURRENT_BINARY_DIR}/item-memory-tests)
+
+#############################
+# Verification Curl Factory
+#############################
+
+add_executable(
+  verification-curl-tests
+  verification-curl-tests.cpp
+  )
+
+target_link_libraries(
+  verification-curl-tests
+
+  pay-service-lib
+
+  ${SERVICE_DEPS_LIBRARIES}
+  ${GMOCK_BOTH_LIBRARIES}
+)
+
+add_test(verification-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-tests)
