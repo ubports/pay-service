@@ -60,4 +60,16 @@ TEST_F(VerificationCurlTests, PurchaseItem) {
 	usleep(20 * 1000);
 
 	EXPECT_EQ(Verification::Item::Status::PURCHASED, status);
+
+	std::string badappid("bad");
+	auto baditem = verify->verifyItem(badappid, itemid);
+	ASSERT_NE(nullptr, item);
+
+	Verification::Item::Status badstatus = Verification::Item::Status::ERROR;
+	item->verificationComplete.connect([&badstatus] (Verification::Item::Status in_status) { badstatus = in_status; });
+
+	ASSERT_TRUE(baditem->run());
+	usleep(20 * 1000);
+
+	EXPECT_EQ(Verification::Item::Status::ERROR, badstatus);
 }
