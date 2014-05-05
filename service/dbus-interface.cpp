@@ -52,7 +52,7 @@ class Applications : public ApplicationsSkeleton
 public:
 	typedef std::shared_ptr<Applications> Ptr;
 
-	Applications (const core::dbus::Bus::Ptr& bus, Item::IStore::Ptr in_items) : 
+	Applications (const core::dbus::Bus::Ptr& bus, Item::Store::Ptr in_items) : 
 		ApplicationsSkeleton(bus),
 		items(in_items) { }
 
@@ -70,10 +70,10 @@ public:
 	}
 
 private:
-	Item::IStore::Ptr items;
+	Item::Store::Ptr items;
 };
 
-DBusInterface::DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::IStore::Ptr in_items) :
+DBusInterface::DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::Store::Ptr in_items) :
 		bus(in_bus),
 		items(in_items),
 		base(core::dbus::announce_service_on_bus<DBusInterface::IApplications, Applications>(in_bus, in_items))

@@ -23,7 +23,7 @@
 
 namespace Item {
 
-class MemoryItem : public IItem {
+class MemoryItem : public Item {
 public:
 	MemoryItem (std::string& in_id) :
 		id(in_id)
@@ -34,8 +34,8 @@ public:
 		return id;
 	}
 
-	IItem::Status getStatus (void) {
-		return IItem::Status::UNKNOWN;
+	Item::Status getStatus (void) {
+		return Item::Status::UNKNOWN;
 	}
 
 	typedef std::shared_ptr<MemoryItem> Ptr;
@@ -51,32 +51,32 @@ MemoryStore::listApplications (void)
 	std::transform(data.begin(),
 	               data.end(),
 	               std::back_inserter(apps),
-	               [](const std::pair<std::string, std::shared_ptr<std::map<std::string, IItem::Ptr>>> &pair){return pair.first;});
+	               [](const std::pair<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> &pair){return pair.first;});
 
 	return apps;
 }
 
-std::shared_ptr<std::map<std::string, IItem::Ptr>>
+std::shared_ptr<std::map<std::string, Item::Ptr>>
 MemoryStore::getItems (std::string& application)
 {
 	auto app = data[application];
 
 	if (app == nullptr) {
-		app = std::make_shared<std::map<std::string, IItem::Ptr>>();
+		app = std::make_shared<std::map<std::string, Item::Ptr>>();
 		data[application] = app;
 	}
 
 	return app;
 }
 
-IItem::Ptr
+Item::Ptr
 MemoryStore::getItem (std::string& application, std::string& itemid)
 {
 	auto app = getItems(application);
-	IItem::Ptr item = (*app)[itemid];
+	Item::Ptr item = (*app)[itemid];
 
 	if (item == nullptr) {
-		item = std::shared_ptr<IItem>(new MemoryItem(itemid));
+		item = std::shared_ptr<Item>(new MemoryItem(itemid));
 		(*app)[itemid] = item;
 	}
 

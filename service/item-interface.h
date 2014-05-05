@@ -27,7 +27,7 @@
 
 namespace Item {
 
-class IItem {
+class Item {
 	public:
 		enum Status {
 			UNKNOWN
@@ -36,16 +36,16 @@ class IItem {
 		virtual std::string& getId (void) = 0;
 		virtual Status getStatus (void) = 0;
 
-		typedef std::shared_ptr<IItem> Ptr;
+		typedef std::shared_ptr<Item> Ptr;
 };
 
-class IStore {
+class Store {
 	public:
 		virtual std::list<std::string> listApplications (void) = 0;
-		virtual std::shared_ptr<std::map<std::string, IItem::Ptr>> getItems (std::string& application) = 0;
-		virtual IItem::Ptr getItem (std::string& application, std::string& item) = 0;
+		virtual std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application) = 0;
+		virtual Item::Ptr getItem (std::string& application, std::string& item) = 0;
 
-		typedef std::shared_ptr<IStore> Ptr;
+		typedef std::shared_ptr<Store> Ptr;
 };
 
 } // namespace Item

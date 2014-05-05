@@ -39,7 +39,7 @@ TEST_F(MemoryItemTests, BasicCreate) {
 
 /* Verify that the initial state is empty */
 TEST_F(MemoryItemTests, InitialState) {
-	Item::IStore::Ptr store(new Item::MemoryStore());
+	Item::Store::Ptr store(new Item::MemoryStore());
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -51,7 +51,7 @@ TEST_F(MemoryItemTests, InitialState) {
 
 /* Verify that the memory store saves things */
 TEST_F(MemoryItemTests, StoreItems) {
-	Item::IStore::Ptr store(new Item::MemoryStore());
+	Item::Store::Ptr store(new Item::MemoryStore());
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
