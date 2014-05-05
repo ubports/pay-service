@@ -27,11 +27,12 @@ namespace Verification {
 class CurlItem : public Item {
 public:
 	CurlItem (std::string& app, std::string& item, std::string& endpoint) : exec(nullptr){
+		url = (endpoint + "/" + app + "-" + item);
 		handle = curl_easy_init();
 
 		/* Helps with threads */
 		curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1);
-		curl_easy_setopt(handle, CURLOPT_URL, (endpoint + "/" + app + "-" + item).c_str());
+		curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
 		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
 		curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
 	}
@@ -55,6 +56,7 @@ public:
 				/* TODO: Clearly we need to be a bit more sophisticated here */
 				verificationComplete(Status::PURCHASED);
 			} else {
+				std::cerr << "CURL error '" << curl_easy_strerror(status) << "' from URL '" << url << "'" << std::endl;
 				verificationComplete(Status::ERROR);
 			}
 		});
@@ -65,13 +67,16 @@ private:
 	CURL * handle;
 	std::string transferBuffer;
 	std::shared_ptr<std::thread> exec;
+	std::string url;
 
 	/* This is the callback from cURL as it does the transfer. We're
 	   pretty simple in that we're just putting it into a string. */
 	static size_t curlWrite (void * buffer, size_t size, size_t nmemb, void * user_data) {
+		auto datasize = size * nmemb;
+		//std::cout << "Got data: " << datasize << std::endl;
 		CurlItem * item = static_cast<CurlItem *>(user_data);
-		item->transferBuffer.append(static_cast<char *>(buffer), size);
-		return size;
+		item->transferBuffer.append(static_cast<char *>(buffer), datasize);
+		return datasize;
 	}
 };
 
