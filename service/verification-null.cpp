@@ -17,7 +17,7 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-null.hpp"
+#include "verification-null.h"
 
 namespace Verification {
 

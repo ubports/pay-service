@@ -24,7 +24,7 @@
 
 #include "dbus-interface.h"
 #include "item-memory.h"
-#include "verification-null.hpp"
+#include "verification-null.h"
 
 namespace dbus = core::dbus;
 

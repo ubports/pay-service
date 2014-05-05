@@ -17,7 +17,7 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-factory.hpp"
+#include "verification-factory.h"
 
 #ifndef VERIFICATION_NULL_HPP__
 #define VERIFICATION_NULL_HPP__ 1

@@ -17,7 +17,7 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "service/verification-factory.hpp"
+#include "service/verification-factory.h"
 
 #include <thread>
 #include <chrono>

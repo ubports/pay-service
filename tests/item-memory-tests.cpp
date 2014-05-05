@@ -19,9 +19,9 @@
 
 #include <gtest/gtest.h>
 #include "service/item-memory.h"
-#include "service/verification-null.hpp"
+#include "service/verification-null.h"
 
-#include "verification-test.hpp"
+#include "verification-test.h"
 
 struct MemoryItemTests : public ::testing::Test
 {

@@ -17,7 +17,7 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-factory.hpp"
+#include "verification-factory.h"
 #include <core/dbus/bus.h>
 
 #ifndef VERIFICATION_CURL_HPP__

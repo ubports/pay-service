@@ -18,7 +18,7 @@
  */
 
 #include "item-interface.h"
-#include "verification-factory.hpp"
+#include "verification-factory.h"
 #include <memory>
 #include <iostream>
 #include <map>
