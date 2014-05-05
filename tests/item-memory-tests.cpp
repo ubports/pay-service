@@ -36,6 +36,8 @@ struct MemoryItemTests : public ::testing::Test
 /* Test to make sure the basic stuff doesn't crash to ensure we can move forward */
 TEST_F(MemoryItemTests, BasicCreate) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
+	ASSERT_NE(nullptr, vfactory);
+
 	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::IFactory, Verification::NullFactory>(vfactory));
 	EXPECT_NE(nullptr, store);
 	/* Force a destruction in the test */

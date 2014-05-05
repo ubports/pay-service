@@ -28,8 +28,10 @@ namespace Item {
 class MemoryStore : public IStore {
 	public:
 		MemoryStore (const Verification::IFactory::Ptr& factory) :
-			verificationFactory(factory)
-			{}
+			verificationFactory(factory) {
+				if (verificationFactory == nullptr)
+					throw std::invalid_argument("factory");
+			}
 		std::list<std::string> listApplications (void);
 		std::shared_ptr<std::map<std::string, IItem::Ptr>> getItems (std::string& application);
 		IItem::Ptr getItem (std::string& application, std::string& itemid);

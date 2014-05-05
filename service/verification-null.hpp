@@ -24,7 +24,7 @@
 
 namespace Verification {
 
-class NullFactory {
+class NullFactory : public IFactory {
 public:
 	virtual bool running ();
 	virtual IItem::Ptr verifyItem (std::string& appid, std::string& itemid);

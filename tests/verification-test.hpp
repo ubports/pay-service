@@ -48,7 +48,7 @@ private:
 	std::thread t;
 };
 
-class TestFactory {
+class TestFactory : public IFactory {
 public:
 	TestFactory() : m_running(false) {
 	}
