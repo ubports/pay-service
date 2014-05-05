@@ -17,21 +17,22 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "item-memory.hpp"
+#include "item-memory.h"
 
 #include <algorithm>
 #include <core/signal.h>
+#include <memory>
 
 namespace Item {
 
-class MemoryItem : public IItem {
+class MemoryItem : public Item {
 public:
 	MemoryItem (std::string& in_app, std::string& in_id, Verification::IFactory::Ptr& in_vfactory) :
 		app(in_app),
 		id(in_id),
 		vfactory(in_vfactory),
 		vitem(nullptr),
-		status(IItem::Status::UNKNOWN)
+		status(Item::Status::UNKNOWN)
 	{
 		/* We init into the unknown state and then wait for someone
 		   to ask us to do something about it. */
@@ -45,7 +46,7 @@ public:
 		return id;
 	}
 
-	IItem::Status getStatus (void) {
+	Item::Status getStatus (void) {
 		return status;
 	}
 
@@ -62,7 +63,7 @@ public:
 		}
 
 		/* New verification instance, tell the world! */
-		setStatus(IItem::Status::VERIFYING);
+		setStatus(Item::Status::VERIFYING);
 
 		/* When the verification item has run it's course we need to
 		   update our status */
@@ -70,14 +71,14 @@ public:
 		vitem->verificationComplete.connect([this](Verification::IItem::Status status) {
 			switch (status) {
 			case Verification::IItem::PURCHASED:
-				setStatus(IItem::Status::PURCHASED);
+				setStatus(Item::Status::PURCHASED);
 				break;
 			case Verification::IItem::NOT_PURCHASED:
-				setStatus(IItem::Status::NOT_PURCHASED);
+				setStatus(Item::Status::NOT_PURCHASED);
 				break;
 			case Verification::IItem::ERROR:
 			default: /* Fall through, an error is same as status we don't know */
-				setStatus(IItem::Status::UNKNOWN);
+				setStatus(Item::Status::UNKNOWN);
 				break;
 			}
 		});
@@ -86,10 +87,10 @@ public:
 	}
 
 	typedef std::shared_ptr<MemoryItem> Ptr;
-	core::Signal<IItem::Status> statusChanged;
+	core::Signal<Item::Status> statusChanged;
 
 private:
-	void setStatus (IItem::Status in_status) {
+	void setStatus (Item::Status in_status) {
 		std::unique_lock<std::mutex> ul(status_mutex);
 		bool signal = (status != in_status);
 
@@ -116,7 +117,7 @@ private:
 
 	/****** status is protected with it's own mutex *******/
 	std::mutex status_mutex;
-	IItem::Status status;
+	Item::Status status;
 };
 
 std::list<std::string>
@@ -127,40 +128,40 @@ MemoryStore::listApplications (void)
 	std::transform(data.begin(),
 	               data.end(),
 	               std::back_inserter(apps),
-	               [](const std::pair<std::string, std::shared_ptr<std::map<std::string, IItem::Ptr>>> &pair){return pair.first;});
+	               [](const std::pair<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> &pair){return pair.first;});
 
 	return apps;
 }
 
-std::shared_ptr<std::map<std::string, IItem::Ptr>>
+std::shared_ptr<std::map<std::string, Item::Ptr>>
 MemoryStore::getItems (std::string& application)
 {
 	auto app = data[application];
 
 	if (app == nullptr) {
-		app = std::make_shared<std::map<std::string, IItem::Ptr>>();
+		app = std::make_shared<std::map<std::string, Item::Ptr>>();
 		data[application] = app;
 	}
 
 	return app;
 }
 
-IItem::Ptr
+Item::Ptr
 MemoryStore::getItem (std::string& application, std::string& itemid)
 {
 	if (verificationFactory == nullptr)
-		return IItem::Ptr(nullptr);
+		return Item::Ptr(nullptr);
 
 	auto app = getItems(application);
-	IItem::Ptr item = (*app)[itemid];
+	Item::Ptr item = (*app)[itemid];
 
 	if (item == nullptr) {
-		auto mitem = new MemoryItem(application, itemid, verificationFactory);
-		mitem->statusChanged.connect([this, mitem](IItem::Status status) {
+		auto mitem = std::make_shared<MemoryItem>(application, itemid, verificationFactory);
+		mitem->statusChanged.connect([this, mitem](Item::Status status) {
 			itemChanged(mitem->getApp(), mitem->getId(), status);
 		});
 
-		item = std::shared_ptr<IItem>(mitem);
+		item = std::dynamic_pointer_cast<Item, MemoryItem>(mitem);
 		(*app)[itemid] = item;
 	}
 

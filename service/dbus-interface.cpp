@@ -23,7 +23,7 @@
 #include <core/dbus/stub.h>
 #include <vector>
 
-#include "dbus-interface.hpp"
+#include "dbus-interface.h"
 
 class ApplicationsSkeleton : public core::dbus::Skeleton<DBusInterface::IApplications>
 {
@@ -52,7 +52,7 @@ class Applications : public ApplicationsSkeleton
 public:
 	typedef std::shared_ptr<Applications> Ptr;
 
-	Applications (const core::dbus::Bus::Ptr& bus, Item::IStore::Ptr in_items) : 
+	Applications (const core::dbus::Bus::Ptr& bus, Item::Store::Ptr in_items) : 
 		ApplicationsSkeleton(bus),
 		items(in_items) { }
 
@@ -70,15 +70,15 @@ public:
 	}
 
 private:
-	Item::IStore::Ptr items;
+	Item::Store::Ptr items;
 };
 
-DBusInterface::DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::IStore::Ptr in_items) :
+DBusInterface::DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::Store::Ptr in_items) :
 		bus(in_bus),
 		items(in_items),
 		base(core::dbus::announce_service_on_bus<DBusInterface::IApplications, Applications>(in_bus, in_items))
 {
-	items->itemChanged.connect([this](std::string& app, std::string& item, Item::IItem::Status status) {
+	items->itemChanged.connect([this](std::string& app, std::string& item, Item::Item::Status status) {
 		std::string app_encode = encodePath(app);
 		std::string item_encode = encodePath(item);
 

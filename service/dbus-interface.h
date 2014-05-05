@@ -19,7 +19,7 @@
 
 #include <core/dbus/bus.h>
 #include <core/dbus/service.h>
-#include "item-interface.hpp"
+#include "item-interface.h"
 
 #ifndef DBUS_INTERFACE_HPP__
 #define DBUS_INTERFACE_HPP__ 1
@@ -51,12 +51,12 @@ public:
 
 
 public:
-	DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::IStore::Ptr in_items);
+	DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::Store::Ptr in_items);
 	~DBusInterface () { };
 
 
 private:
-	Item::IStore::Ptr items;
+	Item::Store::Ptr items;
 	core::dbus::Bus::Ptr bus;
 	std::shared_ptr<Applications> base;
 

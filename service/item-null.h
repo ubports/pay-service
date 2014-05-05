@@ -18,11 +18,11 @@
  */
 
 #include <string>
-#include "item-interface.hpp"
+#include "item-interface.h"
 
 namespace Item {
 
-class NullItem : public IItem {
+class NullItem : public Item {
 		std::string _id;
 
 	public:
@@ -32,8 +32,8 @@ class NullItem : public IItem {
 			return _id;
 		}
 
-		IItem::Status getStatus (void) {
-			return IItem::Status::UNKNOWN;
+		Item::Status getStatus (void) {
+			return Item::Status::UNKNOWN;
 		}
 
 		bool verify (void) {
@@ -41,18 +41,18 @@ class NullItem : public IItem {
 		}
 };
 
-class NullStore : public IStore {
+class NullStore : public Store {
 	public:
 		std::list<std::string> listApplications (void) {
 			return std::list<std::string>();
 		}
 
-		std::shared_ptr<std::map<std::string, IItem::Ptr>> getItems (std::string& application) {
-			return std::make_shared<std::map<std::string, IItem::Ptr>>();
+		std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application) {
+			return std::make_shared<std::map<std::string, Item::Ptr>>();
 		}
 
-		IItem::Ptr getItem (std::string& application, std::string& itemid) {
-			IItem::Ptr retval(new NullItem(itemid));
+		Item::Ptr getItem (std::string& application, std::string& itemid) {
+			Item::Ptr retval(new NullItem(itemid));
 			return retval;
 		}
 

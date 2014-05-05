@@ -18,7 +18,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "service/item-memory.hpp"
+#include "service/item-memory.h"
 #include "service/verification-null.hpp"
 
 #include "verification-test.hpp"
@@ -101,7 +101,7 @@ TEST_F(MemoryItemTests, VerifyItem) {
 	auto item = store->getItem(appname, itemname);
 
 	ASSERT_NE(nullptr, item);
-	EXPECT_EQ(Item::IItem::Status::UNKNOWN, item->getStatus());
+	EXPECT_EQ(Item::Item::Status::UNKNOWN, item->getStatus());
 
 	/* It's not running yet */
 	EXPECT_FALSE(item->verify());
@@ -110,5 +110,5 @@ TEST_F(MemoryItemTests, VerifyItem) {
 	ASSERT_TRUE(item->verify());
 	usleep(50 * 1000);
 
-	EXPECT_EQ(Item::IItem::Status::NOT_PURCHASED, item->getStatus());
+	EXPECT_EQ(Item::Item::Status::NOT_PURCHASED, item->getStatus());
 }

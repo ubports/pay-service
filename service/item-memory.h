@@ -17,46 +17,28 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <list>
-#include <string>
+#include "item-interface.h"
+#include "verification-factory.hpp"
 #include <memory>
+#include <iostream>
 #include <map>
-
-#include <core/signal.h>
-
-#ifndef ITEM_INTERFACE_HPP__
-#define ITEM_INTERFACE_HPP__ 1
 
 namespace Item {
 
-class IItem {
+class MemoryStore : public Store {
 	public:
-		enum Status {
-			UNKNOWN,
-			VERIFYING,
-			NOT_PURCHASED,
-			PURCHASED
-		};
+		MemoryStore (const Verification::IFactory::Ptr& factory) :
+			verificationFactory(factory) {
+				if (verificationFactory == nullptr)
+					throw std::invalid_argument("factory");
+			}
+		std::list<std::string> listApplications (void);
+		std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application);
+		Item::Ptr getItem (std::string& application, std::string& itemid);
 
-		virtual std::string& getId (void) = 0;
-		virtual Status getStatus (void) = 0;
-		virtual bool verify (void) = 0;
-
-		typedef std::shared_ptr<IItem> Ptr;
-};
-
-class IStore {
-	public:
-		virtual std::list<std::string> listApplications (void) = 0;
-		virtual std::shared_ptr<std::map<std::string, IItem::Ptr>> getItems (std::string& application) = 0;
-		virtual IItem::Ptr getItem (std::string& application, std::string& item) = 0;
-
-		typedef std::shared_ptr<IStore> Ptr;
-
-		core::Signal<std::string&, std::string&, IItem::Status> itemChanged;
+	private:
+		std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
+		Verification::IFactory::Ptr verificationFactory;
 };
 
 } // namespace Item
-
-#endif // ITEM_INTERFACE_HPP__
-
