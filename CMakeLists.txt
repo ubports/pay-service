@@ -96,7 +96,7 @@ endif ()
 
 if (${enable_tests})
   if (${enable_lcov})
-    ENABLE_COVERAGE_REPORT(TARGETS pay-service FILTER /usr/include ${CMAKE_SOURCE_DIR}/tests/* ${CMAKE_BINARY_DIR}/*)
+    ENABLE_COVERAGE_REPORT(TARGETS pay-service FILTER /usr/include ${CMAKE_SOURCE_DIR}/tests/*)
   endif ()
 endif ()
 
