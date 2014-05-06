@@ -37,6 +37,13 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
                    properties-cpp>=0.0.1)
 include_directories (SYSTEM ${PROCESS_CPP_INCLUDE_DIRS} ${SERVICE_DEPS_INCLUDE_DIRS})
 
+# facilitate some introductions
+add_subdirectory(service)
+add_subdirectory(data)
+if (${enable_tests})
+  add_subdirectory(tests)
+endif ()
+
 ##
 ##  custom targets
 ##
@@ -73,10 +80,4 @@ if (${enable_tests})
   endif ()
 endif ()
 
-# actually build things
-add_subdirectory(service)
-add_subdirectory(data)
-if (${enable_tests})
-  add_subdirectory(tests)
-endif ()
 
