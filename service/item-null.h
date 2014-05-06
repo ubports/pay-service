@@ -20,43 +20,52 @@
 #include <string>
 #include "item-interface.h"
 
-namespace Item {
+namespace Item
+{
 
-class NullItem : public Item {
-		std::string _id;
+class NullItem : public Item
+{
+    std::string _id;
 
-	public:
-		NullItem (std::string id) : _id(id) {};
+public:
+    NullItem (std::string id) : _id(id) {};
 
-		std::string &getId (void) {
-			return _id;
-		}
+    std::string& getId (void)
+    {
+        return _id;
+    }
 
-		Item::Status getStatus (void) {
-			return Item::Status::UNKNOWN;
-		}
+    Item::Status getStatus (void)
+    {
+        return Item::Status::UNKNOWN;
+    }
 
-		bool verify (void) {
-			return false;
-		}
+    bool verify (void)
+    {
+        return false;
+    }
 };
 
-class NullStore : public Store {
-	public:
-		std::list<std::string> listApplications (void) {
-			return std::list<std::string>();
-		}
+class NullStore : public Store
+{
+public:
+    std::list<std::string> listApplications (void)
+    {
+        return std::list<std::string>();
+    }
 
-		std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application) {
-			return std::make_shared<std::map<std::string, Item::Ptr>>();
-		}
+    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application)
+    {
+        return std::make_shared<std::map<std::string, Item::Ptr>>();
+    }
 
-		Item::Ptr getItem (std::string& application, std::string& itemid) {
-			auto retval = std::make_shared<NullItem>(itemid);
-			return retval;
-		}
+    Item::Ptr getItem (std::string& application, std::string& itemid)
+    {
+        auto retval = std::make_shared<NullItem>(itemid);
+        return retval;
+    }
 
-		typedef std::shared_ptr<NullStore> Ptr;
+    typedef std::shared_ptr<NullStore> Ptr;
 };
 
 }; // ns Item

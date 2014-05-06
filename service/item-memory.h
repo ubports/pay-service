@@ -23,22 +23,27 @@
 #include <iostream>
 #include <map>
 
-namespace Item {
+namespace Item
+{
 
-class MemoryStore : public Store {
-	public:
-		MemoryStore (const Verification::Factory::Ptr& factory) :
-			verificationFactory(factory) {
-				if (verificationFactory == nullptr)
-					throw std::invalid_argument("factory");
-			}
-		std::list<std::string> listApplications (void);
-		std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application);
-		Item::Ptr getItem (std::string& application, std::string& itemid);
+class MemoryStore : public Store
+{
+public:
+    MemoryStore (const Verification::Factory::Ptr& factory) :
+        verificationFactory(factory)
+    {
+        if (verificationFactory == nullptr)
+        {
+            throw std::invalid_argument("factory");
+        }
+    }
+    std::list<std::string> listApplications (void);
+    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application);
+    Item::Ptr getItem (std::string& application, std::string& itemid);
 
-	private:
-		std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
-		Verification::Factory::Ptr verificationFactory;
+private:
+    std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
+    Verification::Factory::Ptr verificationFactory;
 };
 
 } // namespace Item

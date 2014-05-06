@@ -19,32 +19,37 @@
 
 #include "verification-null.h"
 
-namespace Verification {
+namespace Verification
+{
 
-class NullItem : public Item {
+class NullItem : public Item
+{
 public:
-	NullItem (void) {
-	}
+    NullItem (void)
+    {
+    }
 
-	~NullItem (void) {
-	}
+    ~NullItem (void)
+    {
+    }
 
-	virtual bool run (void) {
-		return false;
-	}
+    virtual bool run (void)
+    {
+        return false;
+    }
 };
 
 
 bool
 NullFactory::running ()
 {
-	return false;
+    return false;
 }
 
 Item::Ptr
 NullFactory::verifyItem (std::string& appid, std::string& itemid)
 {
-	return std::make_shared<NullItem>();
+    return std::make_shared<NullItem>();
 }
 
 } // ns Verification

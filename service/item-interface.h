@@ -27,33 +27,37 @@
 #ifndef ITEM_INTERFACE_HPP__
 #define ITEM_INTERFACE_HPP__ 1
 
-namespace Item {
+namespace Item
+{
 
-class Item {
-	public:
-		enum Status {
-			UNKNOWN,
-			VERIFYING,
-			NOT_PURCHASED,
-			PURCHASED
-		};
+class Item
+{
+public:
+    enum Status
+    {
+        UNKNOWN,
+        VERIFYING,
+        NOT_PURCHASED,
+        PURCHASED
+    };
 
-		virtual std::string& getId (void) = 0;
-		virtual Status getStatus (void) = 0;
-		virtual bool verify (void) = 0;
+    virtual std::string& getId (void) = 0;
+    virtual Status getStatus (void) = 0;
+    virtual bool verify (void) = 0;
 
-		typedef std::shared_ptr<Item> Ptr;
+    typedef std::shared_ptr<Item> Ptr;
 };
 
-class Store {
-	public:
-		virtual std::list<std::string> listApplications (void) = 0;
-		virtual std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application) = 0;
-		virtual Item::Ptr getItem (std::string& application, std::string& item) = 0;
+class Store
+{
+public:
+    virtual std::list<std::string> listApplications (void) = 0;
+    virtual std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application) = 0;
+    virtual Item::Ptr getItem (std::string& application, std::string& item) = 0;
 
-		typedef std::shared_ptr<Store> Ptr;
+    typedef std::shared_ptr<Store> Ptr;
 
-		core::Signal<std::string&, std::string&, Item::Status> itemChanged;
+    core::Signal<std::string&, std::string&, Item::Status> itemChanged;
 };
 
 } // namespace Item
