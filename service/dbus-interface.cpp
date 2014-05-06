@@ -103,7 +103,7 @@ std::string
 DBusInterface::encodePath (const std::string& input)
 {
     std::string output = "";
-	bool first = true;
+    bool first = true;
 
     for (unsigned char c : input)
     {
@@ -113,7 +113,7 @@ DBusInterface::encodePath (const std::string& input)
                 (c >= 'A' && c <= 'Z') ||
                 (c >= '0' && c <= '9' && !first))
         {
-            retval = std::string((char *)&c, 1);
+            retval = std::string((char*)&c, 1);
         }
         else
         {
@@ -123,7 +123,7 @@ DBusInterface::encodePath (const std::string& input)
         }
 
         output += retval;
-		first = false;
+        first = false;
     }
 
     return output;
