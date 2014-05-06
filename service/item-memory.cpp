@@ -21,66 +21,75 @@
 
 #include <algorithm>
 
-namespace Item {
+namespace Item
+{
 
-class MemoryItem : public Item {
+class MemoryItem : public Item
+{
 public:
-	MemoryItem (std::string& in_id) :
-		id(in_id)
-	{
-	}
+    MemoryItem (std::string& in_id) :
+        id(in_id)
+    {
+    }
 
-	std::string &getId (void) {
-		return id;
-	}
+    std::string& getId (void)
+    {
+        return id;
+    }
 
-	Item::Status getStatus (void) {
-		return Item::Status::UNKNOWN;
-	}
+    Item::Status getStatus (void)
+    {
+        return Item::Status::UNKNOWN;
+    }
 
-	typedef std::shared_ptr<MemoryItem> Ptr;
+    typedef std::shared_ptr<MemoryItem> Ptr;
 private:
-	std::string id;
+    std::string id;
 };
 
 std::list<std::string>
 MemoryStore::listApplications (void)
 {
-	std::list<std::string> apps;
+    std::list<std::string> apps;
 
-	std::transform(data.begin(),
-	               data.end(),
-	               std::back_inserter(apps),
-	               [](const std::pair<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> &pair){return pair.first;});
+    std::transform(data.begin(),
+                   data.end(),
+                   std::back_inserter(apps),
+                   [](const std::pair<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>>& pair)
+    {
+        return pair.first;
+    });
 
-	return apps;
+    return apps;
 }
 
 std::shared_ptr<std::map<std::string, Item::Ptr>>
-MemoryStore::getItems (std::string& application)
+                                               MemoryStore::getItems (std::string& application)
 {
-	auto app = data[application];
+    auto app = data[application];
 
-	if (app == nullptr) {
-		app = std::make_shared<std::map<std::string, Item::Ptr>>();
-		data[application] = app;
-	}
+    if (app == nullptr)
+    {
+        app = std::make_shared<std::map<std::string, Item::Ptr>>();
+        data[application] = app;
+    }
 
-	return app;
+    return app;
 }
 
 Item::Ptr
 MemoryStore::getItem (std::string& application, std::string& itemid)
 {
-	auto app = getItems(application);
-	Item::Ptr item = (*app)[itemid];
+    auto app = getItems(application);
+    Item::Ptr item = (*app)[itemid];
 
-	if (item == nullptr) {
-		item = std::shared_ptr<Item>(new MemoryItem(itemid));
-		(*app)[itemid] = item;
-	}
+    if (item == nullptr)
+    {
+        item = std::shared_ptr<Item>(new MemoryItem(itemid));
+        (*app)[itemid] = item;
+    }
 
-	return item;
+    return item;
 }
 
 } // namespace Item

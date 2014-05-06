@@ -22,16 +22,18 @@
 #include <iostream>
 #include <map>
 
-namespace Item {
+namespace Item
+{
 
-class MemoryStore : public Store {
-	public:
-		std::list<std::string> listApplications (void);
-		std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application);
-		Item::Ptr getItem (std::string& application, std::string& itemid);
+class MemoryStore : public Store
+{
+public:
+    std::list<std::string> listApplications (void);
+    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application);
+    Item::Ptr getItem (std::string& application, std::string& itemid);
 
-	private:
-		std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
+private:
+    std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
 };
 
 } // namespace Item
