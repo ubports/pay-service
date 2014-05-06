@@ -37,6 +37,13 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
                    properties-cpp>=0.0.1)
 include_directories (SYSTEM ${PROCESS_CPP_INCLUDE_DIRS} ${SERVICE_DEPS_INCLUDE_DIRS})
 
+# facilitate some introductions
+add_subdirectory(service)
+add_subdirectory(data)
+if (${enable_tests})
+  add_subdirectory(tests)
+endif ()
+
 ##
 ##  custom targets
 ##
@@ -64,14 +71,13 @@ set (CXX_WARNING_ARGS " -Wall -Wextra -pedantic -Wno-missing-field-initializers"
 if (${enable_tests})
   enable_testing ()
   if (${enable_lcov})
-    include(GCov)
+    include(EnableCoverageReport) # Using gcov CMake modules from https://code.cor-lab.org/projects/rsc
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage" )
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage" )
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} --coverage" )
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage" )
+    ENABLE_COVERAGE_REPORT(TARGETS ${PACKAGE} FILTER /usr/include ${CMAKE_SOURCE_DIR}/tests/* ${CMAKE_BINARY_DIR}/*)
   endif ()
 endif ()
 
-# actually build things
-add_subdirectory(service)
-add_subdirectory(data)
-if (${enable_tests})
-  add_subdirectory(tests)
-endif ()
 
