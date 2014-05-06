@@ -17,3 +17,12 @@ target_link_libraries(pay-service
                       ${PROCESS_CPP_LIBRARIES})
 
 install(TARGETS pay-service RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
+
+get_target_property(pay-service-lib-src pay-service-lib SOURCES)
+add_test(NAME pay-service-lib-style COMMAND
+	astyle "--options=${CMAKE_SOURCE_DIR}/data/astyle-config" ${pay-service-lib-src})
+
+get_target_property(pay-service-src pay-service SOURCES)
+add_test(NAME pay-service-style COMMAND
+	astyle "--options=${CMAKE_SOURCE_DIR}/data/astyle-config" ${pay-service-src})
+
