@@ -18,11 +18,24 @@ target_link_libraries(pay-service
 
 install(TARGETS pay-service RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
 
+######################
+# Style Checking
+######################
+
+macro(list_prefix _outvar _listvar _prefix)
+	set(${_outvar})
+	foreach(_item IN LISTS ${_listvar})
+		list(APPEND ${_outvar} ${_prefix}${_item})
+	endforeach()
+endmacro(list_prefix)
+
 get_target_property(pay-service-lib-src pay-service-lib SOURCES)
+list_prefix(pay-service-lib-full-src pay-service-lib-src "${CMAKE_CURRENT_SOURCE_DIR}/")
 add_test(NAME pay-service-lib-style COMMAND
-	astyle "--options=${CMAKE_SOURCE_DIR}/data/astyle-config" ${pay-service-lib-src})
+	astyle "--options=${CMAKE_SOURCE_DIR}/data/astyle-config" ${pay-service-lib-full-src})
 
 get_target_property(pay-service-src pay-service SOURCES)
+list_prefix(pay-service-full-src pay-service-src "${CMAKE_CURRENT_SOURCE_DIR}/")
 add_test(NAME pay-service-style COMMAND
-	astyle "--options=${CMAKE_SOURCE_DIR}/data/astyle-config" ${pay-service-src})
+	astyle "--options=${CMAKE_SOURCE_DIR}/data/astyle-config" ${pay-service-full-src})
 
