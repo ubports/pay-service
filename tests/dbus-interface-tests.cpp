@@ -139,8 +139,8 @@ TEST_F(Service, encodeDecode)
 	EXPECT_EQ("fine", DBusInterface::decodePath(std::string("fine")));
 
 	/* Number as first characeter */
-	//EXPECT_EQ("_331337", DBusInterface::encodePath(std::string("31337")));
-	EXPECT_EQ("31337", DBusInterface::encodePath(std::string("_331337")));
+	EXPECT_EQ("_331337", DBusInterface::encodePath(std::string("31337")));
+	EXPECT_EQ("31337", DBusInterface::decodePath(std::string("_331337")));
 
 	/* Underscore test */
 	EXPECT_EQ("this_5Fis_5Fc_5Fstyle_5Fnamespacing", DBusInterface::encodePath(std::string("this_is_c_style_namespacing")));

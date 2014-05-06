@@ -102,31 +102,29 @@ DBusInterface::DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::Store::Ptr in_
 std::string
 DBusInterface::encodePath (const std::string& input)
 {
-    std::string output;
+    std::string output = "";
+	bool first = true;
 
-    std::transform(input.cbegin(),
-                   input.cend(),
-                   std::back_inserter(output),
-                   [](const char c)
+    for (unsigned char c : input)
     {
         std::string retval;
 
         if ((c >= 'a' && c <= 'z') ||
                 (c >= 'A' && c <= 'Z') ||
-                (c >= '0' && c <= '9'))
+                (c >= '0' && c <= '9' && !first))
         {
-            retval = std::string(&c, 1);
+            retval = std::string((char *)&c, 1);
         }
         else
         {
-            char buffer[4] = {0};
-            std::snprintf(buffer, 3, "_%2X", c);
+            char buffer[5] = {0};
+            std::snprintf(buffer, 4, "_%2X", c);
             retval = std::string(buffer);
         }
 
-        std::back_insert_iterator<std::string> iterator(retval);
-        return iterator;
-    });
+        output += retval;
+		first = false;
+    }
 
     return output;
 }
