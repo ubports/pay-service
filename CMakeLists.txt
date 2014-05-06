@@ -9,6 +9,10 @@ set (PACKAGE ${CMAKE_PROJECT_NAME})
 option (enable_tests "Build the package's automatic tests." ON)
 option (enable_lcov "Generate lcov code coverage reports." ON)
 
+if (${enable_tests})
+  enable_testing ()
+endif ()
+
 ##
 ##  GNU standard installation directories
 ## 
@@ -37,13 +41,6 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
                    properties-cpp>=0.0.1)
 include_directories (SYSTEM ${PROCESS_CPP_INCLUDE_DIRS} ${SERVICE_DEPS_INCLUDE_DIRS})
 
-# facilitate some introductions
-add_subdirectory(service)
-add_subdirectory(data)
-if (${enable_tests})
-  add_subdirectory(tests)
-endif ()
-
 ##
 ##  custom targets
 ##
@@ -67,16 +64,39 @@ add_custom_target (cppcheck COMMAND cppcheck --enable=all -q --error-exitcode=2 
 set (CC_WARNING_ARGS " -Wall -Wshadow -Wextra -Wunused -Wformat=2 -Wno-missing-field-initializers")
 set (CXX_WARNING_ARGS " -Wall -Wextra -pedantic -Wno-missing-field-initializers")
 
-# testing & coverage
+##
+##  Coverage Flags
+##
+
 if (${enable_tests})
-  enable_testing ()
   if (${enable_lcov})
     include(EnableCoverageReport) # Using gcov CMake modules from https://code.cor-lab.org/projects/rsc
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage" )
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage" )
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} --coverage" )
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage" )
-    ENABLE_COVERAGE_REPORT(TARGETS ${PACKAGE} FILTER /usr/include ${CMAKE_SOURCE_DIR}/tests/* ${CMAKE_BINARY_DIR}/*)
+  endif ()
+endif ()
+
+
+##
+##  Subdirectories
+##
+
+add_subdirectory(service)
+add_subdirectory(data)
+if (${enable_tests})
+  add_subdirectory(tests)
+endif ()
+
+
+##
+##  Coverage Reports
+##
+
+if (${enable_tests})
+  if (${enable_lcov})
+    ENABLE_COVERAGE_REPORT(TARGETS pay-service FILTER /usr/include ${CMAKE_SOURCE_DIR}/tests/* ${CMAKE_BINARY_DIR}/*)
   endif ()
 endif ()
 
