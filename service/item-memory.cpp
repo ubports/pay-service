@@ -104,7 +104,37 @@ public:
 
     bool purchase (void)
     {
-        return false;
+        /* First check to see if a purchase makes sense */
+        std::unique_lock<std::mutex> ul(status_mutex);
+        if (status != NOT_PURCHASED)
+        {
+            return false;
+        }
+        ul.unlock();
+
+        if (pitem != nullptr)
+        {
+            return true;
+        }
+
+        pitem = pfactory->purchaseItem(app, id);
+        if (pitem == nullptr)
+        {
+            /* Uhg, failed */
+            return false;
+        }
+
+        /* New purchase instance, tell the world! */
+        setStatus(Item::Status::PURCHASING);
+
+        pitem->purchaseComplete.connect([this](Purchase::Item::Status status)
+        {
+            return;
+        });
+
+        pitem->run();
+
+        return true;
     }
 
     typedef std::shared_ptr<MemoryItem> Ptr;

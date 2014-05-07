@@ -37,6 +37,7 @@ public:
     {
         UNKNOWN,
         VERIFYING,
+        PURCHASING,
         NOT_PURCHASED,
         PURCHASED
     };
