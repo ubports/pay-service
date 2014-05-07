@@ -18,14 +18,13 @@
  */
 
 #include "verification-factory.h"
-#include <core/dbus/bus.h>
 
 #ifndef VERIFICATION_CURL_HPP__
 #define VERIFICATION_CURL_HPP__ 1
 
 namespace Verification {
 
-class CurlFactory {
+class CurlFactory : public Factory {
 public:
 	CurlFactory ();
 	CurlFactory (const std::string& endpoint);
