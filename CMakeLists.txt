@@ -68,6 +68,7 @@ if (${enable_tests})
 endif ()
 
 # actually build things
+add_subdirectory(libpay)
 add_subdirectory(service)
 add_subdirectory(data)
 if (${enable_tests})
