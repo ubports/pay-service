@@ -10,6 +10,8 @@ add_library(pay-service-lib STATIC
             purchase-factory.h
             purchase-null.h
             purchase-null.cpp
+            purchase-ual.h
+            purchase-ual.cpp
             verification-curl.cpp
             verification-null.cpp)
 
