@@ -22,30 +22,34 @@
 #ifndef PURCHASE_FACTORY_HPP__
 #define PURCHASE_FACTORY_HPP__ 1
 
-namespace Purchase {
+namespace Purchase
+{
 
-class Item {
+class Item
+{
 public:
-	enum Status {
-		ERROR,
-		NOT_PURCHASED,
-		PURCHASED
-	};
+    enum Status
+    {
+        ERROR,
+        NOT_PURCHASED,
+        PURCHASED
+    };
 
-	virtual bool run (void) = 0;
+    virtual bool run (void) = 0;
 
-	typedef std::shared_ptr<Item> Ptr;
+    typedef std::shared_ptr<Item> Ptr;
 
-	core::Signal<Status> purchaseComplete;
+    core::Signal<Status> purchaseComplete;
 };
 
-class Factory {
+class Factory
+{
 public:
-	virtual ~Factory() = default;
+    virtual ~Factory() = default;
 
-	virtual Item::Ptr purchaseItem (std::string& appid, std::string& itemid) = 0;
+    virtual Item::Ptr purchaseItem (std::string& appid, std::string& itemid) = 0;
 
-	typedef std::shared_ptr<Factory> Ptr;
+    typedef std::shared_ptr<Factory> Ptr;
 };
 
 } // ns Purchase

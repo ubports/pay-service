@@ -19,29 +19,32 @@
 
 #include "purchase-null.h"
 
-namespace Purchase {
+namespace Purchase
+{
 
-class NullItem : public Item {
+class NullItem : public Item
+{
 public:
-	typedef std::shared_ptr<Item> Ptr;
+    typedef std::shared_ptr<Item> Ptr;
 
-	NullItem (std::string& in_appid, std::string& in_itemid) : 
-		appid(in_appid), itemid(in_itemid)
-	{
-	}
-	virtual bool run (void) {
-		std::cout << "Running" << std::endl;	
-	};
+    NullItem (std::string& in_appid, std::string& in_itemid) :
+        appid(in_appid), itemid(in_itemid)
+    {
+    }
+    virtual bool run (void)
+    {
+        std::cout << "Running" << std::endl;
+    };
 
 private:
-	std::string appid;
-	std::string itemid;
+    std::string appid;
+    std::string itemid;
 };
 
 Item::Ptr
 Factory::purchaseItem (std::string& appid, std::string& itemid)
 {
-	return std::make_shared<NullItem>(appid, itemid);
+    return std::make_shared<NullItem>(appid, itemid);
 }
 
 } // ns Purchase

@@ -22,14 +22,16 @@
 #ifndef PURCHASE_NULL_HPP__
 #define PURCHASE_NULL_HPP__ 1
 
-namespace Purchase {
+namespace Purchase
+{
 
-class NullFactory : public Factory {
+class NullFactory : public Factory
+{
 public:
-	virtual bool running ();
-	virtual Item::Ptr purchaseItem (std::string& appid, std::string& itemid);
+    virtual bool running ();
+    virtual Item::Ptr purchaseItem (std::string& appid, std::string& itemid);
 
-	typedef std::shared_ptr<NullFactory> Ptr;
+    typedef std::shared_ptr<NullFactory> Ptr;
 };
 
 } // ns Purchase
