@@ -99,6 +99,11 @@ public:
         return vitem->run();
     }
 
+    bool purchase (void)
+    {
+        return false;
+    }
+
     typedef std::shared_ptr<MemoryItem> Ptr;
     core::Signal<Item::Status> statusChanged;
 

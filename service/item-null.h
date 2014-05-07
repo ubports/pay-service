@@ -44,6 +44,11 @@ public:
     {
         return false;
     }
+
+    bool purchase (void)
+    {
+        return false;
+    }
 };
 
 class NullStore : public Store
