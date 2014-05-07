@@ -29,11 +29,14 @@ namespace Item
 class MemoryItem : public Item
 {
 public:
-    MemoryItem (std::string& in_app, std::string& in_id, Verification::Factory::Ptr& in_vfactory) :
+    MemoryItem (std::string& in_app, std::string& in_id, Verification::Factory::Ptr& in_vfactory,
+                Purchase::Factory::Ptr& in_pfactory) :
         app(in_app),
         id(in_id),
         vfactory(in_vfactory),
+        pfactory(in_pfactory),
         vitem(nullptr),
+        pitem(nullptr),
         status(Item::Status::UNKNOWN)
     {
         /* We init into the unknown state and then wait for someone
@@ -131,10 +134,14 @@ private:
     std::string app;
     /* Pointer to the factory to use */
     Verification::Factory::Ptr vfactory;
+    /* Pointer to the factory to use */
+    Purchase::Factory::Ptr pfactory;
 
     /****** std::shared_ptr<> is threadsafe **********/
     /* Verification item if we're in the state of verifying or null otherwise */
     Verification::Item::Ptr vitem;
+    /* Purchase item if we're in the state of purchasing or null otherwise */
+    Purchase::Item::Ptr pitem;
 
     /****** status is protected with it's own mutex *******/
     std::mutex status_mutex;
@@ -179,12 +186,17 @@ MemoryStore::getItem (std::string& application, std::string& itemid)
         return Item::Ptr(nullptr);
     }
 
+    if (purchaseFactory == nullptr)
+    {
+        return Item::Ptr(nullptr);
+    }
+
     auto app = getItems(application);
     Item::Ptr item = (*app)[itemid];
 
     if (item == nullptr)
     {
-        auto mitem = std::make_shared<MemoryItem>(application, itemid, verificationFactory);
+        auto mitem = std::make_shared<MemoryItem>(application, itemid, verificationFactory, purchaseFactory);
         mitem->statusChanged.connect([this, mitem](Item::Status status)
         {
             itemChanged(mitem->getApp(), mitem->getId(), status);
