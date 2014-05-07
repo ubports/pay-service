@@ -7,6 +7,9 @@ add_library(pay-service-lib STATIC
             item-null.h
             item-memory.h
             item-memory.cpp
+            purchase-factory.h
+            purchase-null.h
+            purchase-null.cpp
             verification-curl.cpp
             verification-null.cpp)
 
