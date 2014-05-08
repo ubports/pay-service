@@ -31,9 +31,10 @@ public:
         appid(in_appid), itemid(in_itemid)
     {
     }
+
     virtual bool run (void)
     {
-        std::cout << "Running" << std::endl;
+        return false;
     };
 
 private:

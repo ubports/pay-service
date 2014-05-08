@@ -124,3 +124,24 @@ TEST_F(MemoryItemTests, VerifyItem) {
 
 	EXPECT_EQ(Item::Item::Status::NOT_PURCHASED, item->getStatus());
 }
+
+TEST_F(MemoryItemTests, PurchaseItemNull) {
+	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
+	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, pfactory);
+
+	vfactory->test_setRunning(true);
+
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+
+	std::string appname("my-application");
+	std::string itemname("my-item");
+	auto item = store->getItem(appname, itemname);
+
+	ASSERT_NE(nullptr, item);
+	ASSERT_TRUE(item->verify());
+	usleep(50 * 1000);
+
+	EXPECT_FALSE(item->purchase());
+}

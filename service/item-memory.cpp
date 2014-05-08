@@ -105,12 +105,10 @@ public:
     bool purchase (void)
     {
         /* First check to see if a purchase makes sense */
-        std::unique_lock<std::mutex> ul(status_mutex);
         if (status != NOT_PURCHASED)
         {
             return false;
         }
-        ul.unlock();
 
         if (pitem != nullptr)
         {
@@ -129,12 +127,11 @@ public:
 
         pitem->purchaseComplete.connect([this](Purchase::Item::Status status)
         {
+            /* TODO: Pass it up */
             return;
         });
 
-        pitem->run();
-
-        return true;
+        return pitem->run();
     }
 
     typedef std::shared_ptr<MemoryItem> Ptr;
