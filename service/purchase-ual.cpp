@@ -31,7 +31,7 @@ public:
     typedef std::shared_ptr<Item> Ptr;
 
     UalItem (std::string& in_appid, std::string& in_itemid) :
-        appid(in_appid), itemid(in_itemid), ui_appid("gedit")
+        appid(in_appid), itemid(in_itemid), ui_appid("gedit"), loop(nullptr), status(Item::ERROR)
     {
         /* TODO: ui_appid needs to be grabbed from the click hook */
     }
@@ -43,7 +43,7 @@ public:
             /* Build up the context and loop for the async events and a place
                for GDBus to send its events back to */
             GMainContext* context = g_main_context_new();
-            GMainLoop* loop = g_main_loop_new(context, FALSE);
+            loop = g_main_loop_new(context, FALSE);
 
             g_main_context_push_thread_default(context);
 
@@ -52,7 +52,7 @@ public:
             GDBusConnection* bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
             if (bus == NULL)
             {
-                /* TODO: Signal not purchased */
+                purchaseComplete(Item::ERROR);
                 return;
             }
 
@@ -69,31 +69,38 @@ public:
             const gchar* urls[2] = {0};
             urls[0] = purchase_url.c_str();
 
-            if (!upstart_app_launch_start_application(ui_appid.c_str(), urls))
-            {
-                /* TODO: Signal not purchased */
-            }
-            else
+            if (upstart_app_launch_start_application(ui_appid.c_str(), urls))
             {
                 g_main_loop_run(loop);
             }
 
+            /* Clean up */
             upstart_app_launch_observer_delete_app_stop(app_stop_static_helper, this);
             upstart_app_launch_observer_delete_app_failed(app_failed_static_helper, this);
 
             g_clear_object(&bus);
-            g_main_loop_unref(loop);
-            g_main_context_unref(context);
+            g_clear_pointer(&loop, g_main_loop_unref);
+            g_clear_pointer(&context, g_main_context_unref);
+
+            /* Signal where we end up */
+            purchaseComplete(status);
         });
 
         return true;
     };
 
 private:
+    /* Set at init */
     std::string appid;
     std::string itemid;
     std::string ui_appid;
+
+    /* Created by run, destroyed with the object */
     std::thread t;
+
+    /* Only used in thread t */
+    GMainLoop* loop;
+    Item::Status status;
 
     static void app_stop_static_helper (const gchar* appid, gpointer user_data)
     {
@@ -115,8 +122,8 @@ private:
             return;
         }
 
-        /* Set status to purchased */
-        /* Stop main loop */
+        status = Item::PURCHASED;
+        g_main_loop_quit(loop);
     }
 
     void appFailed (std::string failed_appid)
@@ -126,8 +133,8 @@ private:
             return;
         }
 
-        /* Set status to not purchased */
-        /* Stop main loop */
+        status = Item::NOT_PURCHASED;
+        g_main_loop_quit(loop);
     }
 };
 
