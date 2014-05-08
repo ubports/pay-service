@@ -124,6 +124,15 @@ TEST_F(MemoryItemTests, VerifyItem) {
 	usleep(50 * 1000);
 
 	EXPECT_EQ(Item::Item::Status::NOT_PURCHASED, item->getStatus());
+
+	std::string pitemname("purchased-item");
+	vfactory->test_setPurchase(appname, pitemname, true);
+	auto pitem = store->getItem(appname, pitemname);
+
+	ASSERT_TRUE(pitem->verify());
+	usleep(50 * 1000);
+
+	EXPECT_EQ(Item::Item::Status::PURCHASED, pitem->getStatus());
 }
 
 TEST_F(MemoryItemTests, PurchaseItemNull) {
