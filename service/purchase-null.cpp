@@ -48,11 +48,5 @@ NullFactory::purchaseItem (std::string& appid, std::string& itemid)
     return std::make_shared<NullItem>(appid, itemid);
 }
 
-bool
-NullFactory::running ()
-{
-    return false;
-}
-
 } // ns Purchase
 

@@ -127,7 +127,18 @@ public:
 
         pitem->purchaseComplete.connect([this](Purchase::Item::Status status)
         {
-            /* TODO: Pass it up */
+            switch (status)
+            {
+                case Purchase::Item::PURCHASED:
+                    setStatus(Item::Status::PURCHASED);
+                    break;
+                case Purchase::Item::ERROR:
+                case Purchase::Item::NOT_PURCHASED:
+                default: /* Fall through, an error is same as status we don't know */
+                    /* We know we were not purchased before, so let's stay that way */
+                    setStatus(Item::Status::NOT_PURCHASED);
+                    break;
+            }
             return;
         });
 

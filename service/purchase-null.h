@@ -28,7 +28,6 @@ namespace Purchase
 class NullFactory : public Factory
 {
 public:
-    virtual bool running ();
     virtual Item::Ptr purchaseItem (std::string& appid, std::string& itemid);
 
     typedef std::shared_ptr<NullFactory> Ptr;

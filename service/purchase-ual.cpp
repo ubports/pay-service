@@ -149,11 +149,5 @@ UalFactory::purchaseItem (std::string& appid, std::string& itemid)
     return std::make_shared<UalItem>(appid, itemid);
 }
 
-bool
-UalFactory::running ()
-{
-    return false;
-}
-
 } // ns Purchase
 
