@@ -31,13 +31,18 @@ public:
     typedef std::shared_ptr<Item> Ptr;
 
     UalItem (std::string& in_appid, std::string& in_itemid) :
-        appid(in_appid), itemid(in_itemid), ui_appid("gedit"), loop(nullptr), status(Item::ERROR)
+        appid(in_appid), itemid(in_itemid), loop(nullptr), status(Item::ERROR)
     {
         /* TODO: ui_appid needs to be grabbed from the click hook */
+        ui_appid = "gedit";
     }
 
     virtual bool run (void)
     {
+        if (ui_appid.empty())
+        {
+            return false;
+        }
         t = std::thread([this]()
         {
             /* Build up the context and loop for the async events and a place
