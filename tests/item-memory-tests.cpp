@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include "service/item-memory.h"
 #include "service/verification-null.h"
+#include "service/purchase-null.h"
 
 #include "verification-test.h"
 
@@ -38,7 +39,10 @@ TEST_F(MemoryItemTests, BasicCreate) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::NullFactory>(vfactory));
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
+	ASSERT_NE(nullptr, vfactory);
+
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
 	EXPECT_NE(nullptr, store);
 	/* Force a destruction in the test */
 	store.reset();
@@ -48,7 +52,11 @@ TEST_F(MemoryItemTests, BasicCreate) {
 /* Verify that the initial state is empty */
 TEST_F(MemoryItemTests, InitialState) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::NullFactory>(vfactory));
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
+	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, pfactory);
+
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -61,9 +69,11 @@ TEST_F(MemoryItemTests, InitialState) {
 /* Verify that the memory store saves things */
 TEST_F(MemoryItemTests, StoreItems) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, pfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::NullFactory>(vfactory));
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -92,9 +102,11 @@ TEST_F(MemoryItemTests, StoreItems) {
 
 TEST_F(MemoryItemTests, VerifyItem) {
 	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, pfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::TestFactory>(vfactory));
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
 
 	std::string appname("my-application");
 	std::string itemname("my-item");
