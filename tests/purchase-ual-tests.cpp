@@ -17,16 +17,64 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
+#include <gio/gio.h>
 #include <gtest/gtest.h>
+#include <libdbustest/dbus-test.h>
+
 #include "service/purchase-ual.h"
 
 struct VerificationCurlTests : public ::testing::Test
 {
 	protected:
+		DbusTestService * service = NULL;
+		DbusTestDbusMock * mock = NULL;
+		DbusTestDbusMockObject * obj = NULL;
+		DbusTestDbusMockObject * jobobj = NULL;
+		GDBusConnection * bus = NULL;
+
 		virtual void SetUp() {
+			service = dbus_test_service_new(NULL);
+
+			mock = dbus_test_dbus_mock_new("com.ubuntu.Upstart");
+			obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", NULL);
+
+			dbus_test_dbus_mock_object_add_method(mock, obj,
+				"GetJobByName",
+				G_VARIANT_TYPE_STRING,
+				G_VARIANT_TYPE_OBJECT_PATH, /* out */
+				"ret = dbus.ObjectPath('/job')", /* python */
+				NULL); /* error */
+
+			jobobj = dbus_test_dbus_mock_get_object(mock, "/job", "com.ubuntu.Upstart0_6.Job", NULL);
+
+			dbus_test_dbus_mock_object_add_method(mock, jobobj,
+				"Start",
+				G_VARIANT_TYPE("(asb)"),
+				G_VARIANT_TYPE_OBJECT_PATH, /* out */
+				"ret = dbus.ObjectPath('/instance')", /* python */
+				NULL); /* error */
+
+			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
+			dbus_test_service_start_tasks(service);
+
+			bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+			g_dbus_connection_set_exit_on_close(bus, FALSE);
+			g_object_add_weak_pointer(G_OBJECT(bus), (gpointer *)&bus);
 		}
 
 		virtual void TearDown() {
+			g_clear_object(&mock);
+			g_clear_object(&service);
+
+			g_object_unref(bus);
+
+			unsigned int cleartry = 0;
+			while (bus != NULL && cleartry < 100) {
+				g_usleep(100000);
+				while (g_main_pending())
+					g_main_iteration(TRUE);
+				cleartry++;
+			}
 		}
 };
 
