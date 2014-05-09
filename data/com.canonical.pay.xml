@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node>
+	<interface name="com.canonical.pay">
+		<method name="ListApplications">
+			<arg type="ao" name="applications" direction="out" />
+		</method>
+	</interface>
+</node>
