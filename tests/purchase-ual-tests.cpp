@@ -17,22 +17,22 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "purchase-factory.h"
+#include <gtest/gtest.h>
+#include "service/purchase-ual.h"
 
-#ifndef PURCHASE_UAL_HPP__
-#define PURCHASE_UAL_HPP__ 1
-
-namespace Purchase
+struct VerificationCurlTests : public ::testing::Test
 {
+	protected:
+		virtual void SetUp() {
+		}
 
-class UalFactory : public Factory
-{
-public:
-    virtual Item::Ptr purchaseItem (std::string& appid, std::string& itemid);
-
-    typedef std::shared_ptr<UalFactory> Ptr;
+		virtual void TearDown() {
+		}
 };
 
-} // ns Purchase
-
-#endif /* PURCHASE_UAL_HPP__ */
+TEST_F(VerificationCurlTests, InitTest) {
+	auto purchase = std::make_shared<Purchase::UalFactory>();
+	EXPECT_NE(nullptr, purchase);
+	purchase.reset();
+	EXPECT_EQ(nullptr, purchase);
+}
