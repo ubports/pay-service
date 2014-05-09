@@ -97,13 +97,14 @@ TEST_F(VerificationCurlTests, PurchaseTest) {
 
 	Purchase::Item::Status status = Purchase::Item::Status::ERROR;
 	item->purchaseComplete.connect([&status](Purchase::Item::Status in_status) {
+		std::cout << "Purchase Status Callback: " << in_status << std::endl;
 		status = in_status;
 	});
 
 	EXPECT_TRUE(item->run());
 	usleep(20 * 1000);
 
-	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('Stopped', ['JOB=application-legacy', 'INSTANCE=gedit-'])"), NULL);
+	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=application-legacy', 'INSTANCE=gedit-'])"), NULL);
 	usleep(20 * 1000);
 
 	EXPECT_EQ(Purchase::Item::Status::PURCHASED, status);

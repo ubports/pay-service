@@ -37,6 +37,18 @@ public:
         ui_appid = "gedit";
     }
 
+    ~UalItem ()
+    {
+        if (loop != nullptr)
+        {
+            g_main_loop_quit(loop);
+        }
+        if (t.joinable())
+        {
+            t.join();
+        }
+    }
+
     virtual bool run (void)
     {
         if (ui_appid.empty())
@@ -122,7 +134,7 @@ private:
 
     void appStop (std::string stop_appid)
     {
-        if (stop_appid != appid)
+        if (stop_appid != ui_appid)
         {
             return;
         }
@@ -133,7 +145,7 @@ private:
 
     void appFailed (std::string failed_appid)
     {
-        if (failed_appid != appid)
+        if (failed_appid != ui_appid)
         {
             return;
         }
