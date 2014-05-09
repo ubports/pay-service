@@ -36,6 +36,7 @@ struct VerificationCurlTests : public ::testing::Test
 			service = dbus_test_service_new(NULL);
 
 			mock = dbus_test_dbus_mock_new("com.ubuntu.Upstart");
+
 			obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", NULL);
 
 			dbus_test_dbus_mock_object_add_method(mock, obj,
@@ -55,6 +56,7 @@ struct VerificationCurlTests : public ::testing::Test
 				NULL); /* error */
 
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
+
 			dbus_test_service_start_tasks(service);
 
 			bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
@@ -89,6 +91,7 @@ TEST_F(VerificationCurlTests, PurchaseTest) {
 	auto purchase = std::make_shared<Purchase::UalFactory>();
 	ASSERT_NE(nullptr, purchase);
 
+	/*** Purchase an item ***/
 	std::string appname("application");
 	std::string itemname("item");
 	auto item = purchase->purchaseItem(appname, itemname);
@@ -108,4 +111,27 @@ TEST_F(VerificationCurlTests, PurchaseTest) {
 	usleep(20 * 1000);
 
 	EXPECT_EQ(Purchase::Item::Status::PURCHASED, status);
+
+	/*** Purchase failed ***/
+	std::string failitemname("faileditem");
+	auto failitem = purchase->purchaseItem(appname, failitemname);
+
+	ASSERT_NE(nullptr, failitem);
+
+	Purchase::Item::Status failstatus = Purchase::Item::Status::ERROR;
+	failitem->purchaseComplete.connect([&failstatus](Purchase::Item::Status in_status) {
+		std::cout << "Purchase Status Callback: " << in_status << std::endl;
+		failstatus = in_status;
+	});
+
+	EXPECT_TRUE(failitem->run());
+	usleep(20 * 1000);
+
+	GError * error = NULL;
+	g_spawn_command_line_async("gdbus emit --session --object-path / --signal com.canonical.UpstartAppLaunch.ApplicationFailed gedit crash", &error);
+	ASSERT_EQ(nullptr, error);
+
+	usleep(100 * 1000);
+
+	EXPECT_EQ(Purchase::Item::Status::NOT_PURCHASED, failstatus);
 }
