@@ -84,3 +84,27 @@ TEST_F(VerificationCurlTests, InitTest) {
 	purchase.reset();
 	EXPECT_EQ(nullptr, purchase);
 }
+
+TEST_F(VerificationCurlTests, PurchaseTest) {
+	auto purchase = std::make_shared<Purchase::UalFactory>();
+	ASSERT_NE(nullptr, purchase);
+
+	std::string appname("application");
+	std::string itemname("item");
+	auto item = purchase->purchaseItem(appname, itemname);
+
+	ASSERT_NE(nullptr, item);
+
+	Purchase::Item::Status status = Purchase::Item::Status::ERROR;
+	item->purchaseComplete.connect([&status](Purchase::Item::Status in_status) {
+		status = in_status;
+	});
+
+	EXPECT_TRUE(item->run());
+	usleep(20 * 1000);
+
+	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('Stopped', ['JOB=application-legacy', 'INSTANCE=gedit-'])"), NULL);
+	usleep(20 * 1000);
+
+	EXPECT_EQ(Purchase::Item::Status::PURCHASED, status);
+}
