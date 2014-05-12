@@ -22,6 +22,8 @@
 #include <gio/gio.h>
 #include <thread>
 
+#include "service-proxy.h"
+
 class DBusInterfaceImpl
 {
 public:
@@ -31,9 +33,7 @@ public:
 
     /* Allocated on thread, and cleaned up there */
     GMainLoop* loop;
-
-    /* Allocated on thread, cleaned up on main */
-    GDBusConnection* bus;
+    proxyPay* serviceProxy;
 
     /* Allocates a thread to do dbus work */
     DBusInterfaceImpl (const Item::Store::Ptr& in_items) : items(in_items)
@@ -56,6 +56,8 @@ public:
 
             g_main_loop_run(loop);
 
+            g_clear_object(&serviceProxy);
+
             g_clear_pointer(&loop, g_main_loop_unref);
             g_clear_pointer(&context, g_main_context_unref);
         });
@@ -74,14 +76,18 @@ public:
         }
     }
 
-    GDBusConnection* getBus (void)
-    {
-        return bus;
-    }
-
     /* Export objects into the bus before we get a name */
-    void busAcquired ()
+    void busAcquired (GDBusConnection* bus)
     {
+        serviceProxy = proxy_pay_skeleton_new();
+        g_signal_connect(G_OBJECT(serviceProxy),
+                         "handle-list-applications",
+                         G_CALLBACK(listApplications_staticHelper),
+                         this);
+        g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(serviceProxy),
+                                         bus,
+                                         "/com/canonical/pay",
+                                         NULL);
 
     }
 
@@ -89,7 +95,31 @@ public:
        be done with it. */
     void nameLost ()
     {
+        g_main_loop_quit(loop);
         throw std::runtime_error("Unable to get dbus name: 'com.canonical.pay'");
+    }
+
+    /* Someone wants to know what applications we have */
+    bool listApplications (GDBusMethodInvocation* invocation)
+    {
+        auto applications = items->listApplications();
+        GVariantBuilder builder;
+        g_variant_builder_init(&builder, G_VARIANT_TYPE_TUPLE);
+        g_variant_builder_open(&builder, G_VARIANT_TYPE("ao"));
+
+        for (auto application : applications)
+        {
+            std::string prefix("/com/canonical/pay/");
+            std::string encoded = DBusInterface::encodePath(application);
+
+            prefix += encoded;
+
+            g_variant_builder_add_value(&builder, g_variant_new_object_path(prefix.c_str()));
+        }
+
+        g_variant_builder_close(&builder); // tuple
+        g_dbus_method_invocation_return_value(invocation, g_variant_builder_end(&builder));
+        return true;
     }
 
 
@@ -99,13 +129,19 @@ public:
     static void busAcquired_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
-        notthis->busAcquired();
+        notthis->busAcquired(bus);
     }
 
     static void nameLost_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
         notthis->nameLost();
+    }
+
+    static gboolean listApplications_staticHelper (proxyPay* proxy, GDBusMethodInvocation* invocation, gpointer user_data)
+    {
+        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        return notthis->listApplications(invocation);
     }
 };
 
@@ -117,7 +153,7 @@ DBusInterface::DBusInterface (const Item::Store::Ptr& in_items)
 bool
 DBusInterface::busStatus ()
 {
-    return impl->getBus() != nullptr;
+    return true;
 }
 
 std::string
