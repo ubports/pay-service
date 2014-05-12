@@ -22,7 +22,9 @@
 #include <gio/gio.h>
 #include <thread>
 
-#include "service-proxy.h"
+#include "proxy-service.h"
+#include "proxy-package.h"
+#include "proxy-item.h"
 
 class DBusInterfaceImpl
 {
