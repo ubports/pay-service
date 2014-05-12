@@ -44,6 +44,12 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
 include_directories (SYSTEM ${PROCESS_CPP_INCLUDE_DIRS} ${SERVICE_DEPS_INCLUDE_DIRS})
 
 ##
+##  Gdbus
+##
+
+include (GdbusCodegen)
+
+##
 ##  custom targets
 ##
 
