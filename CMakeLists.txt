@@ -1,4 +1,4 @@
-project (pay-service CXX)
+project (pay-service C CXX)
 cmake_minimum_required (VERSION 2.8.9)
 
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
@@ -39,6 +39,7 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
                    upstart-app-launch-2
                    dbustest-1
                    gio-2.0
+                   gio-unix-2.0
                    process-cpp
                    properties-cpp>=0.0.1)
 include_directories (SYSTEM ${PROCESS_CPP_INCLUDE_DIRS} ${SERVICE_DEPS_INCLUDE_DIRS})

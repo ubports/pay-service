@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g ${GCOV_FLAGS}")
 # Service Library
 ######################
 
-add_library(pay-service-lib STATIC
+set(SERVICE_LIB_SOURCES
             dbus-interface.cpp
             item-interface.h
             item-null.h
@@ -20,7 +20,9 @@ add_library(pay-service-lib STATIC
             verification-curl.cpp
             verification-null.cpp)
 
-add_gdbus_codegen_with_namespace(pay-service-lib service-proxy service_proxy _gdbus ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.xml)
+add_gdbus_codegen_with_namespace(SERVICE_LIB_SOURCES service-proxy com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.xml)
+
+add_library(pay-service-lib STATIC ${SERVICE_LIB_SOURCES})
 
 message(${SERVICE_DEPS_LIBRARIES})
 target_link_libraries(pay-service-lib ${SERVICE_DEPS_LIBRARIES})
