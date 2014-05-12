@@ -76,20 +76,7 @@ public:
         }
     }
 
-    /* Export objects into the bus before we get a name */
-    void busAcquired (GDBusConnection* bus)
-    {
-        serviceProxy = proxy_pay_skeleton_new();
-        g_signal_connect(G_OBJECT(serviceProxy),
-                         "handle-list-applications",
-                         G_CALLBACK(listApplications_staticHelper),
-                         this);
-        g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(serviceProxy),
-                                         bus,
-                                         "/com/canonical/pay",
-                                         NULL);
-
-    }
+    void busAcquired (GDBusConnection* bus);
 
     /* We only get this on errors, so we need to throw the exception and
        be done with it. */
@@ -182,33 +169,13 @@ public:
         return notthis->subtreeIntrospect();
     }
 
-    static const GDBusInterfaceVTable* subtreeDispatch_staticHelper (GDBusConnection* bus, const gchar* sender,
-                                                                     const gchar* path, const gchar* interface, const gchar* node, gpointer* out_user_data, gpointer user_data)
-    {
-        *out_user_data = user_data;
-        const GDBusInterfaceVTable* retval = nullptr;
-
-        if (g_strcmp0(interface, "com.caonical.pay.application") == 0)
-        {
-            retval = &applicationVtable;
-        }
-        else if (g_strcmp0(interface, "com.caonical.pay.item") == 0)
-        {
-            retval = &itemVtable;
-        }
-
-        return retval;
-    }
-
-    static constexpr GDBusSubtreeVTable subtreeVtable =
-    {
-enumerate:
-        subtreeEnumerate_staticHelper,
-introspect:
-        subtreeIntrospect_staticHelper,
-dispatch:
-        subtreeDispatch_staticHelper
-    };
+    static const GDBusInterfaceVTable* subtreeDispatch_staticHelper (GDBusConnection* bus,
+                                                                     const gchar* sender,
+                                                                     const gchar* path,
+                                                                     const gchar* interface,
+                                                                     const gchar* node,
+                                                                     gpointer* out_user_data,
+                                                                     gpointer user_data);
 
     static void applicationCall_staticHelper (GDBusConnection* connection, const gchar* sender, const gchar* path,
                                               const gchar* interface, const gchar* method, GVariant* params, GDBusMethodInvocation* invocation, gpointer user_data)
@@ -217,16 +184,6 @@ dispatch:
         return notthis->applicationCall(sender, path, method, params, invocation);
     }
 
-    static constexpr GDBusInterfaceVTable applicationVtable =
-    {
-method_call:
-        applicationCall_staticHelper,
-get_property:
-        nullptr,
-set_property:
-        nullptr
-    };
-
     static void itemCall_staticHelper (GDBusConnection* connection, const gchar* sender, const gchar* path,
                                        const gchar* interface, const gchar* method, GVariant* params, GDBusMethodInvocation* invocation, gpointer user_data)
     {
@@ -234,16 +191,76 @@ set_property:
         return notthis->itemCall(sender, path, method, params, invocation);
     }
 
-    static constexpr GDBusInterfaceVTable itemVtable =
-    {
-method_call:
-        itemCall_staticHelper,
-get_property:
-        nullptr,
-set_property:
-        nullptr
-    };
 };
+
+static const GDBusSubtreeVTable subtreeVtable =
+{
+    .enumerate = DBusInterfaceImpl::subtreeEnumerate_staticHelper,
+    .introspect = DBusInterfaceImpl::subtreeIntrospect_staticHelper,
+    .dispatch= DBusInterfaceImpl::subtreeDispatch_staticHelper
+};
+
+/* Export objects into the bus before we get a name */
+void DBusInterfaceImpl::busAcquired (GDBusConnection* bus)
+{
+    serviceProxy = proxy_pay_skeleton_new();
+    g_signal_connect(G_OBJECT(serviceProxy),
+                     "handle-list-applications",
+                     G_CALLBACK(listApplications_staticHelper),
+                     this);
+    g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(serviceProxy),
+                                     bus,
+                                     "/com/canonical/pay",
+                                     NULL);
+
+    g_dbus_connection_register_subtree(bus,
+                                       "/com/canonical/pay",
+                                       &subtreeVtable,
+                                       G_DBUS_SUBTREE_FLAGS_DISPATCH_TO_UNENUMERATED_NODES,
+                                       this,
+                                       nullptr, /* free func */
+                                       nullptr);
+}
+
+static const GDBusInterfaceVTable applicationVtable =
+{
+    .method_call = DBusInterfaceImpl::applicationCall_staticHelper,
+    .get_property = nullptr,
+    .set_property = nullptr
+};
+
+
+static constexpr GDBusInterfaceVTable itemVtable =
+{
+    .method_call = DBusInterfaceImpl::itemCall_staticHelper,
+    .get_property = nullptr,
+    .set_property = nullptr
+};
+
+const GDBusInterfaceVTable* DBusInterfaceImpl::subtreeDispatch_staticHelper (GDBusConnection* bus,
+                                                                             const gchar* sender,
+                                                                             const gchar* path,
+                                                                             const gchar* interface,
+                                                                             const gchar* node,
+                                                                             gpointer* out_user_data,
+                                                                             gpointer user_data)
+{
+    *out_user_data = user_data;
+    const GDBusInterfaceVTable* retval = nullptr;
+
+    if (g_strcmp0(interface, "com.caonical.pay.application") == 0)
+    {
+        retval = &applicationVtable;
+    }
+    else if (g_strcmp0(interface, "com.caonical.pay.item") == 0)
+    {
+        retval = &itemVtable;
+    }
+
+    return retval;
+}
+
+
 
 DBusInterface::DBusInterface (const Item::Store::Ptr& in_items)
 {
