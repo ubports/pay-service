@@ -122,6 +122,30 @@ public:
         return true;
     }
 
+    /**************************************
+     * Subtree Functions
+     **************************************/
+    gchar** subtreeEnumerate (void)
+    {
+        /* TODO: Yes */
+    }
+
+    GDBusInterfaceInfo** subtreeIntrospect (void)
+    {
+        /* TODO: this */
+    }
+
+    void applicationCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
+                         GDBusMethodInvocation* invocation)
+    {
+
+    }
+
+    void itemCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
+                  GDBusMethodInvocation* invocation)
+    {
+
+    }
 
     /**************************************
      * Static Helpers, C language binding
@@ -143,6 +167,82 @@ public:
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
         return notthis->listApplications(invocation);
     }
+
+    static gchar** subtreeEnumerate_staticHelper (GDBusConnection* bus, const gchar* sender, const gchar* object_path,
+                                                  gpointer user_data)
+    {
+        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        return notthis->subtreeEnumerate();
+    }
+
+    static GDBusInterfaceInfo** subtreeIntrospect_staticHelper (GDBusConnection* bus, const gchar* sender,
+                                                                const gchar* object_path, const gchar* node, gpointer user_data)
+    {
+        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        return notthis->subtreeIntrospect();
+    }
+
+    static const GDBusInterfaceVTable* subtreeDispatch_staticHelper (GDBusConnection* bus, const gchar* sender,
+                                                                     const gchar* path, const gchar* interface, const gchar* node, gpointer* out_user_data, gpointer user_data)
+    {
+        *out_user_data = user_data;
+        const GDBusInterfaceVTable* retval = nullptr;
+
+        if (g_strcmp0(interface, "com.caonical.pay.application") == 0)
+        {
+            retval = &applicationVtable;
+        }
+        else if (g_strcmp0(interface, "com.caonical.pay.item") == 0)
+        {
+            retval = &itemVtable;
+        }
+
+        return retval;
+    }
+
+    static constexpr GDBusSubtreeVTable subtreeVtable =
+    {
+enumerate:
+        subtreeEnumerate_staticHelper,
+introspect:
+        subtreeIntrospect_staticHelper,
+dispatch:
+        subtreeDispatch_staticHelper
+    };
+
+    static void applicationCall_staticHelper (GDBusConnection* connection, const gchar* sender, const gchar* path,
+                                              const gchar* interface, const gchar* method, GVariant* params, GDBusMethodInvocation* invocation, gpointer user_data)
+    {
+        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        return notthis->applicationCall(sender, path, method, params, invocation);
+    }
+
+    static constexpr GDBusInterfaceVTable applicationVtable =
+    {
+method_call:
+        applicationCall_staticHelper,
+get_property:
+        nullptr,
+set_property:
+        nullptr
+    };
+
+    static void itemCall_staticHelper (GDBusConnection* connection, const gchar* sender, const gchar* path,
+                                       const gchar* interface, const gchar* method, GVariant* params, GDBusMethodInvocation* invocation, gpointer user_data)
+    {
+        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        return notthis->itemCall(sender, path, method, params, invocation);
+    }
+
+    static constexpr GDBusInterfaceVTable itemVtable =
+    {
+method_call:
+        itemCall_staticHelper,
+get_property:
+        nullptr,
+set_property:
+        nullptr
+    };
 };
 
 DBusInterface::DBusInterface (const Item::Store::Ptr& in_items)
