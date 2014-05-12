@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <node>
-	<interface name="com.canonical.pay.application">
+	<interface name="com.canonical.pay.package">
 		<!-- Base stuff -->
 		<method name="ListItems">
 			<arg type="ao" name="items" direction="out" />

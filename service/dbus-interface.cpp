@@ -86,18 +86,18 @@ public:
         throw std::runtime_error("Unable to get dbus name: 'com.canonical.pay'");
     }
 
-    /* Someone wants to know what applications we have */
-    bool listApplications (GDBusMethodInvocation* invocation)
+    /* Someone wants to know what packages we have */
+    bool listPackages (GDBusMethodInvocation* invocation)
     {
-        auto applications = items->listApplications();
+        auto packages = items->listApplications();
         GVariantBuilder builder;
         g_variant_builder_init(&builder, G_VARIANT_TYPE_TUPLE);
         g_variant_builder_open(&builder, G_VARIANT_TYPE("ao"));
 
-        for (auto application : applications)
+        for (auto package : packages)
         {
             std::string prefix("/com/canonical/pay/");
-            std::string encoded = DBusInterface::encodePath(application);
+            std::string encoded = DBusInterface::encodePath(package);
 
             prefix += encoded;
 
@@ -122,8 +122,8 @@ public:
         /* TODO: this */
     }
 
-    void applicationCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
-                         GDBusMethodInvocation* invocation)
+    void packageCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
+                     GDBusMethodInvocation* invocation)
     {
 
     }
@@ -149,10 +149,10 @@ public:
         notthis->nameLost();
     }
 
-    static gboolean listApplications_staticHelper (proxyPay* proxy, GDBusMethodInvocation* invocation, gpointer user_data)
+    static gboolean listPackages_staticHelper (proxyPay* proxy, GDBusMethodInvocation* invocation, gpointer user_data)
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
-        return notthis->listApplications(invocation);
+        return notthis->listPackages(invocation);
     }
 
     static gchar** subtreeEnumerate_staticHelper (GDBusConnection* bus, const gchar* sender, const gchar* object_path,
@@ -177,11 +177,11 @@ public:
                                                                      gpointer* out_user_data,
                                                                      gpointer user_data);
 
-    static void applicationCall_staticHelper (GDBusConnection* connection, const gchar* sender, const gchar* path,
-                                              const gchar* interface, const gchar* method, GVariant* params, GDBusMethodInvocation* invocation, gpointer user_data)
+    static void packageCall_staticHelper (GDBusConnection* connection, const gchar* sender, const gchar* path,
+                                          const gchar* interface, const gchar* method, GVariant* params, GDBusMethodInvocation* invocation, gpointer user_data)
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
-        return notthis->applicationCall(sender, path, method, params, invocation);
+        return notthis->packageCall(sender, path, method, params, invocation);
     }
 
     static void itemCall_staticHelper (GDBusConnection* connection, const gchar* sender, const gchar* path,
@@ -205,8 +205,8 @@ void DBusInterfaceImpl::busAcquired (GDBusConnection* bus)
 {
     serviceProxy = proxy_pay_skeleton_new();
     g_signal_connect(G_OBJECT(serviceProxy),
-                     "handle-list-applications",
-                     G_CALLBACK(listApplications_staticHelper),
+                     "handle-list-packages",
+                     G_CALLBACK(listPackages_staticHelper),
                      this);
     g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(serviceProxy),
                                      bus,
@@ -222,9 +222,9 @@ void DBusInterfaceImpl::busAcquired (GDBusConnection* bus)
                                        nullptr);
 }
 
-static const GDBusInterfaceVTable applicationVtable =
+static const GDBusInterfaceVTable packageVtable =
 {
-    .method_call = DBusInterfaceImpl::applicationCall_staticHelper,
+    .method_call = DBusInterfaceImpl::packageCall_staticHelper,
     .get_property = nullptr,
     .set_property = nullptr
 };
@@ -248,9 +248,9 @@ const GDBusInterfaceVTable* DBusInterfaceImpl::subtreeDispatch_staticHelper (GDB
     *out_user_data = user_data;
     const GDBusInterfaceVTable* retval = nullptr;
 
-    if (g_strcmp0(interface, "com.caonical.pay.application") == 0)
+    if (g_strcmp0(interface, "com.caonical.pay.package") == 0)
     {
-        retval = &applicationVtable;
+        retval = &packageVtable;
     }
     else if (g_strcmp0(interface, "com.caonical.pay.item") == 0)
     {
