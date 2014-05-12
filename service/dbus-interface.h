@@ -25,18 +25,19 @@
 
 class DBusInterfaceImpl;
 
-class DBusInterface {
+class DBusInterface
+{
 public:
-	DBusInterface (const Item::Store::Ptr& in_items);
-	~DBusInterface () { };
+    DBusInterface (const Item::Store::Ptr& in_items);
+    ~DBusInterface () { };
 
-	bool busStatus ();
+    bool busStatus ();
 
-	static std::string encodePath (const std::string& input);
-	static std::string decodePath (const std::string& input);
+    static std::string encodePath (const std::string& input);
+    static std::string decodePath (const std::string& input);
 
 private:
-	std::shared_ptr<DBusInterfaceImpl> impl;
+    std::shared_ptr<DBusInterfaceImpl> impl;
 };
 
 
