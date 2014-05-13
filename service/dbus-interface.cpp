@@ -21,6 +21,7 @@
 
 #include <gio/gio.h>
 #include <thread>
+#include <cstring>
 
 #include "proxy-service.h"
 #include "proxy-package.h"
@@ -118,9 +119,34 @@ public:
     /**************************************
      * Subtree Functions
      **************************************/
-    gchar** subtreeEnumerate (void)
+    gchar** subtreeEnumerate (const gchar* path)
     {
-        /* TODO: Yes */
+        GArray* nodes = g_array_new(TRUE, FALSE, sizeof(gchar*));
+        const gchar* node = path + std::strlen("/com/canonical/pay/");
+
+        if (node[0] == '\0')
+        {
+            auto packages = items->listApplications();
+            for (auto package : packages)
+            {
+                std::string encoded = DBusInterface::encodePath(package);
+                gchar* val = g_strdup(encoded.c_str());
+                g_array_append_val(nodes, val);
+            }
+        }
+        else
+        {
+            std::string appname(node);
+            std::string decoded = DBusInterface::decodePath(appname);
+            auto litems = items->getItems(decoded);
+            for (auto item : *litems)
+            {
+                gchar* val = g_strdup(item.first.c_str());
+                g_array_append_val(nodes, val);
+            }
+        }
+
+        return reinterpret_cast<gchar**>(g_array_free(nodes, FALSE));
     }
 
     GDBusInterfaceInfo** subtreeIntrospect (const gchar* path)
@@ -179,7 +205,7 @@ public:
                                                   gpointer user_data)
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
-        return notthis->subtreeEnumerate();
+        return notthis->subtreeEnumerate(object_path);
     }
 
     static GDBusInterfaceInfo** subtreeIntrospect_staticHelper (GDBusConnection* bus, const gchar* sender,
