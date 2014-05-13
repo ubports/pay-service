@@ -149,29 +149,44 @@ public:
         return reinterpret_cast<gchar**>(g_array_free(nodes, FALSE));
     }
 
-    GDBusInterfaceInfo** subtreeIntrospect (const gchar* path)
+    GDBusInterfaceInfo** subtreeIntrospect (const gchar* path, const gchar* node)
     {
-        GDBusInterfaceInfo** retval = g_new0(GDBusInterfaceInfo*, 2);
         GDBusInterfaceInfo* skelInfo = nullptr;
-        /* If the path is this, then then node is the package so we're
-           asking about the package. Otherwise we're asking about an item. */
-        if (g_strcmp0(path, "/com/canonical/pay") == 0)
-        {
-            skelInfo = g_dbus_interface_skeleton_get_info(G_DBUS_INTERFACE_SKELETON(packageProxy));
-        }
-        else
-        {
-            skelInfo = g_dbus_interface_skeleton_get_info(G_DBUS_INTERFACE_SKELETON(itemProxy));
-        }
 
+        skelInfo = g_dbus_interface_skeleton_get_info(G_DBUS_INTERFACE_SKELETON(packageProxy));
+
+        GDBusInterfaceInfo** retval = g_new0(GDBusInterfaceInfo*, 2);
         retval[0] = g_dbus_interface_info_ref(skelInfo);
+
         return retval;
     }
 
     void packageCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
                      GDBusMethodInvocation* invocation)
     {
+        const gchar* encoded_package = path + std::strlen("/com/canonical/pay/");
+        std::string package = DBusInterface::decodePath(std::string(encoded_package));
 
+        if (g_strcmp0(method, "ListItems") == 0)
+        {
+            GVariantBuilder builder;
+            g_variant_builder_init(&builder, G_VARIANT_TYPE_TUPLE);
+            g_variant_builder_open(&builder, G_VARIANT_TYPE("ao"));
+
+            auto litems = items->getItems(package);
+            for (auto item : *litems)
+            {
+                std::string encodedItem = DBusInterface::encodePath(item.first.c_str());
+                std::string fullpath(path);
+                fullpath += "/";
+                fullpath += encodedItem;
+
+                g_variant_builder_add_value(&builder, g_variant_new_object_path(fullpath.c_str()));
+            }
+
+            g_variant_builder_close(&builder);
+            g_dbus_method_invocation_return_value(invocation, g_variant_builder_end(&builder));
+        }
     }
 
     void itemCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
@@ -212,7 +227,7 @@ public:
                                                                 const gchar* object_path, const gchar* node, gpointer user_data)
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
-        return notthis->subtreeIntrospect(object_path);
+        return notthis->subtreeIntrospect(object_path, node);
     }
 
     static const GDBusInterfaceVTable* subtreeDispatch_staticHelper (GDBusConnection* bus,
@@ -229,14 +244,6 @@ public:
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
         return notthis->packageCall(sender, path, method, params, invocation);
     }
-
-    static void itemCall_staticHelper (GDBusConnection* connection, const gchar* sender, const gchar* path,
-                                       const gchar* interface, const gchar* method, GVariant* params, GDBusMethodInvocation* invocation, gpointer user_data)
-    {
-        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
-        return notthis->itemCall(sender, path, method, params, invocation);
-    }
-
 };
 
 static const GDBusSubtreeVTable subtreeVtable =
@@ -257,6 +264,7 @@ void DBusInterfaceImpl::busAcquired (GDBusConnection* bus)
                      "handle-list-packages",
                      G_CALLBACK(listPackages_staticHelper),
                      this);
+
     g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(serviceProxy),
                                      bus,
                                      "/com/canonical/pay",
@@ -278,14 +286,6 @@ static const GDBusInterfaceVTable packageVtable =
     .set_property = nullptr
 };
 
-
-static constexpr GDBusInterfaceVTable itemVtable =
-{
-    .method_call = DBusInterfaceImpl::itemCall_staticHelper,
-    .get_property = nullptr,
-    .set_property = nullptr
-};
-
 const GDBusInterfaceVTable* DBusInterfaceImpl::subtreeDispatch_staticHelper (GDBusConnection* bus,
                                                                              const gchar* sender,
                                                                              const gchar* path,
@@ -297,13 +297,9 @@ const GDBusInterfaceVTable* DBusInterfaceImpl::subtreeDispatch_staticHelper (GDB
     *out_user_data = user_data;
     const GDBusInterfaceVTable* retval = nullptr;
 
-    if (g_strcmp0(interface, "com.caonical.pay.package") == 0)
+    if (g_strcmp0(interface, "com.canonical.pay.package") == 0)
     {
         retval = &packageVtable;
-    }
-    else if (g_strcmp0(interface, "com.caonical.pay.item") == 0)
-    {
-        retval = &itemVtable;
     }
 
     return retval;
