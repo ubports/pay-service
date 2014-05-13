@@ -36,6 +36,8 @@ public:
     /* Allocated on thread, and cleaned up there */
     GMainLoop* loop;
     proxyPay* serviceProxy;
+    proxyPayPackage* packageProxy;
+    proxyPayItem* itemProxy;
 
     /* Allocates a thread to do dbus work */
     DBusInterfaceImpl (const Item::Store::Ptr& in_items) : items(in_items)
@@ -59,6 +61,8 @@ public:
             g_main_loop_run(loop);
 
             g_clear_object(&serviceProxy);
+            g_clear_object(&packageProxy);
+            g_clear_object(&itemProxy);
 
             g_clear_pointer(&loop, g_main_loop_unref);
             g_clear_pointer(&context, g_main_context_unref);
@@ -119,9 +123,23 @@ public:
         /* TODO: Yes */
     }
 
-    GDBusInterfaceInfo** subtreeIntrospect (void)
+    GDBusInterfaceInfo** subtreeIntrospect (const gchar* path)
     {
-        /* TODO: this */
+        GDBusInterfaceInfo** retval = g_new0(GDBusInterfaceInfo*, 2);
+        GDBusInterfaceInfo* skelInfo = nullptr;
+        /* If the path is this, then then node is the package so we're
+           asking about the package. Otherwise we're asking about an item. */
+        if (g_strcmp0(path, "/com/canonical/pay") == 0)
+        {
+            skelInfo = g_dbus_interface_skeleton_get_info(G_DBUS_INTERFACE_SKELETON(packageProxy));
+        }
+        else
+        {
+            skelInfo = g_dbus_interface_skeleton_get_info(G_DBUS_INTERFACE_SKELETON(itemProxy));
+        }
+
+        retval[0] = static_cast<GDBusInterfaceInfo*>(g_object_ref(skelInfo));
+        return retval;
     }
 
     void packageCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
@@ -168,7 +186,7 @@ public:
                                                                 const gchar* object_path, const gchar* node, gpointer user_data)
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
-        return notthis->subtreeIntrospect();
+        return notthis->subtreeIntrospect(object_path);
     }
 
     static const GDBusInterfaceVTable* subtreeDispatch_staticHelper (GDBusConnection* bus,
@@ -206,6 +224,9 @@ static const GDBusSubtreeVTable subtreeVtable =
 void DBusInterfaceImpl::busAcquired (GDBusConnection* bus)
 {
     serviceProxy = proxy_pay_skeleton_new();
+    packageProxy = proxy_pay_package_skeleton_new();
+    itemProxy = proxy_pay_item_skeleton_new();
+
     g_signal_connect(G_OBJECT(serviceProxy),
                      "handle-list-packages",
                      G_CALLBACK(listPackages_staticHelper),
