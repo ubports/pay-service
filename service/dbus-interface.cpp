@@ -164,7 +164,7 @@ public:
             skelInfo = g_dbus_interface_skeleton_get_info(G_DBUS_INTERFACE_SKELETON(itemProxy));
         }
 
-        retval[0] = static_cast<GDBusInterfaceInfo*>(g_object_ref(skelInfo));
+        retval[0] = g_dbus_interface_info_ref(skelInfo);
         return retval;
     }
 
