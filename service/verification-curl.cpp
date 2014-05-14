@@ -65,7 +65,7 @@ public:
             if (status == CURLE_OK)
             {
                 /* TODO: Clearly we need to be a bit more sophisticated here */
-                verificationComplete(Status::PURCHASED);
+                verificationComplete(Status::NOT_PURCHASED);
             }
             else
             {
