@@ -119,13 +119,13 @@ public:
     gchar** subtreeEnumerate (const gchar* path)
     {
         GArray* nodes = g_array_new(TRUE, FALSE, sizeof(gchar*));
-		auto packages = items->listApplications();
-		for (auto package : packages)
-		{
-			std::string encoded = DBusInterface::encodePath(package);
-			gchar* val = g_strdup(encoded.c_str());
-			g_array_append_val(nodes, val);
-		}
+        auto packages = items->listApplications();
+        for (auto package : packages)
+        {
+            std::string encoded = DBusInterface::encodePath(package);
+            gchar* val = g_strdup(encoded.c_str());
+            g_array_append_val(nodes, val);
+        }
 
         return reinterpret_cast<gchar**>(g_array_free(nodes, FALSE));
     }
