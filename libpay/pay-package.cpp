@@ -26,6 +26,7 @@ namespace Pay
 class Package
 {
     std::string id;
+    /* NOTE: Using the shared_ptr here because gcc 4.7 map doesn't have emplace */
     std::map <std::pair<PayPackageItemObserver, void*>, std::shared_ptr<core::ScopedConnection>> observers;
     core::Signal<std::string, PayPackageItemStatus> itemChanged;
     std::map <std::string, PayPackageItemStatus> itemStatusCache;
