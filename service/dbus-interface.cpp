@@ -25,7 +25,6 @@
 
 #include "proxy-service.h"
 #include "proxy-package.h"
-#include "proxy-item.h"
 
 class DBusInterfaceImpl
 {
@@ -38,7 +37,6 @@ public:
     GMainLoop* loop;
     proxyPay* serviceProxy;
     proxyPayPackage* packageProxy;
-    proxyPayItem* itemProxy;
 
     /* Allocates a thread to do dbus work */
     DBusInterfaceImpl (const Item::Store::Ptr& in_items) : items(in_items)
@@ -63,7 +61,6 @@ public:
 
             g_clear_object(&serviceProxy);
             g_clear_object(&packageProxy);
-            g_clear_object(&itemProxy);
 
             g_clear_pointer(&loop, g_main_loop_unref);
             g_clear_pointer(&context, g_main_context_unref);
@@ -258,7 +255,6 @@ void DBusInterfaceImpl::busAcquired (GDBusConnection* bus)
 {
     serviceProxy = proxy_pay_skeleton_new();
     packageProxy = proxy_pay_package_skeleton_new();
-    itemProxy = proxy_pay_item_skeleton_new();
 
     g_signal_connect(G_OBJECT(serviceProxy),
                      "handle-list-packages",
