@@ -173,7 +173,7 @@ public:
             auto litems = items->getItems(package);
             for (auto item : *litems)
             {
-                g_variant_builder_open(&builder, G_VARIANT_TYPE_TUPLE);
+                g_variant_builder_open(&builder, G_VARIANT_TYPE("(ss)"));
 
                 g_variant_builder_add_value(&builder, g_variant_new_string(item.first.c_str()));
                 g_variant_builder_add_value(&builder, g_variant_new_string(Item::Item::statusString(item.second->getStatus())));
@@ -184,12 +184,38 @@ public:
             g_variant_builder_close(&builder);
             g_dbus_method_invocation_return_value(invocation, g_variant_builder_end(&builder));
         }
-    }
+        else if (g_strcmp0(method, "VerifyItem") == 0)
+        {
+            GVariant* vitemid = g_variant_get_child_value(params, 0);
+            std::string itemid(g_variant_get_string(vitemid, NULL));
+            g_variant_unref(vitemid);
 
-    void itemCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
-                  GDBusMethodInvocation* invocation)
-    {
+            auto item = items->getItem(package, itemid);
+            if (item->verify())
+            {
+                g_dbus_method_invocation_return_value(invocation, NULL);
+            }
+            else
+            {
+                /* TODO: Error */
+            }
+        }
+        else if (g_strcmp0(method, "PurchaseItem") == 0)
+        {
+            GVariant* vitemid = g_variant_get_child_value(params, 0);
+            std::string itemid(g_variant_get_string(vitemid, NULL));
+            g_variant_unref(vitemid);
 
+            auto item = items->getItem(package, itemid);
+            if (item->purchase())
+            {
+                g_dbus_method_invocation_return_value(invocation, NULL);
+            }
+            else
+            {
+                /* TODO: Error */
+            }
+        }
     }
 
     /**************************************
