@@ -28,16 +28,28 @@ class Package
     std::string id;
     std::map <std::pair<PayPackageItemObserver, void*>, std::shared_ptr<core::ScopedConnection>> observers;
     core::Signal<std::string, PayPackageItemStatus> itemChanged;
+    std::map <std::string, PayPackageItemStatus> itemStatusCache;
 
 public:
-    Package (const char* packageid) : id(packageid) { }
+    Package (const char* packageid) : id(packageid)
+    {
+        /* Keeps item cache up-to-data as we get signals about it */
+        itemChanged.connect([this](std::string itemid, PayPackageItemStatus status)
+        {
+            itemStatusCache[itemid] = status;
+        });
+    }
 
     PayPackageItemStatus itemStatus (const char* itemid)
     {
+        return itemStatusCache[itemid];
     }
 
     bool addItemObserver (PayPackageItemObserver observer, void* user_data)
     {
+        /* Creates a connection to the signal for the observer and stores the connection
+           object in the map so that we can remove it later, or it'll get disconnected
+           when the whole object gets destroyed */
         std::pair<PayPackageItemObserver, void*> key(observer, user_data);
         auto connection = std::make_shared<core::ScopedConnection>(itemChanged.connect([this, observer, user_data] (
                                                                                            std::string itemid,
