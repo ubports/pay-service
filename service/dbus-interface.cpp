@@ -37,6 +37,7 @@ public:
     GMainLoop* loop;
     proxyPay* serviceProxy;
     proxyPayPackage* packageProxy;
+    GDBusConnection* bus;
 
     /* Allocates a thread to do dbus work */
     DBusInterfaceImpl (const Item::Store::Ptr& in_items) : items(in_items)
@@ -47,6 +48,29 @@ public:
             loop = g_main_loop_new(context, FALSE);
 
             g_main_context_push_thread_default(context);
+
+            core::ScopedConnection itemupdate(items->itemChanged.connect([this](std::string pkg, std::string item,
+                                                                                Item::Item::Status status)
+            {
+                if (bus == nullptr)
+                {
+                    return;
+                }
+
+                std::string encodedpkg = DBusInterface::encodePath(pkg);
+                std::string path("/com/canonical/pay/");
+                path += encodedpkg;
+
+                const char* strstatus = Item::Item::statusString(status);
+
+                g_dbus_connection_emit_signal(bus,
+                                              nullptr, /* dest */
+                                              path.c_str(),
+                                              "com.canonical.pay.package",
+                                              "ItemStatusChanged",
+                                              g_variant_new("(ss)", item.c_str(), strstatus),
+                                              nullptr);
+            }));
 
             g_bus_own_name(G_BUS_TYPE_SESSION,
                            "com.canonical.pay",
@@ -62,6 +86,7 @@ public:
             g_clear_object(&serviceProxy);
             g_clear_object(&packageProxy);
 
+            g_clear_object(&bus);
             g_clear_pointer(&loop, g_main_loop_unref);
             g_clear_pointer(&context, g_main_context_unref);
         });
@@ -205,10 +230,10 @@ public:
     /**************************************
      * Static Helpers, C language binding
      **************************************/
-    static void busAcquired_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
+    static void busAcquired_staticHelper (GDBusConnection* inbus, const gchar* name, gpointer user_data)
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
-        notthis->busAcquired(bus);
+        notthis->busAcquired(inbus);
     }
 
     static void nameLost_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
@@ -261,8 +286,10 @@ static const GDBusSubtreeVTable subtreeVtable =
 };
 
 /* Export objects into the bus before we get a name */
-void DBusInterfaceImpl::busAcquired (GDBusConnection* bus)
+void DBusInterfaceImpl::busAcquired (GDBusConnection* inbus)
 {
+    bus = reinterpret_cast<GDBusConnection*>(g_object_ref(inbus));
+
     serviceProxy = proxy_pay_skeleton_new();
     packageProxy = proxy_pay_package_skeleton_new();
 
