@@ -23,6 +23,8 @@
 #include <core/signal.h>
 #include <gio/gio.h>
 
+#include "proxy-package.h"
+
 namespace Pay
 {
 class Package
@@ -35,9 +37,11 @@ class Package
 
     std::thread t;
     GMainLoop* loop;
+    GCancellable* cancellable;
+    proxyPayPackage* proxy;
 
 public:
-    Package (const char* packageid) : id(packageid)
+    Package (const char* packageid) : id(packageid), cancellable(g_cancellable_new())
     {
         /* Keeps item cache up-to-data as we get signals about it */
         itemChanged.connect([this](std::string itemid, PayPackageItemStatus status)
@@ -47,13 +51,30 @@ public:
 
         t = std::thread([this]()
         {
+            GError* error = nullptr;
             GMainContext* context = g_main_context_new();
             loop = g_main_loop_new(context, FALSE);
 
             g_main_context_push_thread_default(context);
 
-            g_main_loop_run(loop);
+            proxy = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                             G_DBUS_PROXY_FLAGS_NONE,
+                                                             "com.canonical.pay",
+                                                             "/com/canonical/pay/app_name",
+                                                             cancellable,
+                                                             &error);
 
+            if (error != nullptr)
+            {
+                throw std::runtime_error(error->message);
+            }
+
+            if (!g_cancellable_is_cancelled(cancellable))
+            {
+                g_main_loop_run(loop);
+            }
+
+            g_clear_object(&proxy);
             g_clear_pointer(&loop, g_main_loop_unref);
             g_clear_pointer(&context, g_main_context_unref);
         });
@@ -61,6 +82,9 @@ public:
 
     ~Package (void)
     {
+        g_cancellable_cancel(cancellable);
+        g_clear_object(&cancellable);
+
         if (loop != nullptr)
         {
             g_main_loop_quit(loop);

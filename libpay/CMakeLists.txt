@@ -8,12 +8,19 @@ set(api-version 1)
 set(abi-version 1)
 
 ######################
+# DBus Proxies
+######################
+
+set(libpay-generated)
+add_gdbus_codegen_with_namespace(libpay-generated proxy-package com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.package.xml)
+
+######################
 # Lib Building
 ######################
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g ${GCOV_FLAGS}")
 
-add_library(libpay SHARED ${libpay-sources})
+add_library(libpay SHARED ${libpay-sources} ${libpay-generated})
 set_target_properties(libpay PROPERTIES
   VERSION ${api-version}.0.0
   SOVESRION ${abi-version}
