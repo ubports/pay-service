@@ -3,7 +3,18 @@
 	<interface name="com.canonical.pay.package">
 		<!-- Base stuff -->
 		<method name="ListItems">
-			<arg type="ao" name="items" direction="out" />
+			<!-- item id, status -->
+			<arg type="a(ss)" name="items" direction="out" />
 		</method>
+		<method name="VerifyItem">
+			<arg type="s" name="item" direction="in" />
+		</method>
+		<method name="PurchaseItem">
+			<arg type="s" name="item" direction="in" />
+		</method>
+		<signal name="ItemStatusChanged">
+			<arg type="s" name="item" direction="out" />
+			<arg type="s" name="status" direction="out" />
+		</signal>
 	</interface>
 </node>

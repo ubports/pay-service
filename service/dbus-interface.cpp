@@ -168,17 +168,17 @@ public:
         {
             GVariantBuilder builder;
             g_variant_builder_init(&builder, G_VARIANT_TYPE_TUPLE);
-            g_variant_builder_open(&builder, G_VARIANT_TYPE("ao"));
+            g_variant_builder_open(&builder, G_VARIANT_TYPE("a(ss)"));
 
             auto litems = items->getItems(package);
             for (auto item : *litems)
             {
-                std::string encodedItem = DBusInterface::encodePath(item.first.c_str());
-                std::string fullpath(path);
-                fullpath += "/";
-                fullpath += encodedItem;
+                g_variant_builder_open(&builder, G_VARIANT_TYPE_TUPLE);
 
-                g_variant_builder_add_value(&builder, g_variant_new_object_path(fullpath.c_str()));
+                g_variant_builder_add_value(&builder, g_variant_new_string(item.first.c_str()));
+                g_variant_builder_add_value(&builder, g_variant_new_string(Item::Item::statusString(item.second->getStatus())));
+
+                g_variant_builder_close(&builder);
             }
 
             g_variant_builder_close(&builder);
