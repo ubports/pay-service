@@ -19,7 +19,9 @@
 #include "pay-package.h"
 #include <string>
 #include <map>
+#include <thread>
 #include <core/signal.h>
+#include <gio/gio.h>
 
 namespace Pay
 {
@@ -31,6 +33,9 @@ class Package
     core::Signal<std::string, PayPackageItemStatus> itemChanged;
     std::map <std::string, PayPackageItemStatus> itemStatusCache;
 
+    std::thread t;
+    GMainLoop* loop;
+
 public:
     Package (const char* packageid) : id(packageid)
     {
@@ -39,6 +44,32 @@ public:
         {
             itemStatusCache[itemid] = status;
         });
+
+        t = std::thread([this]()
+        {
+            GMainContext* context = g_main_context_new();
+            loop = g_main_loop_new(context, FALSE);
+
+            g_main_context_push_thread_default(context);
+
+            g_main_loop_run(loop);
+
+            g_clear_pointer(&loop, g_main_loop_unref);
+            g_clear_pointer(&context, g_main_context_unref);
+        });
+    }
+
+    ~Package (void)
+    {
+        if (loop != nullptr)
+        {
+            g_main_loop_quit(loop);
+        }
+
+        if (t.joinable())
+        {
+            t.join();
+        }
     }
 
     PayPackageItemStatus itemStatus (const char* itemid)
