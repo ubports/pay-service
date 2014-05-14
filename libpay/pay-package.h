@@ -10,7 +10,7 @@ typedef enum {
 } PayPackageItemStatus;
 typedef void (*PayPackageItemObserver) (PayPackage * package, const char * itemid, PayPackageItemStatus status);
 
-PayPackage * pay_package_create (const char * package_name);
+PayPackage * pay_package_new (const char * package_name);
 void pay_package_delete (PayPackage * package);
 PayPackageItemStatus pay_package_item_status (PayPackage * package, const char * itemid);
 gboolean pay_package_item_observer_add (PayPackage * package, PayPackageItemObserver observer, gpointer user_data);
