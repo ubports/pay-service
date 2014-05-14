@@ -22,7 +22,7 @@
 #include "dbus-interface.h"
 #include "item-memory.h"
 #include "verification-curl.h"
-#include "purchase-null.h"
+#include "purchase-ual.h"
 
 int
 main (int argv, char* argc[])
@@ -39,7 +39,7 @@ main (int argv, char* argc[])
     });
 
     auto vfactory = std::make_shared<Verification::CurlFactory>();
-    auto pfactory = std::make_shared<Purchase::NullFactory>();
+    auto pfactory = std::make_shared<Purchase::UalFactory>();
     auto items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
     auto dbus = std::make_shared<DBusInterface>(items);
 
