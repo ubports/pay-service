@@ -18,18 +18,42 @@
 
 #include "pay-package.h"
 #include <string>
+#include <map>
+#include <core/signal.h>
 
 namespace Pay
 {
 class Package
 {
     std::string id;
+    std::map <std::pair<PayPackageItemObserver, void*>, std::shared_ptr<core::ScopedConnection>> observers;
+    core::Signal<std::string, PayPackageItemStatus> itemChanged;
 
 public:
     Package (const char* packageid) : id(packageid) { }
 
     PayPackageItemStatus itemStatus (const char* itemid)
     {
+    }
+
+    bool addItemObserver (PayPackageItemObserver observer, void* user_data)
+    {
+        std::pair<PayPackageItemObserver, void*> key(observer, user_data);
+        auto connection = std::make_shared<core::ScopedConnection>(itemChanged.connect([this, observer, user_data] (
+                                                                                           std::string itemid,
+                                                                                           PayPackageItemStatus status)
+        {
+            observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
+        }));
+        observers[key] = connection;
+        return true;
+    }
+
+    bool removeItemObserver (PayPackageItemObserver observer, void* user_data)
+    {
+        std::pair<PayPackageItemObserver, void*> key(observer, user_data);
+        observers.erase(key);
+        return true;
     }
 
     bool startVerification (const char* itemid)
@@ -80,6 +104,7 @@ int pay_package_item_observer_install (PayPackage* package,
                                        void* user_data)
 {
     auto pkg = reinterpret_cast<Pay::Package*>(package);
+    pkg->addItemObserver(observer, user_data);
 }
 
 int pay_package_item_observer_uninstall (PayPackage* package,
@@ -87,6 +112,7 @@ int pay_package_item_observer_uninstall (PayPackage* package,
                                          void* user_data)
 {
     auto pkg = reinterpret_cast<Pay::Package*>(package);
+    pkg->removeItemObserver(observer, user_data);
 }
 
 int pay_package_item_start_verification (PayPackage* package,
