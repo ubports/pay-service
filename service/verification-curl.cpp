@@ -95,7 +95,7 @@ private:
 };
 
 CurlFactory::CurlFactory () :
-    endpoint("https://ubuntu.com")
+    endpoint("https://launchpad.net")
 {
     /* TODO: We should check to see if we have networking someday */
     curl_global_init(CURL_GLOBAL_SSL);
