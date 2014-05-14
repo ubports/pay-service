@@ -42,7 +42,14 @@ public:
 
     PayPackageItemStatus itemStatus (const char* itemid)
     {
-        return itemStatusCache[itemid];
+        try
+        {
+            return itemStatusCache[itemid];
+        }
+        catch (std::out_of_range range)
+        {
+            return PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
+        }
     }
 
     bool addItemObserver (PayPackageItemObserver observer, void* user_data)
