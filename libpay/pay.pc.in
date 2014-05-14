@@ -1,0 +1,11 @@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Cflags: -I${includedir}/libpay-@api-version@
+Requires: glib-2.0 gio-2.0
+Libs: -L${libdir} -lpay
+
+Name: libpay
+Description: A library for in-application payment
+Version: @abi-version@
+

@@ -19,7 +19,14 @@ set_target_properties(libpay PROPERTIES
   SOVESRION ${abi-version}
   OUTPUT_NAME "pay"
 )
+
 target_link_libraries(libpay ${SERVICE_DEPS_LIBRARIES})
+
+######################
+# Package Config
+######################
+
+configure_file("pay.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/pay-${api-version}.pc" @ONLY)
 
 ######################
 # Style Checking
@@ -39,3 +46,22 @@ add_test(NAME libpay-headers-style COMMAND
 list_prefix(libpay-sources-full libpay-sources "${CMAKE_CURRENT_SOURCE_DIR}/")
 add_test(NAME libpay-sources-style COMMAND
 	astyle "--options=${CMAKE_SOURCE_DIR}/data/astyle-config" ${libpay-sources-full})
+
+######################
+# Installation
+######################
+
+install(
+  TARGETS libpay
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(
+  FILES ${libpay-headers}
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libpay-${api-version}/libpay"
+)
+
+install (
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/pay-${api-version}.pc"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+)
