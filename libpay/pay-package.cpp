@@ -124,7 +124,7 @@ int pay_package_item_observer_install (PayPackage* package,
                                        void* user_data)
 {
     auto pkg = reinterpret_cast<Pay::Package*>(package);
-    pkg->addItemObserver(observer, user_data);
+    return pkg->addItemObserver(observer, user_data);
 }
 
 int pay_package_item_observer_uninstall (PayPackage* package,
@@ -132,7 +132,7 @@ int pay_package_item_observer_uninstall (PayPackage* package,
                                          void* user_data)
 {
     auto pkg = reinterpret_cast<Pay::Package*>(package);
-    pkg->removeItemObserver(observer, user_data);
+    return pkg->removeItemObserver(observer, user_data);
 }
 
 int pay_package_item_start_verification (PayPackage* package,
