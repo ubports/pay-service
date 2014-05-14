@@ -37,23 +37,24 @@ typedef enum
 
 typedef void (*PayPackageItemObserver) (PayPackage* package,
                                         const char* itemid,
-                                        PayPackageItemStatus status);
+                                        PayPackageItemStatus status,
+                                        void* user_data);
 
 PayPackage* pay_package_new (const char* package_name);
 void pay_package_delete (PayPackage* package);
 PayPackageItemStatus pay_package_item_status (PayPackage* package,
                                               const char* itemid);
-gboolean pay_package_item_observer_install (PayPackage* package,
-                                            PayPackageItemObserver observer,
-                                            gpointer user_data);
-gboolean pay_package_item_observer_uninstall (PayPackage* package,
-                                              PayPackageItemObserver observer,
-                                              gpointer user_data);
+int pay_package_item_observer_install (PayPackage* package,
+                                       PayPackageItemObserver observer,
+                                       void* user_data);
+int pay_package_item_observer_uninstall (PayPackage* package,
+                                         PayPackageItemObserver observer,
+                                         void* user_data);
 
-gboolean pay_package_item_start_verification (PayPackage* package,
-                                              const char* itemid);
-gboolean pay_package_item_start_purchase (PayPackage* package,
-                                          const char* itemid);
+int pay_package_item_start_verification (PayPackage* package,
+                                         const char* itemid);
+int pay_package_item_start_purchase (PayPackage* package,
+                                     const char* itemid);
 
 #pragma GCC visibility pop
 
