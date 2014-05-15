@@ -132,12 +132,14 @@ public:
         return true;
     }
 
-	/* So, a lot of lamdas here. Which makes it a bit tricky to get a hold of
-	   but I think there's a real gain in being able to see where all the memory
-	   is allocated and freed in the same block of code. Two allocations and a
-	   reference are created and they're free'd in various places. Watch for them,
-	   always the tricky part about using C APIs. */
-    bool startVerification (const char* itemid)
+    /* So, a lot of lamdas here. Which makes it a bit tricky to get a hold of
+       but I think there's a real gain in being able to see where all the memory
+       is allocated and freed in the same block of code. Two allocations and a
+       reference are created and they're free'd in various places. Watch for them,
+       always the tricky part about using C APIs. */
+    bool functionCall (void (*start) (proxyPayPackage*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
+                       gboolean (*finish) (proxyPayPackage*, GAsyncResult*, GError**),
+                       const char* itemid)
     {
         GSource* idlesrc = g_idle_source_new();
 
@@ -145,26 +147,31 @@ public:
         {
             Package* notthis;
             gchar* itemid;
+            void (*start) (proxyPayPackage*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer);
+            gboolean (*finish) (proxyPayPackage*, GAsyncResult*, GError**);
         } startVerificationData;
 
         startVerificationData* data = g_new0(startVerificationData, 1);
         data->notthis = this;
         data->itemid = g_strdup(itemid);
+        data->start = start;
+        data->finish = finish;
 
         g_source_set_callback(idlesrc,
                               [] (gpointer user_data)
         {
             /* Executes on the threads mainloop */
             auto data = static_cast<startVerificationData*>(user_data);
-            proxy_pay_package_call_verify_item(data->notthis->proxy,
-                                               data->itemid,
-                                               data->notthis->cancellable,
-                                               [](GObject * obj, GAsyncResult * res, gpointer user_data)
+            data->start(data->notthis->proxy,
+                        data->itemid,
+                        data->notthis->cancellable,
+                        [](GObject * obj, GAsyncResult * res, gpointer user_data)
             {
+                auto finish = reinterpret_cast<gboolean (*)(proxyPayPackage*, GAsyncResult*, GError**)>(user_data);
                 GError* error = nullptr;
-                proxy_pay_package_call_verify_item_finish(PROXY_PAY_PACKAGE(obj),
-                                                          res,
-                                                          &error);
+                finish(PROXY_PAY_PACKAGE(obj),
+                       res,
+                       &error);
 
                 if (error != nullptr)
                 {
@@ -173,7 +180,7 @@ public:
                 }
 
             },
-            data->notthis);
+            reinterpret_cast<gpointer>(data->finish));
 
             return G_SOURCE_REMOVE;
         },
@@ -192,8 +199,14 @@ public:
         return success;
     }
 
+    bool startVerification (const char* itemid)
+    {
+        return functionCall(proxy_pay_package_call_verify_item, proxy_pay_package_call_verify_item_finish, itemid);
+    }
+
     bool startPurchase (const char* itemid)
     {
+        return functionCall(proxy_pay_package_call_purchase_item, proxy_pay_package_call_purchase_item_finish, itemid);
     }
 };
 
