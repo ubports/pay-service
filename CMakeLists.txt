@@ -87,11 +87,11 @@ if (${enable_tests})
   endif ()
 endif ()
 
-
 ##
 ##  Subdirectories
 ##
 
+add_subdirectory(libpay)
 add_subdirectory(service)
 add_subdirectory(data)
 if (${enable_tests})
