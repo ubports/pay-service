@@ -9,3 +9,5 @@ tests/gmock
 tests/test_data.h
 item-memory-tests
 pay-service.conf
+verification-curl-tests
+tests/verification-curl-endpoints/good-simple

@@ -65,3 +65,29 @@ target_link_libraries(
 )
 
 add_test(item-memory-tests ${CMAKE_CURRENT_BINARY_DIR}/item-memory-tests)
+
+#############################
+# Verification Curl Factory
+#############################
+
+add_definitions("-DVERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints\"")
+
+add_executable(
+  verification-curl-tests
+  verification-curl-tests.cpp
+  )
+
+target_link_libraries(
+  verification-curl-tests
+
+  pay-service-lib
+
+  ${SERVICE_DEPS_LIBRARIES}
+  ${GMOCK_BOTH_LIBRARIES}
+)
+
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good-simple.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good-simple @ONLY)
+
+add_test(verification-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-tests)

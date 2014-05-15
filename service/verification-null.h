@@ -17,33 +17,21 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "item-interface.h"
 #include "verification-factory.h"
-#include <memory>
-#include <iostream>
-#include <map>
 
-namespace Item
-{
+#ifndef VERIFICATION_NULL_HPP__
+#define VERIFICATION_NULL_HPP__ 1
 
-class MemoryStore : public Store
-{
+namespace Verification {
+
+class NullFactory : public Factory {
 public:
-    MemoryStore (const Verification::Factory::Ptr& factory) :
-        verificationFactory(factory)
-    {
-        if (verificationFactory == nullptr)
-        {
-            throw std::invalid_argument("factory");
-        }
-    }
-    std::list<std::string> listApplications (void);
-    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application);
-    Item::Ptr getItem (std::string& application, std::string& itemid);
+	virtual bool running ();
+	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
 
-private:
-    std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
-    Verification::Factory::Ptr verificationFactory;
+	typedef std::shared_ptr<NullFactory> Ptr;
 };
 
-} // namespace Item
+} // ns Verification
+
+#endif /* VERIFICATION_NULL_HPP__ */

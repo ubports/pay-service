@@ -23,7 +23,8 @@
 #include <core/posix/signal.h>
 
 #include "dbus-interface.h"
-#include "item-null.h"
+#include "item-memory.h"
+#include "verification-curl.h"
 
 namespace dbus = core::dbus;
 
@@ -54,8 +55,9 @@ main (int argv, char* argc[])
     bus->install_executor(core::dbus::asio::make_executor(bus));
     std::thread t {std::bind(&dbus::Bus::run, bus)};
 
-    std::shared_ptr<Item::NullStore> items(new Item::NullStore);
-    std::shared_ptr<DBusInterface> dbus(new DBusInterface(bus, items));
+    auto vfactory = std::make_shared<Verification::CurlFactory>();
+    auto items = std::make_shared<Item::MemoryStore>(vfactory);
+    auto dbus = std::make_shared<DBusInterface>(bus, items);
 
     trap->run();
     bus->stop();

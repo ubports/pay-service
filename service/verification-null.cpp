@@ -17,55 +17,39 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <string>
-#include "item-interface.h"
+#include "verification-null.h"
 
-namespace Item
+namespace Verification
 {
 
 class NullItem : public Item
 {
-    std::string _id;
-
 public:
-    NullItem (std::string id) : _id(id) {};
-
-    std::string& getId (void)
+    NullItem (void)
     {
-        return _id;
     }
 
-    Item::Status getStatus (void)
+    ~NullItem (void)
     {
-        return Item::Status::UNKNOWN;
     }
 
-    bool verify (void)
+    virtual bool run (void)
     {
         return false;
     }
 };
 
-class NullStore : public Store
+
+bool
+NullFactory::running ()
 {
-public:
-    std::list<std::string> listApplications (void)
-    {
-        return std::list<std::string>();
-    }
+    return false;
+}
 
-    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application)
-    {
-        return std::make_shared<std::map<std::string, Item::Ptr>>();
-    }
+Item::Ptr
+NullFactory::verifyItem (std::string& appid, std::string& itemid)
+{
+    return std::make_shared<NullItem>();
+}
 
-    Item::Ptr getItem (std::string& application, std::string& itemid)
-    {
-        auto retval = std::make_shared<NullItem>(itemid);
-        return retval;
-    }
-
-    typedef std::shared_ptr<NullStore> Ptr;
-};
-
-}; // ns Item
+} // ns Verification

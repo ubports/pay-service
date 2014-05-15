@@ -17,33 +17,28 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "item-interface.h"
 #include "verification-factory.h"
-#include <memory>
-#include <iostream>
-#include <map>
 
-namespace Item
-{
+#ifndef VERIFICATION_CURL_HPP__
+#define VERIFICATION_CURL_HPP__ 1
 
-class MemoryStore : public Store
-{
+namespace Verification {
+
+class CurlFactory : public Factory {
 public:
-    MemoryStore (const Verification::Factory::Ptr& factory) :
-        verificationFactory(factory)
-    {
-        if (verificationFactory == nullptr)
-        {
-            throw std::invalid_argument("factory");
-        }
-    }
-    std::list<std::string> listApplications (void);
-    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application);
-    Item::Ptr getItem (std::string& application, std::string& itemid);
+	CurlFactory ();
+	CurlFactory (const std::string& endpoint);
+	~CurlFactory ();
+
+	virtual bool running ();
+	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
+
+	void setEndpoint (std::string& endpoint);
 
 private:
-    std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
-    Verification::Factory::Ptr verificationFactory;
+	std::string endpoint;
 };
 
-} // namespace Item
+} // ns Verification
+
+#endif /* VERIFICATION_CURL_HPP__ */

@@ -91,8 +91,8 @@ TEST_F(Service, is_reachable_on_the_bus)
 
             std::thread t{[bus](){ bus->run(); }};
 
-            auto null_store = std::shared_ptr<Item::NullStore>(new Item::NullStore);
-            auto pay_service = std::shared_ptr<DBusInterface>(new DBusInterface(bus, null_store));
+            auto null_store = std::make_shared<Item::NullStore>();
+            auto pay_service = std::make_shared<DBusInterface>(bus, null_store);
 
             cps1.try_signal_ready_for(std::chrono::milliseconds{500});
 
@@ -130,4 +130,27 @@ TEST_F(Service, is_reachable_on_the_bus)
         };
 
         EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(service, client));
+}
+
+TEST_F(Service, encodeDecode)
+{
+	/* Pass through */
+	EXPECT_EQ("fine", DBusInterface::encodePath(std::string("fine")));
+	EXPECT_EQ("fine", DBusInterface::decodePath(std::string("fine")));
+
+	/* Number as first characeter */
+	EXPECT_EQ("_331337", DBusInterface::encodePath(std::string("31337")));
+	EXPECT_EQ("31337", DBusInterface::decodePath(std::string("_331337")));
+
+	/* Underscore test */
+	EXPECT_EQ("this_5Fis_5Fc_5Fstyle_5Fnamespacing", DBusInterface::encodePath(std::string("this_is_c_style_namespacing")));
+	EXPECT_EQ("this_is_c_style_namespacing", DBusInterface::decodePath(std::string("this_5Fis_5Fc_5Fstyle_5Fnamespacing")));
+
+	/* Hyphen test */
+	EXPECT_EQ("typical_2Dapplication", DBusInterface::encodePath(std::string("typical-application")));
+	EXPECT_EQ("typical-application", DBusInterface::decodePath(std::string("typical_2Dapplication")));
+
+	/* Japanese test */
+	EXPECT_EQ("_E6_97_A5_E6_9C_AC_E8_AA_9E", DBusInterface::encodePath(std::string("日本語")));
+	EXPECT_EQ("日本語", DBusInterface::decodePath(std::string("_E6_97_A5_E6_9C_AC_E8_AA_9E")));
 }

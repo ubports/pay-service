@@ -22,6 +22,8 @@
 #include <memory>
 #include <map>
 
+#include <core/signal.h>
+
 #ifndef ITEM_INTERFACE_HPP__
 #define ITEM_INTERFACE_HPP__ 1
 
@@ -33,11 +35,15 @@ class Item
 public:
     enum Status
     {
-        UNKNOWN
+        UNKNOWN,
+        VERIFYING,
+        NOT_PURCHASED,
+        PURCHASED
     };
 
     virtual std::string& getId (void) = 0;
     virtual Status getStatus (void) = 0;
+    virtual bool verify (void) = 0;
 
     typedef std::shared_ptr<Item> Ptr;
 };
@@ -50,6 +56,8 @@ public:
     virtual Item::Ptr getItem (std::string& application, std::string& item) = 0;
 
     typedef std::shared_ptr<Store> Ptr;
+
+    core::Signal<std::string&, std::string&, Item::Status> itemChanged;
 };
 
 } // namespace Item

@@ -20,6 +20,8 @@
 #include "item-memory.h"
 
 #include <algorithm>
+#include <core/signal.h>
+#include <memory>
 
 namespace Item
 {
@@ -27,9 +29,20 @@ namespace Item
 class MemoryItem : public Item
 {
 public:
-    MemoryItem (std::string& in_id) :
-        id(in_id)
+    MemoryItem (std::string& in_app, std::string& in_id, Verification::Factory::Ptr& in_vfactory) :
+        app(in_app),
+        id(in_id),
+        vfactory(in_vfactory),
+        vitem(nullptr),
+        status(Item::Status::UNKNOWN)
     {
+        /* We init into the unknown state and then wait for someone
+           to ask us to do something about it. */
+    }
+
+    std::string& getApp (void)
+    {
+        return app;
     }
 
     std::string& getId (void)
@@ -39,12 +52,88 @@ public:
 
     Item::Status getStatus (void)
     {
-        return Item::Status::UNKNOWN;
+        return status;
+    }
+
+    bool verify (void)
+    {
+        if (vitem != nullptr)
+        {
+            return true;
+        }
+        if (!vfactory->running())
+        {
+            return false;
+        }
+
+        vitem = vfactory->verifyItem(app, id);
+        if (vitem == nullptr)
+        {
+            /* Uhg, failed */
+            return false;
+        }
+
+        /* New verification instance, tell the world! */
+        setStatus(Item::Status::VERIFYING);
+
+        /* When the verification item has run it's course we need to
+           update our status */
+        /* NOTE: This will execute on the verification item's thread */
+        vitem->verificationComplete.connect([this](Verification::Item::Status status)
+        {
+            switch (status)
+            {
+                case Verification::Item::PURCHASED:
+                    setStatus(Item::Status::PURCHASED);
+                    break;
+                case Verification::Item::NOT_PURCHASED:
+                    setStatus(Item::Status::NOT_PURCHASED);
+                    break;
+                case Verification::Item::ERROR:
+                default: /* Fall through, an error is same as status we don't know */
+                    setStatus(Item::Status::UNKNOWN);
+                    break;
+            }
+        });
+
+        return vitem->run();
     }
 
     typedef std::shared_ptr<MemoryItem> Ptr;
+    core::Signal<Item::Status> statusChanged;
+
 private:
+    void setStatus (Item::Status in_status)
+    {
+        std::unique_lock<std::mutex> ul(status_mutex);
+        bool signal = (status != in_status);
+
+        status = in_status;
+        ul.unlock();
+
+        if (signal)
+            /* NOTE: in_status here as it's on the stack and the status
+               that this signal should be associated with */
+        {
+            statusChanged(in_status);
+        }
+    }
+
+    /***** Only set at init *********/
+    /* Item ID */
     std::string id;
+    /* Application ID */
+    std::string app;
+    /* Pointer to the factory to use */
+    Verification::Factory::Ptr vfactory;
+
+    /****** std::shared_ptr<> is threadsafe **********/
+    /* Verification item if we're in the state of verifying or null otherwise */
+    Verification::Item::Ptr vitem;
+
+    /****** status is protected with it's own mutex *******/
+    std::mutex status_mutex;
+    Item::Status status;
 };
 
 std::list<std::string>
@@ -80,12 +169,23 @@ std::shared_ptr<std::map<std::string, Item::Ptr>>
 Item::Ptr
 MemoryStore::getItem (std::string& application, std::string& itemid)
 {
+    if (verificationFactory == nullptr)
+    {
+        return Item::Ptr(nullptr);
+    }
+
     auto app = getItems(application);
     Item::Ptr item = (*app)[itemid];
 
     if (item == nullptr)
     {
-        item = std::shared_ptr<Item>(new MemoryItem(itemid));
+        auto mitem = std::make_shared<MemoryItem>(application, itemid, verificationFactory);
+        mitem->statusChanged.connect([this, mitem](Item::Status status)
+        {
+            itemChanged(mitem->getApp(), mitem->getId(), status);
+        });
+
+        item = std::dynamic_pointer_cast<Item, MemoryItem>(mitem);
         (*app)[itemid] = item;
     }
 

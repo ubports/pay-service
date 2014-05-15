@@ -6,7 +6,9 @@ add_library(pay-service-lib STATIC
             item-interface.h
             item-null.h
             item-memory.h
-            item-memory.cpp)
+            item-memory.cpp
+            verification-curl.cpp
+            verification-null.cpp)
 
 message(${SERVICE_DEPS_LIBRARIES})
 target_link_libraries(pay-service-lib ${SERVICE_DEPS_LIBRARIES})

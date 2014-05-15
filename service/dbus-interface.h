@@ -54,6 +54,8 @@ public:
 	DBusInterface (core::dbus::Bus::Ptr& in_bus, Item::Store::Ptr in_items);
 	~DBusInterface () { };
 
+	static std::string encodePath (const std::string& input);
+	static std::string decodePath (const std::string& input);
 
 private:
 	Item::Store::Ptr items;
