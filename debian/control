@@ -12,6 +12,7 @@ Build-Depends: astyle,
                libdbus-cpp-dev,
                libgtest-dev,
                libproperties-cpp-dev,
+               libupstart-app-launch2-dev,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/pay-service
 # If you aren't a member of ~indicator-applet-developers but need to upload

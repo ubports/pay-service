@@ -11,3 +11,4 @@ item-memory-tests
 pay-service.conf
 verification-curl-tests
 tests/verification-curl-endpoints/good-simple
+purchase-ual-tests

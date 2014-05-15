@@ -20,8 +20,10 @@
 #include <gtest/gtest.h>
 #include "service/item-memory.h"
 #include "service/verification-null.h"
+#include "service/purchase-null.h"
 
 #include "verification-test.h"
+#include "purchase-test.h"
 
 struct MemoryItemTests : public ::testing::Test
 {
@@ -38,7 +40,10 @@ TEST_F(MemoryItemTests, BasicCreate) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::NullFactory>(vfactory));
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
+	ASSERT_NE(nullptr, vfactory);
+
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
 	EXPECT_NE(nullptr, store);
 	/* Force a destruction in the test */
 	store.reset();
@@ -48,7 +53,11 @@ TEST_F(MemoryItemTests, BasicCreate) {
 /* Verify that the initial state is empty */
 TEST_F(MemoryItemTests, InitialState) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::NullFactory>(vfactory));
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
+	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, pfactory);
+
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -61,9 +70,11 @@ TEST_F(MemoryItemTests, InitialState) {
 /* Verify that the memory store saves things */
 TEST_F(MemoryItemTests, StoreItems) {
 	auto vfactory = std::make_shared<Verification::NullFactory>();
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, pfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::NullFactory>(vfactory));
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -92,9 +103,11 @@ TEST_F(MemoryItemTests, StoreItems) {
 
 TEST_F(MemoryItemTests, VerifyItem) {
 	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, pfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(std::dynamic_pointer_cast<Verification::Factory, Verification::TestFactory>(vfactory));
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
 
 	std::string appname("my-application");
 	std::string itemname("my-item");
@@ -111,4 +124,70 @@ TEST_F(MemoryItemTests, VerifyItem) {
 	usleep(50 * 1000);
 
 	EXPECT_EQ(Item::Item::Status::NOT_PURCHASED, item->getStatus());
+
+	std::string pitemname("purchased-item");
+	vfactory->test_setPurchase(appname, pitemname, true);
+	auto pitem = store->getItem(appname, pitemname);
+
+	ASSERT_TRUE(pitem->verify());
+	usleep(50 * 1000);
+
+	EXPECT_EQ(Item::Item::Status::PURCHASED, pitem->getStatus());
+}
+
+TEST_F(MemoryItemTests, PurchaseItemNull) {
+	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto pfactory = std::make_shared<Purchase::NullFactory>();
+	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, pfactory);
+
+	vfactory->test_setRunning(true);
+
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+
+	std::string appname("my-application");
+	std::string itemname("my-item");
+	auto item = store->getItem(appname, itemname);
+
+	ASSERT_NE(nullptr, item);
+	ASSERT_TRUE(item->verify());
+	usleep(50 * 1000);
+
+	EXPECT_FALSE(item->purchase());
+}
+
+TEST_F(MemoryItemTests, PurchaseItem) {
+	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto pfactory = std::make_shared<Purchase::TestFactory>();
+	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, pfactory);
+
+	vfactory->test_setRunning(true);
+
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+
+	std::string appname("my-application");
+	std::string itemname("my-item");
+	auto item = store->getItem(appname, itemname);
+
+	ASSERT_NE(nullptr, item);
+	ASSERT_TRUE(item->verify());
+	usleep(50 * 1000);
+	/* Make sure we're testing what we think we're going to test */
+	ASSERT_EQ(Item::Item::Status::NOT_PURCHASED, item->getStatus());
+
+	EXPECT_TRUE(item->purchase());
+	usleep(50 * 1000);
+	EXPECT_EQ(Item::Item::Status::NOT_PURCHASED, item->getStatus());
+
+	std::string pitemname("purchased-item");
+	pfactory->test_setPurchase(appname, pitemname, true);
+	auto pitem = store->getItem(appname, pitemname);
+
+	ASSERT_TRUE(pitem->verify());
+	usleep(50 * 1000);
+	ASSERT_TRUE(pitem->purchase());
+	usleep(50 * 1000);
+
+	EXPECT_EQ(Item::Item::Status::PURCHASED, pitem->getStatus());
 }

@@ -25,6 +25,7 @@
 #include "dbus-interface.h"
 #include "item-memory.h"
 #include "verification-curl.h"
+#include "purchase-null.h"
 
 namespace dbus = core::dbus;
 
@@ -56,7 +57,8 @@ main (int argv, char* argc[])
     std::thread t {std::bind(&dbus::Bus::run, bus)};
 
     auto vfactory = std::make_shared<Verification::CurlFactory>();
-    auto items = std::make_shared<Item::MemoryStore>(vfactory);
+    auto pfactory = std::make_shared<Purchase::NullFactory>();
+    auto items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
     auto dbus = std::make_shared<DBusInterface>(bus, items);
 
     trap->run();

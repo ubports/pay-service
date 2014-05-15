@@ -29,11 +29,14 @@ namespace Item
 class MemoryItem : public Item
 {
 public:
-    MemoryItem (std::string& in_app, std::string& in_id, Verification::Factory::Ptr& in_vfactory) :
+    MemoryItem (std::string& in_app, std::string& in_id, Verification::Factory::Ptr& in_vfactory,
+                Purchase::Factory::Ptr& in_pfactory) :
         app(in_app),
         id(in_id),
         vfactory(in_vfactory),
+        pfactory(in_pfactory),
         vitem(nullptr),
+        pitem(nullptr),
         status(Item::Status::UNKNOWN)
     {
         /* We init into the unknown state and then wait for someone
@@ -99,6 +102,49 @@ public:
         return vitem->run();
     }
 
+    bool purchase (void)
+    {
+        /* First check to see if a purchase makes sense */
+        if (status != NOT_PURCHASED)
+        {
+            return false;
+        }
+
+        if (pitem != nullptr)
+        {
+            return true;
+        }
+
+        pitem = pfactory->purchaseItem(app, id);
+        if (pitem == nullptr)
+        {
+            /* Uhg, failed */
+            return false;
+        }
+
+        /* New purchase instance, tell the world! */
+        setStatus(Item::Status::PURCHASING);
+
+        pitem->purchaseComplete.connect([this](Purchase::Item::Status status)
+        {
+            switch (status)
+            {
+                case Purchase::Item::PURCHASED:
+                    setStatus(Item::Status::PURCHASED);
+                    break;
+                case Purchase::Item::ERROR:
+                case Purchase::Item::NOT_PURCHASED:
+                default: /* Fall through, an error is same as status we don't know */
+                    /* We know we were not purchased before, so let's stay that way */
+                    setStatus(Item::Status::NOT_PURCHASED);
+                    break;
+            }
+            return;
+        });
+
+        return pitem->run();
+    }
+
     typedef std::shared_ptr<MemoryItem> Ptr;
     core::Signal<Item::Status> statusChanged;
 
@@ -126,10 +172,14 @@ private:
     std::string app;
     /* Pointer to the factory to use */
     Verification::Factory::Ptr vfactory;
+    /* Pointer to the factory to use */
+    Purchase::Factory::Ptr pfactory;
 
     /****** std::shared_ptr<> is threadsafe **********/
     /* Verification item if we're in the state of verifying or null otherwise */
     Verification::Item::Ptr vitem;
+    /* Purchase item if we're in the state of purchasing or null otherwise */
+    Purchase::Item::Ptr pitem;
 
     /****** status is protected with it's own mutex *******/
     std::mutex status_mutex;
@@ -174,12 +224,17 @@ MemoryStore::getItem (std::string& application, std::string& itemid)
         return Item::Ptr(nullptr);
     }
 
+    if (purchaseFactory == nullptr)
+    {
+        return Item::Ptr(nullptr);
+    }
+
     auto app = getItems(application);
     Item::Ptr item = (*app)[itemid];
 
     if (item == nullptr)
     {
-        auto mitem = std::make_shared<MemoryItem>(application, itemid, verificationFactory);
+        auto mitem = std::make_shared<MemoryItem>(application, itemid, verificationFactory, purchaseFactory);
         mitem->statusChanged.connect([this, mitem](Item::Status status)
         {
             itemChanged(mitem->getApp(), mitem->getId(), status);

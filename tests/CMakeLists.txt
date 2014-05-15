@@ -91,3 +91,23 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good-simple @ONLY)
 
 add_test(verification-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-tests)
+
+#############################
+# Purchase UAL
+#############################
+
+add_executable(
+  purchase-ual-tests
+  purchase-ual-tests.cpp
+  )
+
+target_link_libraries(
+  purchase-ual-tests
+
+  pay-service-lib
+  ${SERVICE_DEPS_LIBRARIES}
+  ${GMOCK_BOTH_LIBRARIES}
+)
+
+add_test(purchase-ual-tests ${CMAKE_CURRENT_BINARY_DIR}/purchase-ual-tests)
+
