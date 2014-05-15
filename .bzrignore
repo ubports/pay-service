@@ -1,0 +1,11 @@
+CMakeCache.txt
+CMakeFiles
+*.cmake
+Makefile
+pay-service
+Testing
+tests/dbus-interface-tests
+tests/gmock
+tests/test_data.h
+item-memory-tests
+pay-service.conf

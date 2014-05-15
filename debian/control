@@ -1,0 +1,35 @@
+Source: pay-service
+Section: gnome
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Build-Depends: astyle,
+               cmake,
+               dbus,
+               debhelper (>= 9),
+               gcc-4.7,
+               g++-4.7,
+               google-mock,
+               libdbus-cpp-dev,
+               libgtest-dev,
+               libproperties-cpp-dev,
+Standards-Version: 3.9.4
+Homepage: http://launchpad.net/pay-service
+# If you aren't a member of ~indicator-applet-developers but need to upload
+# packaging changes, just go ahead.  ~indicator-applet-developers will notice
+# and sync up the code again.
+Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/pay-service/trunk.14.04
+Vcs-Browser: http://bazaar.launchpad.net/~indicator-applet-developers/pay-service/trunk.14.04/files
+
+Package: pay-service
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends},
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Description: service to allow requesting payment for an item
+ Allows applications to request an item be paid for by the user.
+ This requires interaction with the server backend to handle the
+ payment provider and give that money to the developer. This service
+ coordinates the payment interaction with the server on the device.
+ .
+ This package provides a service for the Pay Service
