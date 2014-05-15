@@ -38,14 +38,23 @@ public:
     proxyPay* serviceProxy;
     proxyPayPackage* packageProxy;
     GDBusConnection* bus;
+    GCancellable* cancel;
 
     /* Allocates a thread to do dbus work */
-    DBusInterfaceImpl (const Item::Store::Ptr& in_items) : items(in_items)
+    DBusInterfaceImpl (const Item::Store::Ptr& in_items) :
+        items(in_items),
+        cancel(g_cancellable_new()),
+        loop(nullptr),
+        bus(nullptr),
+        serviceProxy(nullptr),
+        packageProxy(nullptr)
     {
         t = std::thread([this]()
         {
             GMainContext* context = g_main_context_new();
+            g_debug("Setting main loop");
             loop = g_main_loop_new(context, FALSE);
+            g_debug("Main loop set");
 
             g_main_context_push_thread_default(context);
 
@@ -81,7 +90,10 @@ public:
                            this,
                            nullptr /* free func for this */);
 
-            g_main_loop_run(loop);
+            if (cancel != nullptr && !g_cancellable_is_cancelled(cancel))
+            {
+                g_main_loop_run(loop);
+            }
 
             g_clear_object(&serviceProxy);
             g_clear_object(&packageProxy);
@@ -94,13 +106,18 @@ public:
 
     ~DBusInterfaceImpl ()
     {
+        g_cancellable_cancel(cancel);
+        g_clear_object(&cancel);
+
         if (loop != nullptr)
         {
+            g_debug("Quitting main loop");
             g_main_loop_quit(loop);
         }
 
         if (t.joinable())
         {
+            g_debug("Waiting on thread");
             t.join();
         }
     }
@@ -288,6 +305,11 @@ static const GDBusSubtreeVTable subtreeVtable =
 /* Export objects into the bus before we get a name */
 void DBusInterfaceImpl::busAcquired (GDBusConnection* inbus)
 {
+    if (inbus == nullptr)
+    {
+        return;
+    }
+
     bus = reinterpret_cast<GDBusConnection*>(g_object_ref(inbus));
 
     serviceProxy = proxy_pay_skeleton_new();
