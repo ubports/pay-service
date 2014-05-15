@@ -102,13 +102,31 @@ public:
     static void proxySignal (proxyPayPackage* proxy, const gchar* itemid, const gchar* statusstr, gpointer user_data)
     {
         Package* notthis = reinterpret_cast<Package*>(user_data);
-        notthis->itemChanged(itemid, notthis->statusFromString(statusstr));
+        notthis->itemChanged(itemid, statusFromString(statusstr));
     }
 
-    PayPackageItemStatus statusFromString (std::string statusstr)
+    inline static PayPackageItemStatus statusFromString (std::string statusstr)
     {
-        /* TODO */
-        return PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
+        if (statusstr == "purchased")
+        {
+            return PAY_PACKAGE_ITEM_STATUS_PURCHASED;
+        }
+        else if (statusstr == "not purchased")
+        {
+            return PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED;
+        }
+        else if (statusstr == "verifying")
+        {
+            return PAY_PACKAGE_ITEM_STATUS_VERIFYING;
+        }
+        else if (statusstr == "purchasing")
+        {
+            return PAY_PACKAGE_ITEM_STATUS_PURCHASING;
+        }
+        else
+        {
+            return PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
+        }
     }
 
     PayPackageItemStatus itemStatus (const char* itemid)
