@@ -70,6 +70,8 @@ public:
                 throw std::runtime_error(error->message);
             }
 
+            g_signal_connect(proxy, "item-status-changed", G_CALLBACK(proxySignal), this);
+
             if (!g_cancellable_is_cancelled(cancellable))
             {
                 g_main_loop_run(loop);
@@ -95,6 +97,18 @@ public:
         {
             t.join();
         }
+    }
+
+    static void proxySignal (proxyPayPackage* proxy, const gchar* itemid, const gchar* statusstr, gpointer user_data)
+    {
+        Package* notthis = reinterpret_cast<Package*>(user_data);
+        notthis->itemChanged(itemid, notthis->statusFromString(statusstr));
+    }
+
+    PayPackageItemStatus statusFromString (std::string statusstr)
+    {
+        /* TODO */
+        return PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
     }
 
     PayPackageItemStatus itemStatus (const char* itemid)
