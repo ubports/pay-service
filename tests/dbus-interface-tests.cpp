@@ -16,8 +16,6 @@
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
  */
 
-#include "test_data.h"
-
 #include <service/dbus-interface.h>
 #include <service/item-null.h>
 
