@@ -37,6 +37,7 @@ class Package
 
     std::thread t;
     GMainLoop* loop;
+    GMainContext* context;
     GCancellable* cancellable;
     proxyPayPackage* proxy;
 
@@ -52,7 +53,7 @@ public:
         t = std::thread([this]()
         {
             GError* error = nullptr;
-            GMainContext* context = g_main_context_new();
+            context = g_main_context_new();
             loop = g_main_loop_new(context, FALSE);
 
             g_main_context_push_thread_default(context);
@@ -131,8 +132,64 @@ public:
         return true;
     }
 
+	/* So, a lot of lamdas here. Which makes it a bit tricky to get a hold of
+	   but I think there's a real gain in being able to see where all the memory
+	   is allocated and freed in the same block of code. Two allocations and a
+	   reference are created and they're free'd in various places. Watch for them,
+	   always the tricky part about using C APIs. */
     bool startVerification (const char* itemid)
     {
+        GSource* idlesrc = g_idle_source_new();
+
+        typedef struct
+        {
+            Package* notthis;
+            gchar* itemid;
+        } startVerificationData;
+
+        startVerificationData* data = g_new0(startVerificationData, 1);
+        data->notthis = this;
+        data->itemid = g_strdup(itemid);
+
+        g_source_set_callback(idlesrc,
+                              [] (gpointer user_data)
+        {
+            /* Executes on the threads mainloop */
+            auto data = static_cast<startVerificationData*>(user_data);
+            proxy_pay_package_call_verify_item(data->notthis->proxy,
+                                               data->itemid,
+                                               data->notthis->cancellable,
+                                               [](GObject * obj, GAsyncResult * res, gpointer user_data)
+            {
+                GError* error = nullptr;
+                proxy_pay_package_call_verify_item_finish(PROXY_PAY_PACKAGE(obj),
+                                                          res,
+                                                          &error);
+
+                if (error != nullptr)
+                {
+                    std::cerr << "Error verifying item: " << error->message << std::endl;
+                    g_clear_error(&error);
+                }
+
+            },
+            data->notthis);
+
+            return G_SOURCE_REMOVE;
+        },
+        data,
+        [] (gpointer user_data)
+        {
+            /* Cleans up our allocated helper */
+            auto data = static_cast<startVerificationData*>(user_data);
+            g_free(data->itemid);
+            g_free(data);
+        });
+
+        bool success = (g_source_attach(idlesrc, context) != 0);
+        g_source_unref(idlesrc);
+
+        return success;
     }
 
     bool startPurchase (const char* itemid)
