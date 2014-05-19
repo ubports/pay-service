@@ -46,7 +46,7 @@ TEST_F(DbusInterfaceTests, BasicAllocation)
     return;
 }
 
-TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
+TEST_F(DbusInterfaceTests, NullStoreTests)
 {
     core::testing::CrossProcessSync cps1;
 
@@ -123,6 +123,11 @@ TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
         EXPECT_FALSE(proxy_pay_package_call_verify_item_sync(package,
                                                              "bar-item-id",
                                                              nullptr, nullptr));
+
+        /* Try to purchase an item */
+        EXPECT_FALSE(proxy_pay_package_call_purchase_item_sync(package,
+                                                               "bar-item-id",
+                                                               nullptr, nullptr));
 
 
         g_clear_object(&service);
