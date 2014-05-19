@@ -39,6 +39,7 @@ public:
     proxyPayPackage* packageProxy;
     GDBusConnection* bus;
     GCancellable* cancel;
+    guint subtree_registration;
 
     /* Allocates a thread to do dbus work */
     DBusInterfaceImpl (const Item::Store::Ptr& in_items) :
@@ -81,18 +82,31 @@ public:
                                               nullptr);
             }));
 
-            g_bus_own_name(G_BUS_TYPE_SESSION,
-                           "com.canonical.pay",
-                           G_BUS_NAME_OWNER_FLAGS_NONE,
-                           busAcquired_staticHelper,
-                           nullptr,
-                           nameLost_staticHelper,
-                           this,
-                           nullptr /* free func for this */);
+            if (cancel != nullptr && !g_cancellable_is_cancelled(cancel))
+            {
+                g_bus_own_name(G_BUS_TYPE_SESSION,
+                               "com.canonical.pay",
+                               G_BUS_NAME_OWNER_FLAGS_NONE,
+                               busAcquired_staticHelper,
+                               nameAcquired_staticHelper,
+                               nameLost_staticHelper,
+                               this,
+                               nullptr /* free func for this */);
+            }
 
             if (cancel != nullptr && !g_cancellable_is_cancelled(cancel))
             {
                 g_main_loop_run(loop);
+            }
+
+            if (serviceProxy != nullptr)
+            {
+                g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(serviceProxy));
+            }
+            if (subtree_registration != 0 && bus != nullptr)
+            {
+                g_dbus_connection_unregister_subtree(bus, subtree_registration);
+                subtree_registration =0;
             }
 
             g_clear_object(&serviceProxy);
@@ -325,13 +339,13 @@ void DBusInterfaceImpl::busAcquired (GDBusConnection* inbus)
                                      "/com/canonical/pay",
                                      NULL);
 
-    g_dbus_connection_register_subtree(bus,
-                                       "/com/canonical/pay",
-                                       &subtreeVtable,
-                                       G_DBUS_SUBTREE_FLAGS_DISPATCH_TO_UNENUMERATED_NODES,
-                                       this,
-                                       nullptr, /* free func */
-                                       nullptr);
+    subtree_registration = g_dbus_connection_register_subtree(bus,
+                                                              "/com/canonical/pay",
+                                                              &subtreeVtable,
+                                                              G_DBUS_SUBTREE_FLAGS_DISPATCH_TO_UNENUMERATED_NODES,
+                                                              this,
+                                                              nullptr, /* free func */
+                                                              nullptr);
 }
 
 static const GDBusInterfaceVTable packageVtable =
