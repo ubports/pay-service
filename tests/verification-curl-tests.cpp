@@ -59,7 +59,7 @@ TEST_F(VerificationCurlTests, PurchaseItem) {
 	ASSERT_TRUE(item->run());
 	usleep(20 * 1000);
 
-	EXPECT_EQ(Verification::Item::Status::PURCHASED, status);
+	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
 
 	std::string badappid("bad");
 	auto baditem = verify->verifyItem(badappid, itemid);
