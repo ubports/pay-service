@@ -33,6 +33,7 @@ public:
     Item::Store::Ptr items;
     std::thread t;
     core::Signal<> connectionReady;
+    GQuark errorQuark;
 
     /* Allocated on thread, and cleaned up there */
     GMainLoop* loop;
@@ -49,7 +50,8 @@ public:
         loop(nullptr),
         bus(nullptr),
         serviceProxy(nullptr),
-        packageProxy(nullptr)
+        packageProxy(nullptr),
+        errorQuark(g_quark_from_static_string("dbus-interface-impl"))
     {
         t = std::thread([this]()
         {
@@ -244,7 +246,7 @@ public:
             }
             else
             {
-                /* TODO: Error */
+                g_dbus_method_invocation_return_error(invocation, errorQuark, 1, "Unable to verify item '%s'", itemid.c_str());
             }
         }
         else if (g_strcmp0(method, "PurchaseItem") == 0)
@@ -260,7 +262,7 @@ public:
             }
             else
             {
-                /* TODO: Error */
+                g_dbus_method_invocation_return_error(invocation, errorQuark, 2, "Unable to purchase item '%s'", itemid.c_str());
             }
         }
     }

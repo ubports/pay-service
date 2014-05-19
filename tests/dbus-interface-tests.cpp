@@ -82,32 +82,14 @@ TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
 
     auto client = [this, &cps1]()
     {
-        auto bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
-        /*
-        GError * error = nullptr;
-        auto address = g_dbus_address_get_for_bus_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
-        GDBusConnection * bus = g_dbus_connection_new_for_address_sync(
-        address,
-        static_cast<GDBusConnectionFlags>(G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT | G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION),
-        nullptr, nullptr, &error
-        );
-        g_free(address);
-
-        if (error != nullptr) {
-            g_warning("Unable to get bus: %s", error->message);
-            g_clear_error(&error);
-            return core::posix::exit::Status::failure;
-        }
-        */
-
         EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {1}));
 
         /* Service function test */
-        auto service = proxy_pay_proxy_new_sync(bus,
-                                                G_DBUS_PROXY_FLAGS_NONE,
-                                                "com.canonical.pay",
-                                                "/com/canonical/pay",
-                                                nullptr, nullptr);
+        auto service = proxy_pay_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                        G_DBUS_PROXY_FLAGS_NONE,
+                                                        "com.canonical.pay",
+                                                        "/com/canonical/pay",
+                                                        nullptr, nullptr);
         EXPECT_NE(nullptr, service);
 
         /* Should have no packages starting out */
@@ -118,10 +100,32 @@ TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
         EXPECT_EQ(0, g_strv_length(packages));
         g_strfreev(packages);
 
-        /* Item proxy and getting status */
+        /* Package proxy and getting status */
+        auto package = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                                G_DBUS_PROXY_FLAGS_NONE,
+                                                                "com.canonical.pay",
+                                                                "/com/canonical/pay/foopkg",
+                                                                nullptr, nullptr);
+        EXPECT_NE(nullptr, package);
+
+        GVariant* itemslist = nullptr;
+        EXPECT_TRUE(proxy_pay_package_call_list_items_sync(package,
+                                                           &itemslist,
+                                                           nullptr,
+                                                           nullptr));
+
+        EXPECT_STREQ("a(ss)", g_variant_get_type_string(itemslist));
+        EXPECT_EQ(0, g_variant_n_children(itemslist));
+
+        g_variant_unref(itemslist);
+
+        /* Try to check on an item */
+        EXPECT_FALSE(proxy_pay_package_call_verify_item_sync(package,
+                                                             "bar-item-id",
+                                                             nullptr, nullptr));
+
 
         g_clear_object(&service);
-        g_clear_object(&bus);
 
         return ::testing::Test::HasFailure() ? core::posix::exit::Status::failure : core::posix::exit::Status::success;
     };
