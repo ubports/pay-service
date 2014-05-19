@@ -18,6 +18,8 @@
 
 #include <service/dbus-interface.h>
 #include <service/item-null.h>
+#include <service/proxy-service.h>
+#include <service/proxy-package.h>
 
 #include <core/posix/signal.h>
 
@@ -31,38 +33,6 @@
 
 struct DbusInterfaceTests : public ::testing::Test
 {
-protected:
-    DbusTestService* service = NULL;
-    GDBusConnection* bus = NULL;
-
-    virtual void SetUp()
-    {
-        service = dbus_test_service_new(NULL);
-
-        dbus_test_service_start_tasks(service);
-
-        bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
-        g_dbus_connection_set_exit_on_close(bus, FALSE);
-        g_object_add_weak_pointer(G_OBJECT(bus), (gpointer*)&bus);
-    }
-
-    virtual void TearDown()
-    {
-        g_clear_object(&service);
-
-        g_object_unref(bus);
-
-        unsigned int cleartry = 0;
-        while (bus != NULL && cleartry < 100)
-        {
-            g_usleep(10000);
-            while (g_main_pending())
-            {
-                g_main_iteration(TRUE);
-            }
-            cleartry++;
-        }
-    }
 };
 
 TEST_F(DbusInterfaceTests, BasicAllocation)
@@ -76,7 +46,6 @@ TEST_F(DbusInterfaceTests, BasicAllocation)
     return;
 }
 
-#if 0
 TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
 {
     core::testing::CrossProcessSync cps1;
@@ -97,7 +66,10 @@ TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
         auto null_store = std::make_shared<Item::NullStore>();
         auto pay_service = std::make_shared<DBusInterface>(null_store);
 
-        cps1.try_signal_ready_for(std::chrono::milliseconds {500});
+        pay_service->connectionReady.connect([&cps1]()
+        {
+            cps1.try_signal_ready_for(std::chrono::seconds {1});
+        });
 
         trap->run();
 
@@ -110,10 +82,45 @@ TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
 
     auto client = [this, &cps1]()
     {
-        GDBusConnection* bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+        auto bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+        /*
+        GError * error = nullptr;
+        auto address = g_dbus_address_get_for_bus_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
+        GDBusConnection * bus = g_dbus_connection_new_for_address_sync(
+        address,
+        static_cast<GDBusConnectionFlags>(G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT | G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION),
+        nullptr, nullptr, &error
+        );
+        g_free(address);
 
-        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::milliseconds {500}));
+        if (error != nullptr) {
+            g_warning("Unable to get bus: %s", error->message);
+            g_clear_error(&error);
+            return core::posix::exit::Status::failure;
+        }
+        */
 
+        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {1}));
+
+        /* Service function test */
+        auto service = proxy_pay_proxy_new_sync(bus,
+                                                G_DBUS_PROXY_FLAGS_NONE,
+                                                "com.canonical.pay",
+                                                "/com/canonical/pay",
+                                                nullptr, nullptr);
+        EXPECT_NE(nullptr, service);
+
+        /* Should have no packages starting out */
+        gchar** packages = nullptr;
+        EXPECT_TRUE(proxy_pay_call_list_packages_sync(service,
+                                                      &packages,
+                                                      nullptr, nullptr));
+        EXPECT_EQ(0, g_strv_length(packages));
+        g_strfreev(packages);
+
+        /* Item proxy and getting status */
+
+        g_clear_object(&service);
         g_clear_object(&bus);
 
         return ::testing::Test::HasFailure() ? core::posix::exit::Status::failure : core::posix::exit::Status::success;
@@ -121,7 +128,6 @@ TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
 
     EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(service, client));
 }
-#endif
 
 TEST_F(DbusInterfaceTests, encodeDecode)
 {
