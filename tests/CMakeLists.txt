@@ -11,10 +11,6 @@ find_package(Threads)
 
 add_definitions(-DCORE_DBUS_ENABLE_GOOGLE_TEST_FIXTURE)
 
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/test_data.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/test_data.h @ONLY)
-
 include_directories(
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
