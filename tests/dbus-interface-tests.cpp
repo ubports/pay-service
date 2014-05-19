@@ -76,6 +76,7 @@ TEST_F(DbusInterfaceTests, BasicAllocation)
     return;
 }
 
+#if 0
 TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
 {
     core::testing::CrossProcessSync cps1;
@@ -120,6 +121,7 @@ TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
 
     EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(service, client));
 }
+#endif
 
 TEST_F(DbusInterfaceTests, encodeDecode)
 {
