@@ -10,7 +10,6 @@ Build-Depends: astyle,
                g++-4.7,
                google-mock,
                libgtest-dev,
-               libproperties-cpp-dev,
                libupstart-app-launch2-dev,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/pay-service
@@ -33,3 +32,35 @@ Description: service to allow requesting payment for an item
  coordinates the payment interaction with the server on the device.
  .
  This package provides a service for the Pay Service
+
+Package: libpay1
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: Library for interacting with the in app payments
+ This library contains information to purchase items and figure out
+ their purchase status.
+
+Package: libpay1-dev
+Architecture: any
+Section: libdevel
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libpay0 (=${binary:Version}),
+         libpay0-headers (=${binary:Version}),
+Description: Pay service - library development files
+ This library contains information to purchase items and figure out
+ their purchase status.
+
+Package: libpay1-headers
+Architecture: all
+Section: libdevel
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libpay0 (=${binary:Version}),
+         libpay0-headers (=${binary:Version}),
+Description: Pay service - arch independent header files
+ This library contains information to purchase items and figure out
+ their purchase status.
+
