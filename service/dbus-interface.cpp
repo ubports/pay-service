@@ -32,6 +32,7 @@ public:
     /* Allocated on main thread with init */
     Item::Store::Ptr items;
     std::thread t;
+    core::Signal<> connectionReady;
 
     /* Allocated on thread, and cleaned up there */
     GMainLoop* loop;
@@ -137,6 +138,12 @@ public:
     }
 
     void busAcquired (GDBusConnection* bus);
+
+    /* Signal up that we're ready on the interface side of things */
+    void nameAcquired ()
+    {
+        connectionReady();
+    }
 
     /* We only get this on errors, so we need to throw the exception and
        be done with it. */
@@ -267,6 +274,12 @@ public:
         notthis->busAcquired(inbus);
     }
 
+    static void nameAcquired_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
+    {
+        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        notthis->nameAcquired();
+    }
+
     static void nameLost_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
@@ -379,6 +392,10 @@ const GDBusInterfaceVTable* DBusInterfaceImpl::subtreeDispatch_staticHelper (GDB
 DBusInterface::DBusInterface (const Item::Store::Ptr& in_items)
 {
     impl = std::make_shared<DBusInterfaceImpl>(in_items);
+    impl->connectionReady.connect([this]()
+    {
+        connectionReady();
+    });
 }
 
 bool
