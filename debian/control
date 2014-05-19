@@ -10,6 +10,7 @@ Build-Depends: astyle,
                g++-4.7,
                google-mock,
                libgtest-dev,
+               libprocess-cpp-dev,
                libupstart-app-launch2-dev,
 Standards-Version: 3.9.5
 Homepage: http://launchpad.net/pay-service
