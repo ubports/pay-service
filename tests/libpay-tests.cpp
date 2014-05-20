@@ -21,6 +21,8 @@
 #include <gtest/gtest.h>
 #include <libdbustest/dbus-test.h>
 
+#include <libpay/pay-package.h>
+
 struct LibPayTests : public ::testing::Test
 {
 	protected:
@@ -86,6 +88,7 @@ struct LibPayTests : public ::testing::Test
 };
 
 TEST_F(LibPayTests, InitTest) {
-
+	auto package = pay_package_new("package");
+	pay_package_delete(package);
 }
 
