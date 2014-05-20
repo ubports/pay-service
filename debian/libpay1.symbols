@@ -1,4 +1,4 @@
-libpay.so.2 libpay1 #MINVER#
+libpay.so.1.0.0 libpay1 #MINVER#
  pay_package_delete@Base 0.1
  pay_package_item_observer_install@Base 0.1
  pay_package_item_observer_uninstall@Base 0.1
