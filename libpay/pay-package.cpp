@@ -22,6 +22,7 @@
 #include <thread>
 #include <core/signal.h>
 #include <gio/gio.h>
+#include <mutex>
 
 #include "proxy-package.h"
 
@@ -34,6 +35,7 @@ class Package
     std::map <std::pair<PayPackageItemObserver, void*>, std::shared_ptr<core::ScopedConnection>> observers;
     core::Signal<std::string, PayPackageItemStatus> itemChanged;
     std::map <std::string, PayPackageItemStatus> itemStatusCache;
+    std::mutex context_mutex;
 
     std::thread t;
     GMainLoop* loop;
@@ -50,6 +52,7 @@ public:
             itemStatusCache[itemid] = status;
         });
 
+        context_mutex.lock();
         t = std::thread([this]()
         {
             GError* error = nullptr;
@@ -57,6 +60,7 @@ public:
             loop = g_main_loop_new(context, FALSE);
 
             g_main_context_push_thread_default(context);
+            context_mutex.unlock();
 
             std::string path("/com/canonical/pay/");
             path += id; /* TODO: encode */
@@ -175,6 +179,8 @@ public:
                        gboolean (*finish) (proxyPayPackage*, GAsyncResult*, GError**),
                        const char* itemid)
     {
+        std::unique_lock<std::mutex> ul(context_mutex);
+
         GSource* idlesrc = g_idle_source_new();
 
         typedef struct
@@ -297,7 +303,6 @@ int pay_package_item_observer_uninstall (PayPackage* package,
 int pay_package_item_start_verification (PayPackage* package,
                                          const char* itemid)
 {
-
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->startVerification(itemid);
 }
