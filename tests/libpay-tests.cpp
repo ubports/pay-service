@@ -159,6 +159,8 @@ TEST_F(LibPayTests, ItemLifecycle)
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASING,    list[2].second);
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED,     list[3].second);
 
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, pay_package_item_status(package, "item"));
+
     pay_package_delete(package);
 
     /* Let's make sure we stop getting events as well */
@@ -177,3 +179,40 @@ TEST_F(LibPayTests, ItemLifecycle)
     EXPECT_EQ(0, list.size());
 }
 
+TEST_F(LibPayTests, ItemOperations)
+{
+    GError* error = nullptr;
+    guint callcount = 0;
+    auto package = pay_package_new("package");
+
+    EXPECT_TRUE(pay_package_item_start_verification(package, "item"));
+
+    /* Wait for the call to make it over */
+    usleep(100000);
+
+    auto calls = dbus_test_dbus_mock_object_get_method_calls(mock, pkgobj,
+                                                             "VerifyItem",
+                                                             &callcount,
+                                                             &error);
+
+    ASSERT_EQ(nullptr, error);
+    ASSERT_EQ(1, callcount);
+    EXPECT_TRUE(g_variant_equal(calls[0].params, g_variant_new("(s)", "item")));
+
+
+    EXPECT_TRUE(pay_package_item_start_purchase(package, "item2"));
+
+    /* Wait for the call to make it over */
+    usleep(100000);
+
+    calls = dbus_test_dbus_mock_object_get_method_calls(mock, pkgobj,
+                                                        "PurchaseItem",
+                                                        &callcount,
+                                                        &error);
+
+    ASSERT_EQ(nullptr, error);
+    ASSERT_EQ(1, callcount);
+    EXPECT_TRUE(g_variant_equal(calls[0].params, g_variant_new("(s)", "item2")));
+
+    pay_package_delete(package);
+}
