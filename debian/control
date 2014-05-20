@@ -53,6 +53,7 @@ Architecture: any
 Section: libdevel
 Depends: ${shlibs:Depends},
          ${misc:Depends},
+         libglib2.0-dev,
          libpay1 (=${binary:Version})
 Multi-Arch: same
 Description: Pay service - library development files
