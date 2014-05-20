@@ -42,7 +42,7 @@ class Package
     proxyPayPackage* proxy;
 
 public:
-    Package (const char* packageid) : id(packageid), cancellable(g_cancellable_new())
+    Package (const char* packageid) : id(packageid), cancellable(g_cancellable_new()), loop(nullptr)
     {
         /* Keeps item cache up-to-data as we get signals about it */
         itemChanged.connect([this](std::string itemid, PayPackageItemStatus status)
@@ -72,7 +72,7 @@ public:
 
             g_signal_connect(proxy, "item-status-changed", G_CALLBACK(proxySignal), this);
 
-            if (!g_cancellable_is_cancelled(cancellable))
+            if (cancellable != nullptr && !g_cancellable_is_cancelled(cancellable))
             {
                 g_main_loop_run(loop);
             }
