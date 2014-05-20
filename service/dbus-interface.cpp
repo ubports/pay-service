@@ -32,6 +32,8 @@ public:
     /* Allocated on main thread with init */
     Item::Store::Ptr items;
     std::thread t;
+    core::Signal<> connectionReady;
+    GQuark errorQuark;
 
     /* Allocated on thread, and cleaned up there */
     GMainLoop* loop;
@@ -39,6 +41,7 @@ public:
     proxyPayPackage* packageProxy;
     GDBusConnection* bus;
     GCancellable* cancel;
+    guint subtree_registration;
 
     /* Allocates a thread to do dbus work */
     DBusInterfaceImpl (const Item::Store::Ptr& in_items) :
@@ -47,7 +50,8 @@ public:
         loop(nullptr),
         bus(nullptr),
         serviceProxy(nullptr),
-        packageProxy(nullptr)
+        packageProxy(nullptr),
+        errorQuark(g_quark_from_static_string("dbus-interface-impl"))
     {
         t = std::thread([this]()
         {
@@ -81,18 +85,31 @@ public:
                                               nullptr);
             }));
 
-            g_bus_own_name(G_BUS_TYPE_SESSION,
-                           "com.canonical.pay",
-                           G_BUS_NAME_OWNER_FLAGS_NONE,
-                           busAcquired_staticHelper,
-                           nullptr,
-                           nameLost_staticHelper,
-                           this,
-                           nullptr /* free func for this */);
+            if (cancel != nullptr && !g_cancellable_is_cancelled(cancel))
+            {
+                g_bus_own_name(G_BUS_TYPE_SESSION,
+                               "com.canonical.pay",
+                               G_BUS_NAME_OWNER_FLAGS_NONE,
+                               busAcquired_staticHelper,
+                               nameAcquired_staticHelper,
+                               nameLost_staticHelper,
+                               this,
+                               nullptr /* free func for this */);
+            }
 
             if (cancel != nullptr && !g_cancellable_is_cancelled(cancel))
             {
                 g_main_loop_run(loop);
+            }
+
+            if (serviceProxy != nullptr)
+            {
+                g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(serviceProxy));
+            }
+            if (subtree_registration != 0 && bus != nullptr)
+            {
+                g_dbus_connection_unregister_subtree(bus, subtree_registration);
+                subtree_registration =0;
             }
 
             g_clear_object(&serviceProxy);
@@ -123,6 +140,12 @@ public:
     }
 
     void busAcquired (GDBusConnection* bus);
+
+    /* Signal up that we're ready on the interface side of things */
+    void nameAcquired ()
+    {
+        connectionReady();
+    }
 
     /* We only get this on errors, so we need to throw the exception and
        be done with it. */
@@ -223,7 +246,7 @@ public:
             }
             else
             {
-                /* TODO: Error */
+                g_dbus_method_invocation_return_error(invocation, errorQuark, 1, "Unable to verify item '%s'", itemid.c_str());
             }
         }
         else if (g_strcmp0(method, "PurchaseItem") == 0)
@@ -239,7 +262,7 @@ public:
             }
             else
             {
-                /* TODO: Error */
+                g_dbus_method_invocation_return_error(invocation, errorQuark, 2, "Unable to purchase item '%s'", itemid.c_str());
             }
         }
     }
@@ -251,6 +274,12 @@ public:
     {
         DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
         notthis->busAcquired(inbus);
+    }
+
+    static void nameAcquired_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
+    {
+        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        notthis->nameAcquired();
     }
 
     static void nameLost_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
@@ -325,13 +354,13 @@ void DBusInterfaceImpl::busAcquired (GDBusConnection* inbus)
                                      "/com/canonical/pay",
                                      NULL);
 
-    g_dbus_connection_register_subtree(bus,
-                                       "/com/canonical/pay",
-                                       &subtreeVtable,
-                                       G_DBUS_SUBTREE_FLAGS_DISPATCH_TO_UNENUMERATED_NODES,
-                                       this,
-                                       nullptr, /* free func */
-                                       nullptr);
+    subtree_registration = g_dbus_connection_register_subtree(bus,
+                                                              "/com/canonical/pay",
+                                                              &subtreeVtable,
+                                                              G_DBUS_SUBTREE_FLAGS_DISPATCH_TO_UNENUMERATED_NODES,
+                                                              this,
+                                                              nullptr, /* free func */
+                                                              nullptr);
 }
 
 static const GDBusInterfaceVTable packageVtable =
@@ -365,6 +394,10 @@ const GDBusInterfaceVTable* DBusInterfaceImpl::subtreeDispatch_staticHelper (GDB
 DBusInterface::DBusInterface (const Item::Store::Ptr& in_items)
 {
     impl = std::make_shared<DBusInterfaceImpl>(in_items);
+    impl->connectionReady.connect([this]()
+    {
+        connectionReady();
+    });
 }
 
 bool

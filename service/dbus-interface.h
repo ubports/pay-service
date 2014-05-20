@@ -19,6 +19,7 @@
 
 #include "item-interface.h"
 #include <memory>
+#include <core/signal.h>
 
 #ifndef DBUS_INTERFACE_HPP__
 #define DBUS_INTERFACE_HPP__ 1
@@ -35,6 +36,8 @@ public:
 
     static std::string encodePath (const std::string& input);
     static std::string decodePath (const std::string& input);
+
+    core::Signal<> connectionReady;
 
 private:
     std::shared_ptr<DBusInterfaceImpl> impl;

@@ -18,6 +18,8 @@
 
 #include <service/dbus-interface.h>
 #include <service/item-null.h>
+#include <service/proxy-service.h>
+#include <service/proxy-package.h>
 
 #include <core/posix/signal.h>
 
@@ -29,40 +31,11 @@
 
 #include <gtest/gtest.h>
 
+#include "item-test.h"
+#include <thread>
+
 struct DbusInterfaceTests : public ::testing::Test
 {
-protected:
-    DbusTestService* service = NULL;
-    GDBusConnection* bus = NULL;
-
-    virtual void SetUp()
-    {
-        service = dbus_test_service_new(NULL);
-
-        dbus_test_service_start_tasks(service);
-
-        bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
-        g_dbus_connection_set_exit_on_close(bus, FALSE);
-        g_object_add_weak_pointer(G_OBJECT(bus), (gpointer*)&bus);
-    }
-
-    virtual void TearDown()
-    {
-        g_clear_object(&service);
-
-        g_object_unref(bus);
-
-        unsigned int cleartry = 0;
-        while (bus != NULL && cleartry < 100)
-        {
-            g_usleep(10000);
-            while (g_main_pending())
-            {
-                g_main_iteration(TRUE);
-            }
-            cleartry++;
-        }
-    }
 };
 
 TEST_F(DbusInterfaceTests, BasicAllocation)
@@ -76,8 +49,7 @@ TEST_F(DbusInterfaceTests, BasicAllocation)
     return;
 }
 
-#if 0
-TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
+TEST_F(DbusInterfaceTests, NullStoreTests)
 {
     core::testing::CrossProcessSync cps1;
 
@@ -97,7 +69,10 @@ TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
         auto null_store = std::make_shared<Item::NullStore>();
         auto pay_service = std::make_shared<DBusInterface>(null_store);
 
-        cps1.try_signal_ready_for(std::chrono::milliseconds {500});
+        pay_service->connectionReady.connect([&cps1]()
+        {
+            cps1.try_signal_ready_for(std::chrono::seconds {1});
+        });
 
         trap->run();
 
@@ -110,18 +85,157 @@ TEST_F(DbusInterfaceTests, is_reachable_on_the_bus)
 
     auto client = [this, &cps1]()
     {
-        GDBusConnection* bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {1}));
 
-        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::milliseconds {500}));
+        /* Service function test */
+        auto service = proxy_pay_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                        G_DBUS_PROXY_FLAGS_NONE,
+                                                        "com.canonical.pay",
+                                                        "/com/canonical/pay",
+                                                        nullptr, nullptr);
+        EXPECT_NE(nullptr, service);
 
-        g_clear_object(&bus);
+        /* Should have no packages starting out */
+        gchar** packages = nullptr;
+        EXPECT_TRUE(proxy_pay_call_list_packages_sync(service,
+                                                      &packages,
+                                                      nullptr, nullptr));
+        EXPECT_EQ(0, g_strv_length(packages));
+        g_strfreev(packages);
+
+        /* Package proxy and getting status */
+        auto package = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                                G_DBUS_PROXY_FLAGS_NONE,
+                                                                "com.canonical.pay",
+                                                                "/com/canonical/pay/foopkg",
+                                                                nullptr, nullptr);
+        EXPECT_NE(nullptr, package);
+
+        GVariant* itemslist = nullptr;
+        EXPECT_TRUE(proxy_pay_package_call_list_items_sync(package,
+                                                           &itemslist,
+                                                           nullptr,
+                                                           nullptr));
+
+        EXPECT_STREQ("a(ss)", g_variant_get_type_string(itemslist));
+        EXPECT_EQ(0, g_variant_n_children(itemslist));
+
+        g_variant_unref(itemslist);
+
+        /* Try to check on an item */
+        EXPECT_FALSE(proxy_pay_package_call_verify_item_sync(package,
+                                                             "bar-item-id",
+                                                             nullptr, nullptr));
+
+        /* Try to purchase an item */
+        EXPECT_FALSE(proxy_pay_package_call_purchase_item_sync(package,
+                                                               "bar-item-id",
+                                                               nullptr, nullptr));
+
+
+        g_clear_object(&service);
 
         return ::testing::Test::HasFailure() ? core::posix::exit::Status::failure : core::posix::exit::Status::success;
     };
 
     EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(service, client));
 }
-#endif
+
+void signalAppend (GObject* obj, const gchar* itemid, const gchar* status, std::vector<std::string>& list)
+{
+    ASSERT_STREQ("fooitem", itemid);
+    list.push_back(status);
+}
+
+TEST_F(DbusInterfaceTests, ItemSignalTests)
+{
+    core::testing::CrossProcessSync cps1;
+    core::testing::CrossProcessSync cps2;
+
+    auto service = [this, &cps1, &cps2]()
+    {
+        auto test_store = std::make_shared<Item::TestStore>();
+        auto pay_service = std::make_shared<DBusInterface>(test_store);
+
+        pay_service->connectionReady.connect([&cps1]()
+        {
+            cps1.try_signal_ready_for(std::chrono::seconds {1});
+        });
+
+        EXPECT_EQ(1u,cps2.wait_for_signal_ready_for(std::chrono::seconds {2}));
+        usleep(100);
+
+        std::string appname("foopkg");
+        std::string itemname("fooitem");
+
+        auto item = test_store->getItem(appname, itemname);
+        EXPECT_NE(nullptr, item);
+
+        auto titem = std::dynamic_pointer_cast<Item::TestItem, Item::Item>(item);
+
+        titem->test_setStatus(Item::Item::VERIFYING, true);
+        titem->test_setStatus(Item::Item::PURCHASING, true);
+        titem->test_setStatus(Item::Item::NOT_PURCHASED, true);
+        titem->test_setStatus(Item::Item::PURCHASED, true);
+
+        /* Force deallocation so we can catch stuff from it */
+        test_store.reset();
+        pay_service.reset();
+
+        return ::testing::Test::HasFailure() ? core::posix::exit::Status::failure : core::posix::exit::Status::success;
+    };
+
+    auto client = [this, &cps1, &cps2]()
+    {
+        GMainContext* context = g_main_context_new();
+        g_main_context_push_thread_default(context);
+
+        auto trap = core::posix::trap_signals_for_all_subsequent_threads(
+        {
+            core::posix::Signal::sig_int,
+            core::posix::Signal::sig_term
+        });
+
+        trap->signal_raised().connect([trap](core::posix::Signal)
+        {
+            trap->stop();
+        });
+
+        /* Wait for the service to setup */
+        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {1}));
+
+        /* Package proxy and getting status */
+        auto package = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                                G_DBUS_PROXY_FLAGS_NONE,
+                                                                "com.canonical.pay",
+                                                                "/com/canonical/pay/foopkg",
+                                                                nullptr, nullptr);
+        EXPECT_NE(nullptr, package);
+
+        std::vector<std::string> itemsignals;
+        g_signal_connect(G_OBJECT(package), "item-status-changed", G_CALLBACK(signalAppend), &itemsignals);
+
+        cps2.try_signal_ready_for(std::chrono::seconds {1});
+
+        trap->run();
+
+        /* Pull the events through */
+        while (g_main_context_iteration(context, FALSE)) {}
+
+        EXPECT_EQ("verifying", itemsignals[0]);
+        EXPECT_EQ("purchasing", itemsignals[1]);
+        EXPECT_EQ("not purchased", itemsignals[2]);
+        EXPECT_EQ("purchased", itemsignals[3]);
+
+        g_clear_object(&package);
+        g_clear_pointer(&context, g_main_context_unref);
+
+        return ::testing::Test::HasFailure() ? core::posix::exit::Status::failure : core::posix::exit::Status::success;
+    };
+
+    EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(client, service));
+}
+
 
 TEST_F(DbusInterfaceTests, encodeDecode)
 {
