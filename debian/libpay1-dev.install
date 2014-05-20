@@ -1,2 +1,3 @@
 usr/lib/*/pkgconfig/pay*pc
 usr/lib/*/libpay.so
+usr/include

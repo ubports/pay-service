@@ -20,7 +20,7 @@ export CC=$(DEB_HOST_GNU_TYPE)-gcc-4.7
 export CXX=$(DEB_HOST_GNU_TYPE)-g++-4.7
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pay-service -DCMAKE_C_COMPILER=$(DEB_HOST_GNU_TYPE)-gcc-4.7 -DCMAKE_CXX_COMPILER=$(DEB_HOST_GNU_TYPE)-g++-4.7
+	dh_auto_configure -- -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pay-service -DCMAKE_C_COMPILER=$(DEB_HOST_GNU_TYPE)-gcc-4.7 -DCMAKE_CXX_COMPILER=$(DEB_HOST_GNU_TYPE)-g++-4.7 -DCMAKE_INSTALL_INCLUDEDIR=/usr/include/$(DEB_HOST_MULTIARCH)/
 
 override_dh_auto_test:
 	if [ "$(DEB_HOST_MULTIARCH)" != "powerpc-linux-gnu" ]; then \
