@@ -58,10 +58,12 @@ public:
 
             g_main_context_push_thread_default(context);
 
+            std::string path("/com/canonical/pay/");
+            path += id; /* TODO: encode */
             proxy = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
                                                              G_DBUS_PROXY_FLAGS_NONE,
                                                              "com.canonical.pay",
-                                                             "/com/canonical/pay/app_name",
+                                                             path.c_str(),
                                                              cancellable,
                                                              &error);
 
