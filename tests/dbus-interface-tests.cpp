@@ -31,6 +31,8 @@
 
 #include <gtest/gtest.h>
 
+#include "item-test.h"
+
 struct DbusInterfaceTests : public ::testing::Test
 {
 };
@@ -137,6 +139,76 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
 
     EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(service, client));
 }
+
+void signalAppend (GObject* obj, const gchar* itemid, const gchar* status, std::list<std::string>& list)
+{
+    ASSERT_STREQ("fooitem", itemid);
+    list.push_back(status);
+}
+
+TEST_F(DbusInterfaceTests, ItemSignalTests)
+{
+    core::testing::CrossProcessSync cps1;
+    core::testing::CrossProcessSync cps2;
+
+    auto service = [this, &cps1, &cps2]()
+    {
+        auto test_store = std::make_shared<Item::TestStore>();
+        auto pay_service = std::make_shared<DBusInterface>(test_store);
+
+        pay_service->connectionReady.connect([&cps1]()
+        {
+            cps1.try_signal_ready_for(std::chrono::seconds {1});
+        });
+
+        EXPECT_EQ(1u,cps2.wait_for_signal_ready_for(std::chrono::seconds {2}));
+
+        /* Force deallocation so we can catch stuff from it */
+        test_store.reset();
+        pay_service.reset();
+
+        return ::testing::Test::HasFailure() ? core::posix::exit::Status::failure : core::posix::exit::Status::success;
+    };
+
+    auto client = [this, &cps1, &cps2]()
+    {
+        auto trap = core::posix::trap_signals_for_all_subsequent_threads(
+        {
+            core::posix::Signal::sig_int,
+            core::posix::Signal::sig_term
+        });
+
+        trap->signal_raised().connect([trap](core::posix::Signal)
+        {
+            trap->stop();
+        });
+
+        /* Wait for the service to setup */
+        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {1}));
+
+        /* Package proxy and getting status */
+        auto package = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                                G_DBUS_PROXY_FLAGS_NONE,
+                                                                "com.canonical.pay",
+                                                                "/com/canonical/pay/foopkg",
+                                                                nullptr, nullptr);
+        EXPECT_NE(nullptr, package);
+
+        std::list<std::string> itemsignals;
+        g_signal_connect(G_OBJECT(package), "item-status-changed", G_CALLBACK(signalAppend), &itemsignals);
+
+        cps2.try_signal_ready_for(std::chrono::seconds {1});
+
+        trap->run();
+
+        g_clear_object(&package);
+
+        return ::testing::Test::HasFailure() ? core::posix::exit::Status::failure : core::posix::exit::Status::success;
+    };
+
+    EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(client, service));
+}
+
 
 TEST_F(DbusInterfaceTests, encodeDecode)
 {
