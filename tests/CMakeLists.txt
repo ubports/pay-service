@@ -108,3 +108,21 @@ target_link_libraries(
 
 add_test(purchase-ual-tests ${CMAKE_CURRENT_BINARY_DIR}/purchase-ual-tests)
 
+#############################
+# libpay Tests
+#############################
+
+add_executable(
+  libpay-tests
+  libpay-tests.cpp
+  )
+
+target_link_libraries(
+  libpay-tests
+
+  libpay
+  ${GMOCK_BOTH_LIBRARIES}
+)
+
+add_test(libpay-tests ${CMAKE_CURRENT_BINARY_DIR}/libpay-tests)
+
