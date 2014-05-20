@@ -148,7 +148,7 @@ TEST_F(LibPayTests, ItemLifecycle)
     /* Wait for the signal to make it over */
     usleep(100000);
 
-	EXPECT_EQ(4, list.size());
+    EXPECT_EQ(4, list.size());
     EXPECT_EQ("item", list[0].first);
     EXPECT_EQ("item", list[1].first);
     EXPECT_EQ("item", list[2].first);
@@ -160,5 +160,20 @@ TEST_F(LibPayTests, ItemLifecycle)
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED,     list[3].second);
 
     pay_package_delete(package);
+
+    /* Let's make sure we stop getting events as well */
+    list.clear();
+
+    dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
+                                           "ItemStatusChanged",
+                                           G_VARIANT_TYPE("(ss)"),
+                                           g_variant_new("(ss)", "item", "purchasing"),
+                                           &error);
+    EXPECT_EQ(nullptr, error);
+
+    /* Wait for the signal to make it over */
+    usleep(100000);
+
+    EXPECT_EQ(0, list.size());
 }
 
