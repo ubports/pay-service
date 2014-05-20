@@ -123,6 +123,7 @@ public:
             {
                 itemChanged(titem->getApp(), titem->getId(), status);
             });
+            item = std::dynamic_pointer_cast<Item, TestItem>(titem);
             (*app)[itemid] = item;
         }
 

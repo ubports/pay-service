@@ -32,6 +32,7 @@
 #include <gtest/gtest.h>
 
 #include "item-test.h"
+#include <thread>
 
 struct DbusInterfaceTests : public ::testing::Test
 {
@@ -140,7 +141,7 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
     EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(service, client));
 }
 
-void signalAppend (GObject* obj, const gchar* itemid, const gchar* status, std::list<std::string>& list)
+void signalAppend (GObject* obj, const gchar* itemid, const gchar* status, std::vector<std::string>& list)
 {
     ASSERT_STREQ("fooitem", itemid);
     list.push_back(status);
@@ -162,6 +163,20 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
         });
 
         EXPECT_EQ(1u,cps2.wait_for_signal_ready_for(std::chrono::seconds {2}));
+        usleep(100);
+
+        std::string appname("foopkg");
+        std::string itemname("fooitem");
+
+        auto item = test_store->getItem(appname, itemname);
+        EXPECT_NE(nullptr, item);
+
+        auto titem = std::dynamic_pointer_cast<Item::TestItem, Item::Item>(item);
+
+        titem->test_setStatus(Item::Item::VERIFYING, true);
+        titem->test_setStatus(Item::Item::PURCHASING, true);
+        titem->test_setStatus(Item::Item::NOT_PURCHASED, true);
+        titem->test_setStatus(Item::Item::PURCHASED, true);
 
         /* Force deallocation so we can catch stuff from it */
         test_store.reset();
@@ -172,6 +187,9 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
 
     auto client = [this, &cps1, &cps2]()
     {
+        GMainContext* context = g_main_context_new();
+        g_main_context_push_thread_default(context);
+
         auto trap = core::posix::trap_signals_for_all_subsequent_threads(
         {
             core::posix::Signal::sig_int,
@@ -194,14 +212,23 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
                                                                 nullptr, nullptr);
         EXPECT_NE(nullptr, package);
 
-        std::list<std::string> itemsignals;
+        std::vector<std::string> itemsignals;
         g_signal_connect(G_OBJECT(package), "item-status-changed", G_CALLBACK(signalAppend), &itemsignals);
 
         cps2.try_signal_ready_for(std::chrono::seconds {1});
 
         trap->run();
 
+        /* Pull the events through */
+        while (g_main_context_iteration(context, FALSE)) {}
+
+        EXPECT_EQ("verifying", itemsignals[0]);
+        EXPECT_EQ("purchasing", itemsignals[1]);
+        EXPECT_EQ("not purchased", itemsignals[2]);
+        EXPECT_EQ("purchased", itemsignals[3]);
+
         g_clear_object(&package);
+        g_clear_pointer(&context, g_main_context_unref);
 
         return ::testing::Test::HasFailure() ? core::posix::exit::Status::failure : core::posix::exit::Status::success;
     };
