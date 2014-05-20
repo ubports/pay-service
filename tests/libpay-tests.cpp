@@ -25,70 +25,140 @@
 
 struct LibPayTests : public ::testing::Test
 {
-	protected:
-		DbusTestService * service = NULL;
-		DbusTestDbusMock * mock = NULL;
-		DbusTestDbusMockObject * obj = NULL;
-		DbusTestDbusMockObject * pkgobj = NULL;
-		GDBusConnection * bus = NULL;
+protected:
+    DbusTestService* service = NULL;
+    DbusTestDbusMock* mock = NULL;
+    DbusTestDbusMockObject* obj = NULL;
+    DbusTestDbusMockObject* pkgobj = NULL;
+    GDBusConnection* bus = NULL;
 
-		virtual void SetUp() {
-			service = dbus_test_service_new(NULL);
+    virtual void SetUp()
+    {
+        service = dbus_test_service_new(NULL);
 
-			mock = dbus_test_dbus_mock_new("com.canonical.pay");
+        mock = dbus_test_dbus_mock_new("com.canonical.pay");
 
-			obj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay", "com.canonical.pay", NULL);
+        obj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay", "com.canonical.pay", NULL);
 
-			dbus_test_dbus_mock_object_add_method(mock, obj,
-				"ListPackages",
-				nullptr,
-				G_VARIANT_TYPE("ao"), /* out */
-				"ret = [ dbus.ObjectPath('/com/canonical/pay/package') ]", /* python */
-				NULL); /* error */
+        dbus_test_dbus_mock_object_add_method(mock, obj,
+                                              "ListPackages",
+                                              nullptr,
+                                              G_VARIANT_TYPE("ao"), /* out */
+                                              "ret = [ dbus.ObjectPath('/com/canonical/pay/package') ]", /* python */
+                                              NULL); /* error */
 
-			pkgobj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay/package", "com.canonical.pay.package", NULL);
+        pkgobj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay/package", "com.canonical.pay.package", NULL);
 
-			dbus_test_dbus_mock_object_add_method(mock, pkgobj,
-				"VerifyItem",
-				G_VARIANT_TYPE_STRING,
-				NULL, /* out */
-				"", /* python */
-				NULL); /* error */
+        dbus_test_dbus_mock_object_add_method(mock, pkgobj,
+                                              "VerifyItem",
+                                              G_VARIANT_TYPE_STRING,
+                                              NULL, /* out */
+                                              "", /* python */
+                                              NULL); /* error */
 
-			dbus_test_dbus_mock_object_add_method(mock, pkgobj,
-				"PurchaseItem",
-				G_VARIANT_TYPE_STRING,
-				NULL, /* out */
-				"", /* python */
-				NULL); /* error */
+        dbus_test_dbus_mock_object_add_method(mock, pkgobj,
+                                              "PurchaseItem",
+                                              G_VARIANT_TYPE_STRING,
+                                              NULL, /* out */
+                                              "", /* python */
+                                              NULL); /* error */
 
-			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
+        dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
 
-			dbus_test_service_start_tasks(service);
+        dbus_test_service_start_tasks(service);
 
-			bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
-			g_dbus_connection_set_exit_on_close(bus, FALSE);
-			g_object_add_weak_pointer(G_OBJECT(bus), (gpointer *)&bus);
-		}
+        bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+        g_dbus_connection_set_exit_on_close(bus, FALSE);
+        g_object_add_weak_pointer(G_OBJECT(bus), (gpointer*)&bus);
+    }
 
-		virtual void TearDown() {
-			g_clear_object(&mock);
-			g_clear_object(&service);
+    virtual void TearDown()
+    {
+        g_clear_object(&mock);
+        g_clear_object(&service);
 
-			g_object_unref(bus);
+        g_object_unref(bus);
 
-			unsigned int cleartry = 0;
-			while (bus != NULL && cleartry < 100) {
-				g_usleep(100000);
-				while (g_main_pending())
-					g_main_iteration(TRUE);
-				cleartry++;
-			}
-		}
+        unsigned int cleartry = 0;
+        while (bus != NULL && cleartry < 100)
+        {
+            g_usleep(100000);
+            while (g_main_pending())
+            {
+                g_main_iteration(TRUE);
+            }
+            cleartry++;
+        }
+    }
 };
 
-TEST_F(LibPayTests, InitTest) {
-	auto package = pay_package_new("package");
-	pay_package_delete(package);
+TEST_F(LibPayTests, InitTest)
+{
+    auto package = pay_package_new("package");
+    pay_package_delete(package);
+}
+
+TEST_F(LibPayTests, ItemLifecycle)
+{
+    auto package = pay_package_new("package");
+
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_UNKNOWN, pay_package_item_status(package, "item"));
+
+    std::vector<std::pair<std::string, PayPackageItemStatus>> list;
+
+    EXPECT_TRUE(pay_package_item_observer_install(package, [](PayPackage * pkg,
+                                                              const char * itemid,
+                                                              PayPackageItemStatus status,
+                                                              void * user_data)
+    {
+        auto list = reinterpret_cast<std::vector<std::pair<std::string, PayPackageItemStatus>> *>(user_data);
+        std::pair<std::string, PayPackageItemStatus> pair(std::string(itemid), status);
+        list->push_back(pair);
+    }, &list));
+
+    GError* error = nullptr;
+    dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
+                                           "ItemStatusChanged",
+                                           G_VARIANT_TYPE("(ss)"),
+                                           g_variant_new("(ss)", "item", "verifying"),
+                                           &error);
+    EXPECT_EQ(nullptr, error);
+
+    dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
+                                           "ItemStatusChanged",
+                                           G_VARIANT_TYPE("(ss)"),
+                                           g_variant_new("(ss)", "item", "not purchased"),
+                                           &error);
+    EXPECT_EQ(nullptr, error);
+
+    dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
+                                           "ItemStatusChanged",
+                                           G_VARIANT_TYPE("(ss)"),
+                                           g_variant_new("(ss)", "item", "purchasing"),
+                                           &error);
+    EXPECT_EQ(nullptr, error);
+
+    dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
+                                           "ItemStatusChanged",
+                                           G_VARIANT_TYPE("(ss)"),
+                                           g_variant_new("(ss)", "item", "purchased"),
+                                           &error);
+    EXPECT_EQ(nullptr, error);
+
+    /* Wait for the signal to make it over */
+    usleep(100000);
+
+	EXPECT_EQ(4, list.size());
+    EXPECT_EQ("item", list[0].first);
+    EXPECT_EQ("item", list[1].first);
+    EXPECT_EQ("item", list[2].first);
+    EXPECT_EQ("item", list[3].first);
+
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_VERIFYING,     list[0].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, list[1].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASING,    list[2].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED,     list[3].second);
+
+    pay_package_delete(package);
 }
 
