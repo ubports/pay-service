@@ -19,6 +19,7 @@ add_gdbus_codegen_with_namespace(libpay-generated proxy-package com.canonical. p
 ######################
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g ${GCOV_FLAGS} -fvisibility=hidden")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g ${GCOV_FLAGS} -fvisibility=hidden")
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(libpay SHARED ${libpay-sources} ${libpay-generated})
