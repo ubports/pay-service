@@ -26,48 +26,48 @@
 struct LibPayTests : public ::testing::Test
 {
 protected:
-    DbusTestService* service = NULL;
-    DbusTestDbusMock* mock = NULL;
-    DbusTestDbusMockObject* obj = NULL;
-    DbusTestDbusMockObject* pkgobj = NULL;
-    GDBusConnection* bus = NULL;
+    DbusTestService* service = nullptr;
+    DbusTestDbusMock* mock = nullptr;
+    DbusTestDbusMockObject* obj = nullptr;
+    DbusTestDbusMockObject* pkgobj = nullptr;
+    GDBusConnection* bus = nullptr;
 
     virtual void SetUp()
     {
-        service = dbus_test_service_new(NULL);
+        service = dbus_test_service_new(nullptr);
 
         mock = dbus_test_dbus_mock_new("com.canonical.pay");
 
-        obj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay", "com.canonical.pay", NULL);
+        obj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay", "com.canonical.pay", nullptr);
 
         dbus_test_dbus_mock_object_add_method(mock, obj,
                                               "ListPackages",
                                               nullptr,
                                               G_VARIANT_TYPE("ao"), /* out */
                                               "ret = [ dbus.ObjectPath('/com/canonical/pay/package') ]", /* python */
-                                              NULL); /* error */
+                                              nullptr); /* error */
 
-        pkgobj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay/package", "com.canonical.pay.package", NULL);
+        pkgobj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay/package", "com.canonical.pay.package", nullptr);
 
         dbus_test_dbus_mock_object_add_method(mock, pkgobj,
                                               "VerifyItem",
                                               G_VARIANT_TYPE_STRING,
-                                              NULL, /* out */
+                                              nullptr, /* out */
                                               "", /* python */
-                                              NULL); /* error */
+                                              nullptr); /* error */
 
         dbus_test_dbus_mock_object_add_method(mock, pkgobj,
                                               "PurchaseItem",
                                               G_VARIANT_TYPE_STRING,
-                                              NULL, /* out */
+                                              nullptr, /* out */
                                               "", /* python */
-                                              NULL); /* error */
+                                              nullptr); /* error */
 
         dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
 
         dbus_test_service_start_tasks(service);
 
-        bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+        bus = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
         g_dbus_connection_set_exit_on_close(bus, FALSE);
         g_object_add_weak_pointer(G_OBJECT(bus), (gpointer*)&bus);
     }
@@ -80,7 +80,7 @@ protected:
         g_object_unref(bus);
 
         unsigned int cleartry = 0;
-        while (bus != NULL && cleartry < 100)
+        while (bus != nullptr && cleartry < 100)
         {
             g_usleep(100000);
             while (g_main_pending())
