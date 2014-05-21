@@ -1,3 +1,6 @@
 {
+global:
 	pay_package_*;
+local:
+	*;
 };
