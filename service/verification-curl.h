@@ -37,6 +37,7 @@ public:
 
 private:
 	std::string endpoint;
+	std::string device;
 };
 
 } // ns Verification

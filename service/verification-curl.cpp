@@ -30,9 +30,19 @@ namespace Verification
 class CurlItem : public Item
 {
 public:
-    CurlItem (std::string& app, std::string& item, std::string& endpoint) : exec(nullptr)
+    CurlItem (std::string& app, std::string& item, std::string& endpoint, std::string& device) : exec(nullptr)
     {
-        url = (endpoint + "/" + app + "-" + item);
+        url = endpoint;
+
+        if (app != "click-scope")
+        {
+            url += "/" + app;
+        }
+        if (!device.empty())
+        {
+            url += "?device=" + device;
+        }
+
         handle = curl_easy_init();
 
         /* Helps with threads */
@@ -116,7 +126,7 @@ CurlFactory::running ()
 Item::Ptr
 CurlFactory::verifyItem (std::string& appid, std::string& itemid)
 {
-    return std::make_shared<CurlItem>(appid, itemid, endpoint);
+    return std::make_shared<CurlItem>(appid, itemid, endpoint, device);
 }
 
 void
