@@ -84,8 +84,8 @@ target_link_libraries(
 )
 
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good-simple.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good-simple @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/simple.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/simple @ONLY)
 
 add_test(verification-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-tests)
 
