@@ -34,9 +34,9 @@ public:
         appid(in_appid), itemid(in_itemid), loop(nullptr), status(Item::ERROR)
     {
         /* TODO: ui_appid needs to be grabbed from the click hook */
-		gchar * appidc = upstart_app_launch_triplet_to_app_id("com.canonical.payui", nullptr, nullptr);
+        gchar* appidc = upstart_app_launch_triplet_to_app_id("com.canonical.payui", nullptr, nullptr);
         ui_appid = appidc;
-		g_free(appidc);
+        g_free(appidc);
     }
 
     ~UalItem ()
