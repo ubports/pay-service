@@ -30,7 +30,12 @@ namespace Verification
 class CurlItem : public Item
 {
 public:
-    CurlItem (std::string& app, std::string& item, std::string& endpoint, std::string& device) : exec(nullptr)
+    CurlItem (std::string& app,
+              std::string& item,
+              std::string& endpoint,
+              std::string& device) :
+        exec(nullptr),
+        stop(false)
     {
         url = endpoint;
 
@@ -54,6 +59,8 @@ public:
 
     ~CurlItem (void)
     {
+        stop = true;
+
         if (exec->joinable())
         {
             exec->join();
@@ -91,6 +98,7 @@ private:
     std::string transferBuffer;
     std::shared_ptr<std::thread> exec;
     std::string url;
+    bool stop;
 
     /* This is the callback from cURL as it does the transfer. We're
        pretty simple in that we're just putting it into a string. */
@@ -99,6 +107,10 @@ private:
         auto datasize = size * nmemb;
         //std::cout << "Got data: " << datasize << std::endl;
         CurlItem* item = static_cast<CurlItem*>(user_data);
+        if (item->stop)
+        {
+            return 0;
+        }
         item->transferBuffer.append(static_cast<char*>(buffer), datasize);
         return datasize;
     }
