@@ -33,6 +33,13 @@ struct VerificationCurlTests : public ::testing::Test
 		GDBusConnection * bus = NULL;
 
 		virtual void SetUp() {
+			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
+			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
+
+			gchar * linkfarm = g_build_filename(CMAKE_SOURCE_DIR, "ual-link-farm", NULL);
+			g_setenv("UPSTART_APP_LAUNCH_LINK_FARM", linkfarm, TRUE);
+			g_free(linkfarm);
+
 			service = dbus_test_service_new(NULL);
 
 			mock = dbus_test_dbus_mock_new("com.ubuntu.Upstart");
@@ -107,7 +114,7 @@ TEST_F(VerificationCurlTests, PurchaseTest) {
 	EXPECT_TRUE(item->run());
 	usleep(20 * 1000);
 
-	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=application-legacy', 'INSTANCE=gedit-'])"), NULL);
+	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=application-click', 'INSTANCE=com.canonical.payui_app1_0.1'])"), NULL);
 	usleep(20 * 1000);
 
 	EXPECT_EQ(Purchase::Item::Status::PURCHASED, status);
@@ -128,7 +135,7 @@ TEST_F(VerificationCurlTests, PurchaseTest) {
 	usleep(20 * 1000);
 
 	GError * error = NULL;
-	g_spawn_command_line_async("gdbus emit --session --object-path / --signal com.canonical.UpstartAppLaunch.ApplicationFailed gedit crash", &error);
+	g_spawn_command_line_async("gdbus emit --session --object-path / --signal com.canonical.UpstartAppLaunch.ApplicationFailed com.canonical.payui_app1_0.1 crash", &error);
 	ASSERT_EQ(nullptr, error);
 
 	usleep(100 * 1000);
