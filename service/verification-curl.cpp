@@ -34,7 +34,6 @@ public:
               std::string& item,
               std::string& endpoint,
               std::string& device) :
-        exec(nullptr),
         stop(false)
     {
         url = endpoint;
@@ -61,9 +60,9 @@ public:
     {
         stop = true;
 
-        if (exec->joinable())
+        if (exec.joinable())
         {
-            exec->join();
+            exec.join();
         }
 
         curl_easy_cleanup(handle);
@@ -75,7 +74,7 @@ public:
 
         /* Do the execution in another thread so we can wait on the
            network socket. */
-        exec = std::make_shared<std::thread>([this]()
+        exec = std::thread([this]()
         {
             auto status = curl_easy_perform(handle);
 
@@ -96,7 +95,7 @@ public:
 private:
     CURL* handle;
     std::string transferBuffer;
-    std::shared_ptr<std::thread> exec;
+    std::thread exec;
     std::string url;
     bool stop;
 
