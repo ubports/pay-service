@@ -135,4 +135,10 @@ CurlFactory::setEndpoint (std::string& in_endpoint)
     endpoint = in_endpoint;
 }
 
+void
+CurlFactory::setDevice (std::string& in_device)
+{
+    device = in_device;
+}
+
 } // ns Verification

@@ -26,12 +26,15 @@ struct VerificationCurlTests : public ::testing::Test
 		virtual void SetUp() {
 			endpoint = "file://";
 			endpoint += VERIFICATION_CURL_ENDPOINTS_DIR;
+
+			device = "1234";
 		}
 
 		virtual void TearDown() {
 		}
 
 		std::string endpoint;
+		std::string device;
 };
 
 TEST_F(VerificationCurlTests, InitTest) {
@@ -81,6 +84,27 @@ TEST_F(VerificationCurlTests, ClickScope) {
 
 	std::string appid("click-scope");
 	std::string itemid("package-name");
+
+	auto item = verify->verifyItem(appid, itemid);
+	ASSERT_NE(nullptr, item);
+
+	Verification::Item::Status status = Verification::Item::Status::ERROR;
+	item->verificationComplete.connect([&status] (Verification::Item::Status in_status) { status = in_status; });
+
+	ASSERT_TRUE(item->run());
+	usleep(20 * 1000);
+
+	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
+}
+
+TEST_F(VerificationCurlTests, DeviceId) {
+	auto verify = std::make_shared<Verification::CurlFactory>();
+	ASSERT_NE(nullptr, verify);
+	verify->setEndpoint(endpoint);
+	verify->setDevice(device);
+
+	std::string appid("good");
+	std::string itemid("device-id");
 
 	auto item = verify->verifyItem(appid, itemid);
 	ASSERT_NE(nullptr, item);

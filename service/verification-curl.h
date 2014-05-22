@@ -34,6 +34,7 @@ public:
 	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
 
 	void setEndpoint (std::string& endpoint);
+	void setDevice (std::string& device);
 
 private:
 	std::string endpoint;
