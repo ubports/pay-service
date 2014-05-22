@@ -73,3 +73,23 @@ TEST_F(VerificationCurlTests, PurchaseItem) {
 
 	EXPECT_EQ(Verification::Item::Status::ERROR, badstatus);
 }
+
+TEST_F(VerificationCurlTests, ClickScope) {
+	auto verify = std::make_shared<Verification::CurlFactory>();
+	ASSERT_NE(nullptr, verify);
+	verify->setEndpoint(endpoint);
+
+	std::string appid("click-scope");
+	std::string itemid("package-name");
+
+	auto item = verify->verifyItem(appid, itemid);
+	ASSERT_NE(nullptr, item);
+
+	Verification::Item::Status status = Verification::Item::Status::ERROR;
+	item->verificationComplete.connect([&status] (Verification::Item::Status in_status) { status = in_status; });
+
+	ASSERT_TRUE(item->run());
+	usleep(20 * 1000);
+
+	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
+}
