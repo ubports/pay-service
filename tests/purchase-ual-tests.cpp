@@ -128,7 +128,7 @@ TEST_F(PurchaseUALTests, PurchaseTest) {
 	usleep(20 * 1000);
 
 	GError * error = NULL;
-	g_spawn_command_line_async("gdbus emit --session --object-path / --signal com.canonical.UpstartAppLaunch.ApplicationFailed gedit crash", &error);
+	g_spawn_command_line_async("gdbus emit --session --object-path / --signal com.canonical.UbuntuAppLaunch.ApplicationFailed gedit crash", &error);
 	ASSERT_EQ(nullptr, error);
 
 	usleep(100 * 1000);
