@@ -42,6 +42,24 @@ public:
         PURCHASED
     };
 
+    static const char* statusString (Status stat)
+    {
+        switch (stat)
+        {
+            case UNKNOWN:
+                return "unknown";
+            case VERIFYING:
+                return "verifying";
+            case PURCHASING:
+                return "purchasing";
+            case NOT_PURCHASED:
+                return "not purchased";
+            case PURCHASED:
+                return "purchased";
+        }
+        return "error";
+    }
+
     virtual std::string& getId (void) = 0;
     virtual Status getStatus (void) = 0;
     virtual bool verify (void) = 0;

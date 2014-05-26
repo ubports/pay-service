@@ -12,3 +12,5 @@ pay-service.conf
 verification-curl-tests
 tests/verification-curl-endpoints/good-simple
 purchase-ual-tests
+libpay.so.1.0.0
+libpay-tests

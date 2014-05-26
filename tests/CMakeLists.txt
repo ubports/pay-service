@@ -11,13 +11,10 @@ find_package(Threads)
 
 add_definitions(-DCORE_DBUS_ENABLE_GOOGLE_TEST_FIXTURE)
 
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/test_data.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/test_data.h @ONLY)
-
 include_directories(
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_BINARY_DIR}
 
   ${GMOCK_INCLUDE_DIR}
   ${GTEST_INCLUDE_DIR}
@@ -44,7 +41,7 @@ target_link_libraries(
   ${GMOCK_BOTH_LIBRARIES}
 )
 
-add_test(dbus-interface-tests ${CMAKE_CURRENT_BINARY_DIR}/dbus-interface-tests)
+add_test(NAME dbus-interface-tests COMMAND dbus-test-runner --task ${CMAKE_CURRENT_BINARY_DIR}/dbus-interface-tests)
 
 #############################
 # Memory Item Store
@@ -110,4 +107,22 @@ target_link_libraries(
 )
 
 add_test(purchase-ual-tests ${CMAKE_CURRENT_BINARY_DIR}/purchase-ual-tests)
+
+#############################
+# libpay Tests
+#############################
+
+add_executable(
+  libpay-tests
+  libpay-tests.cpp
+  )
+
+target_link_libraries(
+  libpay-tests
+
+  libpay
+  ${GMOCK_BOTH_LIBRARIES}
+)
+
+add_test(libpay-tests ${CMAKE_CURRENT_BINARY_DIR}/libpay-tests)
 
