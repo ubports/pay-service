@@ -5,15 +5,16 @@ Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: astyle,
                cmake,
                dbus,
+               dbus-test-runner,
                debhelper (>= 9),
-               gcc-4.7,
-               g++-4.7,
                google-mock,
-               libdbus-cpp-dev,
+               libcurl4-gnutls-dev,
+               libdbustest1-dev,
                libgtest-dev,
-               libproperties-cpp-dev,
+               libprocess-cpp-dev,
                libupstart-app-launch2-dev,
-Standards-Version: 3.9.4
+               python3-dbusmock,
+Standards-Version: 3.9.5
 Homepage: http://launchpad.net/pay-service
 # If you aren't a member of ~indicator-applet-developers but need to upload
 # packaging changes, just go ahead.  ~indicator-applet-developers will notice
@@ -23,7 +24,6 @@ Vcs-Browser: http://bazaar.launchpad.net/~indicator-applet-developers/pay-servic
 
 Package: pay-service
 Architecture: any
-Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
@@ -34,3 +34,25 @@ Description: service to allow requesting payment for an item
  coordinates the payment interaction with the server on the device.
  .
  This package provides a service for the Pay Service
+
+Package: libpay1
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Multi-Arch: same
+Description: Library for interacting with the in app payments
+ This library contains information to purchase items and figure out
+ their purchase status.
+
+Package: libpay1-dev
+Architecture: any
+Section: libdevel
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libglib2.0-dev,
+         libpay1 (=${binary:Version})
+Multi-Arch: same
+Description: Pay service - library development files
+ This library contains information to purchase items and figure out
+ their purchase status.

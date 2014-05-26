@@ -1,4 +1,4 @@
-project (pay-service CXX)
+project (pay-service C CXX)
 cmake_minimum_required (VERSION 2.8.9)
 
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
@@ -7,7 +7,7 @@ set (PROJECT_VERSION "14.04.0")
 set (PACKAGE ${CMAKE_PROJECT_NAME})
 
 option (enable_tests "Build the package's automatic tests." ON)
-option (enable_lcov "Generate lcov code coverage reports." ON)
+option (enable_lcov "Generate lcov code coverage reports." OFF)
 
 if (${enable_tests})
   enable_testing ()
@@ -39,10 +39,15 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
                    upstart-app-launch-2
                    dbustest-1
                    gio-2.0
-                   dbus-cpp
-                   process-cpp
-                   properties-cpp>=0.0.1)
+                   gio-unix-2.0
+                   process-cpp)
 include_directories (SYSTEM ${PROCESS_CPP_INCLUDE_DIRS} ${SERVICE_DEPS_INCLUDE_DIRS})
+
+##
+##  Gdbus
+##
+
+include (GdbusCodegen)
 
 ##
 ##  custom targets
