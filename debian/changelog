@@ -1,3 +1,13 @@
+pay-service (0.1+14.10.20140526.2-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * README
+  * Boostrap build, service and tests.
+  * Add in a verification factory.
+  * Provide a mechanism to do purchases
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 26 May 2014 10:41:23 +0000
+
 pay-service (0.1-0ubuntu1) utopic; urgency=medium
 
   * Initial Packaging
