@@ -3,6 +3,7 @@ Section: gnome
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: astyle,
+               click-dev,
                cmake,
                dbus,
                dbus-test-runner,
