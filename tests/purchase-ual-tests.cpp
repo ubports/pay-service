@@ -23,7 +23,7 @@
 
 #include "service/purchase-ual.h"
 
-struct VerificationCurlTests : public ::testing::Test
+struct PurchaseUALTests : public ::testing::Test
 {
 	protected:
 		DbusTestService * service = NULL;
@@ -80,14 +80,14 @@ struct VerificationCurlTests : public ::testing::Test
 		}
 };
 
-TEST_F(VerificationCurlTests, InitTest) {
+TEST_F(PurchaseUALTests, InitTest) {
 	auto purchase = std::make_shared<Purchase::UalFactory>();
 	EXPECT_NE(nullptr, purchase);
 	purchase.reset();
 	EXPECT_EQ(nullptr, purchase);
 }
 
-TEST_F(VerificationCurlTests, PurchaseTest) {
+TEST_F(PurchaseUALTests, PurchaseTest) {
 	auto purchase = std::make_shared<Purchase::UalFactory>();
 	ASSERT_NE(nullptr, purchase);
 
@@ -128,7 +128,7 @@ TEST_F(VerificationCurlTests, PurchaseTest) {
 	usleep(20 * 1000);
 
 	GError * error = NULL;
-	g_spawn_command_line_async("gdbus emit --session --object-path / --signal com.canonical.UpstartAppLaunch.ApplicationFailed gedit crash", &error);
+	g_spawn_command_line_async("gdbus emit --session --object-path / --signal com.canonical.UbuntuAppLaunch.ApplicationFailed gedit crash", &error);
 	ASSERT_EQ(nullptr, error);
 
 	usleep(100 * 1000);
