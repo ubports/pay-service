@@ -4,32 +4,8 @@ export DH_VERBOSE=1
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 export G_MESSAGES_DEBUG=all
 
-#######
-# Start GCC 4.7 stuff
-#######
-
-# g++-4.7 does not have SSP. This workaround can be removed
-# when we switch to gcc 4.8
-ifeq (arm64,$(DEB_HOST_ARCH))
-	export DEB_CXXFLAGS_MAINT_STRIP := -fstack-protector
-endif
-
-include /usr/share/dpkg/default.mk
-
-export CC=$(DEB_HOST_GNU_TYPE)-gcc-4.7
-export CXX=$(DEB_HOST_GNU_TYPE)-g++-4.7
-
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pay-service -DCMAKE_C_COMPILER=$(DEB_HOST_GNU_TYPE)-gcc-4.7 -DCMAKE_CXX_COMPILER=$(DEB_HOST_GNU_TYPE)-g++-4.7
-
-override_dh_auto_test:
-	if [ "$(DEB_HOST_MULTIARCH)" != "powerpc-linux-gnu" ]; then \
-		dh_auto_test; \
-	fi
-
-#######
-# End GCC 4.7 stuff
-#######
+	dh_auto_configure -- -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pay-service -DCMAKE_INSTALL_INCLUDEDIR=/usr/include/$(DEB_HOST_MULTIARCH)/
 
 %:
 	dh $@ --fail-missing

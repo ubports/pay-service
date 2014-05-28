@@ -17,26 +17,12 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <core/dbus/bus.h>
-#include <core/dbus/asio/executor.h>
-
 #include <core/posix/signal.h>
 
 #include "dbus-interface.h"
 #include "item-memory.h"
 #include "verification-curl.h"
-#include "purchase-null.h"
-
-namespace dbus = core::dbus;
-
-namespace
-{
-dbus::Bus::Ptr the_session_bus()
-{
-    static dbus::Bus::Ptr session_bus = std::make_shared<dbus::Bus>(dbus::WellKnownBus::session);
-    return session_bus;
-}
-}
+#include "purchase-ual.h"
 
 int
 main (int argv, char* argc[])
@@ -52,22 +38,12 @@ main (int argv, char* argc[])
         trap->stop();
     });
 
-    auto bus = the_session_bus();
-    bus->install_executor(core::dbus::asio::make_executor(bus));
-    std::thread t {std::bind(&dbus::Bus::run, bus)};
-
     auto vfactory = std::make_shared<Verification::CurlFactory>();
-    auto pfactory = std::make_shared<Purchase::NullFactory>();
+    auto pfactory = std::make_shared<Purchase::UalFactory>();
     auto items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
-    auto dbus = std::make_shared<DBusInterface>(bus, items);
+    auto dbus = std::make_shared<DBusInterface>(items);
 
     trap->run();
-    bus->stop();
-
-    if (t.joinable())
-    {
-        t.join();
-    }
 
     return EXIT_SUCCESS;
 }
