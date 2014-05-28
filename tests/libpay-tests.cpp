@@ -146,7 +146,7 @@ TEST_F(LibPayTests, ItemLifecycle)
     EXPECT_EQ(nullptr, error);
 
     /* Wait for the signal to make it over */
-    usleep(100000);
+    usleep(250000);
 
     EXPECT_EQ(4, list.size());
     EXPECT_EQ("item", list[0].first);
