@@ -21,7 +21,6 @@ include_directories(
 
   ${GMOCK_INCLUDE_DIR}
   ${GTEST_INCLUDE_DIR}
-  ${PROCESS_CPP_INCLUDE_DIRS}
 )
 
 #############################
@@ -39,7 +38,6 @@ target_link_libraries(
   pay-service-lib
 
   ${SERVICE_DEPS_LIBRARIES}
-  ${PROCESS_CPP_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
   ${GMOCK_BOTH_LIBRARIES}
 )
