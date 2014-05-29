@@ -65,7 +65,7 @@ public:
             if (status == CURLE_OK)
             {
                 /* TODO: Clearly we need to be a bit more sophisticated here */
-                verificationComplete(Status::PURCHASED);
+                verificationComplete(Status::NOT_PURCHASED);
             }
             else
             {
@@ -95,7 +95,7 @@ private:
 };
 
 CurlFactory::CurlFactory () :
-    endpoint("https://ubuntu.com")
+    endpoint("https://launchpad.net")
 {
     /* TODO: We should check to see if we have networking someday */
     curl_global_init(CURL_GLOBAL_SSL);
