@@ -159,10 +159,10 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
 
         pay_service->connectionReady.connect([&cps1]()
         {
-            cps1.try_signal_ready_for(std::chrono::seconds {1});
+            cps1.try_signal_ready_for(std::chrono::seconds {2});
         });
 
-        EXPECT_EQ(1u,cps2.wait_for_signal_ready_for(std::chrono::seconds {2}));
+        EXPECT_EQ(1u,cps2.wait_for_signal_ready_for(std::chrono::seconds {4}));
         usleep(100);
 
         std::string appname("foopkg");
@@ -185,7 +185,7 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
         return ::testing::Test::HasFailure() ? core::posix::exit::Status::failure : core::posix::exit::Status::success;
     };
 
-    auto client = [this, &cps1, &cps2]()
+    auto client = [this, &cps1, &cps2]() -> core::posix::exit::Status
     {
         GMainContext* context = g_main_context_new();
         g_main_context_push_thread_default(context);
@@ -202,7 +202,7 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
         });
 
         /* Wait for the service to setup */
-        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {1}));
+        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {2}));
 
         /* Package proxy and getting status */
         auto package = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
@@ -215,13 +215,19 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
         std::vector<std::string> itemsignals;
         g_signal_connect(G_OBJECT(package), "item-status-changed", G_CALLBACK(signalAppend), &itemsignals);
 
-        cps2.try_signal_ready_for(std::chrono::seconds {1});
+        cps2.try_signal_ready_for(std::chrono::seconds {2});
 
         trap->run();
 
         /* Pull the events through */
         while (g_main_context_iteration(context, FALSE)) {}
 
+        /* Can't use assert in lambdas */
+        if (4 != itemsignals.size())
+        {
+            std::cerr << "ERROR: Item signals isn't correct size (4): " << itemsignals.size() << std::endl;
+            throw;
+        }
         EXPECT_EQ("verifying", itemsignals[0]);
         EXPECT_EQ("purchasing", itemsignals[1]);
         EXPECT_EQ("not purchased", itemsignals[2]);
