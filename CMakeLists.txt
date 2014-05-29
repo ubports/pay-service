@@ -37,6 +37,7 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
                    upstart-app-launch-2
                    dbustest-1
                    gio-2.0
+                   gio-unix-2.0
                    properties-cpp>=0.0.1)
 include_directories (SYSTEM ${SERVICE_DEPS_INCLUDE_DIRS})
 
