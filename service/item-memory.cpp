@@ -105,9 +105,9 @@ public:
     bool purchase (void)
     {
         /* First check to see if a purchase makes sense */
-        if (status != NOT_PURCHASED)
+        if (status == PURCHASED)
         {
-            return false;
+            return true;
         }
 
         if (pitem != nullptr)
