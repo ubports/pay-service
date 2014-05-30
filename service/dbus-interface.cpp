@@ -51,7 +51,11 @@ public:
         bus(nullptr),
         serviceProxy(nullptr),
         packageProxy(nullptr),
-        errorQuark(g_quark_from_static_string("dbus-interface-impl"))
+        errorQuark(g_quark_from_static_string("dbus-interface-impl")),
+        subtree_registration(0)
+    { }
+
+    void run ()
     {
         t = std::thread([this]()
         {
@@ -398,6 +402,8 @@ DBusInterface::DBusInterface (const Item::Store::Ptr& in_items)
     {
         connectionReady();
     });
+
+    impl->run();
 }
 
 bool
