@@ -110,37 +110,35 @@ public:
             return true;
         }
 
-        if (pitem != nullptr)
-        {
-            return true;
-        }
-
-        pitem = pfactory->purchaseItem(app, id);
         if (pitem == nullptr)
         {
-            /* Uhg, failed */
-            return false;
+            pitem = pfactory->purchaseItem(app, id);
+            if (pitem == nullptr)
+            {
+                /* Uhg, failed */
+                return false;
+            }
+
+            pitem->purchaseComplete.connect([this](Purchase::Item::Status status)
+            {
+                switch (status)
+                {
+                    case Purchase::Item::PURCHASED:
+                        setStatus(Item::Status::PURCHASED);
+                        break;
+                    case Purchase::Item::ERROR:
+                    case Purchase::Item::NOT_PURCHASED:
+                    default: /* Fall through, an error is same as status we don't know */
+                        /* We know we were not purchased before, so let's stay that way */
+                        setStatus(Item::Status::NOT_PURCHASED);
+                        break;
+                }
+                return;
+            });
         }
 
         /* New purchase instance, tell the world! */
         setStatus(Item::Status::PURCHASING);
-
-        pitem->purchaseComplete.connect([this](Purchase::Item::Status status)
-        {
-            switch (status)
-            {
-                case Purchase::Item::PURCHASED:
-                    setStatus(Item::Status::PURCHASED);
-                    break;
-                case Purchase::Item::ERROR:
-                case Purchase::Item::NOT_PURCHASED:
-                default: /* Fall through, an error is same as status we don't know */
-                    /* We know we were not purchased before, so let's stay that way */
-                    setStatus(Item::Status::NOT_PURCHASED);
-                    break;
-            }
-            return;
-        });
 
         return pitem->run();
     }
