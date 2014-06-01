@@ -111,10 +111,14 @@ TEST_F(LibPayTests, ItemLifecycle)
                                                               PayPackageItemStatus status,
                                                               void * user_data)
     {
+        std::cout << "Status changed: " << itemid << " to: " << status << std::endl;
         auto list = reinterpret_cast<std::vector<std::pair<std::string, PayPackageItemStatus>> *>(user_data);
         std::pair<std::string, PayPackageItemStatus> pair(std::string(itemid), status);
         list->push_back(pair);
     }, &list));
+
+    /* Wait for the thread to start on ARM */
+    usleep(100000);
 
     GError* error = nullptr;
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
@@ -148,7 +152,7 @@ TEST_F(LibPayTests, ItemLifecycle)
     /* Wait for the signal to make it over */
     usleep(100000);
 
-    EXPECT_EQ(4, list.size());
+    ASSERT_EQ(4, list.size());
     EXPECT_EQ("item", list[0].first);
     EXPECT_EQ("item", list[1].first);
     EXPECT_EQ("item", list[2].first);

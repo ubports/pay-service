@@ -71,7 +71,7 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
 
         pay_service->connectionReady.connect([&cps1]()
         {
-            cps1.try_signal_ready_for(std::chrono::seconds {1});
+            cps1.try_signal_ready_for(std::chrono::seconds {2});
         });
 
         trap->run();
@@ -85,7 +85,7 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
 
     auto client = [this, &cps1]()
     {
-        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {1}));
+        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {2}));
 
         /* Service function test */
         auto service = proxy_pay_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
@@ -159,10 +159,10 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
 
         pay_service->connectionReady.connect([&cps1]()
         {
-            cps1.try_signal_ready_for(std::chrono::seconds {1});
+            cps1.try_signal_ready_for(std::chrono::seconds {2});
         });
 
-        EXPECT_EQ(1u,cps2.wait_for_signal_ready_for(std::chrono::seconds {2}));
+        EXPECT_EQ(1u,cps2.wait_for_signal_ready_for(std::chrono::seconds {4}));
         usleep(100);
 
         std::string appname("foopkg");
@@ -202,7 +202,7 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
         });
 
         /* Wait for the service to setup */
-        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {1}));
+        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {2}));
 
         /* Package proxy and getting status */
         auto package = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
@@ -215,7 +215,7 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
         std::vector<std::string> itemsignals;
         g_signal_connect(G_OBJECT(package), "item-status-changed", G_CALLBACK(signalAppend), &itemsignals);
 
-        cps2.try_signal_ready_for(std::chrono::seconds {1});
+        cps2.try_signal_ready_for(std::chrono::seconds {2});
 
         trap->run();
 
