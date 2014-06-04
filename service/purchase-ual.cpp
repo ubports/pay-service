@@ -19,7 +19,7 @@
 
 #include "purchase-ual.h"
 #include <thread>
-#include <upstart-app-launch.h>
+#include <ubuntu-app-launch.h>
 #include <gio/gio.h>
 
 namespace Purchase
@@ -34,7 +34,7 @@ public:
         appid(in_appid), itemid(in_itemid), loop(nullptr), status(Item::ERROR)
     {
         /* TODO: ui_appid needs to be grabbed from the click hook */
-        gchar* appidc = upstart_app_launch_triplet_to_app_id("com.canonical.payui", nullptr, nullptr);
+        gchar* appidc = ubuntu_app_launch_triplet_to_app_id("com.canonical.payui", nullptr, nullptr);
         ui_appid = appidc;
         g_free(appidc);
     }
@@ -75,8 +75,8 @@ public:
                 return;
             }
 
-            upstart_app_launch_observer_add_app_stop(app_stop_static_helper, this);
-            upstart_app_launch_observer_add_app_failed(app_failed_static_helper, this);
+            ubuntu_app_launch_observer_add_app_stop(app_stop_static_helper, this);
+            ubuntu_app_launch_observer_add_app_failed(app_failed_static_helper, this);
 
             /* Building a URL so that we can pass this information today without
                using trusted helpers and setting environment vars */
@@ -88,14 +88,14 @@ public:
             const gchar* urls[2] = {0};
             urls[0] = purchase_url.c_str();
 
-            if (upstart_app_launch_start_application(ui_appid.c_str(), urls))
+            if (ubuntu_app_launch_start_application(ui_appid.c_str(), urls))
             {
                 g_main_loop_run(loop);
             }
 
             /* Clean up */
-            upstart_app_launch_observer_delete_app_stop(app_stop_static_helper, this);
-            upstart_app_launch_observer_delete_app_failed(app_failed_static_helper, this);
+            ubuntu_app_launch_observer_delete_app_stop(app_stop_static_helper, this);
+            ubuntu_app_launch_observer_delete_app_failed(app_failed_static_helper, this);
 
             g_clear_object(&bus);
             g_clear_pointer(&loop, g_main_loop_unref);
@@ -127,7 +127,7 @@ private:
         notthis->appStop(std::string(appid));
     }
 
-    static void app_failed_static_helper (const gchar* appid, UpstartAppLaunchAppFailed failure_type, gpointer user_data)
+    static void app_failed_static_helper (const gchar* appid, UbuntuAppLaunchAppFailed failure_type, gpointer user_data)
     {
         /* we're not actually using the failure type, we don't care why */
         UalItem* notthis = static_cast<UalItem*>(user_data);

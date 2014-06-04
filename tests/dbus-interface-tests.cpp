@@ -71,7 +71,7 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
 
         pay_service->connectionReady.connect([&cps1]()
         {
-            cps1.try_signal_ready_for(std::chrono::seconds {1});
+            cps1.try_signal_ready_for(std::chrono::seconds {2});
         });
 
         trap->run();
@@ -85,7 +85,7 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
 
     auto client = [this, &cps1]()
     {
-        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {1}));
+        EXPECT_EQ(1u,cps1.wait_for_signal_ready_for(std::chrono::seconds {2}));
 
         /* Service function test */
         auto service = proxy_pay_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,

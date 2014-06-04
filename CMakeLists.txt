@@ -34,7 +34,7 @@ include (FindPkgConfig)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
                    libcurl
-                   upstart-app-launch-2
+                   ubuntu-app-launch-2
                    dbustest-1
                    gio-2.0
                    gio-unix-2.0

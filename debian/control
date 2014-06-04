@@ -13,7 +13,7 @@ Build-Depends: astyle,
                libglib2.0-dev,
                libgtest-dev,
                libprocess-cpp-dev,
-               libupstart-app-launch2-dev,
+               libubuntu-app-launch2-dev,
                python3-dbusmock,
 Standards-Version: 3.9.5
 Homepage: http://launchpad.net/pay-service
