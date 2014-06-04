@@ -23,10 +23,13 @@
 #include "item-memory.h"
 #include "verification-curl.h"
 #include "purchase-ual.h"
+#include "qtbridge.h"
 
 int
 main (int argv, char* argc[])
 {
+    qt::core::world::build_and_run(argv, argc, []() {});
+
     auto trap = core::posix::trap_signals_for_all_subsequent_threads(
     {
         core::posix::Signal::sig_int,
