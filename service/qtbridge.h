@@ -70,7 +70,8 @@ inline std::future<T> enter_with_task_and_expect_result(const std::function<T()>
         try
         {
             promise->set_value(task());
-        } catch(...)
+        }
+        catch (...)
         {
             promise->set_exception(std::current_exception());
         }

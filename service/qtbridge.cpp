@@ -62,7 +62,8 @@ public:
         {
             task();
             promise.set_value();
-        } catch(...)
+        }
+        catch (...)
         {
             promise.set_exception(std::current_exception());
         }
@@ -113,10 +114,12 @@ TaskHandler* task_handler()
     return instance;
 }
 
-bool TaskHandler::event(QEvent *e)
+bool TaskHandler::event(QEvent* e)
 {
     if (e->type() != qt_core_world_task_event_type())
+    {
         return QObject::event(e);
+    }
 
     auto te = dynamic_cast<TaskEvent*>(e);
     if (te)
@@ -134,13 +137,13 @@ void build_and_run(int argc, char** argv, const std::function<void()>& ready)
     QThread::currentThread();
     if (QCoreApplication::instance() != nullptr)
         throw std::runtime_error(
-                "qt::core::world::build_and_run: "
-                "There is already a QCoreApplication running.");
+            "qt::core::world::build_and_run: "
+            "There is already a QCoreApplication running.");
 
     detail::createCoreApplicationInstanceWithArgs(argc, argv);
 
     detail::task_handler()->moveToThread(
-                detail::coreApplicationInstance()->thread());
+        detail::coreApplicationInstance()->thread());
 
     // Signal to other worlds that we are good to go.
     ready();
@@ -157,7 +160,7 @@ void destroy()
     {
         // We make sure that all tasks have completed before quitting the app.
         QEventLoopLocker locker;
-    }).wait_for(std::chrono::seconds{1});
+    }).wait_for(std::chrono::seconds {1});
 }
 
 std::future<void> enter_with_task(const std::function<void()>& task)
