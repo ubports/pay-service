@@ -17,34 +17,19 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-factory.h"
-#include "token-grabber.h"
+#ifndef TOKEN_GRABBER_HPP__
+#define TOKEN_GRABBER_HPP__ 1
 
+#include <string>
 #include <memory>
 
-#ifndef VERIFICATION_CURL_HPP__
-#define VERIFICATION_CURL_HPP__ 1
-
-namespace Verification {
-
-class CurlFactory : public Factory {
+class TokenGrabber {
 public:
-	CurlFactory ();
-	CurlFactory (const std::string& endpoint);
-	~CurlFactory ();
+	TokenGrabber (void);
+	virtual ~TokenGrabber (void);
+    virtual std::string signUrl(std::string url, std::string type);
 
-	virtual bool running ();
-	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
-
-	void setEndpoint (std::string& endpoint);
-	void setDevice (std::string& device);
-
-private:
-	std::string endpoint;
-	std::string device;
-	std::shared_ptr<TokenGrabber> tokenGrabber;
+	typedef std::shared_ptr<TokenGrabber> Ptr;
 };
 
-} // ns Verification
-
-#endif /* VERIFICATION_CURL_HPP__ */
+#endif /* TOKEN_GRABBER_HPP__ */

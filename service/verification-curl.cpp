@@ -19,15 +19,10 @@
 
 #include "verification-curl.h"
 
-#include <ssoservice.h>
-#include <token.h>
-
 #include <thread>
 
 #include <curl/curl.h>
 #include <curl/easy.h>
-
-#include "qtbridge.h"
 
 namespace Verification
 {
@@ -122,80 +117,12 @@ private:
 };
 
 /*********************
- * TokenGrabber
- *********************/
-
-class TokenGrabber: public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit TokenGrabber (QObject* parent = 0);
-    void run (void);
-    std::string signUrl(std::string url, std::string type);
-
-private Q_SLOTS:
-    void handleCredentialsFound(const UbuntuOne::Token& token);
-    void handleCredentialsNotFound();
-
-private:
-    UbuntuOne::Token token;
-    UbuntuOne::SSOService service;
-};
-
-TokenGrabber::TokenGrabber (QObject* parent) :
-    QObject(parent)
-{
-    std::cout << "Token grabber built" << std::endl;
-}
-
-void TokenGrabber::run (void)
-{
-    std::cout << "Token grabber running" << std::endl;
-    qt::core::world::enter_with_task([this] ()
-    {
-        QObject::connect(&service,
-                         &UbuntuOne::SSOService::credentialsFound,
-                         this,
-                         &TokenGrabber::handleCredentialsFound);
-        QObject::connect(&service,
-                         &UbuntuOne::SSOService::credentialsNotFound,
-                         this,
-                         &TokenGrabber::handleCredentialsNotFound);
-
-        service.getCredentials();
-    });
-}
-
-void TokenGrabber::handleCredentialsFound(const UbuntuOne::Token& in_token)
-{
-    token = in_token;
-    std::cout << "Got a Token" << std::endl;
-}
-
-void TokenGrabber::handleCredentialsNotFound()
-{
-    std::cout << "No Token :-(" << std::endl;
-}
-
-std::string TokenGrabber::signUrl (std::string url, std::string type)
-{
-    std::string retval;
-
-}
-
-
-
-/*********************
  * CurlFactory
  *********************/
 
 CurlFactory::CurlFactory () :
     endpoint("https://launchpad.net")
 {
-    /* Dummy to test tokengrabber */
-    auto grabber = new TokenGrabber();
-    grabber->run();
 
     /* TODO: We should check to see if we have networking someday */
     curl_global_init(CURL_GLOBAL_SSL);
@@ -233,4 +160,3 @@ CurlFactory::setDevice (std::string& in_device)
 
 } // ns Verification
 
-#include "verification-curl.moc"
