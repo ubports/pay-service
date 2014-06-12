@@ -21,6 +21,9 @@ set(SERVICE_LIB_SOURCES
     purchase-null.cpp
     purchase-ual.h
     purchase-ual.cpp
+    token-grabber.h
+    token-grabber-u1.h
+    token-grabber-u1.cpp
     verification-curl.cpp
     verification-null.cpp)
 

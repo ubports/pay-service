@@ -20,13 +20,14 @@
 #include <ssoservice.h>
 #include <token.h>
 #include "qtbridge.h"
+#include "token-grabber-u1.h"
 
-class TokenGrabberQt: public QObject
+class TokenGrabberU1Qt: public QObject
 {
     Q_OBJECT
 
 public:
-    explicit TokenGrabberQt (QObject* parent = 0);
+    explicit TokenGrabberU1Qt (QObject* parent = 0);
     void run (void);
     std::string signUrl(std::string url, std::string type);
 
@@ -39,13 +40,13 @@ private:
     UbuntuOne::SSOService service;
 };
 
-TokenGrabberQt::TokenGrabberQt (QObject* parent) :
+TokenGrabberU1Qt::TokenGrabberU1Qt (QObject* parent) :
     QObject(parent)
 {
     std::cout << "Token grabber built" << std::endl;
 }
 
-void TokenGrabberQt::run (void)
+void TokenGrabberU1Qt::run (void)
 {
     std::cout << "Token grabber running" << std::endl;
     qt::core::world::enter_with_task([this] ()
@@ -53,41 +54,46 @@ void TokenGrabberQt::run (void)
         QObject::connect(&service,
                          &UbuntuOne::SSOService::credentialsFound,
                          this,
-                         &TokenGrabberQt::handleCredentialsFound);
+                         &TokenGrabberU1Qt::handleCredentialsFound);
         QObject::connect(&service,
                          &UbuntuOne::SSOService::credentialsNotFound,
                          this,
-                         &TokenGrabberQt::handleCredentialsNotFound);
+                         &TokenGrabberU1Qt::handleCredentialsNotFound);
 
         service.getCredentials();
     });
 }
 
-void TokenGrabberQt::handleCredentialsFound(const UbuntuOne::Token& in_token)
+void TokenGrabberU1Qt::handleCredentialsFound(const UbuntuOne::Token& in_token)
 {
     token = in_token;
     std::cout << "Got a Token" << std::endl;
 }
 
-void TokenGrabberQt::handleCredentialsNotFound()
+void TokenGrabberU1Qt::handleCredentialsNotFound()
 {
     std::cout << "No Token :-(" << std::endl;
 }
 
-std::string TokenGrabberQt::signUrl (std::string url, std::string type)
+std::string TokenGrabberU1Qt::signUrl (std::string url, std::string type)
 {
     std::string retval;
 
 }
 
-TokenGrabberU1 (void) {
-	qt = std::make_shared<TokenGrabberQt>();
-	qt->run();
+TokenGrabberU1::TokenGrabberU1 (void)
+{
+    qt = std::make_shared<TokenGrabberU1Qt>();
+    qt->run();
 }
 
-~TokenGrabberU1 (void) {
+TokenGrabberU1::~TokenGrabberU1 (void)
+{
 }
 
-std::string TokenGrabberU1::signUrl (std::string url, std::string type) { return qt->signUrl(url, type);}
+std::string TokenGrabberU1::signUrl (std::string url, std::string type)
+{
+    return qt->signUrl(url, type);
+}
 
 #include "token-grabber-u1.moc"

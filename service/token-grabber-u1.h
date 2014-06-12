@@ -24,16 +24,17 @@
 
 class TokenGrabberU1Qt;
 
-class TokenGrabberU1 : public TokenGrabber {
+class TokenGrabberU1 : public TokenGrabber
+{
 public:
-	TokenGrabberU1 (void);
-	virtual ~TokenGrabberU1 (void);
+    TokenGrabberU1 (void);
+    virtual ~TokenGrabberU1 (void);
 
     virtual std::string signUrl(std::string url, std::string type);
 
 private:
-	std::shared_ptr<TokenGrabberU1Qt> qt;
-}
+    std::shared_ptr<TokenGrabberU1Qt> qt;
+};
 
 
 #endif /* TOKEN_GRABBER_U1_HPP__ */

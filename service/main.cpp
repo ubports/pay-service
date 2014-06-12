@@ -22,6 +22,7 @@
 #include "verification-curl.h"
 #include "purchase-ual.h"
 #include "qtbridge.h"
+#include "token-grabber-u1.h"
 
 int
 main (int argv, char* argc[])
@@ -29,7 +30,8 @@ main (int argv, char* argc[])
     qt::core::world::build_and_run(argv, argc, []()
     {
         /* Initialize the other object after Qt is built */
-        auto vfactory = std::make_shared<Verification::CurlFactory>();
+        auto token = std::make_shared<TokenGrabberU1>();
+        auto vfactory = std::make_shared<Verification::CurlFactory>(token);
         auto pfactory = std::make_shared<Purchase::UalFactory>();
         auto items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
         auto dbus = std::make_shared<DBusInterface>(items);

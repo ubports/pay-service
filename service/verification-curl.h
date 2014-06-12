@@ -29,7 +29,7 @@ namespace Verification {
 
 class CurlFactory : public Factory {
 public:
-	CurlFactory ();
+	CurlFactory (TokenGrabber::Ptr token);
 	CurlFactory (const std::string& endpoint);
 	~CurlFactory ();
 
@@ -42,7 +42,7 @@ public:
 private:
 	std::string endpoint;
 	std::string device;
-	std::shared_ptr<TokenGrabber> tokenGrabber;
+	TokenGrabber::Ptr tokenGrabber;
 };
 
 } // ns Verification

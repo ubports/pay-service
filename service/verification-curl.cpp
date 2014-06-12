@@ -120,8 +120,9 @@ private:
  * CurlFactory
  *********************/
 
-CurlFactory::CurlFactory () :
-    endpoint("https://launchpad.net")
+CurlFactory::CurlFactory (TokenGrabber::Ptr token) :
+    endpoint("https://launchpad.net"),
+    tokenGrabber(token)
 {
 
     /* TODO: We should check to see if we have networking someday */

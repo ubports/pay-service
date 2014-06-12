@@ -23,13 +23,19 @@
 #include <string>
 #include <memory>
 
-class TokenGrabber {
-public:
-	TokenGrabber (void);
-	virtual ~TokenGrabber (void);
-    virtual std::string signUrl(std::string url, std::string type);
+//#include <core/signal.h>
 
-	typedef std::shared_ptr<TokenGrabber> Ptr;
+class TokenGrabber
+{
+public:
+    TokenGrabber () : foo(0) { }
+    //virtual ~TokenGrabber (void) = 0;
+    virtual std::string signUrl(std::string url, std::string type) = 0;
+
+    typedef std::shared_ptr<TokenGrabber> Ptr;
+
+    //core::Signal<> tokenUpdated;
+    int foo;
 };
 
 #endif /* TOKEN_GRABBER_HPP__ */
