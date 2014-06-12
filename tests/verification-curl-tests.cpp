@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 #include "service/verification-curl.h"
+#include "token-grabber-null.h"
 
 struct VerificationCurlTests : public ::testing::Test
 {
@@ -38,7 +39,8 @@ struct VerificationCurlTests : public ::testing::Test
 };
 
 TEST_F(VerificationCurlTests, InitTest) {
-	auto verify = std::make_shared<Verification::CurlFactory>();
+	auto token = std::make_shared<TokenGrabberNull>();
+	auto verify = std::make_shared<Verification::CurlFactory>(token);
 	EXPECT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 	verify.reset();
@@ -46,7 +48,8 @@ TEST_F(VerificationCurlTests, InitTest) {
 }
 
 TEST_F(VerificationCurlTests, PurchaseItem) {
-	auto verify = std::make_shared<Verification::CurlFactory>();
+	auto token = std::make_shared<TokenGrabberNull>();
+	auto verify = std::make_shared<Verification::CurlFactory>(token);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 
@@ -78,7 +81,8 @@ TEST_F(VerificationCurlTests, PurchaseItem) {
 }
 
 TEST_F(VerificationCurlTests, ClickScope) {
-	auto verify = std::make_shared<Verification::CurlFactory>();
+	auto token = std::make_shared<TokenGrabberNull>();
+	auto verify = std::make_shared<Verification::CurlFactory>(token);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 
@@ -98,7 +102,8 @@ TEST_F(VerificationCurlTests, ClickScope) {
 }
 
 TEST_F(VerificationCurlTests, DeviceId) {
-	auto verify = std::make_shared<Verification::CurlFactory>();
+	auto token = std::make_shared<TokenGrabberNull>();
+	auto verify = std::make_shared<Verification::CurlFactory>(token);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 	verify->setDevice(device);
