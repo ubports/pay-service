@@ -23,8 +23,7 @@
 #include <string>
 #include <memory>
 
-#include <list>
-#include <mutex>
+#include <core/signal.h>
 
 class TokenGrabber
 {
