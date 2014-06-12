@@ -19,8 +19,8 @@
 
 #include <ssoservice.h>
 #include <token.h>
-#include "qtbridge.h"
 #include "token-grabber-u1.h"
+#include "qtbridge.h"
 
 class TokenGrabberU1Qt: public QObject
 {

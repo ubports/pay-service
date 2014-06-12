@@ -23,19 +23,20 @@
 #include <string>
 #include <memory>
 
-//#include <core/signal.h>
+#include <list>
+#include <mutex>
+
+#include <core/signal.h>
 
 class TokenGrabber
 {
 public:
-    TokenGrabber () : foo(0) { }
-    //virtual ~TokenGrabber (void) = 0;
     virtual std::string signUrl(std::string url, std::string type) = 0;
 
     typedef std::shared_ptr<TokenGrabber> Ptr;
 
-    //core::Signal<> tokenUpdated;
-    int foo;
+    /* Signals */
+    core::Signal<> tokenUpdated;
 };
 
 #endif /* TOKEN_GRABBER_HPP__ */
