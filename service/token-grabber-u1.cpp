@@ -17,8 +17,6 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <core/signal.h>
-
 #include "token-grabber-u1.h"
 #include "qtbridge.h"
 
