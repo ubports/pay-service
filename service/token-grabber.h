@@ -26,8 +26,6 @@
 #include <list>
 #include <mutex>
 
-#include <core/signal.h>
-
 class TokenGrabber
 {
 public:
@@ -36,7 +34,7 @@ public:
     typedef std::shared_ptr<TokenGrabber> Ptr;
 
     /* Signals */
-    core::Signal<> tokenUpdated;
+    core::Signal<bool> tokenUpdated;
 };
 
 #endif /* TOKEN_GRABBER_HPP__ */

@@ -17,10 +17,13 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <ssoservice.h>
-#include <token.h>
+#include <core/signal.h>
+
 #include "token-grabber-u1.h"
 #include "qtbridge.h"
+
+#include <ssoservice.h>
+#include <token.h>
 
 class TokenGrabberU1Qt: public QObject
 {
