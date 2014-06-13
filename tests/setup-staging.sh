@@ -1,4 +1,6 @@
 #!/bin/bash -e
+# This small script sets up the variables needed for acceptance
+# testing of the pay-service and pay related things.
 
 echo "Setting up staging environment variables"
 
