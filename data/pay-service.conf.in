@@ -1,6 +1,8 @@
 description "Service to process payments"
 
-start on desktop-start
+start on desktop-start or started unity8
 stop on desktop-end
+
+respawn
 
 exec @CMAKE_INSTALL_FULL_LIBEXECDIR@/pay-service/pay-service
