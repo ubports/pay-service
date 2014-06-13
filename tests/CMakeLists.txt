@@ -87,8 +87,8 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/simple.in
   ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/simple @ONLY)
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/device-id?device=1234.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/device-id?device=1234 @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/device-id.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/device-id @ONLY)
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/package-name.in
   ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/package-name @ONLY)

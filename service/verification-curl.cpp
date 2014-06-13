@@ -144,6 +144,7 @@ private:
         CurlItem* item = static_cast<CurlItem*>(user_data);
         if (item->stop)
         {
+            std::cout << "cURL transaction stopped prematurely" << std::endl;
             return 0;
         }
         item->transferBuffer.append(static_cast<char*>(buffer), datasize);
