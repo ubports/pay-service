@@ -39,6 +39,8 @@ public:
 
     core::Signal<> connectionReady;
 
+    typedef std::shared_ptr<DBusInterface> Ptr;
+
 private:
     std::shared_ptr<DBusInterfaceImpl> impl;
 };

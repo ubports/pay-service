@@ -27,16 +27,24 @@
 int
 main (int argv, char* argc[])
 {
-    qt::core::world::build_and_run(argv, argc, []()
+    TokenGrabber::Ptr token;
+    Verification::Factory::Ptr vfactory;
+    Purchase::Factory::Ptr pfactory;
+    Item::Store::Ptr items;
+    DBusInterface::Ptr dbus;
+
+    qt::core::world::build_and_run(argv, argc, [&token, &vfactory, &pfactory, &items, &dbus]()
     {
         /* Initialize the other object after Qt is built */
-        auto token = std::make_shared<TokenGrabberU1>();
-        auto vfactory = std::make_shared<Verification::CurlFactory>(token);
-        auto pfactory = std::make_shared<Purchase::UalFactory>();
-        auto items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
-        auto dbus = std::make_shared<DBusInterface>(items);
+        token = std::make_shared<TokenGrabberU1>();
+        vfactory = std::make_shared<Verification::CurlFactory>(token);
+        pfactory = std::make_shared<Purchase::UalFactory>();
+        items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+        dbus = std::make_shared<DBusInterface>(items);
     });
+
     qt::core::world::destroy();
+
     return EXIT_SUCCESS;
 }
 
