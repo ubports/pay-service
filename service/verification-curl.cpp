@@ -106,8 +106,17 @@ public:
 
             if (status == CURLE_OK)
             {
-                /* TODO: Clearly we need to be a bit more sophisticated here */
-                verificationComplete(Status::NOT_PURCHASED);
+                long responsecode = 0;
+                curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &responsecode);
+
+                if (responsecode == 200)
+                {
+                    verificationComplete(Status::PURCHASED);
+                }
+                else
+                {
+                    verificationComplete(Status::NOT_PURCHASED);
+                }
             }
             else
             {
