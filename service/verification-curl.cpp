@@ -45,6 +45,7 @@ public:
         {
             url += "/" + app;
         }
+        url += "/" + item;
         if (!device.empty())
         {
             url += "?device=" + device;
@@ -146,7 +147,7 @@ private:
  *********************/
 
 CurlFactory::CurlFactory (TokenGrabber::Ptr token) :
-    endpoint("https://launchpad.net"),
+    endpoint("https://sc.ubuntu.com/api/2.0/click/purchases"),
     tokenGrabber(token)
 {
     /* TODO: We should check to see if we have networking someday */
