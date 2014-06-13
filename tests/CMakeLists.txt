@@ -137,3 +137,8 @@ target_link_libraries(
 
 add_test(libpay-tests ${CMAKE_CURRENT_BINARY_DIR}/libpay-tests)
 
+#############################
+# staging script
+#############################
+
+install(PROGRAMS setup-staging.sh DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
