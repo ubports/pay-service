@@ -44,10 +44,10 @@ protected:
                                               "ListPackages",
                                               nullptr,
                                               G_VARIANT_TYPE("ao"), /* out */
-                                              "ret = [ dbus.ObjectPath('/com/canonical/pay/package') ]", /* python */
+                                              "ret = [ dbus.ObjectPath('/com/canonical/pay/package_2Dname') ]", /* python */
                                               nullptr); /* error */
 
-        pkgobj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay/package", "com.canonical.pay.package", nullptr);
+        pkgobj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/pay/package_2Dname", "com.canonical.pay.package", nullptr);
 
         dbus_test_dbus_mock_object_add_method(mock, pkgobj,
                                               "VerifyItem",
@@ -94,13 +94,13 @@ protected:
 
 TEST_F(LibPayTests, InitTest)
 {
-    auto package = pay_package_new("package");
+    auto package = pay_package_new("package-name");
     pay_package_delete(package);
 }
 
 TEST_F(LibPayTests, ItemLifecycle)
 {
-    auto package = pay_package_new("package");
+    auto package = pay_package_new("package-name");
 
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_UNKNOWN, pay_package_item_status(package, "item"));
 
@@ -187,7 +187,7 @@ TEST_F(LibPayTests, ItemOperations)
 {
     GError* error = nullptr;
     guint callcount = 0;
-    auto package = pay_package_new("package");
+    auto package = pay_package_new("package-name");
 
     EXPECT_TRUE(pay_package_item_start_verification(package, "item"));
 

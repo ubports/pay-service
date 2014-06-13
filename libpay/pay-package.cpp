@@ -31,6 +31,7 @@ namespace Pay
 class Package
 {
     std::string id;
+    std::string path;
     /* NOTE: Using the shared_ptr here because gcc 4.7 map doesn't have emplace */
     std::map <std::pair<PayPackageItemObserver, void*>, std::shared_ptr<core::ScopedConnection>> observers;
     core::Signal<std::string, PayPackageItemStatus> itemChanged;
@@ -46,6 +47,9 @@ class Package
 public:
     Package (const char* packageid) : id(packageid), cancellable(g_cancellable_new()), loop(nullptr)
     {
+        path = std::string("/com/canonical/pay/");
+        path += encodePath(id);
+
         /* Keeps item cache up-to-data as we get signals about it */
         itemChanged.connect([this](std::string itemid, PayPackageItemStatus status)
         {
@@ -62,8 +66,6 @@ public:
             g_main_context_push_thread_default(context);
             context_mutex.unlock();
 
-            std::string path("/com/canonical/pay/");
-            path += id; /* TODO: encode */
             proxy = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
                                                              G_DBUS_PROXY_FLAGS_NONE,
                                                              "com.canonical.pay",
@@ -247,6 +249,36 @@ public:
     bool startPurchase (const char* itemid)
     {
         return functionCall(proxy_pay_package_call_purchase_item, proxy_pay_package_call_purchase_item_finish, itemid);
+    }
+
+    std::string
+    encodePath (const std::string& input)
+    {
+        std::string output = "";
+        bool first = true;
+
+        for (unsigned char c : input)
+        {
+            std::string retval;
+
+            if ((c >= 'a' && c <= 'z') ||
+                    (c >= 'A' && c <= 'Z') ||
+                    (c >= '0' && c <= '9' && !first))
+            {
+                retval = std::string((char*)&c, 1);
+            }
+            else
+            {
+                char buffer[5] = {0};
+                std::snprintf(buffer, 4, "_%2X", c);
+                retval = std::string(buffer);
+            }
+
+            output += retval;
+            first = false;
+        }
+
+        return output;
     }
 };
 
