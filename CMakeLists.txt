@@ -32,16 +32,15 @@ set (CMAKE_INSTALL_FULL_PKGLIBEXECDIR "${CMAKE_INSTALL_FULL_LIBEXECDIR}/${CMAKE_
 find_package (PkgConfig REQUIRED)
 include (FindPkgConfig)
 
-pkg_check_modules (PROCESS_CPP REQUIRED process-cpp)
-
 pkg_check_modules (SERVICE_DEPS REQUIRED
                    libcurl
                    ubuntu-app-launch-2
                    dbustest-1
                    gio-2.0
                    gio-unix-2.0
-                   process-cpp)
-include_directories (SYSTEM ${PROCESS_CPP_INCLUDE_DIRS} ${SERVICE_DEPS_INCLUDE_DIRS})
+                   process-cpp
+                   properties-cpp>=0.0.1)
+include_directories (SYSTEM ${SERVICE_DEPS_INCLUDE_DIRS})
 
 ##
 ##  Gdbus

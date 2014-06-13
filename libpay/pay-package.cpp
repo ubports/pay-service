@@ -70,7 +70,7 @@ public:
                                                              G_DBUS_PROXY_FLAGS_NONE,
                                                              "com.canonical.pay",
                                                              path.c_str(),
-                                                             cancellable,
+                                                             NULL,
                                                              &error);
 
             if (error != nullptr)
