@@ -33,9 +33,11 @@ public:
     CurlItem (std::string& app,
               std::string& item,
               std::string& endpoint,
-              std::string& device) :
+              std::string& device,
+              TokenGrabber::Ptr token) :
         stop(false),
-        handle(nullptr)
+        handle(nullptr),
+        curlHeaders(nullptr)
     {
         url = endpoint;
 
@@ -48,6 +50,14 @@ public:
             url += "?device=" + device;
         }
 
+        auto auth = token->signUrl(url, "GET");
+        if (!auth.empty())
+        {
+            std::string header("Authorization: ");
+            header += auth;
+            curlHeaders = curl_slist_append(curlHeaders, auth.c_str());
+        }
+
         handle = curl_easy_init();
 
         /* Helps with threads */
@@ -55,6 +65,10 @@ public:
         curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
         curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
         curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
+        if (curlHeaders != nullptr)
+        {
+            curl_easy_setopt(handle, CURLOPT_HTTPHEADER, curlHeaders);
+        }
     }
 
     ~CurlItem (void)
@@ -67,6 +81,12 @@ public:
         }
 
         curl_easy_cleanup(handle);
+
+        if (curlHeaders != nullptr)
+        {
+            curl_slist_free_all (curlHeaders) ;
+            curlHeaders = nullptr;
+        }
     }
 
     virtual bool run (void)
@@ -99,6 +119,7 @@ private:
     std::thread exec;
     std::string url;
     bool stop;
+    struct curl_slist* curlHeaders;
 
     /* This is the callback from cURL as it does the transfer. We're
        pretty simple in that we're just putting it into a string. */
@@ -124,7 +145,6 @@ CurlFactory::CurlFactory (TokenGrabber::Ptr token) :
     endpoint("https://launchpad.net"),
     tokenGrabber(token)
 {
-
     /* TODO: We should check to see if we have networking someday */
     curl_global_init(CURL_GLOBAL_SSL);
 }
@@ -144,7 +164,7 @@ CurlFactory::running ()
 Item::Ptr
 CurlFactory::verifyItem (std::string& appid, std::string& itemid)
 {
-    return std::make_shared<CurlItem>(appid, itemid, endpoint, device);
+    return std::make_shared<CurlItem>(appid, itemid, endpoint, device, tokenGrabber);
 }
 
 void
