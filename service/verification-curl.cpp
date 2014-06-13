@@ -159,6 +159,15 @@ CurlFactory::CurlFactory (TokenGrabber::Ptr token) :
     endpoint("https://sc.ubuntu.com/api/2.0/click/purchases"),
     tokenGrabber(token)
 {
+    /* This is how we enable staging */
+    const char* envendpoint(getenv("PAY_BASE_URL"));
+    if (envendpoint != nullptr)
+    {
+        endpoint = envendpoint;
+        /* Our endpoint is slightly more specific */
+        endpoint += "/purchases";
+    }
+
     /* TODO: We should check to see if we have networking someday */
     curl_global_init(CURL_GLOBAL_SSL);
 }
