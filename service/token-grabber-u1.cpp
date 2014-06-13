@@ -80,6 +80,10 @@ std::string TokenGrabberU1Qt::signUrl (std::string url, std::string type)
 {
     std::string retval;
 
+    auto qretval = token.signUrl(url.c_str(), type.c_str());
+    retval = std::string(qretval.toUtf8());
+
+    return retval;
 }
 
 TokenGrabberU1::TokenGrabberU1 (void)
