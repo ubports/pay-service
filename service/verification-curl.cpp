@@ -30,9 +30,39 @@ namespace Verification
 class CurlItem : public Item
 {
 public:
-    CurlItem (std::string& app, std::string& item, std::string& endpoint) : exec(nullptr)
+    CurlItem (std::string& app,
+              std::string& item,
+              std::string& endpoint,
+              std::string& device,
+              TokenGrabber::Ptr token) :
+        stop(false),
+        handle(nullptr),
+        curlHeaders(nullptr)
     {
-        url = (endpoint + "/" + app + "-" + item);
+        url = endpoint;
+
+        if (app != "click-scope")
+        {
+            url += "/" + app;
+        }
+        url += "/" + item;
+        if (!device.empty())
+        {
+            url += "?device=" + device;
+        }
+
+        /* Sign the request */
+        auto auth = token->signUrl(url, "GET");
+        if (!auth.empty())
+        {
+            std::string header("Authorization: ");
+            header += auth;
+            curlHeaders = curl_slist_append(curlHeaders, auth.c_str());
+        }
+
+        /* Ensure we get JSON back */
+        curlHeaders = curl_slist_append(curlHeaders, "Accept: application/json");
+
         handle = curl_easy_init();
 
         /* Helps with threads */
@@ -40,16 +70,28 @@ public:
         curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
         curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
         curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
+        if (curlHeaders != nullptr)
+        {
+            curl_easy_setopt(handle, CURLOPT_HTTPHEADER, curlHeaders);
+        }
     }
 
     ~CurlItem (void)
     {
-        if (exec->joinable())
+        stop = true;
+
+        if (exec.joinable())
         {
-            exec->join();
+            exec.join();
         }
 
         curl_easy_cleanup(handle);
+
+        if (curlHeaders != nullptr)
+        {
+            curl_slist_free_all (curlHeaders) ;
+            curlHeaders = nullptr;
+        }
     }
 
     virtual bool run (void)
@@ -58,14 +100,23 @@ public:
 
         /* Do the execution in another thread so we can wait on the
            network socket. */
-        exec = std::make_shared<std::thread>([this]()
+        exec = std::thread([this]()
         {
             auto status = curl_easy_perform(handle);
 
             if (status == CURLE_OK)
             {
-                /* TODO: Clearly we need to be a bit more sophisticated here */
-                verificationComplete(Status::NOT_PURCHASED);
+                long responsecode = 0;
+                curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &responsecode);
+
+                if (responsecode == 200)
+                {
+                    verificationComplete(Status::PURCHASED);
+                }
+                else
+                {
+                    verificationComplete(Status::NOT_PURCHASED);
+                }
             }
             else
             {
@@ -79,8 +130,10 @@ public:
 private:
     CURL* handle;
     std::string transferBuffer;
-    std::shared_ptr<std::thread> exec;
+    std::thread exec;
     std::string url;
+    bool stop;
+    struct curl_slist* curlHeaders;
 
     /* This is the callback from cURL as it does the transfer. We're
        pretty simple in that we're just putting it into a string. */
@@ -89,14 +142,33 @@ private:
         auto datasize = size * nmemb;
         //std::cout << "Got data: " << datasize << std::endl;
         CurlItem* item = static_cast<CurlItem*>(user_data);
+        if (item->stop)
+        {
+            std::cout << "cURL transaction stopped prematurely" << std::endl;
+            return 0;
+        }
         item->transferBuffer.append(static_cast<char*>(buffer), datasize);
         return datasize;
     }
 };
 
-CurlFactory::CurlFactory () :
-    endpoint("https://launchpad.net")
+/*********************
+ * CurlFactory
+ *********************/
+
+CurlFactory::CurlFactory (TokenGrabber::Ptr token) :
+    endpoint("https://sc.ubuntu.com/api/2.0/click/purchases"),
+    tokenGrabber(token)
 {
+    /* This is how we enable staging */
+    const char* envendpoint(getenv("PAY_BASE_URL"));
+    if (envendpoint != nullptr)
+    {
+        endpoint = envendpoint;
+        /* Our endpoint is slightly more specific */
+        endpoint += "/purchases";
+    }
+
     /* TODO: We should check to see if we have networking someday */
     curl_global_init(CURL_GLOBAL_SSL);
 }
@@ -116,7 +188,7 @@ CurlFactory::running ()
 Item::Ptr
 CurlFactory::verifyItem (std::string& appid, std::string& itemid)
 {
-    return std::make_shared<CurlItem>(appid, itemid, endpoint);
+    return std::make_shared<CurlItem>(appid, itemid, endpoint, device, tokenGrabber);
 }
 
 void
@@ -125,4 +197,11 @@ CurlFactory::setEndpoint (std::string& in_endpoint)
     endpoint = in_endpoint;
 }
 
+void
+CurlFactory::setDevice (std::string& in_device)
+{
+    device = in_device;
+}
+
 } // ns Verification
+

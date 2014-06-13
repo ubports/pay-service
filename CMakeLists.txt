@@ -29,7 +29,10 @@ set (CMAKE_INSTALL_FULL_PKGLIBEXECDIR "${CMAKE_INSTALL_FULL_LIBEXECDIR}/${CMAKE_
 ##  Check for prerequisites
 ##
 
+set(CMAKE_AUTOMOC ON)
+
 find_package (PkgConfig REQUIRED)
+find_package (Qt5Core REQUIRED)
 include (FindPkgConfig)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
@@ -39,7 +42,8 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
                    gio-2.0
                    gio-unix-2.0
                    process-cpp
-                   properties-cpp>=0.0.1)
+                   properties-cpp
+                   ubuntuoneauth-2.0)
 include_directories (SYSTEM ${SERVICE_DEPS_INCLUDE_DIRS})
 
 ##

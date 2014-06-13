@@ -15,7 +15,9 @@ Build-Depends: astyle,
                libgtest-dev,
                libprocess-cpp-dev,
                libubuntu-app-launch2-dev,
+               libubuntuoneauth-2.0-dev,
                python3-dbusmock,
+               qtbase5-dev,
 Standards-Version: 3.9.5
 Homepage: http://launchpad.net/pay-service
 # If you aren't a member of ~indicator-applet-developers but need to upload
