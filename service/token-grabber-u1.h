@@ -20,6 +20,7 @@
 #ifndef TOKEN_GRABBER_U1_HPP__
 #define TOKEN_GRABBER_U1_HPP__ 1
 
+#include <future>
 #include "token-grabber.h"
 
 class TokenGrabberU1Qt;
@@ -33,7 +34,7 @@ public:
     virtual std::string signUrl(std::string url, std::string type);
 
 private:
-    std::shared_ptr<TokenGrabberU1Qt> qt;
+    std::future<std::shared_ptr<TokenGrabberU1Qt>> qtfuture;
 };
 
 

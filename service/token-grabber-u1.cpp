@@ -50,19 +50,17 @@ TokenGrabberU1Qt::TokenGrabberU1Qt (QObject* parent) :
 void TokenGrabberU1Qt::run (void)
 {
     std::cout << "Token grabber running" << std::endl;
-    qt::core::world::enter_with_task([this] ()
-    {
-        QObject::connect(&service,
-                         &UbuntuOne::SSOService::credentialsFound,
-                         this,
-                         &TokenGrabberU1Qt::handleCredentialsFound);
-        QObject::connect(&service,
-                         &UbuntuOne::SSOService::credentialsNotFound,
-                         this,
-                         &TokenGrabberU1Qt::handleCredentialsNotFound);
 
-        service.getCredentials();
-    });
+    QObject::connect(&service,
+                     &UbuntuOne::SSOService::credentialsFound,
+                     this,
+                     &TokenGrabberU1Qt::handleCredentialsFound);
+    QObject::connect(&service,
+                     &UbuntuOne::SSOService::credentialsNotFound,
+                     this,
+                     &TokenGrabberU1Qt::handleCredentialsNotFound);
+
+    service.getCredentials();
 }
 
 void TokenGrabberU1Qt::handleCredentialsFound(const UbuntuOne::Token& in_token)
@@ -88,8 +86,13 @@ std::string TokenGrabberU1Qt::signUrl (std::string url, std::string type)
 
 TokenGrabberU1::TokenGrabberU1 (void)
 {
-    qt = std::make_shared<TokenGrabberU1Qt>();
-    qt->run();
+    //qt = std::make_shared<TokenGrabberU1Qt>();
+    qtfuture = qt::core::world::enter_with_task_and_expect_result<std::shared_ptr<TokenGrabberU1Qt>>([]()
+    {
+        auto qtgrabber = std::make_shared<TokenGrabberU1Qt>();
+        qtgrabber->run();
+        return qtgrabber;
+    });
 }
 
 TokenGrabberU1::~TokenGrabberU1 (void)
@@ -98,7 +101,13 @@ TokenGrabberU1::~TokenGrabberU1 (void)
 
 std::string TokenGrabberU1::signUrl (std::string url, std::string type)
 {
-    return qt->signUrl(url, type);
+    if (qtfuture.valid())
+    {
+        return qtfuture.get()->signUrl(url, type);
+    }
+
+    std::string retval;
+    return retval;
 }
 
 #include "token-grabber-u1.moc"
