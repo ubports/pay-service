@@ -50,6 +50,7 @@ public:
             url += "?device=" + device;
         }
 
+        /* Sign the request */
         auto auth = token->signUrl(url, "GET");
         if (!auth.empty())
         {
@@ -57,6 +58,9 @@ public:
             header += auth;
             curlHeaders = curl_slist_append(curlHeaders, auth.c_str());
         }
+
+        /* Ensure we get JSON back */
+        curlHeaders = curl_slist_append(curlHeaders, "Accept: application/json");
 
         handle = curl_easy_init();
 
