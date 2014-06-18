@@ -1,5 +1,6 @@
-pay-service (0.1+14.10.20140601-0ubuntu2) UNRELEASED; urgency=medium
+pay-service (0.1+14.10.20140618-0ubuntu1) utopic; urgency=medium
 
+  [ Ted Gould ]
   * Add acceptance tests and merge commit rules
   * Fix scoping of root object
   * Allow purchasing items without verifications
@@ -7,7 +8,7 @@ pay-service (0.1+14.10.20140601-0ubuntu2) UNRELEASED; urgency=medium
   * Launch Pay UI for finishing payment
   * Add a dummy click hook to allow for usage in Pay UI
 
- -- Ted Gould <ted@ubuntu.com>  Wed, 18 Jun 2014 13:44:26 -0500
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 18 Jun 2014 18:47:13 +0000
 
 pay-service (0.1+14.10.20140601-0ubuntu1) utopic; urgency=low
 
