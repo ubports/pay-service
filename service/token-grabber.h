@@ -17,33 +17,23 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "item-interface.h"
+#ifndef TOKEN_GRABBER_HPP__
+#define TOKEN_GRABBER_HPP__ 1
+
+#include <string>
 #include <memory>
+
 #include <core/signal.h>
 
-#ifndef DBUS_INTERFACE_HPP__
-#define DBUS_INTERFACE_HPP__ 1
-
-class DBusInterfaceImpl;
-
-class DBusInterface
+class TokenGrabber
 {
 public:
-    DBusInterface (const Item::Store::Ptr& in_items);
-    ~DBusInterface () { };
+    virtual std::string signUrl(std::string url, std::string type) = 0;
 
-    bool busStatus ();
+    typedef std::shared_ptr<TokenGrabber> Ptr;
 
-    static std::string encodePath (const std::string& input);
-    static std::string decodePath (const std::string& input);
-
-    core::Signal<> connectionReady;
-
-    typedef std::shared_ptr<DBusInterface> Ptr;
-
-private:
-    std::shared_ptr<DBusInterfaceImpl> impl;
+    /* Signals */
+    core::Signal<bool> tokenUpdated;
 };
 
-
-#endif // DBUS_INTERFACE_HPP__
+#endif /* TOKEN_GRABBER_HPP__ */

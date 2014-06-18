@@ -1,0 +1,5 @@
+# NOTE: Temporary until trusted sessions land
+Pattern: ${home}/.local/share/applications/${id}.desktop
+Exec: /bin/true
+User-Level: yes
+Hook-Name: pay-ui

@@ -3,6 +3,7 @@ Section: gnome
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: astyle,
+               click-dev,
                cmake,
                dbus,
                dbus-test-runner,
@@ -10,10 +11,13 @@ Build-Depends: astyle,
                google-mock,
                libcurl4-gnutls-dev,
                libdbustest1-dev,
+               libglib2.0-dev,
                libgtest-dev,
                libprocess-cpp-dev,
                libubuntu-app-launch2-dev,
+               libubuntuoneauth-2.0-dev,
                python3-dbusmock,
+               qtbase5-dev,
 Standards-Version: 3.9.5
 Homepage: http://launchpad.net/pay-service
 # If you aren't a member of ~indicator-applet-developers but need to upload

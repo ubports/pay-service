@@ -17,33 +17,34 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <core/posix/signal.h>
-
 #include "dbus-interface.h"
 #include "item-memory.h"
 #include "verification-curl.h"
 #include "purchase-ual.h"
+#include "qtbridge.h"
+#include "token-grabber-u1.h"
 
 int
 main (int argv, char* argc[])
 {
-    auto trap = core::posix::trap_signals_for_all_subsequent_threads(
+    TokenGrabber::Ptr token;
+    Verification::Factory::Ptr vfactory;
+    Purchase::Factory::Ptr pfactory;
+    Item::Store::Ptr items;
+    DBusInterface::Ptr dbus;
+
+    qt::core::world::build_and_run(argv, argc, [&token, &vfactory, &pfactory, &items, &dbus]()
     {
-        core::posix::Signal::sig_int,
-        core::posix::Signal::sig_term
+        /* Initialize the other object after Qt is built */
+        token = std::make_shared<TokenGrabberU1>();
+        vfactory = std::make_shared<Verification::CurlFactory>(token);
+        pfactory = std::make_shared<Purchase::UalFactory>();
+        items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+        dbus = std::make_shared<DBusInterface>(items);
     });
 
-    trap->signal_raised().connect([trap](core::posix::Signal)
-    {
-        trap->stop();
-    });
-
-    auto vfactory = std::make_shared<Verification::CurlFactory>();
-    auto pfactory = std::make_shared<Purchase::UalFactory>();
-    auto items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
-    auto dbus = std::make_shared<DBusInterface>(items);
-
-    trap->run();
+    qt::core::world::destroy();
 
     return EXIT_SUCCESS;
 }
+

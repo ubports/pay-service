@@ -18,7 +18,6 @@ include_directories(
 
   ${GMOCK_INCLUDE_DIR}
   ${GTEST_INCLUDE_DIR}
-  ${PROCESS_CPP_INCLUDE_DIRS}
 )
 
 #############################
@@ -36,7 +35,6 @@ target_link_libraries(
   pay-service-lib
 
   ${SERVICE_DEPS_LIBRARIES}
-  ${PROCESS_CPP_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
   ${GMOCK_BOTH_LIBRARIES}
 )
@@ -84,14 +82,27 @@ target_link_libraries(
 )
 
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good-simple.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good-simple @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/simple.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/simple @ONLY)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/device-id.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/device-id @ONLY)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/package-name.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/package-name @ONLY)
 
 add_test(verification-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-tests)
 
 #############################
 # Purchase UAL
 #############################
+
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/click-db/test.conf.in
+  ${CMAKE_CURRENT_BINARY_DIR}/click-db/test.conf @ONLY)
+
+add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+add_definitions(-DCMAKE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(
   purchase-ual-tests
@@ -126,3 +137,8 @@ target_link_libraries(
 
 add_test(libpay-tests ${CMAKE_CURRENT_BINARY_DIR}/libpay-tests)
 
+#############################
+# staging script
+#############################
+
+install(PROGRAMS setup-staging.sh DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})

@@ -18,6 +18,9 @@
  */
 
 #include "verification-factory.h"
+#include "token-grabber.h"
+
+#include <memory>
 
 #ifndef VERIFICATION_CURL_HPP__
 #define VERIFICATION_CURL_HPP__ 1
@@ -26,7 +29,7 @@ namespace Verification {
 
 class CurlFactory : public Factory {
 public:
-	CurlFactory ();
+	CurlFactory (TokenGrabber::Ptr token);
 	CurlFactory (const std::string& endpoint);
 	~CurlFactory ();
 
@@ -34,9 +37,12 @@ public:
 	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
 
 	void setEndpoint (std::string& endpoint);
+	void setDevice (std::string& device);
 
 private:
 	std::string endpoint;
+	std::string device;
+	TokenGrabber::Ptr tokenGrabber;
 };
 
 } // ns Verification

@@ -31,10 +31,20 @@ public:
     typedef std::shared_ptr<Item> Ptr;
 
     UalItem (std::string& in_appid, std::string& in_itemid) :
-        appid(in_appid), itemid(in_itemid), loop(nullptr), status(Item::ERROR)
+        appid(in_appid),
+        itemid(in_itemid),
+        loop(nullptr),
+        status(Item::ERROR)
     {
         /* TODO: ui_appid needs to be grabbed from the click hook */
-        ui_appid = "gedit";
+        gchar* appidc = ubuntu_app_launch_triplet_to_app_id("com.canonical.payui",
+                                                            nullptr,
+                                                            nullptr);
+        if (appidc != nullptr)
+        {
+            ui_appid = appidc;
+            g_free(appidc);
+        }
     }
 
     ~UalItem ()
@@ -79,9 +89,14 @@ public:
             /* Building a URL so that we can pass this information today without
                using trusted helpers and setting environment vars */
             /* TODO: Use trusted helpers */
-            std::string purchase_url = "purchase:///";
-            purchase_url += appid;
-            purchase_url += "/";
+            std::string purchase_url = "purchase://";
+
+            if (appid != "click-scope")
+            {
+                purchase_url += appid;
+                purchase_url += "/";
+            }
+
             purchase_url += itemid;
             const gchar* urls[2] = {0};
             urls[0] = purchase_url.c_str();

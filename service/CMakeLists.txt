@@ -1,5 +1,5 @@
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g ${GCOV_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fPIE ${GCOV_FLAGS}")
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 
@@ -14,11 +14,16 @@ set(SERVICE_LIB_SOURCES
     item-null.h
     item-memory.h
     item-memory.cpp
+    qtbridge.h
+    qtbridge.cpp
     purchase-factory.h
     purchase-null.h
     purchase-null.cpp
     purchase-ual.h
     purchase-ual.cpp
+    token-grabber.h
+    token-grabber-u1.h
+    token-grabber-u1.cpp
     verification-curl.cpp
     verification-null.cpp)
 
@@ -34,8 +39,7 @@ target_link_libraries(pay-service-lib ${SERVICE_DEPS_LIBRARIES})
 
 add_executable(pay-service main.cpp)
 target_link_libraries(pay-service
-                      pay-service-lib
-                      ${PROCESS_CPP_LIBRARIES})
+                      pay-service-lib)
 
 install(TARGETS pay-service RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
 

@@ -1,0 +1,9 @@
+{
+	"version": "0.1",
+	"name": "com.canonical.payui",
+	"hooks": {
+		"app1": {
+			"desktop": "test.desktop"
+		}
+	}
+}

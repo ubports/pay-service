@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 #include "service/verification-curl.h"
+#include "token-grabber-null.h"
 
 struct VerificationCurlTests : public ::testing::Test
 {
@@ -26,16 +27,20 @@ struct VerificationCurlTests : public ::testing::Test
 		virtual void SetUp() {
 			endpoint = "file://";
 			endpoint += VERIFICATION_CURL_ENDPOINTS_DIR;
+
+			device = "1234";
 		}
 
 		virtual void TearDown() {
 		}
 
 		std::string endpoint;
+		std::string device;
 };
 
 TEST_F(VerificationCurlTests, InitTest) {
-	auto verify = std::make_shared<Verification::CurlFactory>();
+	auto token = std::make_shared<TokenGrabberNull>();
+	auto verify = std::make_shared<Verification::CurlFactory>(token);
 	EXPECT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 	verify.reset();
@@ -43,7 +48,8 @@ TEST_F(VerificationCurlTests, InitTest) {
 }
 
 TEST_F(VerificationCurlTests, PurchaseItem) {
-	auto verify = std::make_shared<Verification::CurlFactory>();
+	auto token = std::make_shared<TokenGrabberNull>();
+	auto verify = std::make_shared<Verification::CurlFactory>(token);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 
@@ -72,4 +78,47 @@ TEST_F(VerificationCurlTests, PurchaseItem) {
 	usleep(20 * 1000);
 
 	EXPECT_EQ(Verification::Item::Status::ERROR, badstatus);
+}
+
+TEST_F(VerificationCurlTests, ClickScope) {
+	auto token = std::make_shared<TokenGrabberNull>();
+	auto verify = std::make_shared<Verification::CurlFactory>(token);
+	ASSERT_NE(nullptr, verify);
+	verify->setEndpoint(endpoint);
+
+	std::string appid("click-scope");
+	std::string itemid("package-name");
+
+	auto item = verify->verifyItem(appid, itemid);
+	ASSERT_NE(nullptr, item);
+
+	Verification::Item::Status status = Verification::Item::Status::ERROR;
+	item->verificationComplete.connect([&status] (Verification::Item::Status in_status) { status = in_status; });
+
+	ASSERT_TRUE(item->run());
+	usleep(20 * 1000);
+
+	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
+}
+
+TEST_F(VerificationCurlTests, DeviceId) {
+	auto token = std::make_shared<TokenGrabberNull>();
+	auto verify = std::make_shared<Verification::CurlFactory>(token);
+	ASSERT_NE(nullptr, verify);
+	verify->setEndpoint(endpoint);
+	verify->setDevice(device);
+
+	std::string appid("good");
+	std::string itemid("device-id");
+
+	auto item = verify->verifyItem(appid, itemid);
+	ASSERT_NE(nullptr, item);
+
+	Verification::Item::Status status = Verification::Item::Status::ERROR;
+	item->verificationComplete.connect([&status] (Verification::Item::Status in_status) { status = in_status; });
+
+	ASSERT_TRUE(item->run());
+	usleep(20 * 1000);
+
+	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
 }
