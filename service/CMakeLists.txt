@@ -43,6 +43,14 @@ target_link_libraries(pay-service
 
 install(TARGETS pay-service RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
 
+###########################
+# Mir Connection Demangler
+###########################
+
+add_executable(mir-connection-demangler mir-connection-demangler.c)
+target_link_libraries(mir-connection-demangler ${SERVICE_DEPS_LIBRARIES})
+install(TARGETS mir-connection-demangler RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
+
 ######################
 # Style Checking
 ######################
