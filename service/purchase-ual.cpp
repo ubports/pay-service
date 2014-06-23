@@ -176,5 +176,15 @@ UalFactory::purchaseItem (std::string& appid, std::string& itemid)
     return std::make_shared<UalItem>(appid, itemid);
 }
 
+UalFactory::UalFactory () : impl()
+{
+}
+
+class UalFactory::Impl
+{
+
+
+};
+
 } // ns Purchase
 
