@@ -21,6 +21,7 @@
 #include <thread>
 #include <ubuntu-app-launch.h>
 #include <gio/gio.h>
+#include <mir_toolkit/mir_connection.h>
 
 namespace Purchase
 {
@@ -182,7 +183,12 @@ UalFactory::UalFactory () : impl()
 
 class UalFactory::Impl
 {
+    std::unique_ptr<MirConnection, void(*)(MirConnection*)> connection;
 
+    Impl(void) :
+        connection(mir_connect_sync(nullptr, "pay-service"), mir_connection_release)
+    {
+    }
 
 };
 
