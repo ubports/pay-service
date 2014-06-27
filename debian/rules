@@ -4,8 +4,13 @@ export DH_VERBOSE=1
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 export G_MESSAGES_DEBUG=all
 
+# Explicitly selecting a G{CC,++}-version here to avoid accidental
+# ABI breaks introduced by toolchain updates.
+export CC=$(DEB_HOST_GNU_TYPE)-gcc-4.9
+export CXX=$(DEB_HOST_GNU_TYPE)-g++-4.9
+
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pay-service -DCMAKE_INSTALL_INCLUDEDIR=/usr/include/$(DEB_HOST_MULTIARCH)/
+	dh_auto_configure -- -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pay-service -DCMAKE_INSTALL_INCLUDEDIR=/usr/include/$(DEB_HOST_MULTIARCH)/ -DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX)
 
 %:
 	dh $@ --fail-missing --with click

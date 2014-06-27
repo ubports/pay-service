@@ -9,6 +9,10 @@ Build-Depends: astyle,
                dbus-test-runner,
                debhelper (>= 9),
                google-mock,
+# We rely on C++11 features, and to prevent from ABI breaks
+# in libstdc++ causing us issues, we explicitly select a G++
+# version.
+               g++-4.9,
                libcurl4-gnutls-dev,
                libdbustest1-dev,
                libglib2.0-dev,
@@ -39,7 +43,7 @@ Description: service to allow requesting payment for an item
  .
  This package provides a service for the Pay Service
 
-Package: libpay1
+Package: libpay2
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
@@ -49,13 +53,13 @@ Description: Library for interacting with the in app payments
  This library contains information to purchase items and figure out
  their purchase status.
 
-Package: libpay1-dev
+Package: libpay2-dev
 Architecture: any
 Section: libdevel
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          libglib2.0-dev,
-         libpay1 (=${binary:Version})
+         libpay2 (=${binary:Version})
 Multi-Arch: same
 Description: Pay service - library development files
  This library contains information to purchase items and figure out

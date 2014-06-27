@@ -4,8 +4,8 @@ set(libpay-headers
 set(libpay-sources
     pay-package.cpp)
 
-set(api-version 1)
-set(abi-version 1)
+set(api-version 2)
+set(abi-version 2)
 
 ######################
 # DBus Proxies
