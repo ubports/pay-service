@@ -13,13 +13,13 @@ U1_SEARCH_BASE_URL=https://search.apps.staging.ubuntu.com/
 
 echo "Setting up upstart environment variables"
 
-initctl set-env --global SSO_AUTH_BASE_URL=$SSO_AUTH_BASE_URL
-initctl set-env --global SSO_UONE_BASE_URL=$SSO_UONE_BASE_URL
-initctl set-env --global PAY_BASE_URL=$PAY_BASE_URL
-initctl set-env --global URL_PACKAGE_INFO=$URL_PACKAGE_INFO
-initctl set-env --global ACCOUNT_CREDS_URL=$ACCOUNT_CREDS_URL
-initctl set-env --global ADD_PAYMENT_URL=$ADD_PAYMENT_URL
-initctl set-env --global U1_SEARCH_BASE_URL=$U1_SEARCH_BASE_URL
+/sbin/initctl set-env --global SSO_AUTH_BASE_URL=$SSO_AUTH_BASE_URL
+/sbin/initctl set-env --global SSO_UONE_BASE_URL=$SSO_UONE_BASE_URL
+/sbin/initctl set-env --global PAY_BASE_URL=$PAY_BASE_URL
+/sbin/initctl set-env --global URL_PACKAGE_INFO=$URL_PACKAGE_INFO
+/sbin/initctl set-env --global ACCOUNT_CREDS_URL=$ACCOUNT_CREDS_URL
+/sbin/initctl set-env --global ADD_PAYMENT_URL=$ADD_PAYMENT_URL
+/sbin/initctl set-env --global U1_SEARCH_BASE_URL=$U1_SEARCH_BASE_URL
 
 echo "Setting up dbus environment variables"
 
@@ -30,7 +30,7 @@ gdbus call --session \
 	"[{'SSO_AUTH_BASE_URL', '$SSO_AUTH_BASE_URL'}, {'SSO_UONE_BASE_URL', '$SSO_UONE_BASE_URL'}, {'PAY_BASE_URL', '$PAY_BASE_URL'}, {'URL_PACKAGE_INFO', '$URL_PACKAGE_INFO'}, {'ACCOUNT_CREDS_URL', '$ACCOUNT_CREDS_URL'}, {'ADD_PAYMENT_URL', '$ADD_PAYMENT_URL'}, {'U1_SEARCH_BASE_URL', '$U1_SEARCH_BASE_URL'}]"
 
 echo "Restarting scope registry"
-restart scope-registry
+/sbin/restart scope-registry
 
 echo "Restarting pay service"
-restart pay-service
+/sbin/restart pay-service
