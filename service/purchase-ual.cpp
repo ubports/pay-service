@@ -118,8 +118,9 @@ public:
             purchaseComplete(status);
         });
 
+        t.detach();
         return true;
-    };
+    }
 
 private:
     /* Set at init */
