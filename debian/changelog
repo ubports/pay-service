@@ -1,3 +1,17 @@
+pay-service (0.1+14.10.20140702-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * When setting up staging set the DBus activation environment as well
+
+  [ Rodney Dawes ]
+  * Remove a superfluous semicolon. Add a thread.detach to permit the
+    thread to execute/exit independently. (LP: #1335974)
+  * Recommend libglib2.0-bin and upstart as setup-staging.sh requires
+    them. Specify the full path to initctl and restart as /sbin is not
+    in $PATH.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 02 Jul 2014 14:34:41 +0000
+
 pay-service (0.1+14.10.20140618-0ubuntu1) utopic; urgency=medium
 
   [ Ted Gould ]
