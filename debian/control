@@ -31,6 +31,8 @@ Architecture: any
 Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
+Recommends: libglib2.0-bin,
+            upstart,
 Description: service to allow requesting payment for an item
  Allows applications to request an item be paid for by the user.
  This requires interaction with the server backend to handle the
