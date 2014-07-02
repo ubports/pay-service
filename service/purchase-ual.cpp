@@ -53,10 +53,6 @@ public:
         {
             g_main_loop_quit(loop);
         }
-        if (t.joinable())
-        {
-            t.join();
-        }
     }
 
     virtual bool run (void)
@@ -118,8 +114,9 @@ public:
             purchaseComplete(status);
         });
 
+        t.detach();
         return true;
-    };
+    }
 
 private:
     /* Set at init */
