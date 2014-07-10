@@ -65,7 +65,8 @@ public:
         {
             std::string header("Authorization: ");
             header += auth;
-            curlHeaders = curl_slist_append(curlHeaders, auth.c_str());
+            // TODO: Need regression test for this.
+            curlHeaders = curl_slist_append(curlHeaders, header.c_str());
         }
 
         /* Ensure we get JSON back */
