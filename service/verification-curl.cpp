@@ -43,7 +43,8 @@ public:
 
         if (app != "click-scope")
         {
-            url += "/" + app;
+            // TODO: Needs regression testing, and redirect support.
+            url += "/" + app + "/";
         }
         url += "/" + item;
         if (!device.empty())
