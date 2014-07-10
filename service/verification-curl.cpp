@@ -19,6 +19,7 @@
 
 #include "verification-curl.h"
 
+#include <string>
 #include <thread>
 
 #include <curl/curl.h>
@@ -45,7 +46,14 @@ public:
         {
             url += "/" + app;
         }
+        // TODO: Needs regression testing, and redirect support.
         url += "/" + item;
+        if (app == "click-scope"
+                && url.find("file:///") == std::string::npos)
+        {
+            url += "/";
+        }
+
         if (!device.empty())
         {
             url += "?device=" + device;
