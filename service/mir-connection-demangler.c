@@ -17,9 +17,16 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
+#include <glib.h>
+
 int
 main (int argc, char * argv[])
 {
+	const gchar * mir_socket = g_getenv("PAY_SERVICE_MIR_SOCKET");
+	if (mir_socket == NULL) {
+		g_warning("Unable to find Mir connection from Pay Service");
+		return -1;
+	}
 
 
 	return 0;
