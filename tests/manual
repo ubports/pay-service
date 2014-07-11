@@ -4,26 +4,33 @@ Test-case pay-service/setup-staging-account
         <dd>Going to System Settings → Accounts shouldn't have any "Ubuntu One" entries shown</dd>
         <dd>Delete the account if there is one shown and exit system settings</dd>
     <dt>Set up the device to use the staging servers for Ubuntu One</dt>
-        <dd>Execute the script: /usr/lib/*/pay-service/setup-staging.sh</dd>
+        <dd>Execute the script: /usr/lib/*/pay-service/setup-staging.sh (log in via <tt>phablet-shell</tt>)</dd>
         <dd>It should run to completion without error</dd>
-    <dt>Create an Ubuntu One account: ${your name}+${unique number}@canonical.com</dt>
+        <dd>This is just setting the variables to staging during the session, it might happend that some processes are restarted and the variables get lost, in that situation you will need to run the script again.</dd>
+    <dt>Create an Ubuntu One account: ${your name}@canonical.com</dt>
         <dd>NOTE: This is only currently available to Canonical employees. There is work underway to make it more widely available but it is not complete yet.</dd>
-        <dd>The System Settings app should allow creating the account and the account show show up in the list of accounts on the device</dd>
+        <dd>The System Settings app should allow creating the account and the account will show up in the list of accounts on the device.</dd>
     <dt>Add a testing credit card to your account</dt>
-        <dd>The System Settings pane for Payment Options should allow for setting up the testing credit cards (numbers not listed here)</dd>
+        <dd>Go to: https://staging.pay.ubuntu.com/account/ (Use the same Canonical Account to login).</dd>
+        <dd>Click on "Add a new credit card" and complete the Credit Card info, using the following:</dd>
+        <dd><tt>Name on Card: Test</tt></dd>
+        <dd><tt>Card Type: Visa</tt></dd>
+        <dd><tt>Card Number: 4111 1111 1111 1111</tt></dd>
+        <dd><tt>CCV Number: 111</tt></dd>
+        <dd><tt>Expiration date: 12/2021</tt></dd>
 </dl>
 
 Test-case pay-service/purchase-application
 <dl>
     <dt>Create a new account with no previously purchased items</dt>
         <dd>The instructions in <tt>pay-service/setup-staging-account</tt> pass without error</dd>
-    <dt>Find the "QR-Code" app in the application scope</dt>
-        <dd>By searching for "QR-Code" an app should be listed and clicking on it show its preview</dd>
-    <dt>Ensure that the QR-Code app has not been previously purchased</dt>
+    <dt>Find the "Delta" app in the application scope</dt>
+        <dd>By searching for "Delta" an app should be listed and clicking on it show its preview</dd>
+    <dt>Ensure that the Delta app has not been previously purchased</dt>
         <dd>The button in the preview should show the price of the app and not "Open" or "Install"</dd>
     <dt>Wait 10 minutes for the token to expire</dt>
         <dd>Take a nice walk on a sunny day</dd>
-    <dt>Select the "Purchase" button for the "QR-Code" application</dt>
+    <dt>Select the "Purchase" button for the "Delta" application</dt>
         <dd>The button should depress and a window should appear asking for your Ubuntu One password</dd>
     <dt>Enter your password and confirm the purchase</dt>
         <dd>The window should close and the application should begin downloading and install</dd>
