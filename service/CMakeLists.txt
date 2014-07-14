@@ -55,6 +55,7 @@ install(TARGETS mir-connection-demangler RUNTIME DESTINATION ${CMAKE_INSTALL_FUL
 # Untrusted Helper Exec Tool
 #############################
 
+add_definitions(-DSOCKET_TOOL="${CMAKE_INSTALL_FULL_PKGLIBEXECDIR}/mir-connection-demangler")
 add_executable(exec-tool exec-tool.c)
 target_link_libraries(exec-tool ${SERVICE_DEPS_LIBRARIES})
 install(TARGETS exec-tool RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/ubuntu-app-launch/pay-ui")

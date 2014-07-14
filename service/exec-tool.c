@@ -19,8 +19,6 @@
 
 #include <glib.h>
 
-#define SOCKET_TOOL "foo"
-
 int
 main (int argc, char * argv[])
 {
