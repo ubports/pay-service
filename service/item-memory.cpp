@@ -124,7 +124,9 @@ public:
                 switch (status)
                 {
                     case Purchase::Item::PURCHASED:
-                        setStatus(Item::Status::PURCHASED);
+                        /* If the purchase UI says that it was purchased, let's
+                           double check on that */
+                        verify();
                         break;
                     case Purchase::Item::ERROR:
                     case Purchase::Item::NOT_PURCHASED:
