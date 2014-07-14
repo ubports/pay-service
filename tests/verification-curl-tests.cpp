@@ -67,6 +67,15 @@ TEST_F(VerificationCurlTests, PurchaseItem) {
 
 	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
 
+	/* Verify it can be run twice on the same item */
+	status = Verification::Item::Status::ERROR;
+
+	ASSERT_TRUE(item->run());
+	usleep(20 * 1000);
+
+	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
+
+	/* Bad App ID */
 	std::string badappid("bad");
 	auto baditem = verify->verifyItem(badappid, itemid);
 	ASSERT_NE(nullptr, item);
