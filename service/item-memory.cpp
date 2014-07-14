@@ -60,16 +60,16 @@ public:
 
     bool verify (void)
     {
-        if (vitem != nullptr)
-        {
-            return true;
-        }
         if (!vfactory->running())
         {
             return false;
         }
 
-        vitem = vfactory->verifyItem(app, id);
+        if (vitem == nullptr)
+        {
+            vitem = vfactory->verifyItem(app, id);
+        }
+
         if (vitem == nullptr)
         {
             /* Uhg, failed */
@@ -126,8 +126,11 @@ public:
                     case Purchase::Item::PURCHASED:
                         /* If the purchase UI says that it was purchased, let's
                            double check on that */
-                        verify();
-                        break;
+                        if (verify())
+                        {
+                            break;
+                        }
+                        /* If we can't verify, it's an error */
                     case Purchase::Item::ERROR:
                     case Purchase::Item::NOT_PURCHASED:
                     default: /* Fall through, an error is same as status we don't know */
