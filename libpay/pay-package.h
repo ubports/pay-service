@@ -33,7 +33,8 @@ typedef struct PayPackage_ PayPackage;
  * The states that an purchased item can be in.
  */
 typedef enum
-{ /*< prefix=PAY_PACKAGE_ITEM_STATUS */
+{
+    /*< prefix=PAY_PACKAGE_ITEM_STATUS */
     PAY_PACKAGE_ITEM_STATUS_UNKNOWN,       /*< nick=unknown */
     PAY_PACKAGE_ITEM_STATUS_VERIFYING,     /*< nick=verifying */
     PAY_PACKAGE_ITEM_STATUS_PURCHASED,     /*< nick=purchased */

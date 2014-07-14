@@ -87,12 +87,7 @@ public:
 
     ~CurlItem (void)
     {
-        stop = true;
-
-        if (exec.joinable())
-        {
-            exec.join();
-        }
+        stopThread();
 
         curl_easy_cleanup(handle);
 
@@ -103,9 +98,21 @@ public:
         }
     }
 
+    void stopThread (void)
+    {
+        stop = true;
+
+        if (exec.joinable())
+        {
+            exec.join();
+        }
+    }
+
     virtual bool run (void)
     {
+        stopThread();
         transferBuffer.clear();
+        stop = false;
 
         /* Do the execution in another thread so we can wait on the
            network socket. */
