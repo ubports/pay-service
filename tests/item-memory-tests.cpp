@@ -180,12 +180,24 @@ TEST_F(MemoryItemTests, PurchaseItem) {
 	usleep(50 * 1000);
 	EXPECT_EQ(Item::Item::Status::NOT_PURCHASED, item->getStatus());
 
+	/* Assume the purchase UI is a liar */
+	std::string fitemname("falsely-purchased-item");
+	pfactory->test_setPurchase(appname, fitemname, true);
+	auto fitem = store->getItem(appname, fitemname);
+
+	ASSERT_TRUE(fitem->verify());
+	usleep(50 * 1000);
+	ASSERT_TRUE(fitem->purchase());
+	usleep(50 * 1000);
+
+	EXPECT_EQ(Item::Item::Status::NOT_PURCHASED, fitem->getStatus());
+
+	/* Legit purchase with verification */
 	std::string pitemname("purchased-item");
 	pfactory->test_setPurchase(appname, pitemname, true);
-	auto pitem = store->getItem(appname, pitemname);
+	vfactory->test_setPurchase(appname, pitemname, true);
 
-	ASSERT_TRUE(pitem->verify());
-	usleep(50 * 1000);
+	auto pitem = store->getItem(appname, pitemname);
 	ASSERT_TRUE(pitem->purchase());
 	usleep(50 * 1000);
 
