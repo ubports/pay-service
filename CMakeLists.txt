@@ -33,7 +33,6 @@ set(CMAKE_AUTOMOC ON)
 
 find_package (PkgConfig REQUIRED)
 find_package (Qt5Core REQUIRED)
-include (FindPkgConfig)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
                    libcurl
