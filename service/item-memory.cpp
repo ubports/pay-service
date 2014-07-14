@@ -121,22 +121,11 @@ public:
 
             pitem->purchaseComplete.connect([this](Purchase::Item::Status status)
             {
-                switch (status)
+                /* Verifying on each time the purchase UI runs right now because
+                   we're not getting reliable status back from them. */
+                if (!verify())
                 {
-                    case Purchase::Item::PURCHASED:
-                        /* If the purchase UI says that it was purchased, let's
-                           double check on that */
-                        if (verify())
-                        {
-                            break;
-                        }
-                        /* If we can't verify, it's an error */
-                    case Purchase::Item::ERROR:
-                    case Purchase::Item::NOT_PURCHASED:
-                    default: /* Fall through, an error is same as status we don't know */
-                        /* We know we were not purchased before, so let's stay that way */
-                        setStatus(Item::Status::NOT_PURCHASED);
-                        break;
+                    setStatus(Item::Status::NOT_PURCHASED);
                 }
                 return;
             });
