@@ -85,7 +85,7 @@ public:
            network socket. */
         exec = std::thread([this]()
         {
-			std::string authheader;
+            std::string authheader;
             CURL* handle = curl_easy_init();
 
             /* Helps with threads */
