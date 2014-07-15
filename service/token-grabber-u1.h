@@ -35,6 +35,7 @@ public:
 
 private:
     std::future<std::shared_ptr<TokenGrabberU1Qt>> qtfuture;
+    std::shared_ptr<TokenGrabberU1Qt> grabber;
 };
 
 
