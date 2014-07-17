@@ -19,6 +19,7 @@
 
 #include "purchase-ual.h"
 #include <thread>
+#include <future>
 #include <ubuntu-app-launch.h>
 #include <gio/gio.h>
 #include <mir_toolkit/mir_connection.h>
@@ -60,6 +61,22 @@ public:
 
     static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
     {
+    }
+
+    std::string setupSocket (std::shared_ptr<MirPromptSession>& session)
+    {
+        auto socketPromise = std::make_shared<std::promise<std::string>>();
+        auto socketFuture = socketPromise->get_future();
+
+        std::thread([socketPromise]()
+        {
+            std::string socketName("test");
+            socketPromise->set_value(socketName);
+            /* TODO */
+        }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
+
+        socketFuture.wait();
+        return socketFuture.get();
     }
 
     virtual bool run (void)
