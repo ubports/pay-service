@@ -177,9 +177,31 @@ class UalFactory::Impl
     {
     }
 
+    /* Figures out the PID that we should be overlaying with the PayUI */
+    pid_t appid2pid (std::string& appid)
+    {
+        if (appid == "click-scope")
+        {
+            /* TODO: For the click-scope we're using the dash's pid */
+            return 0;
+        }
+        else
+        {
+            return ubuntu_app_launch_get_primary_pid(appid.c_str());
+        }
+    }
+
 public:
     Item::Ptr purchaseItem (std::string& appid, std::string& itemid)
     {
+        pid_t overlaypid = appid2pid(appid);
+        if (overlaypid == 0)
+        {
+            /* We can't overlay nothin' */
+            Item::Ptr empty;
+            return empty;
+        }
+
         return std::make_shared<UalItem>(appid, itemid);
     }
 };
