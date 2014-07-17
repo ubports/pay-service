@@ -168,16 +168,6 @@ private:
     }
 };
 
-Item::Ptr
-UalFactory::purchaseItem (std::string& appid, std::string& itemid)
-{
-    return std::make_shared<UalItem>(appid, itemid);
-}
-
-UalFactory::UalFactory () : impl()
-{
-}
-
 class UalFactory::Impl
 {
     std::unique_ptr<MirConnection, void(*)(MirConnection*)> connection;
@@ -187,7 +177,22 @@ class UalFactory::Impl
     {
     }
 
+public:
+    Item::Ptr purchaseItem (std::string& appid, std::string& itemid)
+    {
+        return std::make_shared<UalItem>(appid, itemid);
+    }
 };
+
+Item::Ptr
+UalFactory::purchaseItem (std::string& appid, std::string& itemid)
+{
+    return impl->purchaseItem(appid, itemid);
+}
+
+UalFactory::UalFactory () : impl()
+{
+}
 
 } // ns Purchase
 
