@@ -32,22 +32,13 @@ class UalItem : public Item
 public:
     typedef std::shared_ptr<Item> Ptr;
 
-    UalItem (std::string& in_appid, std::string& in_itemid, MirConnection* mir, pid_t overlay_pid) :
+    UalItem (std::string& in_appid, std::string& in_itemid, std::shared_ptr<MirConnection> mir) :
         appid(in_appid),
         itemid(in_itemid),
         loop(nullptr),
-        status(Item::ERROR)
+        status(Item::ERROR),
+        connection(mir)
     {
-        session = std::shared_ptr<MirPromptSession>(
-                      mir_connection_create_prompt_session_sync(mir, overlay_pid, stateChanged, this),
-                      [](MirPromptSession * session)
-        {
-            if (session != nullptr)
-            {
-                mir_prompt_session_release_sync(session);
-            }
-        });
-
         /* TODO: ui_appid needs to be grabbed from the click hook */
         gchar* appidc = ubuntu_app_launch_triplet_to_app_id("com.canonical.payui",
                                                             nullptr,
@@ -77,7 +68,31 @@ public:
         {
             return false;
         }
-        t = std::thread([this]()
+
+        pid_t overlaypid = appid2pid(appid);
+        if (overlaypid == 0)
+        {
+            /* We can't overlay nothin' */
+            return false;
+        }
+
+        /* Setup the trusted prompt session */
+        auto session = std::shared_ptr<MirPromptSession>(
+                           mir_connection_create_prompt_session_sync(connection.get(), overlaypid, stateChanged, this),
+                           [](MirPromptSession * session)
+        {
+            if (session != nullptr)
+            {
+                mir_prompt_session_release_sync(session);
+            }
+        });
+
+        if (session == nullptr)
+        {
+            return false;
+        }
+
+        t = std::thread([this, session]()
         {
             /* Build up the context and loop for the async events and a place
                for GDBus to send its events back to */
@@ -139,7 +154,7 @@ private:
     std::string appid;
     std::string itemid;
     std::string ui_appid;
-    std::shared_ptr<MirPromptSession> session;
+    std::shared_ptr<MirConnection> connection;
 
     /* Created by run, destroyed with the object */
     std::thread t;
@@ -147,6 +162,20 @@ private:
     /* Only used in thread t */
     GMainLoop* loop;
     Item::Status status;
+
+    /* Figures out the PID that we should be overlaying with the PayUI */
+    pid_t appid2pid (std::string& appid)
+    {
+        if (appid == "click-scope")
+        {
+            /* TODO: For the click-scope we're using the dash's pid */
+            return 0;
+        }
+        else
+        {
+            return ubuntu_app_launch_get_primary_pid(appid.c_str());
+        }
+    }
 
     static void app_stop_static_helper (const gchar* appid, gpointer user_data)
     {
@@ -200,32 +229,10 @@ class UalFactory::Impl
         });
     }
 
-    /* Figures out the PID that we should be overlaying with the PayUI */
-    pid_t appid2pid (std::string& appid)
-    {
-        if (appid == "click-scope")
-        {
-            /* TODO: For the click-scope we're using the dash's pid */
-            return 0;
-        }
-        else
-        {
-            return ubuntu_app_launch_get_primary_pid(appid.c_str());
-        }
-    }
-
 public:
     Item::Ptr purchaseItem (std::string& appid, std::string& itemid)
     {
-        pid_t overlaypid = appid2pid(appid);
-        if (overlaypid == 0)
-        {
-            /* We can't overlay nothin' */
-            Item::Ptr empty;
-            return empty;
-        }
-
-        return std::make_shared<UalItem>(appid, itemid, connection.get(), overlaypid);
+        return std::make_shared<UalItem>(appid, itemid, connection);
     }
 };
 
