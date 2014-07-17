@@ -84,7 +84,8 @@ std::string TokenGrabberU1Qt::signUrl (std::string url, std::string type)
     return retval;
 }
 
-TokenGrabberU1::TokenGrabberU1 (void)
+TokenGrabberU1::TokenGrabberU1 (void) :
+    grabber(nullptr)
 {
     //qt = std::make_shared<TokenGrabberU1Qt>();
     qtfuture = qt::core::world::enter_with_task_and_expect_result<std::shared_ptr<TokenGrabberU1Qt>>([]()
@@ -103,7 +104,12 @@ std::string TokenGrabberU1::signUrl (std::string url, std::string type)
 {
     if (qtfuture.valid())
     {
-        return qtfuture.get()->signUrl(url, type);
+        grabber = qtfuture.get();
+    }
+
+    if (grabber != nullptr)
+    {
+        return grabber->signUrl(url, type);
     }
 
     std::string retval;
