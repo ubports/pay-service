@@ -22,6 +22,7 @@
 #include <ubuntu-app-launch.h>
 #include <gio/gio.h>
 #include <mir_toolkit/mir_connection.h>
+#include <mir_toolkit/mir_prompt_session.h>
 
 namespace Purchase
 {
@@ -31,12 +32,22 @@ class UalItem : public Item
 public:
     typedef std::shared_ptr<Item> Ptr;
 
-    UalItem (std::string& in_appid, std::string& in_itemid) :
+    UalItem (std::string& in_appid, std::string& in_itemid, MirConnection* mir, pid_t overlay_pid) :
         appid(in_appid),
         itemid(in_itemid),
         loop(nullptr),
         status(Item::ERROR)
     {
+        session = std::shared_ptr<MirPromptSession>(
+                      mir_connection_create_prompt_session_sync(mir, overlay_pid, stateChanged, this),
+                      [](MirPromptSession * session)
+        {
+            if (session != nullptr)
+            {
+                mir_prompt_session_release_sync(session);
+            }
+        });
+
         /* TODO: ui_appid needs to be grabbed from the click hook */
         gchar* appidc = ubuntu_app_launch_triplet_to_app_id("com.canonical.payui",
                                                             nullptr,
@@ -54,6 +65,10 @@ public:
         {
             g_main_loop_quit(loop);
         }
+    }
+
+    static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
+    {
     }
 
     virtual bool run (void)
@@ -124,6 +139,7 @@ private:
     std::string appid;
     std::string itemid;
     std::string ui_appid;
+    std::shared_ptr<MirPromptSession> session;
 
     /* Created by run, destroyed with the object */
     std::thread t;
@@ -170,11 +186,18 @@ private:
 
 class UalFactory::Impl
 {
-    std::unique_ptr<MirConnection, void(*)(MirConnection*)> connection;
+    std::shared_ptr<MirConnection> connection;
 
-    Impl(void) :
-        connection(mir_connect_sync(nullptr, "pay-service"), mir_connection_release)
+    Impl(void)
     {
+        connection = std::shared_ptr<MirConnection>(mir_connect_sync(nullptr, "pay-service"),
+                                                    [](MirConnection * connection)
+        {
+            if (connection != nullptr)
+            {
+                mir_connection_release(connection);
+            }
+        });
     }
 
     /* Figures out the PID that we should be overlaying with the PayUI */
@@ -202,7 +225,7 @@ public:
             return empty;
         }
 
-        return std::make_shared<UalItem>(appid, itemid);
+        return std::make_shared<UalItem>(appid, itemid, connection.get(), overlaypid);
     }
 };
 
