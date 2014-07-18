@@ -243,17 +243,20 @@ private:
     std::string appid;
     std::string itemid;
     std::string ui_appid;
+
+    /* Given to us by our parents */
     std::shared_ptr<MirConnection> connection;
 
     /* Created by run, destroyed with the object */
     std::thread t;
     std::shared_ptr<GCancellable> stopThread;
 
-    /* Only used in thread t */
+    /* Lifecycle should generally match thread t */
     std::shared_ptr<GMainContext> context;
     std::shared_ptr<GMainLoop> loop;
     std::shared_ptr<GDBusConnection> bus;
 
+    /* For the callbacks */
     Item::Status status;
 
     /* Const */
