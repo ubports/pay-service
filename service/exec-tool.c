@@ -19,15 +19,9 @@
 
 #include <glib.h>
 
-int
-main (int argc, char * argv[])
+gchar *
+build_exec_envvar (const gchar * appid)
 {
-	const gchar * appid = g_getenv("APP_ID");
-	if (appid == NULL) {
-		g_error("Environment variable 'APP_ID' required");
-		return -1;
-	}
-
 	gchar * appid_desktop = g_strdup_printf("%s.desktop", appid);
 	gchar * desktopfilepath = g_build_filename(g_get_user_cache_dir(), "pay-service", "pay-ui", appid_desktop, NULL);
 	g_free(appid_desktop);
@@ -35,7 +29,7 @@ main (int argc, char * argv[])
 	if (!g_file_test(desktopfilepath, G_FILE_TEST_EXISTS)) {
 		g_error("Can not file desktop file for '%s', expecting: '%s'", appid, desktopfilepath);
 		g_free(desktopfilepath);
-		return -1;
+		return NULL;
 	}
 
 	GError * error = NULL;
@@ -47,7 +41,7 @@ main (int argc, char * argv[])
 		g_free(desktopfilepath);
 		g_key_file_free(keyfile);
 		g_error_free(error);
-		return -1;
+		return NULL;
 	}
 
 	g_free(desktopfilepath);
@@ -55,7 +49,7 @@ main (int argc, char * argv[])
 	if (!g_key_file_has_key(keyfile, "Desktop File", "Exec", NULL)) {
 		g_error("Desktop file does not have 'Exec' key");
 		g_key_file_free(keyfile);
-		return -1;
+		return NULL;
 	}
 
 	gchar * exec = g_key_file_get_string(keyfile, "Desktop File", "Exec", NULL);
@@ -68,10 +62,26 @@ main (int argc, char * argv[])
 	gchar * envvar = g_strdup_printf("APP_EXEC=%s", prepend);
 	g_free(prepend);
 
+	return envvar;
+}
+
+int
+main (int argc, char * argv[])
+{
+	GError * error = NULL;
+
+	const gchar * appid = g_getenv("APP_ID");
+	if (appid == NULL) {
+		g_error("Environment variable 'APP_ID' required");
+		return -1;
+	}
+
+	gchar * envexec = build_exec_envvar(appid);
+
 	gchar * initctlargv[4] = {
 		"initctl",
 		"set-env",
-		envvar,
+		envexec,
 		NULL
 	};
 
@@ -88,7 +98,7 @@ main (int argc, char * argv[])
 		&error
 	);
 
-	g_free(envvar);
+	g_free(envexec);
 
 	if (error == NULL) {
 		return 0;
