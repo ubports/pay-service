@@ -68,6 +68,29 @@ build_exec_envvar (const gchar * appid)
 gboolean
 build_uri_envvar(const gchar * appuris, gchar ** euri, gchar ** esocket)
 {
+	gint argc;
+	gchar ** argv;
+	GError * error = NULL;
+
+	g_shell_parse_argv(appuris, &argc, &argv, &error);
+	if (error != NULL) {
+		g_critical("Unable to parse URIs '%s': %s", appuris, error->message);
+		g_error_free(error);
+		return FALSE;
+	}
+
+	if (argc != 2) {
+		g_critical("We should be getting 2 entries from '%s' but got %d", appuris, argc);
+		g_strfreev(argv);
+		return FALSE;
+	}
+
+	*esocket = g_strdup_printf("PAY_SERVICE_MIR_SOCKET=%s", argv[0]);
+	gchar * quoted = g_shell_quote(argv[1]);
+	*euri = g_strdup_printf("APP_URIS=%s", quoted);
+	
+	g_free(quoted);
+	g_strfreev(argv);
 
 	return TRUE;
 }
