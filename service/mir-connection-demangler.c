@@ -17,17 +17,74 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <glib.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#ifndef UNIX_PATH_MAX
+/* Bugs me to no end that this isn't a define in sys/un.h */
+#define UNIX_PATH_MAX 108
+#endif
+
+#define OVERRIDE_ENVIRONMENT 1
+
+struct fdcmsghdr {
+	struct cmsghdr hdr;
+	int fd;
+};
 
 int
 main (int argc, char * argv[])
 {
-	const gchar * mir_socket = g_getenv("PAY_SERVICE_MIR_SOCKET");
+	const char * mir_socket = getenv("PAY_SERVICE_MIR_SOCKET");
 	if (mir_socket == NULL) {
-		g_warning("Unable to find Mir connection from Pay Service");
+		fprintf(stderr, "Unable to find Mir connection from Pay Service\n");
 		return -1;
 	}
 
+	if (strlen(mir_socket) > UNIX_PATH_MAX - 1) {
+		fprintf(stderr, "Environment variable 'PAY_SERVICE_MIR_SOCKET' is too long to be a socket path: %s\n", mir_socket);
+		return -1;
+	}
 
-	return 0;
+	struct sockaddr_un socketaddr = {0};
+	socketaddr.sun_family = AF_UNIX;
+	memcpy(socketaddr.sun_path + 1, mir_socket, strlen(mir_socket) + 1);
+
+	int sock = socket(AF_UNIX, SOCK_DGRAM, 0);
+	if (sock == 0) {
+		fprintf(stderr, "Unable to open a socket, at all.\n");
+		return -1;
+	}
+
+	int conresult = connect(sock, (struct sockaddr *)&socketaddr, sizeof(struct sockaddr_un));
+	if (conresult != 0) {
+		close(sock);
+		fprintf(stderr, "Unable to connect to address\n");
+		return -1;
+	}
+
+	struct fdcmsghdr fdhdr = {0};
+	struct msghdr msg = {0};
+
+	msg.msg_control = &fdhdr;
+	msg.msg_controllen = sizeof(struct fdcmsghdr);
+
+	int msgsize = recvmsg(sock, &msg, 0);
+
+	close(sock);
+
+	if (msgsize <= 0) {
+		fprintf(stderr, "Not expecting %d message size", msgsize);
+		return -1;
+	}
+
+	char mirsocketbuf[32];
+	sprintf(mirsocketbuf, "fd://%d", fdhdr.fd);
+	setenv("MIR_SOCKET", mirsocketbuf, OVERRIDE_ENVIRONMENT);
+
+	/* Thought, is argv NULL terminated? */
+	return execv(argv[1], argv + 1);
 }
