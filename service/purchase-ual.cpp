@@ -63,22 +63,9 @@ public:
     {
     }
 
-    std::string setupSocket (std::shared_ptr<MirPromptSession>& session)
-    {
-        auto socketPromise = std::make_shared<std::promise<std::string>>();
-        auto socketFuture = socketPromise->get_future();
-
-        std::thread([socketPromise]()
-        {
-            std::string socketName("test");
-            socketPromise->set_value(socketName);
-            /* TODO */
-        }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
-
-        socketFuture.wait();
-        return socketFuture.get();
-    }
-
+	/* Goes through the basis phases of building up the environment for the
+	   UI to run in. Ensures we've got an AppID, builds the session, sets up
+	   the socket to pass the session. And then starts the UI. */
     virtual bool run (void)
     {
         if (ui_appid.empty())
@@ -86,11 +73,29 @@ public:
             return false;
         }
 
+        auto session = setupSession();
+        if (session == nullptr)
+        {
+            return false;
+        }
+
+        std::string socketname = setupSocket(session);
+        if (socketname.empty())
+        {
+            return false;
+        }
+
+        return appThreadCreate(socketname);
+    }
+
+	/* Creates a Mir Prompt Session by finding the overlay pid and making it. */
+    std::shared_ptr<MirPromptSession> setupSession (void)
+    {
         pid_t overlaypid = appid2pid(appid);
         if (overlaypid == 0)
         {
             /* We can't overlay nothin' */
-            return false;
+            return nullptr;
         }
 
         /* Setup the trusted prompt session */
@@ -104,12 +109,31 @@ public:
             }
         });
 
-        if (session == nullptr)
-        {
-            return false;
-        }
+        return session;
+    }
 
-        t = std::thread([this, session]()
+	/* Creates the abstract socket for communicating the file handle to the
+	   Pay UI and builds a thread to service it */
+    std::string setupSocket (std::shared_ptr<MirPromptSession>& session)
+    {
+        auto socketPromise = std::make_shared<std::promise<std::string>>();
+        auto socketFuture = socketPromise->get_future();
+
+        std::thread([socketPromise, session]()
+        {
+            std::string socketName("test");
+            socketPromise->set_value(socketName);
+            /* TODO */
+        }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
+
+        socketFuture.wait();
+        return socketFuture.get();
+    }
+
+	/* Creates the thread to manage the execution of the Pay UI */
+    bool appThreadCreate (std::string socketname)
+    {
+        t = std::thread([this, socketname]()
         {
             /* Build up the context and loop for the async events and a place
                for GDBus to send its events back to */
