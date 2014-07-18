@@ -204,15 +204,21 @@ public:
             if (helperid != nullptr && !g_cancellable_is_cancelled(stopThread.get()))
             {
                 g_main_loop_run(loop.get());
-                g_free(helperid);
             }
 
             /* Clean up */
             ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE.c_str(), this);
 
+            /* If we've been cancelled we need to clean up the sub process too */
+            if (helperid != nullptr && g_cancellable_is_cancelled(stopThread.get()))
+            {
+                ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE.c_str(), ui_appid.c_str(), helperid);
+            }
+
             bus.reset();
             loop.reset();
             context.reset();
+            g_free(helperid);
 
             /* Signal where we end up */
             purchaseComplete(status);
