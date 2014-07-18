@@ -25,6 +25,12 @@
 #include <mir_toolkit/mir_connection.h>
 #include <mir_toolkit/mir_prompt_session.h>
 
+#include <sys/socket.h>
+#include <sys/un.h>
+
+typedef struct sockaddr_un addrunstruct;
+typedef struct sockaddr addrstruct;
+
 namespace Purchase
 {
 
@@ -66,7 +72,7 @@ public:
 
     static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
     {
-		g_debug("Mir Prompt session is in stated: %d", state);
+        g_debug("Mir Prompt session is in stated: %d", state);
     }
 
     /* Goes through the basis phases of building up the environment for the
@@ -127,9 +133,45 @@ public:
 
         std::thread([socketPromise, session]()
         {
-            std::string socketName("test");
+            std::string socketName;
+
+            int sock = socket(AF_UNIX, SOCK_DGRAM, 0);
+            if (sock == 0)
+            {
+                g_critical("Unable to create socket");
+                socketPromise->set_value(socketName);
+                return;
+            }
+
+            /* Create a Unique-ish Name */
+            int bindtry = 0;
+            do
+            {
+                bindtry++;
+                char templateName[32] = {"/tmp/pay-service-XXXXXX"};
+                mktemp(templateName);
+
+                addrunstruct addr = {0};
+                int bindret = bind(sock, reinterpret_cast<addrstruct*>(&addr), sizeof(addrunstruct));
+
+                if (bindret == 0)
+                {
+                    socketName = std::string(templateName);
+                }
+            }
+            while (socketName.empty() && bindtry < 5);
+
+            /* At this point we're kicking off starting up the process, so we're
+               already bound, which is good. But let's remember what's happening here. */
             socketPromise->set_value(socketName);
-            /* TODO */
+
+            if (socketName.empty())
+            {
+                close(sock);
+                return;
+            }
+
+
         }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
 
         socketFuture.wait();
