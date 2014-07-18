@@ -40,6 +40,15 @@ public:
         status(Item::ERROR),
         connection(mir)
     {
+        stopThread = std::shared_ptr<GCancellable>(g_cancellable_new(), [](GCancellable * cancel)
+        {
+            if (cancel != nullptr)
+            {
+                g_cancellable_cancel(cancel);
+                g_object_unref(cancel);
+            }
+        });
+
         /* TODO: ui_appid needs to be grabbed from the click hook */
         gchar* appidc = ubuntu_app_launch_triplet_to_app_id("com.canonical.payui",
                                                             nullptr,
@@ -53,10 +62,7 @@ public:
 
     ~UalItem ()
     {
-        if (loop != nullptr)
-        {
-            g_main_loop_quit(loop);
-        }
+        cleanupThread();
     }
 
     static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
@@ -130,9 +136,26 @@ public:
         return socketFuture.get();
     }
 
+    void cleanupThread (void)
+    {
+        if (t.joinable())
+        {
+            g_cancellable_cancel(stopThread.get());
+            if (loop != nullptr)
+            {
+                g_main_loop_quit(loop);
+            }
+
+            t.join();
+        }
+    }
+
     /* Creates the thread to manage the execution of the Pay UI */
     bool appThreadCreate (std::string socketname)
     {
+        cleanupThread();
+        g_cancellable_reset(stopThread.get());
+
         t = std::thread([this, socketname]()
         {
             /* Build up the context and loop for the async events and a place
@@ -144,7 +167,7 @@ public:
 
             /* We're grabbing the bus to ensure we can get it, but also
                to keep it connected for the lifecycle of this thread */
-            GDBusConnection* bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+            GDBusConnection* bus = g_bus_get_sync(G_BUS_TYPE_SESSION, stopThread.get(), NULL);
             if (bus == NULL)
             {
                 purchaseComplete(Item::ERROR);
@@ -160,7 +183,7 @@ public:
             urls[0] = purchase_url.c_str();
 
             gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE.c_str(), ui_appid.c_str(), urls);
-            if (helperid != nullptr)
+            if (helperid != nullptr && !g_cancellable_is_cancelled(stopThread.get()))
             {
                 g_main_loop_run(loop);
                 g_free(helperid);
@@ -177,7 +200,6 @@ public:
             purchaseComplete(status);
         });
 
-        t.detach();
         return true;
     }
 
@@ -207,6 +229,7 @@ private:
 
     /* Created by run, destroyed with the object */
     std::thread t;
+    std::shared_ptr<GCancellable> stopThread;
 
     /* Only used in thread t */
     GMainLoop* loop;
