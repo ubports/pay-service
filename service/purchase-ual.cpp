@@ -197,8 +197,9 @@ public:
 
             /* Building a URL to pass info to the Pay UI */
             std::string purchase_url = buildPurchaseUrl();
-            const gchar* urls[2] = {0};
-            urls[0] = purchase_url.c_str();
+            const gchar* urls[3] = {0};
+            urls[0] = socketname.c_str();
+            urls[1] = purchase_url.c_str();
 
             gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE.c_str(), ui_appid.c_str(), urls);
             if (helperid != nullptr && !g_cancellable_is_cancelled(stopThread.get()))
