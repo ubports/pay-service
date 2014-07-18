@@ -155,15 +155,7 @@ public:
             /* TODO: Add failed when in UAL */
 
             /* Building a URL to pass info to the Pay UI */
-            std::string purchase_url = "purchase://";
-
-            if (appid != "click-scope")
-            {
-                purchase_url += appid;
-                purchase_url += "/";
-            }
-
-            purchase_url += itemid;
+            std::string purchase_url = buildPurchaseUrl();
             const gchar* urls[2] = {0};
             urls[0] = purchase_url.c_str();
 
@@ -187,6 +179,23 @@ public:
 
         t.detach();
         return true;
+    }
+
+    /* Build up the URL that we use to pass the purchase information on
+       to the Pay UI */
+    std::string buildPurchaseUrl (void)
+    {
+        std::string purchase_url = "purchase://";
+
+        if (appid != "click-scope")
+        {
+            purchase_url += appid;
+            purchase_url += "/";
+        }
+
+        purchase_url += itemid;
+
+        return purchase_url;
     }
 
 private:
