@@ -63,9 +63,9 @@ public:
     {
     }
 
-	/* Goes through the basis phases of building up the environment for the
-	   UI to run in. Ensures we've got an AppID, builds the session, sets up
-	   the socket to pass the session. And then starts the UI. */
+    /* Goes through the basis phases of building up the environment for the
+       UI to run in. Ensures we've got an AppID, builds the session, sets up
+       the socket to pass the session. And then starts the UI. */
     virtual bool run (void)
     {
         if (ui_appid.empty())
@@ -88,7 +88,7 @@ public:
         return appThreadCreate(socketname);
     }
 
-	/* Creates a Mir Prompt Session by finding the overlay pid and making it. */
+    /* Creates a Mir Prompt Session by finding the overlay pid and making it. */
     std::shared_ptr<MirPromptSession> setupSession (void)
     {
         pid_t overlaypid = appid2pid(appid);
@@ -112,8 +112,8 @@ public:
         return session;
     }
 
-	/* Creates the abstract socket for communicating the file handle to the
-	   Pay UI and builds a thread to service it */
+    /* Creates the abstract socket for communicating the file handle to the
+       Pay UI and builds a thread to service it */
     std::string setupSocket (std::shared_ptr<MirPromptSession>& session)
     {
         auto socketPromise = std::make_shared<std::promise<std::string>>();
@@ -130,7 +130,7 @@ public:
         return socketFuture.get();
     }
 
-	/* Creates the thread to manage the execution of the Pay UI */
+    /* Creates the thread to manage the execution of the Pay UI */
     bool appThreadCreate (std::string socketname)
     {
         t = std::thread([this, socketname]()
@@ -151,12 +151,10 @@ public:
                 return;
             }
 
-            ubuntu_app_launch_observer_add_app_stop(app_stop_static_helper, this);
-            ubuntu_app_launch_observer_add_app_failed(app_failed_static_helper, this);
+            ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, HELPER_TYPE.c_str(), this);
+            /* TODO: Add failed when in UAL */
 
-            /* Building a URL so that we can pass this information today without
-               using trusted helpers and setting environment vars */
-            /* TODO: Use trusted helpers */
+            /* Building a URL to pass info to the Pay UI */
             std::string purchase_url = "purchase://";
 
             if (appid != "click-scope")
@@ -169,14 +167,15 @@ public:
             const gchar* urls[2] = {0};
             urls[0] = purchase_url.c_str();
 
-            if (ubuntu_app_launch_start_application(ui_appid.c_str(), urls))
+            gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE.c_str(), ui_appid.c_str(), urls);
+            if (helperid != nullptr)
             {
                 g_main_loop_run(loop);
+                g_free(helperid);
             }
 
             /* Clean up */
-            ubuntu_app_launch_observer_delete_app_stop(app_stop_static_helper, this);
-            ubuntu_app_launch_observer_delete_app_failed(app_failed_static_helper, this);
+            ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE.c_str(), this);
 
             g_clear_object(&bus);
             g_clear_pointer(&loop, g_main_loop_unref);
@@ -204,8 +203,13 @@ private:
     GMainLoop* loop;
     Item::Status status;
 
+    /* Const */
+    const std::string HELPER_TYPE
+    {"pay-ui"
+    };
+
     /* Figures out the PID that we should be overlaying with the PayUI */
-    pid_t appid2pid (std::string& appid)
+    static pid_t appid2pid (std::string& appid)
     {
         if (appid == "click-scope")
         {
@@ -218,20 +222,14 @@ private:
         }
     }
 
-    static void app_stop_static_helper (const gchar* appid, gpointer user_data)
+    static void helper_stop_static_helper (const gchar* appid, const gchar* instanceid, const gchar* helpertype,
+                                           gpointer user_data)
     {
         UalItem* notthis = static_cast<UalItem*>(user_data);
-        notthis->appStop(std::string(appid));
+        notthis->helperStop(std::string(appid));
     }
 
-    static void app_failed_static_helper (const gchar* appid, UbuntuAppLaunchAppFailed failure_type, gpointer user_data)
-    {
-        /* we're not actually using the failure type, we don't care why */
-        UalItem* notthis = static_cast<UalItem*>(user_data);
-        notthis->appFailed(std::string(appid));
-    }
-
-    void appStop (std::string stop_appid)
+    void helperStop (std::string stop_appid)
     {
         if (stop_appid != ui_appid)
         {
@@ -239,17 +237,6 @@ private:
         }
 
         status = Item::PURCHASED;
-        g_main_loop_quit(loop);
-    }
-
-    void appFailed (std::string failed_appid)
-    {
-        if (failed_appid != ui_appid)
-        {
-            return;
-        }
-
-        status = Item::NOT_PURCHASED;
         g_main_loop_quit(loop);
     }
 };
