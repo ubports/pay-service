@@ -65,11 +65,19 @@ build_exec_envvar (const gchar * appid)
 	return envvar;
 }
 
+gboolean
+build_uri_envvar(const gchar * appuris, gchar ** euri, gchar ** esocket)
+{
+
+	return TRUE;
+}
+
 int
 main (int argc, char * argv[])
 {
 	GError * error = NULL;
 
+	/* Build up our exec */
 	const gchar * appid = g_getenv("APP_ID");
 	if (appid == NULL) {
 		g_error("Environment variable 'APP_ID' required");
@@ -77,11 +85,34 @@ main (int argc, char * argv[])
 	}
 
 	gchar * envexec = build_exec_envvar(appid);
+	if (envexec == NULL) {
+		return -1;
+	}
 
-	gchar * initctlargv[4] = {
+	/* Build up our socket name URL */
+	const gchar * appuris = g_getenv("APP_URIS");
+	if (appuris == NULL) {
+		g_error("Environment variable 'APP_URIS' required");
+		g_free(envexec);
+		return -1;
+	}
+
+	gchar * envuri = NULL;
+	gchar * envsocket = NULL;
+
+	if (!build_uri_envvar(appuris, &envuri, &envsocket)) {
+		g_free(envexec);
+		return -1;
+	}
+
+	/* Execute the setting of the variables! */
+
+	gchar * initctlargv[6] = {
 		"initctl",
 		"set-env",
 		envexec,
+		envuri,
+		envsocket,
 		NULL
 	};
 
@@ -99,6 +130,8 @@ main (int argc, char * argv[])
 	);
 
 	g_free(envexec);
+	g_free(envuri);
+	g_free(envsocket);
 
 	if (error == NULL) {
 		return 0;
