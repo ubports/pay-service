@@ -44,8 +44,8 @@ main (int argc, char * argv[])
 		return -1;
 	}
 
-	if (strlen(mir_socket) > UNIX_PATH_MAX - 1) {
-		fprintf(stderr, "Environment variable 'PAY_SERVICE_MIR_SOCKET' is too long to be a socket path: %s\n", mir_socket);
+	if (strlen(mir_socket) > UNIX_PATH_MAX - 2) { /* One for NULL on front, one on end */
+		fprintf(stderr, "Environment variable 'PAY_SERVICE_MIR_SOCKET' is too long to be an abstract socket path: %s\n", mir_socket);
 		return -1;
 	}
 
