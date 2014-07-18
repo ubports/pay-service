@@ -217,7 +217,7 @@ public:
 
                 if (error != nullptr)
                 {
-                    std::cerr << "Error verifying item: " << error->message << std::endl;
+                    std::cerr << "Error from dbus message to service: " << error->message << std::endl;
                     g_clear_error(&error);
                 }
 

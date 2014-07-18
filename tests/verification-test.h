@@ -38,6 +38,9 @@ public:
 	}
 
 	virtual bool run (void) {
+		if (t.joinable())
+			t.join();
+
 		t = std::thread([this]() {
 			/* Fastest website in the world */
 			usleep(10 * 1000);

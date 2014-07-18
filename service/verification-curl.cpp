@@ -19,6 +19,7 @@
 
 #include "verification-curl.h"
 
+#include <string>
 #include <thread>
 
 #include <curl/curl.h>
@@ -34,10 +35,9 @@ public:
               std::string& item,
               std::string& endpoint,
               std::string& device,
-              TokenGrabber::Ptr token) :
+              TokenGrabber::Ptr intoken) :
         stop(false),
-        handle(nullptr),
-        curlHeaders(nullptr)
+        token(intoken)
     {
         url = endpoint;
 
@@ -45,38 +45,27 @@ public:
         {
             url += "/" + app;
         }
+        // TODO: Needs regression testing, and redirect support.
         url += "/" + item;
+        if (app == "click-scope"
+                && url.find("file:///") == std::string::npos)
+        {
+            url += "/";
+        }
+
         if (!device.empty())
         {
             url += "?device=" + device;
         }
 
-        /* Sign the request */
-        auto auth = token->signUrl(url, "GET");
-        if (!auth.empty())
-        {
-            std::string header("Authorization: ");
-            header += auth;
-            curlHeaders = curl_slist_append(curlHeaders, auth.c_str());
-        }
-
-        /* Ensure we get JSON back */
-        curlHeaders = curl_slist_append(curlHeaders, "Accept: application/json");
-
-        handle = curl_easy_init();
-
-        /* Helps with threads */
-        curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1);
-        curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
-        curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
-        if (curlHeaders != nullptr)
-        {
-            curl_easy_setopt(handle, CURLOPT_HTTPHEADER, curlHeaders);
-        }
     }
 
     ~CurlItem (void)
+    {
+        stopThread();
+    }
+
+    void stopThread (void)
     {
         stop = true;
 
@@ -84,24 +73,50 @@ public:
         {
             exec.join();
         }
-
-        curl_easy_cleanup(handle);
-
-        if (curlHeaders != nullptr)
-        {
-            curl_slist_free_all (curlHeaders) ;
-            curlHeaders = nullptr;
-        }
     }
 
     virtual bool run (void)
     {
+        stopThread();
         transferBuffer.clear();
+        stop = false;
 
         /* Do the execution in another thread so we can wait on the
            network socket. */
         exec = std::thread([this]()
         {
+            std::string authheader;
+            CURL* handle = curl_easy_init();
+
+            /* Helps with threads */
+            curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1);
+            curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
+            curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
+
+            /* Setup the authorization right before doing the request */
+            struct curl_slist* curlHeaders = NULL;
+
+            /* Sign the request */
+            auto auth = token->signUrl(url, "GET");
+            if (!auth.empty())
+            {
+                authheader = "Authorization: ";
+                authheader += auth;
+                // TODO: Need regression test for this.
+                curlHeaders = curl_slist_append(curlHeaders, authheader.c_str());
+            }
+
+            /* Ensure we get JSON back */
+            curlHeaders = curl_slist_append(curlHeaders, "Accept: application/json");
+
+            /* Actually set them in cURL */
+            if (curlHeaders != nullptr)
+            {
+                curl_easy_setopt(handle, CURLOPT_HTTPHEADER, curlHeaders);
+            }
+
+            /**** Do it! ****/
             auto status = curl_easy_perform(handle);
 
             if (status == CURLE_OK)
@@ -123,17 +138,25 @@ public:
                 std::cerr << "CURL error '" << curl_easy_strerror(status) << "' from URL '" << url << "'" << std::endl;
                 verificationComplete(Status::ERROR);
             }
+
+            /* Clean up headers */
+            if (curlHeaders != nullptr)
+            {
+                curl_slist_free_all (curlHeaders) ;
+                curlHeaders = nullptr;
+            }
+
+            curl_easy_cleanup(handle);
         });
 
         return true;
     }
 private:
-    CURL* handle;
     std::string transferBuffer;
     std::thread exec;
     std::string url;
+    TokenGrabber::Ptr token;
     bool stop;
-    struct curl_slist* curlHeaders;
 
     /* This is the callback from cURL as it does the transfer. We're
        pretty simple in that we're just putting it into a string. */

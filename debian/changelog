@@ -4,6 +4,54 @@ pay-service (2.0.0) UNRELEASED; urgency=medium
 
  -- Thomas Voß <thomas.voss@canonical.com>  Fri, 27 Jun 2014 10:26:02 +0200
 
+pay-service (0.1+14.10.20140715-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Apply fixes to the test plan that were done in the Wiki
+  * Authenticate when we do the query to not cache authentications (LP:
+    #1342126)
+
+  [ Rodney Dawes ]
+  * Save the result from the token grabber future, for later use.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 15 Jul 2014 23:24:05 +0000
+
+pay-service (0.1+14.10.20140714-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Verify purchase status after running Purchase UI
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 14 Jul 2014 20:46:45 +0000
+
+pay-service (0.1+14.10.20140710-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Correct error message copy
+  * Bootstrap documentation for libpay
+
+  [ Rodney Dawes ]
+  * Drop the extra include of FindPkgConfig as it is not needed. (LP:
+    #1337332)
+  * Append a / to the URL path to avoid a redirect from the server. (LP:
+    #1340350)
+  * Append the correct thing to the headers list. (LP: #1337493)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 10 Jul 2014 21:11:23 +0000
+
+pay-service (0.1+14.10.20140702-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * When setting up staging set the DBus activation environment as well
+
+  [ Rodney Dawes ]
+  * Remove a superfluous semicolon. Add a thread.detach to permit the
+    thread to execute/exit independently. (LP: #1335974)
+  * Recommend libglib2.0-bin and upstart as setup-staging.sh requires
+    them. Specify the full path to initctl and restart as /sbin is not
+    in $PATH.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 02 Jul 2014 14:34:41 +0000
+
 pay-service (0.1+14.10.20140618-0ubuntu1) utopic; urgency=medium
 
   [ Ted Gould ]
