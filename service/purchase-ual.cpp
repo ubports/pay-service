@@ -161,6 +161,7 @@ public:
 
                 if (bindret == 0)
                 {
+                    g_debug("Bound to socket: %s", templateName);
                     socketName = std::string(templateName);
                 }
             }
@@ -174,6 +175,7 @@ public:
                make sure to clean up the socket. */
             if (socketName.empty())
             {
+                g_critical("Unable to bind to any name");
                 close(sock);
                 return;
             }
@@ -183,6 +185,7 @@ public:
                                                                            1,
                                                                            [](MirPromptSession * session, size_t count, int const * fdsin, void * context) -> void
             {
+                g_debug("FDs %d Returned from Mir", count);
                 if (count != 1) return;
                 int* fdout = reinterpret_cast<int*>(context);
                 fdout[0] = fdsin[0];
@@ -200,11 +203,13 @@ public:
             fdcmsghdr message = {0};
             message.fd = fdlist[0];
 
+            g_debug("Sending FD via socket…");
             /* This will block until someone picks up the message */
             sendmsg(sock, reinterpret_cast<msghdr*>(&message), 0);
 
             /* If it's sent, we're done */
             close(sock);
+            g_debug("Shutting down this side of the socket.");
         }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
 
         socketFuture.wait();
