@@ -200,6 +200,11 @@ public:
             fdcmsghdr message = {0};
             message.fd = fdlist[0];
 
+            /* This will block until someone picks up the message */
+            sendmsg(sock, reinterpret_cast<msghdr*>(&message), 0);
+
+            /* If it's sent, we're done */
+            close(sock);
         }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
 
         socketFuture.wait();
