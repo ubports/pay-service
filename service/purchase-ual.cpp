@@ -30,6 +30,11 @@
 
 typedef struct sockaddr_un addrunstruct;
 typedef struct sockaddr addrstruct;
+typedef struct
+{
+    struct cmsghdr hdr;
+    int fd;
+} fdcmsghdr;
 
 namespace Purchase
 {
@@ -165,12 +170,35 @@ public:
                already bound, which is good. But let's remember what's happening here. */
             socketPromise->set_value(socketName);
 
+            /* If we didn't get a socket name, we should just exit. And
+               make sure to clean up the socket. */
             if (socketName.empty())
             {
                 close(sock);
                 return;
             }
 
+            int fdlist[1] = {0};
+            auto mirwait = mir_prompt_session_new_fds_for_prompt_providers(session.get(),
+                                                                           1,
+                                                                           [](MirPromptSession * session, size_t count, int const * fdsin, void * context) -> void
+            {
+                if (count != 1) return;
+                int* fdout = reinterpret_cast<int*>(context);
+                fdout[0] = fdsin[0];
+            },
+            fdlist);
+
+            mir_wait_for(mirwait);
+
+            if (fdlist[0] == 0)
+            {
+                close(sock);
+                return;
+            }
+
+            fdcmsghdr message = {0};
+            message.fd = fdlist[0];
 
         }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
 
