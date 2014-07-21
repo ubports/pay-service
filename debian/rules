@@ -4,6 +4,8 @@ export DH_VERBOSE=1
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 export G_MESSAGES_DEBUG=all
 
+include /usr/share/dpkg/default.mk
+
 # Explicitly selecting a G{CC,++}-version here to avoid accidental
 # ABI breaks introduced by toolchain updates.
 export CC=$(DEB_HOST_GNU_TYPE)-gcc-4.9
