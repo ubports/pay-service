@@ -12,7 +12,7 @@ class Package : public QObject
 {
 	Q_OBJECT
 
-	Q_PROPERTY(QString pkgname READ pkgname NOTIFY pkgnameChanged)
+	Q_PROPERTY(QString pkgname READ pkgname WRITE setPkgname NOTIFY pkgnameChanged)
 
 public:
 	QString pkgname() const;
