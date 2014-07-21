@@ -131,3 +131,22 @@ TEST_F(VerificationCurlTests, DeviceId) {
 
 	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
 }
+
+TEST_F(VerificationCurlTests, testGetBaseUrl)
+{
+    const char *value = getenv(Verification::PAY_BASE_URL_ENVVAR.c_str());
+    if (value != nullptr) {
+        ASSERT_TRUE(unsetenv(Verification::PAY_BASE_URL_ENVVAR.c_str()) == 0);
+    }
+    ASSERT_TRUE(Verification::CurlFactory::get_base_url() == Verification::PAY_BASE_URL);
+    
+}
+
+TEST_F(VerificationCurlTests, testGetBaseUrlFromEnv)
+{
+    const std::string expected{"http://localhost:8080"};
+    ASSERT_TRUE(setenv(Verification::PAY_BASE_URL_ENVVAR.c_str(),
+                       expected.c_str(), 1) == 0);
+    ASSERT_TRUE(Verification::CurlFactory::get_base_url() == expected);
+    ASSERT_TRUE(unsetenv(Verification::PAY_BASE_URL_ENVVAR.c_str()) == 0);
+}

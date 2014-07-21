@@ -5,7 +5,7 @@
 
 SSO_AUTH_BASE_URL=https://login.staging.ubuntu.com
 SSO_UONE_BASE_URL=https://staging.one.ubuntu.com
-PAY_BASE_URL=https://sc.staging.ubuntu.com/api/2.0/click/
+PAY_BASE_URL=https://sc.staging.ubuntu.com
 URL_PACKAGE_INFO=https://search.apps.staging.ubuntu.com/api/v1/package/
 ACCOUNT_CREDS_URL=https://login.staging.ubuntu.com/api/v2/tokens/oauth
 ADD_PAYMENT_URL=https://sc.staging.ubuntu.com/api/2.0/click/paymentmethods/add/

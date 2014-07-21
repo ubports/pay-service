@@ -180,17 +180,10 @@ private:
  *********************/
 
 CurlFactory::CurlFactory (TokenGrabber::Ptr token) :
-    endpoint("https://sc.ubuntu.com/api/2.0/click/purchases"),
     tokenGrabber(token)
 {
-    /* This is how we enable staging */
-    const char* envendpoint(getenv("PAY_BASE_URL"));
-    if (envendpoint != nullptr)
-    {
-        endpoint = envendpoint;
-        /* Our endpoint is slightly more specific */
-        endpoint += "/purchases";
-    }
+    // TODO: We should probably always assemble the URL when needed.
+    endpoint = get_base_url() + PAY_API_ROOT + PAY_PURCHASES_PATH;
 
     /* TODO: We should check to see if we have networking someday */
     curl_global_init(CURL_GLOBAL_SSL);
@@ -224,6 +217,17 @@ void
 CurlFactory::setDevice (std::string& in_device)
 {
     device = in_device;
+}
+
+std::string
+CurlFactory::get_base_url ()
+{
+    const char* env_url = getenv(PAY_BASE_URL_ENVVAR.c_str());
+    if (env_url != nullptr)
+    {
+        return env_url;
+    }
+    return PAY_BASE_URL;
 }
 
 } // ns Verification

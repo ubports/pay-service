@@ -21,11 +21,18 @@
 #include "token-grabber.h"
 
 #include <memory>
+#include <string>
 
 #ifndef VERIFICATION_CURL_HPP__
 #define VERIFICATION_CURL_HPP__ 1
 
 namespace Verification {
+
+const std::string PAY_BASE_URL_ENVVAR = "PAY_BASE_URL";
+const std::string PAY_BASE_URL = "https://sc.ubuntu.com";
+const std::string PAY_API_ROOT = "/api/2.0/click";
+const std::string PAY_PURCHASES_PATH = "/purchases";
+
 
 class CurlFactory : public Factory {
 public:
@@ -38,6 +45,8 @@ public:
 
 	void setEndpoint (std::string& endpoint);
 	void setDevice (std::string& device);
+
+    static std::string get_base_url ();
 
 private:
 	std::string endpoint;
