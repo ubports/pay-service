@@ -31,6 +31,9 @@ signals:
 private:
 	std::shared_ptr<PayPackage> pkg;
 	QString _pkgname;
+
+public:
+	void emitItemChanged(const QString& item, const QString& status);
 };
 
 #endif /* PACKAGE_H */

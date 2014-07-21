@@ -1,6 +1,8 @@
 #include "package.h"
 #include <QDebug>
 
+static QString enum2str (PayPackageItemStatus val);
+
 Package::Package (QObject * parent):
 	QObject(parent)
 {
@@ -12,6 +14,18 @@ QString Package::pkgname (void) const
 	return _pkgname;
 }
 
+static void itemObserver (PayPackage * pkg, const char * itemid, PayPackageItemStatus status, void * user_data)
+{
+	Package * notthis = reinterpret_cast<Package *>(user_data);
+	QString item(itemid);
+	notthis->emitItemChanged(item, enum2str(status));
+}
+
+void Package::emitItemChanged (const QString &item, const QString &status)
+{
+	emit itemStatusChanged(item, status);
+}
+
 void Package::setPkgname (const QString &pkgname)
 {
 	if (pkgname == _pkgname) {
@@ -19,8 +33,20 @@ void Package::setPkgname (const QString &pkgname)
 	}
 
 	_pkgname = pkgname;
-	pkg = std::shared_ptr<PayPackage>(pay_package_new(_pkgname.toUtf8().data()),
-	[](PayPackage * pkg) {if (pkg != nullptr) pay_package_delete(pkg);});
+	pkg = std::shared_ptr<PayPackage>([this]() -> PayPackage * {
+		PayPackage * pkg = pay_package_new(_pkgname.toUtf8().data());
+
+		if (pkg != nullptr) {
+			pay_package_item_observer_install(pkg, itemObserver, this);
+		}
+
+		return pkg;
+	}(),
+	[this](PayPackage * pkg) {
+		if (pkg != nullptr) {
+			pay_package_item_observer_uninstall(pkg, itemObserver, this);
+			pay_package_delete(pkg);
+		}});
 
 	qDebug() << "Pay Package built for:" << _pkgname.toUtf8().data();
 
