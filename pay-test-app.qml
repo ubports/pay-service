@@ -7,7 +7,8 @@ MainView {
 	id: mainview
 	automaticOrientation: true
 
-	property Package pkg: {
+	Package {
+		id: pkg
 		pkgname: "pay-test-app"
 	}
 
@@ -21,6 +22,7 @@ MainView {
 
 			ListItem.SingleControl {
 				control: TextField {
+					id: idBox
 					x: units.gu(1)
 					y: units.gu(1)
 					width: parent.width - units.gu(2)
@@ -35,6 +37,10 @@ MainView {
 					y: units.gu(1)
 					width: parent.width - units.gu(2)
 					text: i18n.tr("Verify")
+					onClicked: {
+						pkg.verifyItem(idBox.text)
+						return false
+					}
 				}
 			}
 			ListItem.SingleControl {
@@ -43,6 +49,10 @@ MainView {
 					y: units.gu(1)
 					width: parent.width - units.gu(2)
 					text: i18n.tr("Purchase")
+					onClicked: {
+						pkg.purchaseItem(idBox.text)
+						return false
+					}
 				}
 			}
 		}

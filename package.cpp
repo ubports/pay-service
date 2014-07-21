@@ -1,4 +1,5 @@
 #include "package.h"
+#include <QDebug>
 
 Package::Package (QObject * parent):
 	QObject(parent)
@@ -20,6 +21,8 @@ void Package::setPkgname (const QString &pkgname)
 	_pkgname = pkgname;
 	pkg = std::shared_ptr<PayPackage>(pay_package_new(_pkgname.toUtf8().data()),
 	[](PayPackage * pkg) {if (pkg != nullptr) pay_package_delete(pkg);});
+
+	qDebug() << "Pay Package built for:" << _pkgname.toUtf8().data();
 
 	pkgnameChanged();
 }
@@ -51,6 +54,26 @@ QString Package::itemStatus (const QString &item)
 	}
 
 	return enum2str(pay_package_item_status(pkg.get(), item.toUtf8().data()));
+}
+
+bool Package::verifyItem (const QString & item)
+{
+	if (pkg == nullptr)
+		return false;
+
+	qDebug() << "Verifying item" << item << "for package" << _pkgname;
+
+	return pay_package_item_start_verification(pkg.get(), item.toUtf8().data());
+}
+
+bool Package::purchaseItem (const QString & item)
+{
+	if (pkg == nullptr)
+		return false;
+
+	qDebug() << "Purchasing item" << item << "for package" << _pkgname;
+
+	return pay_package_item_start_purchase(pkg.get(), item.toUtf8().data());
 }
 
 #include "moc_package.cpp"

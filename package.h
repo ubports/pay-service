@@ -18,8 +18,11 @@ public:
 	QString pkgname() const;
 	void setPkgname(const QString &pkgname);
 
-	Q_INVOKABLE QString itemStatus (const QString & item);
 	Package (QObject * parent = nullptr);
+
+	Q_INVOKABLE QString itemStatus (const QString & item);
+	Q_INVOKABLE bool verifyItem (const QString & item);
+	Q_INVOKABLE bool purchaseItem (const QString & item);
 
 signals:
 	void pkgnameChanged();
