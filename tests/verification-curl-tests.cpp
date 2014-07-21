@@ -136,17 +136,17 @@ TEST_F(VerificationCurlTests, testGetBaseUrl)
 {
     const char *value = getenv(Verification::PAY_BASE_URL_ENVVAR.c_str());
     if (value != nullptr) {
-        ASSERT_TRUE(unsetenv(Verification::PAY_BASE_URL_ENVVAR.c_str()) == 0);
+        ASSERT_EQ(0, unsetenv(Verification::PAY_BASE_URL_ENVVAR.c_str()));
     }
-    ASSERT_TRUE(Verification::CurlFactory::get_base_url() == Verification::PAY_BASE_URL);
+    ASSERT_EQ(Verification::PAY_BASE_URL, Verification::CurlFactory::get_base_url());
     
 }
 
 TEST_F(VerificationCurlTests, testGetBaseUrlFromEnv)
 {
     const std::string expected{"http://localhost:8080"};
-    ASSERT_TRUE(setenv(Verification::PAY_BASE_URL_ENVVAR.c_str(),
-                       expected.c_str(), 1) == 0);
-    ASSERT_TRUE(Verification::CurlFactory::get_base_url() == expected);
-    ASSERT_TRUE(unsetenv(Verification::PAY_BASE_URL_ENVVAR.c_str()) == 0);
+    ASSERT_EQ(0, setenv(Verification::PAY_BASE_URL_ENVVAR.c_str(),
+                        expected.c_str(), 1));
+    ASSERT_EQ(expected, Verification::CurlFactory::get_base_url());
+    ASSERT_EQ(0, unsetenv(Verification::PAY_BASE_URL_ENVVAR.c_str()));
 }
