@@ -10,6 +10,10 @@ MainView {
 	Package {
 		id: pkg
 		pkgname: "pay-test-app"
+
+		onItemStatusChanged: {
+			statusBox.text = pkg.itemStatus(idBox.text)
+		}
 	}
 
 	Page {
@@ -27,6 +31,22 @@ MainView {
 					y: units.gu(1)
 					width: parent.width - units.gu(2)
 					text: i18n.tr("Item ID")
+
+					onTextChanged: {
+						statusBox.text = pkg.itemStatus(idBox.text)
+					}
+				}
+			}
+			ListItem.Divider {
+			}
+			ListItem.SingleControl {
+				control: TextField {
+					id: statusBox
+					x: units.gu(1)
+					y: units.gu(1)
+					width: parent.width - units.gu(2)
+					text: i18n.tr("Unknown")
+					readOnly: true
 				}
 			}
 			ListItem.Divider {
