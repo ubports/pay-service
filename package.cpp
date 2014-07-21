@@ -6,37 +6,25 @@ Package::Package (QObject * parent):
 	return;
 }
 
-Package::~Package (void)
-{
-	if (pkg != nullptr) {
-		pay_package_delete(pkg);
-		pkg = nullptr;
-	}
-}
-
-QString pkgname (void)
+QString Package::pkgname (void) const
 {
 	return _pkgname;
 }
 
-void setPkgname (const QString * pkgname)
+void Package::setPkgname (const QString &pkgname)
 {
 	if (pkgname == _pkgname) {
 		return;
 	}
 
-	if (pkg != nullptr) {
-		pay_package_delete(pkg);
-		pkg = nullptr;
-	}
-
 	_pkgname = pkgname;
-	pkg = pay_package_new(_pkgname.toUTF8().data());
+	pkg = std::shared_ptr<PayPackage>(pay_package_new(_pkgname.toUtf8().data()),
+	[](PayPackage * pkg) {if (pkg != nullptr) pay_package_delete(pkg);});
 
 	pkgnameChanged();
 }
 
-QString enum2str (PayPackageItemStatus val)
+static QString enum2str (PayPackageItemStatus val)
 {
 	switch (val) {
 	case PAY_PACKAGE_ITEM_STATUS_VERIFYING:
@@ -47,12 +35,14 @@ QString enum2str (PayPackageItemStatus val)
 		return QString("Purchasing");
 	case PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED:
 		return QString("Not Purchased");
+	case PAY_PACKAGE_ITEM_STATUS_UNKNOWN:
+		break;
 	}
 
 	return QString("Unknown");
 }
 
-QString itemStatus (const QString &item)
+QString Package::itemStatus (const QString &item)
 {
 	QString retval;
 
@@ -60,5 +50,7 @@ QString itemStatus (const QString &item)
 		return retval;
 	}
 
-	return enum2string(pay_package_item_status(pkg, item.toUTF8().data()));
+	return enum2str(pay_package_item_status(pkg.get(), item.toUtf8().data()));
 }
+
+#include "moc_package.cpp"

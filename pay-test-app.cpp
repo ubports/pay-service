@@ -1,19 +1,20 @@
 
 #include <QQuickView>
 #include <QtGui/QGuiApplication>
+#include <QtQml/qqml.h>
 
+#include "qtquick2applicationviewer.h"
 #include "package.h"
 
 int main (int argc, char * argv[])
 {
-	auto app = new QApplication(argc, argv);
+	QGuiApplication app(argc, argv);
 
 	qmlRegisterType<Package>("Pay", 1, 0, "Package");
 
-	auto view = new QQuickView();
-	view->setTitle("Pay Test App");
-	view->setSource(Resource::getRcURL("pay-test-app.qml"));
-	view->show();
+	QtQuick2ApplicationViewer view;
+	view.setMainQmlFile(QStringLiteral("pay-test-app.qml"));
+	view.showExpanded();
 
-	return app->exec();
+	return app.exec();
 }
