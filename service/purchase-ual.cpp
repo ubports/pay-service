@@ -217,7 +217,7 @@ public:
             }
 
             addrstruct accepted = {0};
-            socklen_t length;
+            socklen_t length = sizeof(addrstruct);
             if (accept(sock, &accepted, &length) < 0)
             {
                 perror("No acceptance");
