@@ -212,12 +212,14 @@ public:
 
             if (fdlist[0] == 0)
             {
+                g_debug("FD from Mir was a 0");
                 close(sock);
                 return;
             }
 
             listen(sock, 1);
 
+            g_debug("Waiting for connection...");
             addrstruct accepted = {0};
             socklen_t length = sizeof(addrstruct);
             if (accept(sock, &accepted, &length) < 0)
