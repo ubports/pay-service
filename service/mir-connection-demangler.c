@@ -73,6 +73,10 @@ main (int argc, char * argv[])
 	msg.msg_control = &fdhdr;
 	msg.msg_controllen = sizeof(struct fdcmsghdr);
 
+	fdhdr.hdr.cmsg_len = CMSG_LEN(sizeof(int));
+	fdhdr.hdr.cmsg_level = SOL_SOCKET;
+	fdhdr.hdr.cmsg_type = SCM_RIGHTS;
+
 	int msgsize = recvmsg(sock, &msg, 0);
 
 	close(sock);
@@ -82,9 +86,16 @@ main (int argc, char * argv[])
 		return -1;
 	}
 
+	if (fdhdr.fd == 0) {
+		fprintf(stderr, "Passed file descriptor is zero");
+		return -1;
+	}
+
 	char mirsocketbuf[32];
 	sprintf(mirsocketbuf, "fd://%d", fdhdr.fd);
 	setenv("MIR_SOCKET", mirsocketbuf, OVERRIDE_ENVIRONMENT);
+
+	printf("Setting MIR_SOCKET to: '%s'", mirsocketbuf);
 
 	/* Thought, is argv NULL terminated? */
 	return execv(argv[1], argv + 1);
