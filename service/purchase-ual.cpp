@@ -165,13 +165,15 @@ public:
 				g_debug("Socket name attempt: %s", templateName);
 
                 addrunstruct addr = {0};
-                int bindret = connect(sock, reinterpret_cast<addrstruct*>(&addr), sizeof(addrunstruct));
+                int bindret = bind(sock, reinterpret_cast<addrstruct*>(&addr), sizeof(addrunstruct));
 
                 if (bindret == 0)
                 {
                     g_debug("Bound to socket: %s", templateName);
                     socketName = std::string(templateName);
-                }
+                } else {
+					perror("Unable to bind to socket:");
+				}
             }
             while (socketName.empty() && bindtry < 5);
 
