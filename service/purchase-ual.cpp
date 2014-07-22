@@ -26,6 +26,7 @@
 #include <mir_toolkit/mir_connection.h>
 #include <mir_toolkit/mir_prompt_session.h>
 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 
@@ -211,6 +212,15 @@ public:
 
             if (fdlist[0] == 0)
             {
+                close(sock);
+                return;
+            }
+
+            addrstruct accepted = {0};
+            socklen_t length;
+            if (accept(sock, &accepted, &length) < 0)
+            {
+                perror("No acceptance");
                 close(sock);
                 return;
             }
