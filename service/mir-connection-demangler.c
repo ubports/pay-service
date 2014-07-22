@@ -62,7 +62,7 @@ main (int argc, char * argv[])
 	int conresult = connect(sock, (struct sockaddr *)&socketaddr, sizeof(struct sockaddr_un));
 	if (conresult != 0) {
 		close(sock);
-		fprintf(stderr, "Unable to connect to address\n");
+		fprintf(stderr, "Unable to connect to address: %s\n", mir_socket);
 		return -1;
 	}
 
