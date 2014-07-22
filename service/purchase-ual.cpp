@@ -31,9 +31,10 @@
 
 typedef struct sockaddr_un addrunstruct;
 typedef struct sockaddr addrstruct;
+typedef struct msghdr msgstruct;
 typedef struct
 {
-    struct cmsghdr hdr;
+    struct cmsghdr chdr;
     int fd;
 } fdcmsghdr;
 
@@ -214,12 +215,23 @@ public:
                 return;
             }
 
-            fdcmsghdr message = {0};
-            message.fd = fdlist[0];
+            fdcmsghdr cmessage = {0};
+            cmessage.chdr.cmsg_len = CMSG_LEN(sizeof(int));
+            cmessage.chdr.cmsg_level = SOL_SOCKET;
+            cmessage.chdr.cmsg_type = SCM_RIGHTS;
+            cmessage.fd = fdlist[0];
+
+            msgstruct message = {0};
+            message.msg_control = &cmessage;
+            message.msg_controllen = sizeof(fdcmsghdr);
 
             g_debug("Sending FD via socket…");
             /* This will block until someone picks up the message */
-            sendmsg(sock, reinterpret_cast<msghdr*>(&message), 0);
+            int sendcnt = sendmsg(sock, &message, 0);
+            if (sendcnt == 0)
+            {
+                perror("Send message error");
+            }
 
             /* If it's sent, we're done */
             close(sock);
