@@ -163,12 +163,13 @@ public:
                 bindtry++;
                 char templateName[32] = {"/tmp/pay-service-XXXXXX"};
                 mktemp(templateName);
+                std::string tempSock(templateName);
 
                 g_debug("Socket name attempt: %s", templateName);
 
                 addrunstruct addr = {0};
                 addr.sun_family = AF_UNIX;
-                memcpy(addr.sun_path + 1, templateName, 32 + 1);
+                memcpy(addr.sun_path + 1, tempSock.c_str(), tempSock.size() + 1);
                 int bindret = bind(sock, reinterpret_cast<addrstruct*>(&addr), sizeof(addrunstruct));
 
                 if (bindret == 0)
