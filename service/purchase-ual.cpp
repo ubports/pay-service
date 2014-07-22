@@ -391,7 +391,9 @@ class UalFactory::Impl
 
     Impl(void)
     {
-        connection = std::shared_ptr<MirConnection>(mir_connect_sync(nullptr, "pay-service"),
+        gchar* mirpath = g_build_filename(g_get_user_runtime_dir(), "mir_socket_trusted", NULL);
+
+        connection = std::shared_ptr<MirConnection>(mir_connect_sync(mirpath, "pay-service"),
                                                     [](MirConnection * connection)
         {
             if (connection != nullptr)
@@ -399,6 +401,8 @@ class UalFactory::Impl
                 mir_connection_release(connection);
             }
         });
+
+        g_free(mirpath);
     }
 
 public:
