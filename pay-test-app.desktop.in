@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Pay Test App
 Comment=Used for testing pay service, nothing else
-Exec=pay-test-app
+Exec=@pkglibexecdir@/pay-test-app
+Path=@pkglibexecdir@
 Type=Application
