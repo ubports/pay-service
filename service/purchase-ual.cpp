@@ -432,6 +432,9 @@ UalFactory::purchaseItem (std::string& appid, std::string& itemid)
 UalFactory::UalFactory ()
 {
 	impl = std::make_shared<Impl>();
+	if (impl == nullptr) {
+		throw std::runtime_error("Unable to build implementation of UAL Factory");
+	}
 }
 
 } // ns Purchase
