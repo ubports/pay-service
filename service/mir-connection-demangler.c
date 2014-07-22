@@ -63,6 +63,7 @@ main (int argc, char * argv[])
 	if (conresult != 0) {
 		close(sock);
 		fprintf(stderr, "Unable to connect to address: %s\n", mir_socket);
+		perror("Connect error");
 		return -1;
 	}
 
