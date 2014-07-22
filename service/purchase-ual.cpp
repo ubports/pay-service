@@ -216,6 +216,8 @@ public:
                 return;
             }
 
+            listen(sock, 1);
+
             addrstruct accepted = {0};
             socklen_t length = sizeof(addrstruct);
             if (accept(sock, &accepted, &length) < 0)
