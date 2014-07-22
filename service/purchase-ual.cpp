@@ -147,7 +147,7 @@ public:
         {
             std::string socketName;
 
-            int sock = socket(AF_UNIX, SOCK_DGRAM, 0);
+            int sock = socket(AF_UNIX, SOCK_STREAM, 0);
             if (sock == 0)
             {
                 g_critical("Unable to create socket");

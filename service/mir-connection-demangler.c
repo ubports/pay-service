@@ -53,7 +53,7 @@ main (int argc, char * argv[])
 	socketaddr.sun_family = AF_UNIX;
 	memcpy(socketaddr.sun_path + 1, mir_socket, strlen(mir_socket) + 1);
 
-	int sock = socket(AF_UNIX, SOCK_DGRAM, 0);
+	int sock = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (sock == 0) {
 		fprintf(stderr, "Unable to open a socket, at all.\n");
 		return -1;
