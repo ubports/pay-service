@@ -1,2 +1,3 @@
 usr/lib/*/pay-service/*
+usr/lib/*/ubuntu-app-launch/pay-ui/*
 usr/share/upstart/sessions/*
