@@ -47,6 +47,7 @@ MainView {
 					width: parent.width - units.gu(2)
 					text: i18n.tr("Unknown")
 					readOnly: true
+					hasClearButton: false
 				}
 			}
 			ListItem.Divider {
