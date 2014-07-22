@@ -162,18 +162,22 @@ public:
                 char templateName[32] = {"/tmp/pay-service-XXXXXX"};
                 mktemp(templateName);
 
-				g_debug("Socket name attempt: %s", templateName);
+                g_debug("Socket name attempt: %s", templateName);
 
                 addrunstruct addr = {0};
+                addr.sun_family = AF_UNIX;
+                memcpy(addr.sun_path + 1, templateName, 32 + 1);
                 int bindret = bind(sock, reinterpret_cast<addrstruct*>(&addr), sizeof(addrunstruct));
 
                 if (bindret == 0)
                 {
                     g_debug("Bound to socket: %s", templateName);
                     socketName = std::string(templateName);
-                } else {
-					perror("Unable to bind to socket:");
-				}
+                }
+                else
+                {
+                    perror("Unable to bind to socket");
+                }
             }
             while (socketName.empty() && bindtry < 5);
 
@@ -435,10 +439,11 @@ UalFactory::purchaseItem (std::string& appid, std::string& itemid)
 
 UalFactory::UalFactory ()
 {
-	impl = std::make_shared<Impl>();
-	if (impl == nullptr) {
-		throw std::runtime_error("Unable to build implementation of UAL Factory");
-	}
+    impl = std::make_shared<Impl>();
+    if (impl == nullptr)
+    {
+        throw std::runtime_error("Unable to build implementation of UAL Factory");
+    }
 }
 
 } // ns Purchase
