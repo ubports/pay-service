@@ -82,12 +82,13 @@ main (int argc, char * argv[])
 	close(sock);
 
 	if (msgsize <= 0) {
-		fprintf(stderr, "Not expecting %d message size", msgsize);
+		fprintf(stderr, "Not expecting %d message size\n", msgsize);
+		perror("recvmsg error");
 		return -1;
 	}
 
 	if (fdhdr.fd == 0) {
-		fprintf(stderr, "Passed file descriptor is zero");
+		fprintf(stderr, "Passed file descriptor is zero\n");
 		return -1;
 	}
 
