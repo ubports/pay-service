@@ -4,3 +4,5 @@ Comment=Used for testing pay service, nothing else
 Exec=@pkglibexecdir@/pay-test-app
 Path=@pkglibexecdir@
 Type=Application
+X-Ubuntu-Single-Instance=true
+X-Ubuntu-Touch=true
