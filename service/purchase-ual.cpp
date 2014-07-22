@@ -395,6 +395,7 @@ class UalFactory::Impl
 {
     std::shared_ptr<MirConnection> connection;
 
+public:
     Impl(void)
     {
         gchar* mirpath = g_build_filename(g_get_user_runtime_dir(), "mir_socket_trusted", NULL);
@@ -416,7 +417,6 @@ class UalFactory::Impl
         }
     }
 
-public:
     Item::Ptr purchaseItem (std::string& appid, std::string& itemid)
     {
         return std::make_shared<UalItem>(appid, itemid, connection);
@@ -429,8 +429,9 @@ UalFactory::purchaseItem (std::string& appid, std::string& itemid)
     return impl->purchaseItem(appid, itemid);
 }
 
-UalFactory::UalFactory () : impl()
+UalFactory::UalFactory ()
 {
+	impl = std::make_shared<Impl>();
 }
 
 } // ns Purchase
