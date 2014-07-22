@@ -1,0 +1,17 @@
+Source: pay-test-app
+Section: gnome
+Priority: optional
+Maintainer: Ted Gould <ted@ubuntu.com>
+Build-Depends: cmake,
+               debhelper (>= 9),
+               libpay1-dev
+Standards-Version: 3.9.4
+Homepage: http://launchpad.net/~ted/+junk/pay-test-app
+
+Package: pay-test-app
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: Small application to help test payment
+ Not a useful application for users but gives additional
+ information about what's happening in the pay-service
