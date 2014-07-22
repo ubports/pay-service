@@ -46,13 +46,13 @@ build_exec_envvar (const gchar * appid)
 
 	g_free(desktopfilepath);
 
-	if (!g_key_file_has_key(keyfile, "Desktop File", "Exec", NULL)) {
+	if (!g_key_file_has_key(keyfile, "Desktop Entry", "Exec", NULL)) {
 		g_error("Desktop file does not have 'Exec' key");
 		g_key_file_free(keyfile);
 		return NULL;
 	}
 
-	gchar * exec = g_key_file_get_string(keyfile, "Desktop File", "Exec", NULL);
+	gchar * exec = g_key_file_get_string(keyfile, "Desktop Entry", "Exec", NULL);
 	g_key_file_free(keyfile);
 
 	gchar * prepend = g_strdup_printf("%s %s", SOCKET_TOOL, exec);
