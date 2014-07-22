@@ -162,8 +162,10 @@ public:
                 char templateName[32] = {"/tmp/pay-service-XXXXXX"};
                 mktemp(templateName);
 
+				g_debug("Socket name attempt: %s", templateName);
+
                 addrunstruct addr = {0};
-                int bindret = bind(sock, reinterpret_cast<addrstruct*>(&addr), sizeof(addrunstruct));
+                int bindret = connect(sock, reinterpret_cast<addrstruct*>(&addr), sizeof(addrunstruct));
 
                 if (bindret == 0)
                 {
