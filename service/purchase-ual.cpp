@@ -20,6 +20,7 @@
 #include "purchase-ual.h"
 #include <thread>
 #include <future>
+#include <system_error>
 #include <ubuntu-app-launch.h>
 #include <gio/gio.h>
 #include <mir_toolkit/mir_connection.h>
@@ -125,6 +126,11 @@ public:
                 mir_prompt_session_release_sync(session);
             }
         });
+
+        if (session == nullptr)
+        {
+            g_critical("Unable to create a trusted prompt session");
+        }
 
         return session;
     }
@@ -403,6 +409,11 @@ class UalFactory::Impl
         });
 
         g_free(mirpath);
+
+        if (connection == nullptr)
+        {
+            throw std::runtime_error("Unable to connect to Mir Trusted Session");
+        }
     }
 
 public:
