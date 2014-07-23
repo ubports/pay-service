@@ -48,7 +48,7 @@ install(TARGETS pay-service RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECD
 # Mir Connection Demangler
 ###########################
 
-add_executable(mir-connection-demangler mir-connection-demangler.c)
+add_executable(mir-connection-demangler mir-connection-demangler.c proxy-payui.c proxy-payui.h)
 target_link_libraries(mir-connection-demangler ${SERVICE_DEPS_LIBRARIES})
 install(TARGETS mir-connection-demangler RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
 

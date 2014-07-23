@@ -17,95 +17,47 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#ifndef UNIX_PATH_MAX
-/* Bugs me to no end that this isn't a define in sys/un.h */
-#define UNIX_PATH_MAX 108
-#endif
-
-#define OVERRIDE_ENVIRONMENT 1
-
-struct fdcmsghdr {
-	struct cmsghdr hdr;
-	int fd;
-};
+#include <gio/gio.h>
+#include "proxy-payui.h"
 
 int
 main (int argc, char * argv[])
 {
-	const char * mir_socket = getenv("PAY_SERVICE_MIR_SOCKET");
+	const gchar * mir_socket = g_getenv("PAY_SERVICE_MIR_SOCKET");
 	if (mir_socket == NULL) {
-		fprintf(stderr, "Unable to find Mir connection from Pay Service\n");
+		g_error("Unable to find Mir connection from Pay Service");
 		return -1;
 	}
 
-	if (strlen(mir_socket) > UNIX_PATH_MAX - 2) { /* One for NULL on front, one on end */
-		fprintf(stderr, "Environment variable 'PAY_SERVICE_MIR_SOCKET' is too long to be an abstract socket path: %s\n", mir_socket);
+	proxyPayPayui * proxy = proxy_pay_payui_proxy_new_for_bus_sync(
+		G_BUS_TYPE_SESSION,
+		G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES | G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS | G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
+		"com.canonical.pay",
+		mir_socket,
+		NULL, NULL);
+	
+	if (proxy == NULL) {
+		g_error("Unable to connect to proxy");
 		return -1;
 	}
 
-	struct sockaddr_un socketaddr = {0};
-	socketaddr.sun_family = AF_UNIX;
-	memcpy(socketaddr.sun_path + 1, mir_socket, strlen(mir_socket) + 1);
+	GVariant * outhandle = NULL;
+	proxy_pay_payui_call_get_mir_socket_sync(proxy, &outhandle, NULL, NULL);
 
-	int sock = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (sock == 0) {
-		fprintf(stderr, "Unable to open a socket, at all.\n");
+	if (outhandle == NULL) {
+		g_error("Unable to get data from function");
 		return -1;
 	}
 
-	int conresult = connect(sock, (struct sockaddr *)&socketaddr, sizeof(struct sockaddr_un));
-	if (conresult != 0) {
-		close(sock);
-		fprintf(stderr, "Unable to connect to address: %s\n", mir_socket);
-		perror("Connect error");
-		return -1;
-	}
+	gint32 fd = g_variant_get_handle(outhandle);
+	gchar * mirsocketbuf = g_strdup_printf("fd://%d", fd);
+	setenv("MIR_SOCKET", mirsocketbuf, 1);
 
-	struct fdcmsghdr fdhdr = {0};
-	struct msghdr msg = {0};
-	struct iovec iov = {0};
+	g_free(mirsocketbuf);
+	g_variant_unref(outhandle);
+	g_object_unref(proxy);
 
-	int dummydata;
-	iov.iov_base = &dummydata;
-	iov.iov_len = sizeof(dummydata);
-
-	fdhdr.hdr.cmsg_len = CMSG_LEN(sizeof(int));
-	fdhdr.hdr.cmsg_level = SOL_SOCKET;
-	fdhdr.hdr.cmsg_type = SCM_RIGHTS;
-
-	int msgsize;
-	msg.msg_control = &fdhdr;
-	msg.msg_controllen = 1;
-	msg.msg_iov = &iov;
-	msg.msg_iovlen = 1;
-
-	msgsize = recvmsg(sock, &msg, MSG_WAITALL | MSG_NOSIGNAL);
-
-	close(sock);
-
-	if (msgsize < 0) {
-		fprintf(stderr, "Not expecting %d message size\n", msgsize);
-		perror("recvmsg error");
-		return -1;
-	}
-
-	if (fdhdr.fd == 0) {
-		fprintf(stderr, "Passed file descriptor is zero\n");
-		return -1;
-	}
-
-	char mirsocketbuf[32];
-	sprintf(mirsocketbuf, "fd://%d", fdhdr.fd);
-	setenv("MIR_SOCKET", mirsocketbuf, OVERRIDE_ENVIRONMENT);
-
-	printf("Setting MIR_SOCKET to: '%s'", mirsocketbuf);
+	g_print("Setting MIR_SOCKET to: '%s'\n", mirsocketbuf);
 
 	/* Thought, is argv NULL terminated? */
 	return execv(argv[1], argv + 1);
