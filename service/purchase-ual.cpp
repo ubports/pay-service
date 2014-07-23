@@ -220,7 +220,7 @@ public:
 
             listen(sock, 1);
 
-            g_debug("Waiting for connection...");
+            g_debug("Waiting for connection…");
             addrstruct accepted = {0};
             socklen_t length = sizeof(addrstruct);
             int acceptsock = accept(sock, &accepted, &length);
@@ -247,6 +247,11 @@ public:
             if (sendcnt < 0)
             {
                 perror("Send message error");
+            }
+            else
+            {
+                g_debug("Keeping socket open for half a second…");
+                std::this_thread::sleep_for(std::chrono::milliseconds {500});
             }
 
             /* If it's sent, we're done */
