@@ -223,7 +223,8 @@ public:
             g_debug("Waiting for connection...");
             addrstruct accepted = {0};
             socklen_t length = sizeof(addrstruct);
-            if (accept(sock, &accepted, &length) < 0)
+            int acceptsock = accept(sock, &accepted, &length);
+            if (acceptsock <= 0)
             {
                 perror("No acceptance");
                 close(sock);
@@ -242,13 +243,14 @@ public:
 
             g_debug("Sending FD via socket…");
             /* This will block until someone picks up the message */
-            int sendcnt = sendmsg(sock, &message, 0);
+            int sendcnt = sendmsg(acceptsock, &message, 0);
             if (sendcnt < 0)
             {
                 perror("Send message error");
             }
 
             /* If it's sent, we're done */
+            close(acceptsock);
             close(sock);
             g_debug("Shutting down this side of the socket.");
         }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
