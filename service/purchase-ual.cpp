@@ -18,11 +18,14 @@
  */
 
 #include "purchase-ual.h"
+#include "proxy-payui.h"
+
 #include <thread>
 #include <future>
 #include <system_error>
 #include <ubuntu-app-launch.h>
 #include <gio/gio.h>
+#include <gio/gunixfdlist.h>
 #include <mir_toolkit/mir_connection.h>
 #include <mir_toolkit/mir_prompt_session.h>
 
@@ -145,45 +148,79 @@ public:
         auto socketPromise = std::make_shared<std::promise<std::string>>();
         auto socketFuture = socketPromise->get_future();
 
-        std::thread([socketPromise, session]()
+        std::thread([this, socketPromise, session]()
         {
+            GError* error = nullptr;
+            int fdlist[1] = {0};
             std::string socketName;
 
-            int sock = socket(AF_UNIX, SOCK_STREAM, 0);
-            if (sock == 0)
+            /* Build up the context and loop for the async events and a place
+               for GDBus to send its events back to */
+            auto context = std::shared_ptr<GMainContext>(g_main_context_new(), [](GMainContext * context)
             {
-                g_critical("Unable to create socket");
+                if (context != nullptr)
+                {
+                    g_main_context_unref(context);
+                }
+            });
+            auto loop = std::shared_ptr<GMainLoop>(g_main_loop_new(context.get(), FALSE), [](GMainLoop * loop)
+            {
+                if (loop != nullptr)
+                {
+                    g_main_loop_unref(loop);
+                }
+            });
+
+            g_main_context_push_thread_default(context.get());
+
+            /* We're grabbing the bus to ensure we can get it, but also
+               to keep it connected for the lifecycle of this thread */
+            auto bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
+                                                                       NULL), [](GDBusConnection * bus)
+            {
+                if (bus != nullptr)
+                {
+                    g_object_unref(bus);
+                }
+            });
+            if (bus == nullptr)
+            {
+                g_critical("Unable to get session bus");
                 socketPromise->set_value(socketName);
                 return;
             }
 
-            /* Create a Unique-ish Name */
-            int bindtry = 0;
-            do
+            /* Export an Object on DBus */
+            auto payuiobj = std::shared_ptr<proxyPayPayui>(
+                                proxy_pay_payui_skeleton_new(),
+                                [](proxyPayPayui * payui)
             {
-                bindtry++;
-                char templateName[32] = {"/tmp/pay-service-XXXXXX"};
-                mktemp(templateName);
-                std::string tempSock(templateName);
-
-                g_debug("Socket name attempt: %s", templateName);
-
-                addrunstruct addr = {0};
-                addr.sun_family = AF_UNIX;
-                memcpy(addr.sun_path + 1, tempSock.c_str(), tempSock.size() + 1);
-                int bindret = bind(sock, reinterpret_cast<addrstruct*>(&addr), sizeof(addrunstruct));
-
-                if (bindret == 0)
+                if (payui != nullptr)
                 {
-                    g_debug("Bound to socket: %s", templateName);
-                    socketName = std::string(templateName);
+                    g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(payui));
+                    g_object_unref(payui);
                 }
-                else
-                {
-                    perror("Unable to bind to socket");
-                }
+            });
+            g_signal_connect(payuiobj.get(), "handle-get-mir-socket", G_CALLBACK(mirHandle), fdlist);
+
+            /* TODO: Loop for new random numbers */
+            gchar* tryname = g_strdup_printf("/com/canonical/pay/%s/%d", encodePath(ui_appid).c_str(), g_random_int());
+            g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(payuiobj.get()),
+                                             bus.get(),
+                                             tryname,
+                                             &error);
+
+            if (error == NULL)
+            {
+                socketName = std::string(tryname);
             }
-            while (socketName.empty() && bindtry < 5);
+            else
+            {
+                g_critical("Unable to export payui object: %s", error->message);
+                g_error_free(error);
+            }
+
+            g_free(tryname);
 
             /* At this point we're kicking off starting up the process, so we're
                already bound, which is good. But let's remember what's happening here. */
@@ -193,12 +230,10 @@ public:
                make sure to clean up the socket. */
             if (socketName.empty())
             {
-                g_critical("Unable to bind to any name");
-                close(sock);
+                g_critical("Unable to export object to any name");
                 return;
             }
 
-            int fdlist[1] = {0};
             auto mirwait = mir_prompt_session_new_fds_for_prompt_providers(session.get(),
                                                                            1,
                                                                            [](MirPromptSession * session, size_t count, int const * fdsin, void * context) -> void
@@ -214,57 +249,64 @@ public:
 
             if (fdlist[0] == 0)
             {
-                g_debug("FD from Mir was a 0");
-                close(sock);
+                g_critical("FD from Mir was a 0");
                 return;
             }
 
-            listen(sock, 1);
-
-            g_debug("Waiting for connection…");
-            addrstruct accepted = {0};
-            socklen_t length = sizeof(addrstruct);
-            int acceptsock = accept(sock, &accepted, &length);
-            if (acceptsock <= 0)
-            {
-                perror("No acceptance");
-                close(sock);
-                return;
-            }
-
-            iovecstruct iovec = {0};
-            int dummydata = 0;
-            iovec.iov_base = &dummydata;
-            iovec.iov_len = sizeof(dummydata);
-
-            fdcmsghdr cmessage = {0};
-            cmessage.chdr.cmsg_len = CMSG_LEN(sizeof(int));
-            cmessage.chdr.cmsg_level = SOL_SOCKET;
-            cmessage.chdr.cmsg_type = SCM_RIGHTS;
-            cmessage.fd = fdlist[0];
-
-            msgstruct message = {0};
-            message.msg_control = &cmessage;
-            message.msg_controllen = 1;
-            message.msg_iov = &iovec;
-            message.msg_iovlen = 1;
-
-            g_debug("Sending FD via socket…");
-            /* This will block until someone picks up the message */
-            int sendcnt = sendmsg(acceptsock, &message, MSG_NOSIGNAL);
-            if (sendcnt < 0)
-            {
-                perror("Send message error");
-            }
-
-            /* If it's sent, we're done */
-            close(acceptsock);
-            close(sock);
-            g_debug("Shutting down this side of the socket.");
+            g_main_loop_run(loop.get());
+            g_debug("Shutting down this dbus object: %s", socketName.c_str());
         }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
 
         socketFuture.wait();
         return socketFuture.get();
+    }
+
+    static bool mirHandle (GObject* obj, GDBusMethodInvocation* invocation, gpointer user_data)
+    {
+        int* fds = reinterpret_cast<int*>(user_data);
+
+        if (fds[0] == 0)
+        {
+            g_critical("No FDs to give!");
+            return false;
+        }
+
+        GVariant* handle = g_variant_new_handle(fds[0]);
+        GVariant* tuple = g_variant_new_tuple(&handle, 1);
+
+        GUnixFDList* list = g_unix_fd_list_new_from_array(fds, 1);
+
+        g_dbus_method_invocation_return_value_with_unix_fd_list(invocation, tuple, list);
+        return true;
+    }
+
+    static std::string encodePath (const std::string& input)
+    {
+        std::string output = "";
+        bool first = true;
+
+        for (unsigned char c : input)
+        {
+            std::string retval;
+
+            if ((c >= 'a' && c <= 'z') ||
+                    (c >= 'A' && c <= 'Z') ||
+                    (c >= '0' && c <= '9' && !first))
+            {
+                retval = std::string((char*)&c, 1);
+            }
+            else
+            {
+                char buffer[5] = {0};
+                std::snprintf(buffer, 4, "_%2X", c);
+                retval = std::string(buffer);
+            }
+
+            output += retval;
+            first = false;
+        }
+
+        return output;
     }
 
     void cleanupThread (void)
