@@ -76,17 +76,19 @@ main (int argc, char * argv[])
 	iov.iov_base = &dummydata;
 	iov.iov_len = sizeof(dummydata);
 
-	msg.msg_control = &fdhdr;
-	msg.msg_controllen = 1;
-	msg.msg_iov = &iov;
-	msg.msg_iovlen = 1;
-
 	fdhdr.hdr.cmsg_len = CMSG_LEN(sizeof(int));
 	fdhdr.hdr.cmsg_level = SOL_SOCKET;
 	fdhdr.hdr.cmsg_type = SCM_RIGHTS;
 
 	int msgsize;
-	msgsize = recvmsg(sock, &msg, MSG_WAITALL | MSG_NOSIGNAL);
+	do {
+		msg.msg_control = &fdhdr;
+		msg.msg_controllen = 1;
+		msg.msg_iov = &iov;
+		msg.msg_iovlen = 1;
+
+		msgsize = recvmsg(sock, &msg, MSG_WAITALL | MSG_NOSIGNAL);
+	} while (msgsize >= 0 && msg.msg_controllen == 0);
 
 	close(sock);
 
