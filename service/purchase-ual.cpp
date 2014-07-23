@@ -33,6 +33,7 @@
 typedef struct sockaddr_un addrunstruct;
 typedef struct sockaddr addrstruct;
 typedef struct msghdr msgstruct;
+typedef struct iovec iovecstruct;
 typedef struct
 {
     struct cmsghdr chdr;
@@ -231,6 +232,11 @@ public:
                 return;
             }
 
+            iovecstruct iovec = {0};
+            int dummydata = 0;
+            iovec.iov_base = &dummydata;
+            iovec.iov_len = sizeof(dummydata);
+
             fdcmsghdr cmessage = {0};
             cmessage.chdr.cmsg_len = CMSG_LEN(sizeof(int));
             cmessage.chdr.cmsg_level = SOL_SOCKET;
@@ -240,6 +246,8 @@ public:
             msgstruct message = {0};
             message.msg_control = &cmessage;
             message.msg_controllen = sizeof(fdcmsghdr);
+            message.msg_iov = &iovec;
+            message.msg_iovlen = 1;
 
             g_debug("Sending FD via socket…");
             /* This will block until someone picks up the message */

@@ -72,6 +72,10 @@ main (int argc, char * argv[])
 	struct msghdr msg = {0};
 	struct iovec iov = {0};
 
+	int dummydata;
+	iov.iov_base = &dummydata;
+	iov.iov_len = sizeof(dummydata);
+
 	msg.msg_control = &fdhdr;
 	msg.msg_controllen = sizeof(struct fdcmsghdr);
 	msg.msg_iov = &iov;
