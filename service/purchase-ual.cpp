@@ -245,7 +245,7 @@ public:
 
             msgstruct message = {0};
             message.msg_control = &cmessage;
-            message.msg_controllen = sizeof(fdcmsghdr);
+            message.msg_controllen = 1;
             message.msg_iov = &iovec;
             message.msg_iovlen = 1;
 

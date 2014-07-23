@@ -77,7 +77,7 @@ main (int argc, char * argv[])
 	iov.iov_len = sizeof(dummydata);
 
 	msg.msg_control = &fdhdr;
-	msg.msg_controllen = sizeof(struct fdcmsghdr);
+	msg.msg_controllen = 1;
 	msg.msg_iov = &iov;
 	msg.msg_iovlen = 1;
 
