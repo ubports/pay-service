@@ -24,10 +24,12 @@ int
 main (int argc, char * argv[])
 {
 	const gchar * mir_socket = g_getenv("PAY_SERVICE_MIR_SOCKET");
-	if (mir_socket == NULL) {
+	if (mir_socket == NULL || mir_socket[0] == '\0') {
 		g_error("Unable to find Mir connection from Pay Service");
 		return -1;
 	}
+
+	g_print("Mir Connection Path: %s\n", mir_socket);
 
 	proxyPayPayui * proxy = proxy_pay_payui_proxy_new_for_bus_sync(
 		G_BUS_TYPE_SESSION,
