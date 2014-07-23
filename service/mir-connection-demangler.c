@@ -70,16 +70,17 @@ main (int argc, char * argv[])
 
 	struct fdcmsghdr fdhdr = {0};
 	struct msghdr msg = {0};
+	struct iovec iov = {0};
 
 	msg.msg_control = &fdhdr;
 	msg.msg_controllen = sizeof(struct fdcmsghdr);
+	msg.msg_iov = &iov;
+	msg.msg_iovlen = 1;
 
 	fdhdr.hdr.cmsg_len = CMSG_LEN(sizeof(int));
 
 	int msgsize;
-	do {
-		msgsize = recvmsg(sock, &msg, 0);
-	} while (msgsize == 0);
+	msgsize = recvmsg(sock, &msg, 0);
 
 	close(sock);
 
