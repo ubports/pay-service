@@ -81,14 +81,12 @@ main (int argc, char * argv[])
 	fdhdr.hdr.cmsg_type = SCM_RIGHTS;
 
 	int msgsize;
-	do {
-		msg.msg_control = &fdhdr;
-		msg.msg_controllen = 1;
-		msg.msg_iov = &iov;
-		msg.msg_iovlen = 1;
+	msg.msg_control = &fdhdr;
+	msg.msg_controllen = 1;
+	msg.msg_iov = &iov;
+	msg.msg_iovlen = 1;
 
-		msgsize = recvmsg(sock, &msg, MSG_WAITALL | MSG_NOSIGNAL);
-	} while (msgsize >= 0 && msg.msg_controllen == 0);
+	msgsize = recvmsg(sock, &msg, MSG_WAITALL | MSG_NOSIGNAL);
 
 	close(sock);
 
