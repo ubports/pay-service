@@ -86,7 +86,7 @@ main (int argc, char * argv[])
 	fdhdr.hdr.cmsg_type = SCM_RIGHTS;
 
 	int msgsize;
-	msgsize = recvmsg(sock, &msg, 0);
+	msgsize = recvmsg(sock, &msg, MSG_WAITALL | MSG_NOSIGNAL);
 
 	close(sock);
 

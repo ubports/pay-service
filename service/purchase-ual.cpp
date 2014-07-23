@@ -251,7 +251,7 @@ public:
 
             g_debug("Sending FD via socket…");
             /* This will block until someone picks up the message */
-            int sendcnt = sendmsg(acceptsock, &message, 0);
+            int sendcnt = sendmsg(acceptsock, &message, MSG_NOSIGNAL);
             if (sendcnt < 0)
             {
                 perror("Send message error");
