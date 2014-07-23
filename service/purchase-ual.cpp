@@ -271,7 +271,8 @@ public:
             return false;
         }
 
-        GVariant* handle = g_variant_new_handle(fds[0]);
+        /* Index into fds */
+        GVariant* handle = g_variant_new_handle(0);
         GVariant* tuple = g_variant_new_tuple(&handle, 1);
 
         GUnixFDList* list = g_unix_fd_list_new_from_array(fds, 1);

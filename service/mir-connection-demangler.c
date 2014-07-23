@@ -18,7 +18,7 @@
  */
 
 #include <gio/gio.h>
-#include "proxy-payui.h"
+#include <gio/gunixfdlist.h>
 
 int
 main (int argc, char * argv[])
@@ -31,34 +31,61 @@ main (int argc, char * argv[])
 
 	g_print("Mir Connection Path: %s\n", mir_socket);
 
-	proxyPayPayui * proxy = proxy_pay_payui_proxy_new_for_bus_sync(
-		G_BUS_TYPE_SESSION,
-		G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES | G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS | G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
-		"com.canonical.pay",
-		mir_socket,
-		NULL, NULL);
-	
-	if (proxy == NULL) {
-		g_error("Unable to connect to proxy");
+	GError * error = NULL;
+	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
+
+	if (error != NULL) {
+		g_error("Unable to get session bus: %s", error->message);
+		g_error_free(error);
 		return -1;
 	}
 
-	GVariant * outhandle = NULL;
-	proxy_pay_payui_call_get_mir_socket_sync(proxy, &outhandle, NULL, NULL);
+	GVariant * retval;
+	GUnixFDList * fdlist;
+
+	retval = g_dbus_connection_call_with_unix_fd_list_sync(
+		bus,
+		"com.canonical.pay",
+		mir_socket,
+		"com.canonical.pay.payui",
+		"GetMirSocket",
+		NULL,
+		G_VARIANT_TYPE("(h)"),
+		G_DBUS_CALL_FLAGS_NO_AUTO_START,
+		-1, /* timeout */
+		NULL, /* fd list in */
+		&fdlist,
+		NULL, /* cancelable */
+		&error);
+
+	if (error != NULL) {
+		g_error("Unable to get Mir socket over dbus: %s", error->message);
+		g_error_free(error);
+		return -1;
+	}
+
+	GVariant * outhandle = g_variant_get_child_value(retval, 0);
 
 	if (outhandle == NULL) {
 		g_error("Unable to get data from function");
 		return -1;
 	}
 
-	gint32 fd = g_variant_get_handle(outhandle);
+	gint32 fd = g_unix_fd_list_get(fdlist, g_variant_get_handle(outhandle), &error);
+	if (error != NULL) {
+		g_error("Unable to Unix FD: %s", error->message);
+		g_error_free(error);
+		return -1;
+	}
+
 	gchar * mirsocketbuf = g_strdup_printf("fd://%d", fd);
 	setenv("MIR_SOCKET", mirsocketbuf, 1);
 	g_print("Setting MIR_SOCKET to: '%s'\n", mirsocketbuf);
 
 	g_free(mirsocketbuf);
 	g_variant_unref(outhandle);
-	g_object_unref(proxy);
+	g_variant_unref(retval);
+	g_object_unref(bus);
 
 	/* Thought, is argv NULL terminated? */
 	return execvp(argv[1], argv + 1);
