@@ -106,7 +106,7 @@ public:
             return false;
         }
 
-        return appThreadCreate(socketname);
+        return appThreadCreate(socketname, session);
     }
 
     /* Creates a Mir Prompt Session by finding the overlay pid and making it. */
@@ -282,12 +282,12 @@ public:
     }
 
     /* Creates the thread to manage the execution of the Pay UI */
-    bool appThreadCreate (std::string socketname)
+    bool appThreadCreate (std::string socketname, std::shared_ptr<MirPromptSession> session)
     {
         cleanupThread();
         g_cancellable_reset(stopThread.get());
 
-        t = std::thread([this, socketname]()
+        t = std::thread([this, socketname, session]()
         {
             /* Build up the context and loop for the async events and a place
                for GDBus to send its events back to */
