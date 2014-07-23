@@ -54,13 +54,12 @@ main (int argc, char * argv[])
 	gint32 fd = g_variant_get_handle(outhandle);
 	gchar * mirsocketbuf = g_strdup_printf("fd://%d", fd);
 	setenv("MIR_SOCKET", mirsocketbuf, 1);
+	g_print("Setting MIR_SOCKET to: '%s'\n", mirsocketbuf);
 
 	g_free(mirsocketbuf);
 	g_variant_unref(outhandle);
 	g_object_unref(proxy);
 
-	g_print("Setting MIR_SOCKET to: '%s'\n", mirsocketbuf);
-
 	/* Thought, is argv NULL terminated? */
-	return execv(argv[1], argv + 1);
+	return execvp(argv[1], argv + 1);
 }
