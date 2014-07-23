@@ -85,7 +85,7 @@ main (int argc, char * argv[])
 
 	close(sock);
 
-	if (msgsize <= 0) {
+	if (msgsize != 0) {
 		fprintf(stderr, "Not expecting %d message size\n", msgsize);
 		perror("recvmsg error");
 		return -1;
