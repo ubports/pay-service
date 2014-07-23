@@ -75,14 +75,13 @@ main (int argc, char * argv[])
 	msg.msg_controllen = sizeof(struct fdcmsghdr);
 
 	fdhdr.hdr.cmsg_len = CMSG_LEN(sizeof(int));
+	/*
 	fdhdr.hdr.cmsg_level = SOL_SOCKET;
 	fdhdr.hdr.cmsg_type = SCM_RIGHTS;
+	*/
 
 	int msgsize;
-	do {
-		msgsize = recvmsg(sock, &msg, 0);
-	/* If we're asked to do it again, do it again */
-	} while (msgsize == EAGAIN);
+	msgsize = recvmsg(sock, &msg, 0);
 
 	close(sock);
 
