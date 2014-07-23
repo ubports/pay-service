@@ -117,7 +117,7 @@ target_link_libraries(
   ${GMOCK_BOTH_LIBRARIES}
 )
 
-add_test(purchase-ual-tests ${CMAKE_CURRENT_BINARY_DIR}/purchase-ual-tests)
+# add_test(purchase-ual-tests ${CMAKE_CURRENT_BINARY_DIR}/purchase-ual-tests)
 
 #############################
 # libpay Tests
