@@ -65,8 +65,6 @@ public:
                 g_object_unref(cancel);
             }
         });
-
-        ui_appid = discoverUiAppid();
     }
 
     ~UalItem ()
@@ -84,6 +82,8 @@ public:
        the socket to pass the session. And then starts the UI. */
     virtual bool run (void)
     {
+        ui_appid = discoverUiAppid();
+
         if (ui_appid.empty())
         {
             return false;
@@ -416,7 +416,6 @@ private:
     /* Set at init */
     std::string appid;
     std::string itemid;
-    std::string ui_appid;
 
     /* Given to us by our parents */
     std::shared_ptr<MirConnection> connection;
@@ -424,6 +423,7 @@ private:
     /* Created by run, destroyed with the object */
     std::thread t;
     std::shared_ptr<GCancellable> stopThread;
+    std::string ui_appid;
 
     /* Lifecycle should generally match thread t */
     std::shared_ptr<GMainContext> context;
