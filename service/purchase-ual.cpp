@@ -204,7 +204,7 @@ public:
             g_signal_connect(payuiobj.get(), "handle-get-mir-socket", G_CALLBACK(mirHandle), fdlist);
 
             /* TODO: Loop for new random numbers */
-            gchar* tryname = g_strdup_printf("/com/canonical/pay/%s/%d", encodePath(ui_appid).c_str(), g_random_int());
+            gchar* tryname = g_strdup_printf("/com/canonical/pay/%s/%X", encodePath(ui_appid).c_str(), g_random_int());
             g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(payuiobj.get()),
                                              bus.get(),
                                              tryname,
