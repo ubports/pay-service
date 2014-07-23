@@ -75,17 +75,15 @@ main (int argc, char * argv[])
 	msg.msg_controllen = sizeof(struct fdcmsghdr);
 
 	fdhdr.hdr.cmsg_len = CMSG_LEN(sizeof(int));
-	/*
-	fdhdr.hdr.cmsg_level = SOL_SOCKET;
-	fdhdr.hdr.cmsg_type = SCM_RIGHTS;
-	*/
 
 	int msgsize;
-	msgsize = recvmsg(sock, &msg, 0);
+	do {
+		msgsize = recvmsg(sock, &msg, 0);
+	} while (msgsize == 0);
 
 	close(sock);
 
-	if (msgsize != 0) {
+	if (msgsize < 0) {
 		fprintf(stderr, "Not expecting %d message size\n", msgsize);
 		perror("recvmsg error");
 		return -1;
