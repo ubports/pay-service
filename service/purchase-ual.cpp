@@ -446,13 +446,127 @@ private:
     {"pay-ui"
     };
 
+    static pid_t pidForUpstartJob (const gchar* jobname)
+    {
+        GError* error = nullptr;
+
+        if (jobname == nullptr)
+        {
+            return 0;
+        }
+
+        auto bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
+                                                                   NULL), [](GDBusConnection * bus)
+        {
+            if (bus != nullptr)
+            {
+                g_object_unref(bus);
+            }
+        });
+        if (bus == nullptr)
+        {
+            g_critical("Unable to get session bus");
+            return 0;
+        }
+
+        GVariant* retval = nullptr;
+        retval = g_dbus_connection_call_sync(
+                     bus.get(),
+                     "com.ubuntu.Upstart",
+                     "/com/ubuntu/Upstart",
+                     "com.ubuntu.Upstart0_6",
+                     "GetJobByName",
+                     g_variant_new("(s)", jobname),
+                     G_VARIANT_TYPE("(o)"),
+                     G_DBUS_CALL_FLAGS_NO_AUTO_START,
+                     -1, /* timeout */
+                     NULL, /* cancel */
+                     &error);
+
+        if (error != NULL)
+        {
+            g_warning("Unable to get path for job '%s': %s", jobname, error->message);
+            g_error_free(error);
+            return 0;
+        }
+
+        gchar* path = nullptr;
+        g_variant_get(retval, "(o)", &path);
+        g_variant_unref(retval);
+
+        retval = g_dbus_connection_call_sync(
+                     bus.get(),
+                     "com.ubuntu.Upstart",
+                     path,
+                     "com.ubuntu.Upstart0_6.Job",
+                     "GetInstanceByName",
+                     g_variant_new("(s)", ""),
+                     G_VARIANT_TYPE("(o)"),
+                     G_DBUS_CALL_FLAGS_NO_AUTO_START,
+                     -1, /* timeout */
+                     NULL, /* cancel */
+                     &error);
+
+        g_free(path);
+
+        if (error != NULL)
+        {
+            g_warning("Unable to get instance for job '%s': %s", jobname, error->message);
+            g_error_free(error);
+            return 0;
+        }
+
+        g_variant_get(retval, "(o)", &path);
+        g_variant_unref(retval);
+
+        retval = g_dbus_connection_call_sync(
+                     bus.get(),
+                     "com.ubuntu.Upstart",
+                     path,
+                     "org.freedesktop.DBus.Properties",
+                     "Get",
+                     g_variant_new("(ss)", "com.ubuntu.Upstart0_6.Instance", "processes"),
+                     G_VARIANT_TYPE("(a(si))"),
+                     G_DBUS_CALL_FLAGS_NO_AUTO_START,
+                     -1, /* timeout */
+                     NULL, /* cancel */
+                     &error);
+
+        g_free(path);
+
+        if (error != NULL)
+        {
+            g_warning("Unable to get processes for job '%s': %s", jobname, error->message);
+            g_error_free(error);
+            return 0;
+        }
+
+        GPid pid = 0;
+        GVariant* array = g_variant_get_child_value(retval, 0);
+        if (g_variant_n_children(array) > 0)
+        {
+            /* (si) */
+            GVariant* firstitem = g_variant_get_child_value(array, 0);
+            GVariant* vpid = g_variant_get_child_value(firstitem, 1);
+            pid = g_variant_get_int32(vpid);
+            g_variant_unref(vpid);
+            g_variant_unref(firstitem);
+        }
+        g_variant_unref(array);
+        g_variant_unref(retval);
+
+        return pid;
+    }
+
     /* Figures out the PID that we should be overlaying with the PayUI */
     static pid_t appid2pid (std::string& appid)
     {
         if (appid == "click-scope")
         {
-            /* TODO: For the click-scope we're using the dash's pid */
-            return 0;
+            /* FIXME: Before other scopes can use pay, we'll need to figure out
+               how to detect if they're scopes or not. But for now we'll only just
+               look for 'click-scope' as it's our primary use-case */
+            return pidForUpstartJob("unity8-dash");
         }
         else
         {
