@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -77,7 +78,11 @@ main (int argc, char * argv[])
 	fdhdr.hdr.cmsg_level = SOL_SOCKET;
 	fdhdr.hdr.cmsg_type = SCM_RIGHTS;
 
-	int msgsize = recvmsg(sock, &msg, 0);
+	int msgsize;
+	do {
+		msgsize = recvmsg(sock, &msg, 0);
+	/* If we're asked to do it again, do it again */
+	} while (msgsize == EAGAIN);
 
 	close(sock);
 
