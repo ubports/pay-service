@@ -66,15 +66,7 @@ public:
             }
         });
 
-        /* TODO: ui_appid needs to be grabbed from the click hook */
-        gchar* appidc = ubuntu_app_launch_triplet_to_app_id("com.canonical.payui",
-                                                            nullptr,
-                                                            nullptr);
-        if (appidc != nullptr)
-        {
-            ui_appid = appidc;
-            g_free(appidc);
-        }
+        ui_appid = discoverUiAppid();
     }
 
     ~UalItem ()
@@ -591,6 +583,55 @@ private:
         status = Item::PURCHASED;
         g_main_loop_quit(loop.get());
     }
+
+    /* Looks through a directory to find the first entry that is a .desktop file
+       and uses that as our AppID. We don't support more than one entry being in
+       a directory */
+    std::string discoverUiAppid (void)
+    {
+        std::string appid;
+        GDir* dir;
+        const gchar* clickhookdir = g_getenv("PAY_SERVICE_CLICK_DIR");
+        if (clickhookdir == nullptr)
+        {
+            gchar* cacheclickdir = g_build_filename(g_get_user_cache_dir(), "pay-service", "pay-ui", nullptr);
+            dir = g_dir_open(cacheclickdir, 0, nullptr);
+            g_free(cacheclickdir);
+        }
+        else
+        {
+            dir = g_dir_open(clickhookdir, 0, nullptr);
+        }
+
+        if (dir != nullptr)
+        {
+            const gchar* name = nullptr;
+
+            do
+            {
+                name = g_dir_read_name(dir);
+            }
+            while (name != nullptr && !g_str_has_suffix(name, ".desktop"));
+
+            gchar* desktopsuffix = nullptr;
+            if (name != nullptr)
+            {
+                desktopsuffix = g_strstr_len(name, -1, ".desktop");
+            }
+
+            if (desktopsuffix != nullptr)
+            {
+                gchar* justappid = g_strndup(name, desktopsuffix - name);
+                appid = std::string(justappid);
+                g_free(justappid);
+            }
+
+            g_dir_close(dir);
+        }
+
+        return appid;
+    }
+
 };
 
 class UalFactory::Impl
