@@ -69,7 +69,7 @@ public:
 
     ~UalItem ()
     {
-        cleanupThread();
+        cleanupThreads();
     }
 
     static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
@@ -82,6 +82,8 @@ public:
        the socket to pass the session. And then starts the UI. */
     virtual bool run (void)
     {
+        cleanupThreads();
+
         ui_appid = discoverUiAppid();
 
         if (ui_appid.empty())
@@ -332,7 +334,7 @@ public:
         return output;
     }
 
-    void cleanupThread (void)
+    void cleanupThreads (void)
     {
         if (helperThread.joinable())
         {
@@ -344,14 +346,13 @@ public:
 
             helperThread.join();
         }
+
+        g_cancellable_reset(stopThread.get());
     }
 
     /* Creates the thread to manage the execution of the Pay UI */
     bool appThreadCreate (std::string socketname, std::shared_ptr<MirPromptSession> session)
     {
-        cleanupThread();
-        g_cancellable_reset(stopThread.get());
-
         helperThread = std::thread([this, socketname, session]()
         {
             /* Build up the context and loop for the async events and a place
