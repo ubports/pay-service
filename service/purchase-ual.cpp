@@ -146,7 +146,7 @@ public:
         auto socketPromise = std::make_shared<std::promise<std::string>>();
         auto socketFuture = socketPromise->get_future();
 
-        std::thread([this, socketPromise, session]()
+        socketThread = std::thread([this, socketPromise, session]()
         {
             GError* error = nullptr;
             int fdlist[1] = {0};
@@ -154,14 +154,14 @@ public:
 
             /* Build up the context and loop for the async events and a place
                for GDBus to send its events back to */
-            auto context = std::shared_ptr<GMainContext>(g_main_context_new(), [](GMainContext * context)
+            socketContext = std::shared_ptr<GMainContext>(g_main_context_new(), [](GMainContext * context)
             {
                 if (context != nullptr)
                 {
                     g_main_context_unref(context);
                 }
             });
-            auto loop = std::shared_ptr<GMainLoop>(g_main_loop_new(context.get(), FALSE), [](GMainLoop * loop)
+            socketLoop = std::shared_ptr<GMainLoop>(g_main_loop_new(socketContext.get(), FALSE), [](GMainLoop * loop)
             {
                 if (loop != nullptr)
                 {
@@ -169,12 +169,12 @@ public:
                 }
             });
 
-            g_main_context_push_thread_default(context.get());
+            g_main_context_push_thread_default(socketContext.get());
 
             /* We're grabbing the bus to ensure we can get it, but also
                to keep it connected for the lifecycle of this thread */
-            auto bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
-                                                                       NULL), [](GDBusConnection * bus)
+            auto bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, stopThread.get(),
+                                                                       nullptr), [](GDBusConnection * bus)
             {
                 if (bus != nullptr)
                 {
@@ -262,9 +262,16 @@ public:
                 return;
             }
 
-            g_main_loop_run(loop.get());
+            if (!g_cancellable_is_cancelled(stopThread.get()))
+            {
+                g_main_loop_run(socketLoop.get());
+            }
+
             g_debug("Shutting down this dbus object: %s", socketName.c_str());
-        }).detach(); /* TODO: We should track this so we can clean it up if we don't use it for some reason */
+
+            socketLoop.reset();
+            socketContext.reset();
+        });
 
         socketFuture.wait();
         return socketFuture.get();
@@ -345,6 +352,17 @@ public:
             }
 
             helperThread.join();
+        }
+
+        if (socketThread.joinable())
+        {
+            g_cancellable_cancel(stopThread.get());
+            if (socketLoop != nullptr)
+            {
+                g_main_loop_quit(socketLoop.get());
+            }
+
+            socketThread.join();
         }
 
         g_cancellable_reset(stopThread.get());
@@ -452,13 +470,17 @@ private:
 
     /* Created by run, destroyed with the object */
     std::thread helperThread;
+    std::thread socketThread;
     std::shared_ptr<GCancellable> stopThread;
     std::string ui_appid;
 
-    /* Lifecycle should generally match thread t */
+    /* Lifecycle should generally match helper thread */
     std::shared_ptr<GMainContext> helperContext;
     std::shared_ptr<GMainLoop> helperLoop;
-    std::shared_ptr<GDBusConnection> helperBus;
+
+    /* Lifecycle should generally match socket thread  */
+    std::shared_ptr<GMainContext> socketContext;
+    std::shared_ptr<GMainLoop> socketLoop;
 
     /* For the callbacks */
     Item::Status status;
