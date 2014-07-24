@@ -609,11 +609,13 @@ private:
         if (clickhookdir == nullptr)
         {
             gchar* cacheclickdir = g_build_filename(g_get_user_cache_dir(), "pay-service", "pay-ui", nullptr);
+            g_debug("Looking for Pay UI in: %s", cacheclickdir);
             dir = g_dir_open(cacheclickdir, 0, nullptr);
             g_free(cacheclickdir);
         }
         else
         {
+            g_debug("Looking for Pay UI in: %s", clickhookdir);
             dir = g_dir_open(clickhookdir, 0, nullptr);
         }
 
@@ -624,8 +626,11 @@ private:
             do
             {
                 name = g_dir_read_name(dir);
+                g_debug("Looking at file: %s", name);
             }
             while (name != nullptr && !g_str_has_suffix(name, ".desktop"));
+
+            g_debug("Chose file: %s", name);
 
             gchar* desktopsuffix = nullptr;
             if (name != nullptr)
