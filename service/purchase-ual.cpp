@@ -199,7 +199,7 @@ public:
             });
             g_signal_connect(payuiobj.get(), "handle-get-mir-socket", G_CALLBACK(mirHandle), fdlist);
 
-            /* TODO: Loop for new random numbers */
+            /* Loop until we fine an object path that isn't taken (probably only once) */
             while (socketName.empty())
             {
                 gchar* tryname = g_strdup_printf("/com/canonical/pay/%s/%X", encodePath(ui_appid).c_str(), g_random_int());
