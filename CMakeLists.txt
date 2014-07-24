@@ -20,7 +20,7 @@ find_package(Qt5Qml)
 find_package(Qt5Quick)
 find_package(PkgConfig)
 
-pkg_check_modules(PAY REQUIRED pay-1)
+pkg_check_modules(PAY REQUIRED pay-2)
 include_directories (SYSTEM ${PAY_INCLUDE_DIRS})
 
 add_executable(pay-test-app pay-test-app.cpp package.h package.cpp qtquick2applicationviewer.cpp qtquick2applicationviewer.h)

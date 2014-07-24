@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Ted Gould <ted@ubuntu.com>
 Build-Depends: cmake,
                debhelper (>= 9),
-               libpay1-dev,
+               libpay2-dev,
                qt5-default,
                qtdeclarative5-dev,
 Standards-Version: 3.9.4
