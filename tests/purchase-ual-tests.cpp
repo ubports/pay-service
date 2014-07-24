@@ -23,6 +23,8 @@
 
 #include "service/purchase-ual.h"
 
+#include "mir-mock.h"
+
 struct PurchaseUALTests : public ::testing::Test
 {
 	protected:
