@@ -114,6 +114,7 @@ public:
         if (overlaypid == 0)
         {
             /* We can't overlay nothin' */
+            g_debug("Unable to find PID for: %s", appid.c_str());
             return nullptr;
         }
 
@@ -532,7 +533,7 @@ private:
                      "org.freedesktop.DBus.Properties",
                      "Get",
                      g_variant_new("(ss)", "com.ubuntu.Upstart0_6.Instance", "processes"),
-                     G_VARIANT_TYPE("(a(si))"),
+                     G_VARIANT_TYPE("(v)"),
                      G_DBUS_CALL_FLAGS_NO_AUTO_START,
                      -1, /* timeout */
                      NULL, /* cancel */
@@ -548,7 +549,8 @@ private:
         }
 
         GPid pid = 0;
-        GVariant* array = g_variant_get_child_value(retval, 0);
+        GVariant* variant = g_variant_get_child_value(retval, 0);
+        GVariant* array = g_variant_get_variant(variant);
         if (g_variant_n_children(array) > 0)
         {
             /* (si) */
@@ -558,6 +560,7 @@ private:
             g_variant_unref(vpid);
             g_variant_unref(firstitem);
         }
+        g_variant_unref(variant);
         g_variant_unref(array);
         g_variant_unref(retval);
 
