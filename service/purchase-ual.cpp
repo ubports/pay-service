@@ -74,7 +74,7 @@ public:
 
     static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
     {
-        g_debug("Mir Prompt session is in stated: %d", state);
+        g_debug("Mir Prompt session is in state: %d", state);
     }
 
     /* Goes through the basis phases of building up the environment for the

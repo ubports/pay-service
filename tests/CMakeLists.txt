@@ -107,6 +107,7 @@ add_definitions(-DCMAKE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 add_executable(
   purchase-ual-tests
   purchase-ual-tests.cpp
+  mir-mock.cpp
   )
 
 target_link_libraries(
@@ -117,7 +118,7 @@ target_link_libraries(
   ${GMOCK_BOTH_LIBRARIES}
 )
 
-# add_test(purchase-ual-tests ${CMAKE_CURRENT_BINARY_DIR}/purchase-ual-tests)
+add_test(purchase-ual-tests ${CMAKE_CURRENT_BINARY_DIR}/purchase-ual-tests)
 
 #############################
 # libpay Tests
