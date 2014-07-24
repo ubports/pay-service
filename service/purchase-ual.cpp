@@ -334,15 +334,15 @@ public:
 
     void cleanupThread (void)
     {
-        if (t.joinable())
+        if (helperThread.joinable())
         {
             g_cancellable_cancel(stopThread.get());
-            if (loop != nullptr)
+            if (helperLoop != nullptr)
             {
-                g_main_loop_quit(loop.get());
+                g_main_loop_quit(helperLoop.get());
             }
 
-            t.join();
+            helperThread.join();
         }
     }
 
@@ -352,18 +352,18 @@ public:
         cleanupThread();
         g_cancellable_reset(stopThread.get());
 
-        t = std::thread([this, socketname, session]()
+        helperThread = std::thread([this, socketname, session]()
         {
             /* Build up the context and loop for the async events and a place
                for GDBus to send its events back to */
-            context = std::shared_ptr<GMainContext>(g_main_context_new(), [](GMainContext * context)
+            helperContext = std::shared_ptr<GMainContext>(g_main_context_new(), [](GMainContext * context)
             {
                 if (context != nullptr)
                 {
                     g_main_context_unref(context);
                 }
             });
-            loop = std::shared_ptr<GMainLoop>(g_main_loop_new(context.get(), FALSE), [](GMainLoop * loop)
+            helperLoop = std::shared_ptr<GMainLoop>(g_main_loop_new(helperContext.get(), FALSE), [](GMainLoop * loop)
             {
                 if (loop != nullptr)
                 {
@@ -371,12 +371,12 @@ public:
                 }
             });
 
-            g_main_context_push_thread_default(context.get());
+            g_main_context_push_thread_default(helperContext.get());
 
             /* We're grabbing the bus to ensure we can get it, but also
                to keep it connected for the lifecycle of this thread */
-            bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, stopThread.get(),
-                                                                  NULL), [](GDBusConnection * bus)
+            auto bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, stopThread.get(),
+                                                                       NULL), [](GDBusConnection * bus)
             {
                 if (bus != nullptr)
                 {
@@ -401,7 +401,7 @@ public:
             gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE.c_str(), ui_appid.c_str(), urls);
             if (helperid != nullptr && !g_cancellable_is_cancelled(stopThread.get()))
             {
-                g_main_loop_run(loop.get());
+                g_main_loop_run(helperLoop.get());
             }
 
             /* Clean up */
@@ -413,9 +413,8 @@ public:
                 ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE.c_str(), ui_appid.c_str(), helperid);
             }
 
-            bus.reset();
-            loop.reset();
-            context.reset();
+            helperLoop.reset();
+            helperContext.reset();
             g_free(helperid);
 
             /* Signal where we end up */
@@ -451,14 +450,14 @@ private:
     std::shared_ptr<MirConnection> connection;
 
     /* Created by run, destroyed with the object */
-    std::thread t;
+    std::thread helperThread;
     std::shared_ptr<GCancellable> stopThread;
     std::string ui_appid;
 
     /* Lifecycle should generally match thread t */
-    std::shared_ptr<GMainContext> context;
-    std::shared_ptr<GMainLoop> loop;
-    std::shared_ptr<GDBusConnection> bus;
+    std::shared_ptr<GMainContext> helperContext;
+    std::shared_ptr<GMainLoop> helperLoop;
+    std::shared_ptr<GDBusConnection> helperBus;
 
     /* For the callbacks */
     Item::Status status;
@@ -613,7 +612,7 @@ private:
         }
 
         status = Item::PURCHASED;
-        g_main_loop_quit(loop.get());
+        g_main_loop_quit(helperLoop.get());
     }
 
     /* Looks through a directory to find the first entry that is a .desktop file
