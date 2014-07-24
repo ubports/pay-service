@@ -35,12 +35,7 @@ struct PurchaseUALTests : public ::testing::Test
 		GDBusConnection * bus = NULL;
 
 		virtual void SetUp() {
-			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
-			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
-
-			gchar * linkfarm = g_build_filename(CMAKE_SOURCE_DIR, "ual-link-farm", NULL);
-			g_setenv("UPSTART_APP_LAUNCH_LINK_FARM", linkfarm, TRUE);
-			g_free(linkfarm);
+			g_setenv("PAY_SERVICE_CLICK_DIR", CMAKE_SOURCE_DIR "/click-hook-dir", TRUE);
 
 			service = dbus_test_service_new(NULL);
 

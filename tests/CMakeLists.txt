@@ -97,10 +97,6 @@ add_test(verification-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-t
 # Purchase UAL
 #############################
 
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/click-db/test.conf.in
-  ${CMAKE_CURRENT_BINARY_DIR}/click-db/test.conf @ONLY)
-
 add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}")
 add_definitions(-DCMAKE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
