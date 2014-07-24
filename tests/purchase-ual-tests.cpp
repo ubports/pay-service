@@ -32,6 +32,7 @@ struct PurchaseUALTests : public ::testing::Test
 		DbusTestDbusMock * mock = NULL;
 		DbusTestDbusMockObject * obj = NULL;
 		DbusTestDbusMockObject * jobobj = NULL;
+		DbusTestDbusMockObject * instobj = NULL;
 		GDBusConnection * bus = NULL;
 
 		virtual void SetUp() {
@@ -58,6 +59,26 @@ struct PurchaseUALTests : public ::testing::Test
 				G_VARIANT_TYPE_OBJECT_PATH, /* out */
 				"ret = dbus.ObjectPath('/instance')", /* python */
 				NULL); /* error */
+			dbus_test_dbus_mock_object_add_method(mock, jobobj,
+				"GetAllInstances",
+				NULL,
+				G_VARIANT_TYPE("ao"), /* out */
+				"ret = [dbus.ObjectPath('/instance')]", /* python */
+				NULL); /* error */
+			dbus_test_dbus_mock_object_add_method(mock, jobobj,
+				"GetInstanceByName",
+				G_VARIANT_TYPE_STRING,
+				G_VARIANT_TYPE_OBJECT_PATH, /* out */
+				"ret = dbus.ObjectPath('/instance')", /* python */
+				NULL); /* error */
+
+			instobj = dbus_test_dbus_mock_get_object(mock, "/instance", "com.ubuntu.Upstart0_6.Instance", NULL);
+
+			dbus_test_dbus_mock_object_add_property(mock, instobj,
+				"processes",
+				G_VARIANT_TYPE("a(si)"),
+				g_variant_new_parsed("[('main', 1234)]"),
+				NULL);
 
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
 
