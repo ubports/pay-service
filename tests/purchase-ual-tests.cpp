@@ -117,7 +117,7 @@ TEST_F(PurchaseUALTests, PurchaseTest) {
 	ASSERT_NE(nullptr, purchase);
 
 	/*** Purchase an item ***/
-	std::string appname("application");
+	std::string appname("click-scope");
 	std::string itemname("item");
 	auto item = purchase->purchaseItem(appname, itemname);
 
