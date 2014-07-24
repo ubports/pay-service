@@ -20,6 +20,9 @@
 #include <gio/gio.h>
 #include <gio/gunixfdlist.h>
 
+#include <errno.h>
+#include <fcntl.h>
+
 int
 main (int argc, char * argv[])
 {
@@ -75,6 +78,13 @@ main (int argc, char * argv[])
 	if (error != NULL) {
 		g_error("Unable to Unix FD: %s", error->message);
 		g_error_free(error);
+		return -1;
+	}
+
+	errno = 0;
+	fcntl(fd, F_GETFD);
+	if (errno != 0) {
+		perror("File descriptor is invalid");
 		return -1;
 	}
 
