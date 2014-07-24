@@ -2,29 +2,66 @@
 #include "mir-mock.h"
 
 #include <iostream>
+#include <thread>
 
 #include <mir_toolkit/mir_connection.h>
 #include <mir_toolkit/mir_prompt_session.h>
 
+static const char * valid_trust_session = "In the circle of trust";
+static bool valid_trust_connection = true;
+static pid_t last_trust_pid = 0;
+
 MirPromptSession *
 mir_connection_create_prompt_session_sync(MirConnection * connection, pid_t pid, void (*)(MirPromptSession *, MirPromptSessionState, void*data), void * context) {
-	return nullptr;
+	last_trust_pid = pid;
+
+	if (valid_trust_connection) {
+		return (MirPromptSession *)valid_trust_session;
+	} else {
+		return nullptr;
+	}
 }
 
 void
 mir_prompt_session_release_sync (MirPromptSession * session)
 {
+	if (reinterpret_cast<char *>(session) != valid_trust_session) {
+		std::cerr << "Releasing a Mir Trusted Prompt that isn't valid" << std::endl;
+		exit(1);
+	}
 }
+
+static const char * valid_wait_handle = "The best way to wait";
 
 MirWaitHandle *
 mir_prompt_session_new_fds_for_promt_providers (MirPromptSession * session, unsigned int numfds, mir_client_fd_callback cb, void * data) {
-	return nullptr;
+	if (reinterpret_cast<char *>(session) != valid_trust_session) {
+		std::cerr << "Releasing a Mir Trusted Prompt that isn't valid" << std::endl;
+		exit(1);
+	}
+
+	/* Putting in another thread to be more mir like */
+	std::thread([session, numfds, cb, data]() {
+		int * fdlist = new int[numfds];
+
+		for (int i = 0; i < numfds; i++) 
+			fdlist[i] = 1234;
+
+		cb(session, numfds, fdlist, data);
+
+		delete fdlist;
+	}).detach();
+
+	return (MirWaitHandle *)valid_wait_handle;
 }
 
 void
 mir_wait_for (MirWaitHandle * wait)
 {
-
+	if (reinterpret_cast<char *>(wait) != valid_wait_handle) {
+		std::cerr << "Waiting on a Mir Wait that isn't valid" << std::endl;
+		exit(1);
+	}
 }
 
 static const char * valid_connection_str = "Valid Mir Connection";
