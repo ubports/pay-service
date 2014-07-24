@@ -132,31 +132,8 @@ TEST_F(PurchaseUALTests, PurchaseTest) {
 	EXPECT_TRUE(item->run());
 	usleep(20 * 1000);
 
-	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=application-click', 'INSTANCE=com.canonical.payui_app1_0.1'])"), NULL);
+	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=untrusted-helper', 'INSTANCE=pay-ui:234234:payui-helper'])"), NULL);
 	usleep(20 * 1000);
 
 	EXPECT_EQ(Purchase::Item::Status::PURCHASED, status);
-
-	/*** Purchase failed ***/
-	std::string failitemname("faileditem");
-	auto failitem = purchase->purchaseItem(appname, failitemname);
-
-	ASSERT_NE(nullptr, failitem);
-
-	Purchase::Item::Status failstatus = Purchase::Item::Status::ERROR;
-	failitem->purchaseComplete.connect([&failstatus](Purchase::Item::Status in_status) {
-		std::cout << "Purchase Status Callback: " << in_status << std::endl;
-		failstatus = in_status;
-	});
-
-	EXPECT_TRUE(failitem->run());
-	usleep(20 * 1000);
-
-	GError * error = NULL;
-	g_spawn_command_line_async("gdbus emit --session --object-path / --signal com.canonical.UbuntuAppLaunch.ApplicationFailed com.canonical.payui_app1_0.1 crash", &error);
-	ASSERT_EQ(nullptr, error);
-
-	usleep(100 * 1000);
-
-	EXPECT_EQ(Purchase::Item::Status::NOT_PURCHASED, failstatus);
 }
