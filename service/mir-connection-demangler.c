@@ -88,6 +88,9 @@ main (int argc, char * argv[])
 		return -1;
 	}
 
+	/* Make sure the FD doesn't close on exec */
+	fcntl(fd, F_SETFD, 0);
+
 	gchar * mirsocketbuf = g_strdup_printf("fd://%d", fd);
 	setenv("MIR_SOCKET", mirsocketbuf, 1);
 	g_print("Setting MIR_SOCKET to: '%s'\n", mirsocketbuf);
