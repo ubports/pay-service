@@ -86,18 +86,21 @@ public:
 
         if (ui_appid.empty())
         {
+            g_debug("Empty UI App ID");
             return false;
         }
 
         auto session = setupSession();
         if (session == nullptr)
         {
+            g_debug("Unable to set up session");
             return false;
         }
 
         std::string socketname = setupSocket(session);
         if (socketname.empty())
         {
+            g_debug("Unable to set up socket");
             return false;
         }
 
