@@ -34,7 +34,7 @@ mir_prompt_session_release_sync (MirPromptSession * session)
 static const char * valid_wait_handle = "The best way to wait";
 
 MirWaitHandle *
-mir_prompt_session_new_fds_for_promt_providers (MirPromptSession * session, unsigned int numfds, mir_client_fd_callback cb, void * data) {
+mir_prompt_session_new_fds_for_prompt_providers (MirPromptSession * session, unsigned int numfds, mir_client_fd_callback cb, void * data) {
 	if (reinterpret_cast<char *>(session) != valid_trust_session) {
 		std::cerr << "Releasing a Mir Trusted Prompt that isn't valid" << std::endl;
 		exit(1);
