@@ -112,6 +112,23 @@ TEST_F(PurchaseUALTests, InitTest) {
 	EXPECT_EQ(nullptr, purchase);
 }
 
+static gchar *
+find_env (GVariant * env, const gchar * varname)
+{
+	GVariantIter iter;
+	g_variant_iter_init(&iter, env);
+	const gchar * entry = NULL;
+
+	while (g_variant_iter_loop(&iter, "&s", &entry)) {
+		if (g_str_has_prefix(entry, varname)) {
+			const gchar * value = entry + strlen(varname) + 1;
+			return g_strdup(value);
+		}
+	}
+
+	return NULL;
+}
+
 TEST_F(PurchaseUALTests, PurchaseTest) {
 	auto purchase = std::make_shared<Purchase::UalFactory>();
 	ASSERT_NE(nullptr, purchase);
@@ -132,7 +149,25 @@ TEST_F(PurchaseUALTests, PurchaseTest) {
 	EXPECT_TRUE(item->run());
 	usleep(20 * 1000);
 
-	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=untrusted-helper', 'INSTANCE=pay-ui:234234:payui-helper'])"), NULL);
+	guint callcount = 0;
+	auto calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj,
+		"Start", &callcount, NULL);
+	ASSERT_EQ(1, callcount);
+
+	GVariant * env = g_variant_get_child_value(calls->params, 0);
+
+	gchar * helpertype = find_env(env, "HELPER_TYPE");
+	EXPECT_STREQ("pay-ui", helpertype);
+	g_free(helpertype);
+
+	gchar * untrustedappid = find_env(env, "APP_ID");
+	EXPECT_STREQ("payuihelper", untrustedappid);
+	g_free(untrustedappid);
+
+	gchar * instanceid = find_env(env, "INSTANCE_ID");
+	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=untrusted-helper', 'INSTANCE=pay-ui:%1:payuihelper'])", instanceid), NULL);
+	g_free(instanceid);
+
 	usleep(20 * 1000);
 
 	EXPECT_EQ(Purchase::Item::Status::PURCHASED, status);
