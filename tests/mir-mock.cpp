@@ -40,8 +40,8 @@ mir_prompt_session_new_fds_for_prompt_providers (MirPromptSession * session, uns
 		exit(1);
 	}
 
-	/* Putting in another thread to be more mir like */
-	std::thread([session, numfds, cb, data]() {
+	/* TODO: Put in another thread to be more mir like */
+	[session, numfds, cb, data]() {
 		int * fdlist = new int[numfds];
 
 		for (int i = 0; i < numfds; i++) 
@@ -50,7 +50,7 @@ mir_prompt_session_new_fds_for_prompt_providers (MirPromptSession * session, uns
 		cb(session, numfds, fdlist, data);
 
 		delete fdlist;
-	}).detach();
+	}();
 
 	return (MirWaitHandle *)valid_wait_handle;
 }
