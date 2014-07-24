@@ -282,9 +282,24 @@ public:
         GVariant* handle = g_variant_new_handle(0);
         GVariant* tuple = g_variant_new_tuple(&handle, 1);
 
-        GUnixFDList* list = g_unix_fd_list_new_from_array(fds, 1);
+        GError* error = nullptr;
+        GUnixFDList* list = g_unix_fd_list_new();
+        g_unix_fd_list_append(list, fds[0], &error);
 
-        g_dbus_method_invocation_return_value_with_unix_fd_list(invocation, tuple, list);
+        if (error == nullptr)
+        {
+            g_dbus_method_invocation_return_value_with_unix_fd_list(invocation, tuple, list);
+        }
+
+        g_object_unref(list);
+
+        if (error != nullptr)
+        {
+            g_critical("Unable to pass FD %d: %s", fds[0], error->message);
+            g_error_free(error);
+            return false;
+        }
+
         return true;
     }
 

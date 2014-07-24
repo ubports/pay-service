@@ -20,6 +20,9 @@
 #include <gio/gio.h>
 #include <gio/gunixfdlist.h>
 
+#include <errno.h>
+#include <fcntl.h>
+
 int
 main (int argc, char * argv[])
 {
@@ -77,6 +80,16 @@ main (int argc, char * argv[])
 		g_error_free(error);
 		return -1;
 	}
+
+	errno = 0;
+	fcntl(fd, F_GETFD);
+	if (errno != 0) {
+		perror("File descriptor is invalid");
+		return -1;
+	}
+
+	/* Make sure the FD doesn't close on exec */
+	fcntl(fd, F_SETFD, 0);
 
 	gchar * mirsocketbuf = g_strdup_printf("fd://%d", fd);
 	setenv("MIR_SOCKET", mirsocketbuf, 1);
