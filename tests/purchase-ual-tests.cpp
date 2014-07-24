@@ -35,7 +35,7 @@ struct PurchaseUALTests : public ::testing::Test
 		GDBusConnection * bus = NULL;
 
 		virtual void SetUp() {
-			g_setenv("PAY_SERVICE_CLICK_DIR", CMAKE_SOURCE_DIR "/click-hook-dir", TRUE);
+			g_setenv("PAY_SERVICE_CLICK_DIR", CMAKE_SOURCE_DIR "/click-hook-data", TRUE);
 
 			service = dbus_test_service_new(NULL);
 
