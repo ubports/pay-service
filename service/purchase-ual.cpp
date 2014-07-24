@@ -29,20 +29,6 @@
 #include <mir_toolkit/mir_connection.h>
 #include <mir_toolkit/mir_prompt_session.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-typedef struct sockaddr_un addrunstruct;
-typedef struct sockaddr addrstruct;
-typedef struct msghdr msgstruct;
-typedef struct iovec iovecstruct;
-typedef struct
-{
-    struct cmsghdr chdr;
-    int fd;
-} fdcmsghdr;
-
 namespace Purchase
 {
 
