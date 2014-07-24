@@ -196,23 +196,34 @@ public:
             g_signal_connect(payuiobj.get(), "handle-get-mir-socket", G_CALLBACK(mirHandle), fdlist);
 
             /* TODO: Loop for new random numbers */
-            gchar* tryname = g_strdup_printf("/com/canonical/pay/%s/%X", encodePath(ui_appid).c_str(), g_random_int());
-            g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(payuiobj.get()),
-                                             bus.get(),
-                                             tryname,
-                                             &error);
-
-            if (error == NULL)
+            while (socketName.empty())
             {
-                socketName = std::string(tryname);
-            }
-            else
-            {
-                g_critical("Unable to export payui object: %s", error->message);
-                g_error_free(error);
-            }
+                gchar* tryname = g_strdup_printf("/com/canonical/pay/%s/%X", encodePath(ui_appid).c_str(), g_random_int());
+                g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(payuiobj.get()),
+                                                 bus.get(),
+                                                 tryname,
+                                                 &error);
 
-            g_free(tryname);
+                if (error == NULL)
+                {
+                    socketName = std::string(tryname);
+                }
+                else
+                {
+                    /* Always print the error, but if the object path is in use let's
+                       not exit the loop. Let's just try again. */
+                    bool exitnow = (error->domain != G_DBUS_ERROR || error->code != G_DBUS_ERROR_OBJECT_PATH_IN_USE);
+                    g_critical("Unable to export payui object: %s", error->message);
+                    g_error_free(error);
+                    if (exitnow)
+                    {
+                        g_free(tryname);
+                        break;
+                    }
+                }
+
+                g_free(tryname);
+            }
 
             /* At this point we're kicking off starting up the process, so we're
                already bound, which is good. But let's remember what's happening here. */
