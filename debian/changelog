@@ -1,3 +1,13 @@
+pay-service (2.0.0+14.10.20140801.1-0ubuntu1) utopic; urgency=low
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Alejandro J. Cura ]
+  * Enable purchases in the script to setup the staging environ.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 01 Aug 2014 14:11:27 +0000
+
 pay-service (2.0.0+14.10.20140724.1-0ubuntu1) utopic; urgency=low
 
   [ Rodney Dawes ]
