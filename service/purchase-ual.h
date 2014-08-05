@@ -33,6 +33,7 @@ public:
 
     typedef std::shared_ptr<UalFactory> Ptr;
 
+private:
     class Impl;
     std::shared_ptr<Impl> impl;
 };
