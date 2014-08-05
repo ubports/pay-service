@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Pay Test App
+Comment=Used for testing pay service, nothing else
+Exec=@pkglibexecdir@/pay-test-app
+Path=@pkglibexecdir@
+Type=Application
+Icon=pay-test-app
+X-Ubuntu-Single-Instance=true
+X-Ubuntu-Touch=true
