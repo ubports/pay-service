@@ -37,7 +37,7 @@ class UalItem : public Item
 public:
     typedef std::shared_ptr<Item> Ptr;
 
-    UalItem (std::string& in_appid, std::string& in_itemid, std::shared_ptr<MirConnection> mir) :
+    UalItem (const std::string& in_appid, const std::string& in_itemid, const std::shared_ptr<MirConnection>& mir) :
         appid(in_appid),
         itemid(in_itemid),
         status(Item::ERROR),
