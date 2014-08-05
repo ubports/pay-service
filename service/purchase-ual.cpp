@@ -316,7 +316,7 @@ public:
             else
             {
                 char buffer[5] = {0};
-                std::snprintf(buffer, 4, "_%2X", c);
+                std::snprintf(buffer, sizeof(buffer), "_%2X", c);
                 retval = std::string(buffer);
             }
 
