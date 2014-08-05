@@ -666,9 +666,7 @@ private:
 
             if (desktopsuffix != nullptr)
             {
-                gchar* justappid = g_strndup(name, desktopsuffix - name);
-                appid = std::string(justappid);
-                g_free(justappid);
+                appid.assign(name, desktopsuffix - name);
             }
 
             g_dir_close(dir);
