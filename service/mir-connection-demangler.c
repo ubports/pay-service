@@ -61,6 +61,8 @@ main (int argc, char * argv[])
 		NULL, /* cancelable */
 		&error);
 
+	g_clear_object(&bus);
+
 	if (error != NULL) {
 		g_error("Unable to get Mir socket over dbus: %s", error->message);
 		g_error_free(error);
@@ -74,7 +76,19 @@ main (int argc, char * argv[])
 		return -1;
 	}
 
+	gint32 handle = g_variant_get_handle(outhandle);
+	g_variant_unref(outhandle);
+	g_variant_unref(retval);
+
+	if (handle >= g_unix_fd_list_get_length(fdlist)) {
+		g_error("Handle is %d but the FD list only has %d entries", handle, g_unix_fd_list_get_length(fdlist));
+		g_clear_object(&fdlist);
+		return -1;
+	}
+
 	gint32 fd = g_unix_fd_list_get(fdlist, g_variant_get_handle(outhandle), &error);
+	g_clear_object(&fdlist);
+
 	if (error != NULL) {
 		g_error("Unable to Unix FD: %s", error->message);
 		g_error_free(error);
@@ -96,9 +110,6 @@ main (int argc, char * argv[])
 	g_print("Setting MIR_SOCKET to: '%s'\n", mirsocketbuf);
 
 	g_free(mirsocketbuf);
-	g_variant_unref(outhandle);
-	g_variant_unref(retval);
-	g_object_unref(bus);
 
 	/* Thought, is argv NULL terminated? */
 	return execvp(argv[1], argv + 1);
