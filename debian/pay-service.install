@@ -1,2 +1,3 @@
-usr/lib/*/pay-service/*
+usr/lib/*/pay-service/pay-service
+usr/lib/*/pay-service/setup-staging.sh
 usr/share/upstart/sessions/*
