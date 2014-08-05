@@ -10,7 +10,7 @@ find_package(PkgConfig)
 
 include_directories (${CMAKE_SOURCE_DIR})
 
-set (pkglibexecdir ${CMAKE_INSTALL_PKGLIBEXECDIR})
+set(pkglibexecdir "${CMAKE_INSTALL_FULL_PKGLIBEXECDIR}")
 
 add_executable(pay-test-app pay-test-app.cpp package.h package.cpp qtquick2applicationviewer.cpp qtquick2applicationviewer.h)
 qt5_use_modules(pay-test-app Core Qml Quick)
