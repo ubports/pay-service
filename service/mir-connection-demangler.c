@@ -86,7 +86,7 @@ main (int argc, char * argv[])
 		return -1;
 	}
 
-	gint32 fd = g_unix_fd_list_get(fdlist, g_variant_get_handle(outhandle), &error);
+	gint32 fd = g_unix_fd_list_get(fdlist, handle, &error);
 	g_clear_object(&fdlist);
 
 	if (error != NULL) {
