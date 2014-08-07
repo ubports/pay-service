@@ -107,7 +107,7 @@ void TokenGrabberU1Qt::handleCredentialsFound(const UbuntuOne::Token& in_token)
 
 void TokenGrabberU1Qt::handleCredentialsNotFound()
 {
-    qDebug() << "No Token :-(";
+    qWarning() << "No Token :-(";
     token = UbuntuOne::Token();
 }
 
