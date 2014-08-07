@@ -101,18 +101,19 @@ void TokenGrabberU1Qt::accountChanged(Accounts::AccountId id)
 
 void TokenGrabberU1Qt::handleCredentialsFound(const UbuntuOne::Token& in_token)
 {
+    qDebug() << "Got a Token";
     token = in_token;
-    std::cout << "Got a Token" << std::endl;
 }
 
 void TokenGrabberU1Qt::handleCredentialsNotFound()
 {
-    std::cout << "No Token :-(" << std::endl;
+    qDebug() << "No Token :-(";
+    token = UbuntuOne::Token();
 }
 
 void TokenGrabberU1Qt::handleCredentialsStored()
 {
-    std::cout << "New Credentials Stored" << std::endl;
+    qDebug() << "New Credentials Stored";
     service.getCredentials();
 }
 
