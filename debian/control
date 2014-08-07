@@ -13,6 +13,7 @@ Build-Depends: astyle,
 # in libstdc++ causing us issues, we explicitly select a G++
 # version.
                g++-4.9,
+               libaccounts-qt5-dev,
                libclick-0.4-dev,
                libcurl4-gnutls-dev,
                libdbustest1-dev,
