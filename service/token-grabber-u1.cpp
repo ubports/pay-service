@@ -20,8 +20,12 @@
 #include "token-grabber-u1.h"
 #include "qtbridge.h"
 
+/* U1 Creds */
 #include <ssoservice.h>
 #include <token.h>
+
+/* Accounts Service */
+#include <Accounts/Manager>
 
 class TokenGrabberU1Qt: public QObject
 {
@@ -36,14 +40,17 @@ private Q_SLOTS:
     void handleCredentialsFound(const UbuntuOne::Token& token);
     void handleCredentialsNotFound();
     void handleCredentialsStored();
+    void accountChanged(Accounts::AccountId id);
 
 private:
     UbuntuOne::Token token;
     UbuntuOne::SSOService service;
+    Accounts::Manager manager;
 };
 
 TokenGrabberU1Qt::TokenGrabberU1Qt (QObject* parent) :
-    QObject(parent)
+    QObject(parent),
+    manager("ubuntuone")
 {
     std::cout << "Token grabber built" << std::endl;
 }
@@ -52,6 +59,21 @@ void TokenGrabberU1Qt::run (void)
 {
     std::cout << "Token grabber running" << std::endl;
 
+    /* Accounts Manager */
+    QObject::connect(&manager,
+                     &Accounts::Manager::accountCreated,
+                     this,
+                     &TokenGrabberU1Qt::accountChanged);
+    QObject::connect(&manager,
+                     &Accounts::Manager::accountRemoved,
+                     this,
+                     &TokenGrabberU1Qt::accountChanged);
+    QObject::connect(&manager,
+                     &Accounts::Manager::accountUpdated,
+                     this,
+                     &TokenGrabberU1Qt::accountChanged);
+
+    /* U1 signals */
     QObject::connect(&service,
                      &UbuntuOne::SSOService::credentialsFound,
                      this,
@@ -65,6 +87,15 @@ void TokenGrabberU1Qt::run (void)
                      this,
                      &TokenGrabberU1Qt::handleCredentialsStored);
 
+
+
+    service.getCredentials();
+}
+
+void TokenGrabberU1Qt::accountChanged(Accounts::AccountId id)
+{
+    qDebug() << "Account changed, try to get a new token";
+    token = UbuntuOne::Token();
     service.getCredentials();
 }
 
