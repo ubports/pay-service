@@ -52,12 +52,12 @@ TokenGrabberU1Qt::TokenGrabberU1Qt (QObject* parent) :
     QObject(parent),
     manager("ubuntuone")
 {
-    std::cout << "Token grabber built" << std::endl;
+    qDebug() << "Token grabber built";
 }
 
 void TokenGrabberU1Qt::run (void)
 {
-    std::cout << "Token grabber running" << std::endl;
+    qDebug() << "Token grabber running";
 
     /* Accounts Manager */
     QObject::connect(&manager,
