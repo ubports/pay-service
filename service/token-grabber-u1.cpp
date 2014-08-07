@@ -72,6 +72,10 @@ void TokenGrabberU1Qt::run (void)
                      &Accounts::Manager::accountUpdated,
                      this,
                      &TokenGrabberU1Qt::accountChanged);
+    QObject::connect(&manager,
+                     &Accounts::Manager::enabledEvent,
+                     this,
+                     &TokenGrabberU1Qt::accountChanged);
 
     /* U1 signals */
     QObject::connect(&service,
