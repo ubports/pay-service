@@ -28,9 +28,14 @@ namespace Purchase
 class UalFactory : public Factory
 {
 public:
+    UalFactory();
     virtual Item::Ptr purchaseItem (std::string& appid, std::string& itemid);
 
     typedef std::shared_ptr<UalFactory> Ptr;
+
+private:
+    class Impl;
+    std::shared_ptr<Impl> impl;
 };
 
 } // ns Purchase
