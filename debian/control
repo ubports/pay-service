@@ -13,15 +13,19 @@ Build-Depends: astyle,
 # in libstdc++ causing us issues, we explicitly select a G++
 # version.
                g++-4.9,
+               libclick-0.4-dev,
                libcurl4-gnutls-dev,
                libdbustest1-dev,
                libglib2.0-dev,
                libgtest-dev,
+               libmirclient-dev (>= 0.5),
                libprocess-cpp-dev (>= 2.0.0),
                libubuntu-app-launch2-dev,
                libubuntuoneauth-2.0-dev,
                python3-dbusmock,
+               qt5-default,
                qtbase5-dev,
+               qtdeclarative5-dev,
 Standards-Version: 3.9.5
 Homepage: http://launchpad.net/pay-service
 # If you aren't a member of ~indicator-applet-developers but need to upload
@@ -66,3 +70,11 @@ Multi-Arch: same
 Description: Pay service - library development files
  This library contains information to purchase items and figure out
  their purchase status.
+
+Package: pay-test-app
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: Small application to help test payment
+ Not a useful application for users but gives additional
+ information about what's happening in the pay-service

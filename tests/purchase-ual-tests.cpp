@@ -23,6 +23,8 @@
 
 #include "service/purchase-ual.h"
 
+#include "mir-mock.h"
+
 struct PurchaseUALTests : public ::testing::Test
 {
 	protected:
@@ -30,15 +32,11 @@ struct PurchaseUALTests : public ::testing::Test
 		DbusTestDbusMock * mock = NULL;
 		DbusTestDbusMockObject * obj = NULL;
 		DbusTestDbusMockObject * jobobj = NULL;
+		DbusTestDbusMockObject * instobj = NULL;
 		GDBusConnection * bus = NULL;
 
 		virtual void SetUp() {
-			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
-			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
-
-			gchar * linkfarm = g_build_filename(CMAKE_SOURCE_DIR, "ual-link-farm", NULL);
-			g_setenv("UPSTART_APP_LAUNCH_LINK_FARM", linkfarm, TRUE);
-			g_free(linkfarm);
+			g_setenv("PAY_SERVICE_CLICK_DIR", CMAKE_SOURCE_DIR "/click-hook-data", TRUE);
 
 			service = dbus_test_service_new(NULL);
 
@@ -61,6 +59,26 @@ struct PurchaseUALTests : public ::testing::Test
 				G_VARIANT_TYPE_OBJECT_PATH, /* out */
 				"ret = dbus.ObjectPath('/instance')", /* python */
 				NULL); /* error */
+			dbus_test_dbus_mock_object_add_method(mock, jobobj,
+				"GetAllInstances",
+				NULL,
+				G_VARIANT_TYPE("ao"), /* out */
+				"ret = [dbus.ObjectPath('/instance')]", /* python */
+				NULL); /* error */
+			dbus_test_dbus_mock_object_add_method(mock, jobobj,
+				"GetInstanceByName",
+				G_VARIANT_TYPE_STRING,
+				G_VARIANT_TYPE_OBJECT_PATH, /* out */
+				"ret = dbus.ObjectPath('/instance')", /* python */
+				NULL); /* error */
+
+			instobj = dbus_test_dbus_mock_get_object(mock, "/instance", "com.ubuntu.Upstart0_6.Instance", NULL);
+
+			dbus_test_dbus_mock_object_add_property(mock, instobj,
+				"processes",
+				G_VARIANT_TYPE("a(si)"),
+				g_variant_new_parsed("[('main', 1234)]"),
+				NULL);
 
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
 
@@ -94,12 +112,29 @@ TEST_F(PurchaseUALTests, InitTest) {
 	EXPECT_EQ(nullptr, purchase);
 }
 
+static gchar *
+find_env (GVariant * env, const gchar * varname)
+{
+	GVariantIter iter;
+	g_variant_iter_init(&iter, env);
+	const gchar * entry = NULL;
+
+	while (g_variant_iter_loop(&iter, "&s", &entry)) {
+		if (g_str_has_prefix(entry, varname)) {
+			const gchar * value = entry + strlen(varname) + 1;
+			return g_strdup(value);
+		}
+	}
+
+	return NULL;
+}
+
 TEST_F(PurchaseUALTests, PurchaseTest) {
 	auto purchase = std::make_shared<Purchase::UalFactory>();
 	ASSERT_NE(nullptr, purchase);
 
 	/*** Purchase an item ***/
-	std::string appname("application");
+	std::string appname("click-scope");
 	std::string itemname("item");
 	auto item = purchase->purchaseItem(appname, itemname);
 
@@ -114,31 +149,26 @@ TEST_F(PurchaseUALTests, PurchaseTest) {
 	EXPECT_TRUE(item->run());
 	usleep(20 * 1000);
 
-	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=application-click', 'INSTANCE=com.canonical.payui_app1_0.1'])"), NULL);
+	guint callcount = 0;
+	auto calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj,
+		"Start", &callcount, NULL);
+	ASSERT_EQ(1, callcount);
+
+	GVariant * env = g_variant_get_child_value(calls->params, 0);
+
+	gchar * helpertype = find_env(env, "HELPER_TYPE");
+	EXPECT_STREQ("pay-ui", helpertype);
+	g_free(helpertype);
+
+	gchar * untrustedappid = find_env(env, "APP_ID");
+	EXPECT_STREQ("payuihelper", untrustedappid);
+	g_free(untrustedappid);
+
+	gchar * instanceid = find_env(env, "INSTANCE_ID");
+	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=untrusted-helper', 'INSTANCE=pay-ui:%1:payuihelper'])", instanceid), NULL);
+	g_free(instanceid);
+
 	usleep(20 * 1000);
 
 	EXPECT_EQ(Purchase::Item::Status::PURCHASED, status);
-
-	/*** Purchase failed ***/
-	std::string failitemname("faileditem");
-	auto failitem = purchase->purchaseItem(appname, failitemname);
-
-	ASSERT_NE(nullptr, failitem);
-
-	Purchase::Item::Status failstatus = Purchase::Item::Status::ERROR;
-	failitem->purchaseComplete.connect([&failstatus](Purchase::Item::Status in_status) {
-		std::cout << "Purchase Status Callback: " << in_status << std::endl;
-		failstatus = in_status;
-	});
-
-	EXPECT_TRUE(failitem->run());
-	usleep(20 * 1000);
-
-	GError * error = NULL;
-	g_spawn_command_line_async("gdbus emit --session --object-path / --signal com.canonical.UbuntuAppLaunch.ApplicationFailed com.canonical.payui_app1_0.1 crash", &error);
-	ASSERT_EQ(nullptr, error);
-
-	usleep(100 * 1000);
-
-	EXPECT_EQ(Purchase::Item::Status::NOT_PURCHASED, failstatus);
 }

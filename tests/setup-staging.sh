@@ -31,6 +31,14 @@ gdbus call --session \
 	--method org.freedesktop.DBus.UpdateActivationEnvironment \
 	"[{'SSO_AUTH_BASE_URL', '$SSO_AUTH_BASE_URL'}, {'SSO_UONE_BASE_URL', '$SSO_UONE_BASE_URL'}, {'PAY_BASE_URL', '$PAY_BASE_URL'}, {'URL_PACKAGE_INFO', '$URL_PACKAGE_INFO'}, {'ACCOUNT_CREDS_URL', '$ACCOUNT_CREDS_URL'}, {'ADD_PAYMENT_URL', '$ADD_PAYMENT_URL'}, {'U1_SEARCH_BASE_URL', '$U1_SEARCH_BASE_URL'}, {'CLICK_STORE_ENABLE_PURCHASES', '$CLICK_STORE_ENABLE_PURCHASES'}]"
 
+echo "Working around pay-ui Click hook"
+
+PAY_UI_TRIPLET=`ubuntu-app-triplet com.canonical.payui`
+if [ ! -z $PAY_UI_TRIPLET ] && [ ! -e ${HOME}/.cache/pay-service/pay-ui/${PAY_UI_TRIPLET}.desktop ] ; then
+	mkdir -p ${HOME}/.cache/pay-service/pay-ui
+	ln -s ${HOME}/.cache/ubuntu-app-launch/desktop/${PAY_UI_TRIPLET}.desktop ${HOME}/.cache/pay-service/pay-ui/
+fi
+
 echo "Restarting scope registry"
 /sbin/restart scope-registry
 

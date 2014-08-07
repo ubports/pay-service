@@ -1,2 +1,5 @@
-usr/lib/*/pay-service/*
+usr/lib/*/pay-service/pay-service
+usr/lib/*/pay-service/setup-staging.sh
+usr/lib/*/pay-service/mir-connection-demangler
+usr/lib/*/ubuntu-app-launch/pay-ui/*
 usr/share/upstart/sessions/*

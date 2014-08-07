@@ -1,5 +1,4 @@
-# NOTE: Temporary until trusted sessions land
-Pattern: ${home}/.local/share/applications/${id}.desktop
+Pattern: ${home}/.cache/pay-service/pay-ui/${id}.desktop
 Exec: /bin/true
 User-Level: yes
 Hook-Name: pay-ui
