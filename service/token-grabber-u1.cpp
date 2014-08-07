@@ -35,6 +35,7 @@ public:
 private Q_SLOTS:
     void handleCredentialsFound(const UbuntuOne::Token& token);
     void handleCredentialsNotFound();
+    void handleCredentialsStored();
 
 private:
     UbuntuOne::Token token;
@@ -59,6 +60,10 @@ void TokenGrabberU1Qt::run (void)
                      &UbuntuOne::SSOService::credentialsNotFound,
                      this,
                      &TokenGrabberU1Qt::handleCredentialsNotFound);
+    QObject::connect(&service,
+                     &UbuntuOne::SSOService::credentialsStored,
+                     this,
+                     &TokenGrabberU1Qt::handleCredentialsStored);
 
     service.getCredentials();
 }
@@ -72,6 +77,12 @@ void TokenGrabberU1Qt::handleCredentialsFound(const UbuntuOne::Token& in_token)
 void TokenGrabberU1Qt::handleCredentialsNotFound()
 {
     std::cout << "No Token :-(" << std::endl;
+}
+
+void TokenGrabberU1Qt::handleCredentialsStored()
+{
+    std::cout << "New Credentials Stored" << std::endl;
+    service.getCredentials();
 }
 
 std::string TokenGrabberU1Qt::signUrl (std::string url, std::string type)
