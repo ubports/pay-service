@@ -98,6 +98,10 @@ void TokenGrabberU1Qt::run (void)
 
 void TokenGrabberU1Qt::accountChanged(Accounts::AccountId id)
 {
+    /* We don't need to worry about @id here because there
+       can only be one U1 account for the user at a time, so
+       we're not getting a specific account or anything. Just
+       watching for changes */
     qDebug() << "Account changed, try to get a new token";
     token = UbuntuOne::Token();
     service.getCredentials();
