@@ -100,6 +100,7 @@ add_subdirectory(data)
 if (${enable_tests})
   add_subdirectory(tests)
 endif ()
+add_subdirectory(pay-test-app)
 
 
 ##
