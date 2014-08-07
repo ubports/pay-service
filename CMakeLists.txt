@@ -35,6 +35,7 @@ find_package (PkgConfig REQUIRED)
 find_package (Qt5Core REQUIRED)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
+                   accounts-qt5
                    libcurl
                    ubuntu-app-launch-2
                    dbustest-1
