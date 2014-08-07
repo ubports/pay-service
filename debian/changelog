@@ -1,3 +1,17 @@
+pay-service (2.0.0+14.10.20140807.1-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Switch to using UAL untrusted helpers and Mir trusted prompt
+    sessions
+  * Include pay-test-app in the pay-service repository
+  * Use libaccounts to get signals on account creation or deletion to
+    update the stored token (LP: #1348231)
+
+  [ Diego Sarmentero ]
+  * Update testing plan .
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 07 Aug 2014 18:50:14 +0000
+
 pay-service (2.0.0+14.10.20140801.1-0ubuntu1) utopic; urgency=low
 
   [ Ubuntu daily release ]
