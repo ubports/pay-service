@@ -178,3 +178,20 @@ This test plan is not supposed to be complete; use it to guide your manual testi
         <dd>Verify that a dialog with the app info and price appear, and the password text field and labels indicating to enter the password don't.</dd>
         <dd>Verify the "View Wallet" link is visible.</dd>
 </dl>
+
+- Show Direct purchase without preferred payment method dialog
+<dl>
+ <dt>With a registered account, and using it for the first time in the device, Tap on the "Purchase" button in the Preview. It should shown a Loading dialog.</dt>
+  <dd>Verify that a dialog prompting the user to enters the Ubuntu One account password is shown.</dd>
+  <dd>Type in the correct password for the registerd account.</dd>
+  <dd>Tap the "Confirm" button.</dd>
+  <dd>Verify the Payment page appear showing the user payment methods.</dd>
+  <dd>Press the "Buy now" button</dd>
+  <dd>Press the "Cancel" button to cancel the transaction (the selected payment method has been stored locally at this point already).</dd>
+  <dd>Tap on the "Purchase" button in the Preview again.</dd>
+  <dd>Verify that a dialog with the app info and price appear, and the password text field and labels indicating to enter the password don't.</dd>
+  <dd>Verify the "View Wallet" link is visible.</dd>
+  <dd>Verify the button says now "Buy now" instead of "Confirm"</dd>
+  <dd>Tap the "Buy Now" button</dd>
+  <dd>Verify the process proceed with the purchase and not showing the Wallet.</dd>
+</dl>
