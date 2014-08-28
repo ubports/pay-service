@@ -1,3 +1,17 @@
+pay-service (2.0.0+14.10.20140828-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Convert domain from sc.ubuntu.com to software-center.ubuntu.com (LP:
+    #1361888)
+
+  [ Diego Sarmentero ]
+  * Update test plan .
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 28 Aug 2014 12:53:53 +0000
+
 pay-service (2.0.0+14.10.20140807.1-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
