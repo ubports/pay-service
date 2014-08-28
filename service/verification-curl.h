@@ -29,7 +29,7 @@
 namespace Verification {
 
 const std::string PAY_BASE_URL_ENVVAR = "PAY_BASE_URL";
-const std::string PAY_BASE_URL = "https://sc.ubuntu.com";
+const std::string PAY_BASE_URL = "https://software-center.ubuntu.com";
 const std::string PAY_API_ROOT = "/api/2.0/click";
 const std::string PAY_PURCHASES_PATH = "/purchases";
 
