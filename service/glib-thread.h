@@ -27,7 +27,7 @@ class ContextThread {
 	std::shared_ptr<GMainLoop> _loop;
 	std::shared_ptr<GCancellable> _cancel;
 
-	ContextThread (std::function<void(void)> beforeLoop = []{}, std::function<void(void)> afterLoop = []{})
+	ContextThread (std::function<void(std::shared_ptr<GMainContext>, std::shared_ptr<GCancellable>)> beforeLoop = [](std::shared_ptr<GMainContext> context, std::shared_ptr<GCancellable> cancel){}, std::function<void(void)> afterLoop = []{})
 		: _context(nullptr)
 		, _loop(nullptr)
 	{
@@ -68,7 +68,7 @@ class ContextThread {
 			auto pair = std::pair<std::shared_ptr<GMainContext>, std::shared_ptr<GMainLoop>>(context, loop);
 			context_promise.set_value(pair);
 
-			beforeLoop();
+			beforeLoop(context, _cancel);
 
             if (!g_cancellable_is_cancelled(_cancel.get()))
             {
