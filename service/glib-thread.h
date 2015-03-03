@@ -27,7 +27,7 @@ class ContextThread {
 	std::shared_ptr<GMainLoop> _loop;
 	std::shared_ptr<GCancellable> _cancel;
 
-	ContextThread (std::function<void(void)> beforeLoop, std::function<void(void)> afterLoop)
+	ContextThread (std::function<void(void)> beforeLoop = []{}, std::function<void(void)> afterLoop = []{})
 		: _context(nullptr)
 		, _loop(nullptr)
 	{
