@@ -496,6 +496,10 @@ public:
 
     ~UalItem ()
     {
+        helperFinishedConnection->disconnect();
+        helperFinishedConnection.reset();
+        helperThread.reset();
+        socketThread.reset();
     }
 
     /* Goes through the basis phases of building up the environment for the
@@ -517,10 +521,11 @@ public:
         socketThread = std::make_shared<MirSocketThread>(connection, appid, ui_appid);
         helperThread = std::make_shared<HelperThread>(socketThread->getSocketName(), ui_appid, buildPurchaseUrl());
 
-        helperThread->helperFinished.connect([this](Item::Status status)
+        helperFinishedConnection = std::make_shared<core::Connection>(helperThread->helperFinished.connect([this](
+                                                                                                               Item::Status status)
         {
             purchaseComplete(status);
-        });
+        }));
 
         return true;
     }
@@ -536,6 +541,7 @@ private:
     /* Created by run, destroyed with the object */
     std::shared_ptr<HelperThread> helperThread;
     std::shared_ptr<MirSocketThread> socketThread;
+    std::shared_ptr<core::Connection> helperFinishedConnection;
 
     /* Looks through a directory to find the first entry that is a .desktop file
        and uses that as our AppID. We don't support more than one entry being in
