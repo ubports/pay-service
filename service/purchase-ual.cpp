@@ -49,14 +49,13 @@ private:
         Item::Status _status = Item::ERROR;
 
         /* Const */
-        const std::string HELPER_TYPE
-        {"pay-ui"
-        };
+        const char* HELPER_TYPE = "pay-ui";
 
         static void helper_stop_static_helper (const gchar* appid, const gchar* instanceid, const gchar* helpertype,
                                                gpointer user_data)
         {
             auto notthis = static_cast<HelperThread*>(user_data);
+            g_debug("Helper stopped: %s", appid);
             notthis->helperStop(std::string(appid));
         }
 
@@ -80,18 +79,18 @@ private:
             , _purchaseUrl(purchaseUrl)
             , _thread([this]()
         {
-            ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, HELPER_TYPE.c_str(), this);
+            ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
             /* TODO: Add failed when in UAL */
         },
         [this]()
         {
             /* Clean up */
-            ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE.c_str(), this);
+            ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
 
             /* If we've been cancelled we need to clean up the sub process too */
             if (!_helperid.empty() && _thread.isCancelled())
             {
-                ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE.c_str(), _appid.c_str(), _helperid.c_str());
+                ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, _appid.c_str(), _helperid.c_str());
             }
 
             helperFinished(_status);
@@ -105,7 +104,7 @@ private:
                 urls[0] = _socketname.c_str();
                 urls[1] = _purchaseUrl.c_str();
 
-                gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE.c_str(), _appid.c_str(), urls);
+                gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE, _appid.c_str(), urls);
                 std::string retval(helperid);
                 g_free(helperid);
                 return retval;
