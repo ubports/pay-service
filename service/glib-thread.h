@@ -17,7 +17,7 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <glib.h>
+#include <gio/gio.h>
 
 namespace GLib {
 
@@ -27,7 +27,8 @@ class ContextThread {
 	std::shared_ptr<GMainLoop> _loop;
 	std::shared_ptr<GCancellable> _cancel;
 
-	ContextThread (std::function<void(std::shared_ptr<GMainContext>, std::shared_ptr<GCancellable>)> beforeLoop = [](std::shared_ptr<GMainContext> context, std::shared_ptr<GCancellable> cancel){}, std::function<void(void)> afterLoop = []{})
+public:
+	ContextThread (std::function<void(void)> beforeLoop = [](void){}, std::function<void(void)> afterLoop = []{})
 		: _context(nullptr)
 		, _loop(nullptr)
 	{
@@ -68,7 +69,7 @@ class ContextThread {
 			auto pair = std::pair<std::shared_ptr<GMainContext>, std::shared_ptr<GMainLoop>>(context, loop);
 			context_promise.set_value(pair);
 
-			beforeLoop(context, _cancel);
+			beforeLoop();
 
             if (!g_cancellable_is_cancelled(_cancel.get()))
             {
@@ -89,23 +90,36 @@ class ContextThread {
 		_loop = context_value.second;
 
 		if (_context == nullptr || _loop == nullptr) {
-			g_error("Fail");
+			throw std::runtime_error("Unable to create GLib Thread");
 		}
 	}
 
 	~ContextThread (void)
 	{
-		g_cancellable_cancel(_cancel.get()); /* Force the cancellation on ongoing tasks */
-		if (_loop != nullptr)
-			g_main_loop_quit(_loop.get()); /* Quit the loop */
+		quit();
+
 		if (_thread.joinable())
 			_thread.join();
 	}
 
+	void quit (void) {
+		g_cancellable_cancel(_cancel.get()); /* Force the cancellation on ongoing tasks */
+		if (_loop != nullptr)
+			g_main_loop_quit(_loop.get()); /* Quit the loop */
+	}
+
+	bool isCancelled (void) {
+		return g_cancellable_is_cancelled(_cancel.get()) == TRUE;
+	}
+
 	template<typename T> auto executeOnThread (std::function<T(void)> work) -> T {
+		if (isCancelled()) {
+			throw std::runtime_error("Trying to execute work on a GLib thread that is shutting down.");
+		}
+
 		std::promise<T> promise;
 		std::function<gboolean(void)> magicFunc = [&promise, &work] (void) -> gboolean {
-			promise = work();
+			promise.set_value(work());
 			return G_SOURCE_REMOVE;
 		};
 
@@ -125,6 +139,10 @@ class ContextThread {
 	}
 
 	void executeOnThread (std::function<void(void)> work) {
+		if (isCancelled()) {
+			throw std::runtime_error("Trying to execute work on a GLib thread that is shutting down.");
+		}
+
 		/* The reason why this case is different is that we're not waiting on
 		   the return so we need to copy the function object */
 		std::function<void(void)> *heapWork = new std::function<void(void)>(work);
