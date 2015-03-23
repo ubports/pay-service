@@ -62,7 +62,7 @@ typedef void (*PayPackageItemObserver) (PayPackage* package,
 typedef enum
 {
     /*< prefix=PAY_PACKAGE_REFUND_STATUS */
-    PAY_PACKAGE_REFUND_STATUS_REFUNABLE,       /*< nick=refundable */
+    PAY_PACKAGE_REFUND_STATUS_REFUNDABLE,      /*< nick=refundable */
     PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE,  /*< nick=not-refundable */
     PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED,   /*< nick=not-purchased */
     PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING  /*< nick=window-expiring */
