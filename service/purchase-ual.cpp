@@ -29,7 +29,7 @@
 #include <mir_toolkit/mir_connection.h>
 #include <mir_toolkit/mir_prompt_session.h>
 
-#include <glib-thread.h>
+#include "glib-thread.h"
 
 static const char* HELPER_TYPE = "pay-ui";
 
