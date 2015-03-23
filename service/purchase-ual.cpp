@@ -66,6 +66,7 @@ private:
             }
 
             _status = Item::PURCHASED;
+            _helperid.clear(); /* It has stopped, now an invalid ID */
             _thread.quit();
         }
 
@@ -85,12 +86,14 @@ private:
         [this]
         {
             /* Clean up */
-            ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
+            if (!ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE, this))
+                throw std::runtime_error("Unable to unregister Stop Helper");
 
-            /* If we've been cancelled we need to clean up the sub process too */
-            if (!_helperid.empty() && _thread.isCancelled())
+            /* If we've still got a helper ID we need to kill it. */
+            if (!_helperid.empty())
             {
                 ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, _appid.c_str(), _helperid.c_str());
+                _helperid.clear();
             }
 
             helperFinished(_status);
