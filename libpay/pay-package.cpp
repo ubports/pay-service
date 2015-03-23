@@ -162,6 +162,12 @@ public:
         }
     }
 
+    PayPackageRefundStatus refundStatus (const char* itemid)
+    {
+        // TODO: DO
+        return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
+    }
+
     bool addItemObserver (PayPackageItemObserver observer, void* user_data)
     {
         /* Creates a connection to the signal for the observer and stores the connection
@@ -183,6 +189,18 @@ public:
     {
         std::pair<PayPackageItemObserver, void*> key(observer, user_data);
         observers.erase(key);
+        return true;
+    }
+
+    bool addRefundObserver (PayPackageRefundObserver observer, void* user_data)
+    {
+        // TODO: DO
+        return true;
+    }
+
+    bool removeRefundObserver (PayPackageRefundObserver observer, void* user_data)
+    {
+        // TODO: DO
         return true;
     }
 
@@ -265,6 +283,11 @@ public:
         return functionCall(proxy_pay_package_call_purchase_item, proxy_pay_package_call_purchase_item_finish, itemid);
     }
 
+    bool startRefund (const char* itemid)
+    {
+        // TODO: Do
+    }
+
     std::string
     encodePath (const std::string& input)
     {
@@ -330,6 +353,19 @@ PayPackageItemStatus pay_package_item_status (PayPackage* package,
     return pkg->itemStatus(itemid);
 }
 
+int pay_package_item_is_refundable (PayPackage* package,
+                                    const char* itemid)
+{
+    return pay_package_refund_status(package, itemid) == PAY_PACKAGE_REFUND_STATUS_REFUNDABLE;
+}
+
+PayPackageRefundStatus pay_package_refund_status (PayPackage* package,
+                                                  const char* itemid)
+{
+    auto pkg = reinterpret_cast<Pay::Package*>(package);
+    return pkg->refundStatus(itemid);
+}
+
 int pay_package_item_observer_install (PayPackage* package,
                                        PayPackageItemObserver observer,
                                        void* user_data)
@@ -346,6 +382,22 @@ int pay_package_item_observer_uninstall (PayPackage* package,
     return pkg->removeItemObserver(observer, user_data);
 }
 
+int pay_package_refund_observer_install (PayPackage* package,
+                                         PayPackageRefundObserver observer,
+                                         void* user_data)
+{
+    auto pkg = reinterpret_cast<Pay::Package*>(package);
+    return pkg->addRefundObserver(observer, user_data);
+}
+
+int pay_package_refund_observer_uninstall (PayPackage* package,
+                                           PayPackageRefundObserver observer,
+                                           void* user_data)
+{
+    auto pkg = reinterpret_cast<Pay::Package*>(package);
+    return pkg->removeRefundObserver(observer, user_data);
+}
+
 int pay_package_item_start_verification (PayPackage* package,
                                          const char* itemid)
 {
@@ -358,4 +410,11 @@ int pay_package_item_start_purchase (PayPackage* package,
 {
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->startPurchase(itemid);
+}
+
+int pay_package_item_start_refund (PayPackage* package,
+                                   const char* itemid)
+{
+    auto pkg = reinterpret_cast<Pay::Package*>(package);
+    return pkg->startRefund(itemid);
 }
