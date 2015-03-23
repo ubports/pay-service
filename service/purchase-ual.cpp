@@ -43,12 +43,12 @@ private:
     {
     private:
         /* Members Only */
-        std::string _socketname;
-        GLib::ContextThread _thread;
-        std::string _helperid;
-        std::string _appid;
-        std::string _purchaseUrl;
-        Item::Status _status = Item::ERROR;
+        std::string socketname;
+        GLib::ContextThread thread;
+        std::string helperid;
+        std::string appid;
+        std::string purchaseUrl;
+        Item::Status status = Item::ERROR;
 
         /* Const */
         static void helper_stop_static_helper (const gchar* appid, const gchar* instanceid, const gchar* helpertype,
@@ -60,24 +60,24 @@ private:
 
         void helperStop (std::string stop_appid)
         {
-            if (stop_appid != _appid)
+            if (stop_appid != appid)
             {
                 return;
             }
 
-            _status = Item::PURCHASED;
-            _helperid.clear(); /* It has stopped, now an invalid ID */
-            _thread.quit();
+            status = Item::PURCHASED;
+            helperid.clear(); /* It has stopped, now an invalid ID */
+            thread.quit();
         }
 
     public:
         core::Signal<Item::Status> helperFinished;
 
-        HelperThread (const std::string& socketname, const std::string& appid, const std::string& purchaseUrl)
-            : _socketname(socketname)
-            , _appid(appid)
-            , _purchaseUrl(purchaseUrl)
-            , _thread([this]
+        HelperThread (const std::string& in_socketname, const std::string& in_appid, const std::string& in_purchaseUrl)
+            : socketname(in_socketname)
+            , appid(in_appid)
+            , purchaseUrl(in_purchaseUrl)
+            , thread([this]
         {
             if (!ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, HELPER_TYPE, this))
                 throw std::runtime_error("Unable to register Stop Helper");
@@ -90,24 +90,24 @@ private:
                 throw std::runtime_error("Unable to unregister Stop Helper");
 
             /* If we've still got a helper ID we need to kill it. */
-            if (!_helperid.empty())
+            if (!helperid.empty())
             {
-                ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, _appid.c_str(), _helperid.c_str());
-                _helperid.clear();
+                ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, appid.c_str(), helperid.c_str());
+                helperid.clear();
             }
 
-            helperFinished(_status);
+            helperFinished(status);
         })
 
         {
-            _helperid = _thread.executeOnThread<std::string>([this]() -> std::string
+            helperid = thread.executeOnThread<std::string>([this]() -> std::string
             {
                 /* Building a URL to pass info to the Pay UI */
                 const gchar* urls[3] = {0};
-                urls[0] = _socketname.c_str();
-                urls[1] = _purchaseUrl.c_str();
+                urls[0] = socketname.c_str();
+                urls[1] = purchaseUrl.c_str();
 
-                gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE, _appid.c_str(), urls);
+                gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE, appid.c_str(), urls);
                 std::string retval(helperid);
                 g_free(helperid);
                 return retval;
@@ -117,7 +117,7 @@ private:
         ~HelperThread (void)
         {
             /* Quit before other variables are free'd */
-            _thread.quit();
+            thread.quit();
         }
     };
 
