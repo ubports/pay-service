@@ -51,9 +51,12 @@ public:
         path += encodePath(id);
 
         /* Keeps item cache up-to-data as we get signals about it */
-        itemChanged.connect([this](std::string itemid, PayPackageItemStatus status, std::chrono::system_clock::time_point refundable_until)
+        itemChanged.connect([this](std::string itemid,
+                                   PayPackageItemStatus status,
+                                   std::chrono::system_clock::time_point refundable_until)
         {
-            itemStatusCache[itemid] = std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>(status, refundable_until);
+            itemStatusCache[itemid] = std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>(status,
+                                                                                                             refundable_until);
         });
 
         context_mutex.lock();
@@ -107,10 +110,16 @@ public:
         }
     }
 
-    static void proxySignal (proxyPayPackage* proxy, const gchar* itemid, const gchar* statusstr, guint64 refundable_until, gpointer user_data)
+    static void proxySignal (proxyPayPackage* proxy,
+                             const gchar* itemid,
+                             const gchar* statusstr,
+                             guint64 refundable_until,
+                             gpointer user_data)
     {
         Package* notthis = reinterpret_cast<Package*>(user_data);
-        notthis->itemChanged(itemid, statusFromString(statusstr), std::chrono::system_clock::from_time_t((time_t)(refundable_until)));
+        notthis->itemChanged(itemid,
+                             statusFromString(statusstr),
+                             std::chrono::system_clock::from_time_t((time_t)(refundable_until)));
     }
 
     inline static PayPackageItemStatus statusFromString (std::string statusstr)
