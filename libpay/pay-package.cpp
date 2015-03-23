@@ -34,8 +34,8 @@ class Package
     std::string path;
     /* NOTE: Using the shared_ptr here because gcc 4.7 map doesn't have emplace */
     std::map <std::pair<PayPackageItemObserver, void*>, std::shared_ptr<core::ScopedConnection>> observers;
-    core::Signal<std::string, PayPackageItemStatus> itemChanged;
-    std::map <std::string, PayPackageItemStatus> itemStatusCache;
+    core::Signal<std::string, PayPackageItemStatus, std::chrono::system_clock::time_point> itemChanged;
+    std::map <std::string, std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>> itemStatusCache;
     std::mutex context_mutex;
 
     std::thread t;
@@ -51,9 +51,9 @@ public:
         path += encodePath(id);
 
         /* Keeps item cache up-to-data as we get signals about it */
-        itemChanged.connect([this](std::string itemid, PayPackageItemStatus status)
+        itemChanged.connect([this](std::string itemid, PayPackageItemStatus status, std::chrono::system_clock::time_point refundable_until)
         {
-            itemStatusCache[itemid] = status;
+            itemStatusCache[itemid] = std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>(status, refundable_until);
         });
 
         context_mutex.lock();
@@ -107,10 +107,10 @@ public:
         }
     }
 
-    static void proxySignal (proxyPayPackage* proxy, const gchar* itemid, const gchar* statusstr, gpointer user_data)
+    static void proxySignal (proxyPayPackage* proxy, const gchar* itemid, const gchar* statusstr, guint64 refundable_until, gpointer user_data)
     {
         Package* notthis = reinterpret_cast<Package*>(user_data);
-        notthis->itemChanged(itemid, statusFromString(statusstr));
+        notthis->itemChanged(itemid, statusFromString(statusstr), std::chrono::system_clock::from_time_t((time_t)(refundable_until)));
     }
 
     inline static PayPackageItemStatus statusFromString (std::string statusstr)
@@ -141,7 +141,7 @@ public:
     {
         try
         {
-            return itemStatusCache[itemid];
+            return itemStatusCache[itemid].first;
         }
         catch (std::out_of_range range)
         {
@@ -157,7 +157,8 @@ public:
         std::pair<PayPackageItemObserver, void*> key(observer, user_data);
         auto connection = std::make_shared<core::ScopedConnection>(itemChanged.connect([this, observer, user_data] (
                                                                                            std::string itemid,
-                                                                                           PayPackageItemStatus status)
+                                                                                           PayPackageItemStatus status,
+                                                                                           std::chrono::system_clock::time_point refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
         }));
