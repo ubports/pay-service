@@ -130,10 +130,10 @@ private:
         std::string socketName;
 
         /* On thread */
-        GLib::ContextThread thread;
         std::shared_ptr<proxyPayPayui> payuiobj;
         std::shared_ptr<GDBusConnection> bus;
         int fdlist[1] = {0};
+        GLib::ContextThread thread;
 
         /* Creates a Mir Prompt Session by finding the overlay pid and making it. */
         std::shared_ptr<MirPromptSession> setupSession (void)
@@ -476,6 +476,12 @@ private:
         {
             session = setupSession();
             socketName = setupSocket();
+        }
+
+        ~MirSocketThread (void)
+        {
+            /* Quit before other variables are free'd */
+            thread.quit();
         }
 
         std::string getSocketName (void)
