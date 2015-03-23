@@ -31,6 +31,8 @@
 
 #include <glib-thread.h>
 
+static const char* HELPER_TYPE = "pay-ui";
+
 namespace Purchase
 {
 
@@ -49,13 +51,10 @@ private:
         Item::Status _status = Item::ERROR;
 
         /* Const */
-        const char* HELPER_TYPE = "pay-ui";
-
         static void helper_stop_static_helper (const gchar* appid, const gchar* instanceid, const gchar* helpertype,
                                                gpointer user_data)
         {
             auto notthis = static_cast<HelperThread*>(user_data);
-            g_debug("Helper stopped: %s", appid);
             notthis->helperStop(std::string(appid));
         }
 
@@ -77,12 +76,13 @@ private:
             : _socketname(socketname)
             , _appid(appid)
             , _purchaseUrl(purchaseUrl)
-            , _thread([this]()
+            , _thread([this]
         {
-            ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
+            if (!ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, HELPER_TYPE, this))
+                throw std::runtime_error("Unable to register Stop Helper");
             /* TODO: Add failed when in UAL */
         },
-        [this]()
+        [this]
         {
             /* Clean up */
             ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
@@ -132,6 +132,7 @@ private:
         /* On thread */
         GLib::ContextThread thread;
         std::shared_ptr<proxyPayPayui> payuiobj;
+        std::shared_ptr<GDBusConnection> bus;
         int fdlist[1] = {0};
 
         /* Creates a Mir Prompt Session by finding the overlay pid and making it. */
@@ -173,8 +174,8 @@ private:
                 GError* error = nullptr;
                 std::string socketName;
 
-                auto bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
-                                                                           nullptr), [](GDBusConnection * bus)
+                bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
+                                                                      nullptr), [](GDBusConnection * bus)
                 {
                     if (bus != nullptr)
                     {
@@ -470,6 +471,7 @@ private:
             , thread([]() {}, [this]()
         {
             payuiobj.reset();
+            bus.reset();
         })
         {
             session = setupSession();
