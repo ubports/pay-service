@@ -140,6 +140,10 @@ public:
         {
             return PAY_PACKAGE_ITEM_STATUS_PURCHASING;
         }
+        else if (statusstr == "refunding")
+        {
+            return PAY_PACKAGE_ITEM_STATUS_REFUNDING;
+        }
         else
         {
             return PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
