@@ -33,8 +33,7 @@ class Package
     std::string id;
     std::string path;
 
-    /* NOTE: Using the shared_ptr here because gcc 4.7 map doesn't have emplace */
-    std::map <std::pair<PayPackageItemObserver, void*>, std::shared_ptr<core::ScopedConnection>> itemObservers;
+    std::map <std::pair<PayPackageItemObserver, void*>, core::ScopedConnection> itemObservers;
     std::map <std::pair<PayPackageRefundObserver, void*>, core::ScopedConnection> refundObservers;
 
     core::Signal<std::string, PayPackageItemStatus, std::chrono::system_clock::time_point> itemChanged;
@@ -207,15 +206,13 @@ public:
         /* Creates a connection to the signal for the observer and stores the connection
            object in the map so that we can remove it later, or it'll get disconnected
            when the whole object gets destroyed */
-        std::pair<PayPackageItemObserver, void*> key(observer, user_data);
-        auto connection = std::make_shared<core::ScopedConnection>(itemChanged.connect([this, observer, user_data] (
+        itemObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
                                                                                            std::string itemid,
                                                                                            PayPackageItemStatus status,
                                                                                            std::chrono::system_clock::time_point refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
         }));
-        itemObservers[key] = connection;
         return true;
     }
 
