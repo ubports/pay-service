@@ -8,6 +8,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ######################
 
 set(SERVICE_LIB_SOURCES
+    glib-thread.h
     dbus-interface.h
     dbus-interface.cpp
     item-interface.h
