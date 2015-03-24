@@ -68,11 +68,11 @@ public:
 
             g_main_context_push_thread_default(context.get());
 
+            beforeLoop();
+
             /* Free's the constructor to continue */
             auto pair = std::pair<std::shared_ptr<GMainContext>, std::shared_ptr<GMainLoop>>(context, loop);
             context_promise.set_value(pair);
-
-            beforeLoop();
 
             if (!g_cancellable_is_cancelled(_cancel.get()))
             {
