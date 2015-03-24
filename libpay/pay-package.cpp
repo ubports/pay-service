@@ -32,8 +32,11 @@ class Package
 {
     std::string id;
     std::string path;
+
     /* NOTE: Using the shared_ptr here because gcc 4.7 map doesn't have emplace */
-    std::map <std::pair<PayPackageItemObserver, void*>, std::shared_ptr<core::ScopedConnection>> observers;
+    std::map <std::pair<PayPackageItemObserver, void*>, std::shared_ptr<core::ScopedConnection>> itemObservers;
+    std::map <std::pair<PayPackageRefundObserver, void*>, core::ScopedConnection> refundObservers;
+
     core::Signal<std::string, PayPackageItemStatus, std::chrono::system_clock::time_point> itemChanged;
     std::map <std::string, std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>> itemStatusCache;
     std::mutex context_mutex;
@@ -169,19 +172,22 @@ public:
 
     PayPackageRefundStatus refundStatus (const char* itemid)
     {
-        if (itemStatus(itemid) != PAY_PACKAGE_ITEM_STATUS_PURCHASED)
-        {
-            return PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED;
-        }
-
-        std::chrono::system_clock::time_point refundtime;
         try
         {
-            refundtime = itemStatusCache[itemid].second;
+            return calcRefundStatus(itemStatusCache[itemid].first, itemStatusCache[itemid].second);
         }
         catch (std::out_of_range range)
         {
             return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
+        }
+    }
+
+    inline PayPackageRefundStatus calcRefundStatus (PayPackageItemStatus item,
+                                                    std::chrono::system_clock::time_point refundtime)
+    {
+        if (item != PAY_PACKAGE_ITEM_STATUS_PURCHASED)
+        {
+            return PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED;
         }
 
         auto timeleft = refundtime - std::chrono::system_clock::now();
@@ -209,26 +215,33 @@ public:
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
         }));
-        observers[key] = connection;
+        itemObservers[key] = connection;
         return true;
     }
 
     bool removeItemObserver (PayPackageItemObserver observer, void* user_data)
     {
         std::pair<PayPackageItemObserver, void*> key(observer, user_data);
-        observers.erase(key);
+        itemObservers.erase(key);
         return true;
     }
 
     bool addRefundObserver (PayPackageRefundObserver observer, void* user_data)
     {
-        // TODO: DO
+        refundObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
+                                                                                             std::string itemid,
+                                                                                             PayPackageItemStatus status,
+                                                                                             std::chrono::system_clock::time_point refund)
+        {
+            observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), calcRefundStatus(status, refund), user_data);
+        }));
         return true;
     }
 
     bool removeRefundObserver (PayPackageRefundObserver observer, void* user_data)
     {
-        // TODO: DO
+        std::pair<PayPackageRefundObserver, void*> key(observer, user_data);
+        refundObservers.erase(key);
         return true;
     }
 
