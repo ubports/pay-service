@@ -151,7 +151,7 @@ private:
             if (overlaypid == 0)
             {
                 /* We can't overlay nothin' */
-                g_debug("Unable to find PID for: %s", appid.c_str());
+                g_warning("Unable to find PID for: %s", appid.c_str());
                 return nullptr;
             }
 
