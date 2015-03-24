@@ -166,7 +166,7 @@ private:
                 }
             });
 
-            if (session == nullptr)
+            if (!session)
             {
                 g_critical("Unable to create a trusted prompt session");
             }
@@ -186,12 +186,9 @@ private:
                 bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
                                                                       nullptr), [](GDBusConnection * bus)
                 {
-                    if (bus != nullptr)
-                    {
-                        g_object_unref(bus);
-                    }
+                    g_clear_object(&bus);
                 });
-                if (bus == nullptr)
+                if (!bus)
                 {
                     g_critical("Unable to get session bus");
                     return std::string();
@@ -348,12 +345,9 @@ private:
             auto bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
                                                                        NULL), [](GDBusConnection * bus)
             {
-                if (bus != nullptr)
-                {
-                    g_object_unref(bus);
-                }
+                g_clear_object(&bus);
             });
-            if (bus == nullptr)
+            if (!bus)
             {
                 g_critical("Unable to get session bus");
                 return 0;
@@ -649,7 +643,7 @@ public:
 
         g_free(mirpath);
 
-        if (connection == nullptr)
+        if (!connection)
         {
             throw std::runtime_error("Unable to connect to Mir Trusted Session");
         }
@@ -670,7 +664,7 @@ UalFactory::purchaseItem (std::string& appid, std::string& itemid)
 UalFactory::UalFactory ()
 {
     impl = std::make_shared<Impl>();
-    if (impl == nullptr)
+    if (!impl)
     {
         throw std::runtime_error("Unable to build implementation of UAL Factory");
     }
