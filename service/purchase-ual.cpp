@@ -610,7 +610,7 @@ private:
         if (appid != "click-scope")
         {
             purchase_url += appid;
-            purchase_url += "/";
+            purchase_url += '/';
         }
 
         purchase_url += itemid;
