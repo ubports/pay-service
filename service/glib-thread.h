@@ -159,7 +159,7 @@ public:
 
         /* The reason why this case is different is that we're not waiting on
            the return so we need to copy the function object */
-        std::function<void(void)>* heapWork = new std::function<void(void)>(work);
+        auto heapWork = new std::function<void(void)>(work);
 
         auto source = g_idle_source_new();
         g_source_set_callback(source,
