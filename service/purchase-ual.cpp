@@ -311,22 +311,19 @@ private:
 
             for (unsigned char c : input)
             {
-                std::string retval;
-
                 if ((c >= 'a' && c <= 'z') ||
                         (c >= 'A' && c <= 'Z') ||
                         (c >= '0' && c <= '9' && !first))
                 {
-                    retval = std::string((char*)&c, 1);
+                    output += c;
                 }
                 else
                 {
                     char buffer[5] = {0};
                     std::snprintf(buffer, sizeof(buffer), "_%2X", c);
-                    retval = std::string(buffer);
+                    output += buffer;
                 }
 
-                output += retval;
                 first = false;
             }
 
