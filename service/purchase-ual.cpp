@@ -102,6 +102,7 @@ private:
             helperid = thread.executeOnThread<std::string>([this]() -> std::string
             {
                 /* Building a URL to pass info to the Pay UI */
+                std::string retval;
                 std::array<const gchar*, 3> urls{
                     socketname.c_str(),
                     purchaseUrl.c_str(),
@@ -109,8 +110,12 @@ private:
                 };
 
                 gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE, appid.c_str(), urls.data());
-                std::string retval(helperid);
-                g_free(helperid);
+                if (helperid != nullptr)
+                {
+                    retval = helperid;
+                    g_free(helperid);
+                }
+
                 return retval;
             });
         }
