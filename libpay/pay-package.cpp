@@ -44,6 +44,11 @@ class Package
     GCancellable* cancellable;
     proxyPayPackage* proxy;
 
+    const std::chrono::minutes expiretime
+    {
+        1
+    };
+
 public:
     Package (const char* packageid) : id(packageid), cancellable(g_cancellable_new()), loop(nullptr)
     {
@@ -164,8 +169,31 @@ public:
 
     PayPackageRefundStatus refundStatus (const char* itemid)
     {
-        // TODO: DO
-        return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
+        if (itemStatus(itemid) != PAY_PACKAGE_ITEM_STATUS_PURCHASED)
+        {
+            return PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED;
+        }
+
+        std::chrono::system_clock::time_point refundtime;
+        try
+        {
+            refundtime = itemStatusCache[itemid].second;
+        }
+        catch (std::out_of_range range)
+        {
+            return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
+        }
+
+        auto timeleft = refundtime - std::chrono::system_clock::now();
+        if (timeleft < std::chrono::seconds(10)) // Honestly, they can't refund this quickly anyway
+        {
+            return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
+        }
+        if (timeleft < expiretime)
+        {
+            return PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING;
+        }
+        return PAY_PACKAGE_REFUND_STATUS_REFUNDABLE;
     }
 
     bool addItemObserver (PayPackageItemObserver observer, void* user_data)
