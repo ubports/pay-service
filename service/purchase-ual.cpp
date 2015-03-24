@@ -50,7 +50,6 @@ private:
         std::string purchaseUrl;
         Item::Status status = Item::ERROR;
 
-        /* Const */
         static void helper_stop_static_helper (const gchar* appid, const gchar* instanceid, const gchar* helpertype,
                                                gpointer user_data)
         {
