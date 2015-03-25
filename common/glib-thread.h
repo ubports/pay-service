@@ -166,7 +166,7 @@ public:
     }
 
 private:
-    void simpleSource (std::function<std::shared_ptr<GSource>(void)> srcBuilder, std::function<void(void)> work)
+    void simpleSource (std::function<GSource * (void)> srcBuilder, std::function<void(void)> work)
     {
         if (isCancelled())
         {
@@ -178,7 +178,15 @@ private:
            it to the context. */
         auto heapWork = new std::function<void(void)>(work);
 
-        auto source = srcBuilder();
+        auto source = std::shared_ptr<GSource>(srcBuilder(),
+                                               [](GSource * src)
+        {
+            if (src != nullptr)
+            {
+                g_source_unref(src);
+            }
+        }
+                                              );
         g_source_set_callback(source.get(),
                               [](gpointer data) -> gboolean
         {
@@ -198,45 +206,24 @@ private:
 public:
     void executeOnThread (std::function<void(void)> work)
     {
-        simpleSource([]() -> std::shared_ptr<GSource>
-        {
-            return std::shared_ptr<GSource>(g_idle_source_new(), [](GSource * src)
-            {
-                if (src != nullptr)
-                {
-                    g_source_unref(src);
-                }
-            });
-        }, work);
+        simpleSource(g_idle_source_new, work);
     }
 
     template<class Rep, class Period> void timeout (const std::chrono::duration<Rep, Period>& length,
                                                     std::function<void(void)> work)
     {
-        simpleSource([length]() -> std::shared_ptr<GSource>
+        simpleSource([length]()
         {
-            return std::shared_ptr<GSource>(g_timeout_source_new(std::chrono::duration_cast<std::chrono::milliseconds>(length).count()), [](GSource * src)
-            {
-                if (src != nullptr)
-                {
-                    g_source_unref(src);
-                }
-            });
+            return g_timeout_source_new(std::chrono::duration_cast<std::chrono::milliseconds>(length).count());
         }, work);
     }
 
     template<class Rep, class Period> void timeoutSeconds (const std::chrono::duration<Rep, Period>& length,
                                                            std::function<void(void)> work)
     {
-        simpleSource([length]() -> std::shared_ptr<GSource>
+        simpleSource([length]()
         {
-            return std::shared_ptr<GSource>(g_timeout_source_new_seconds(std::chrono::duration_cast<std::chrono::seconds>(length).count()), [](GSource * src)
-            {
-                if (src != nullptr)
-                {
-                    g_source_unref(src);
-                }
-            });
+            return g_timeout_source_new_seconds(std::chrono::duration_cast<std::chrono::seconds>(length).count());
         }, work);
     }
 };
