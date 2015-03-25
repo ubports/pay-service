@@ -142,6 +142,11 @@ public:
 
             return proxy;
         });
+
+        if (!proxy)
+        {
+            throw std::runtime_error("Unable to build proxy for pay-service");
+        }
     }
 
     ~Package (void)
@@ -396,8 +401,16 @@ struct PayPackage_
 PayPackage*
 pay_package_new (const char* package_name)
 {
-    Pay::Package* ret = new Pay::Package(package_name);
-    return reinterpret_cast<PayPackage*>(ret);
+    g_return_val_if_fail(package_name != nullptr, nullptr);
+    try
+    {
+        Pay::Package* ret = new Pay::Package(package_name);
+        return reinterpret_cast<PayPackage*>(ret);
+    }
+    catch (std::runtime_error error)
+    {
+        return nullptr;
+    }
 }
 
 void pay_package_delete (PayPackage* package)
