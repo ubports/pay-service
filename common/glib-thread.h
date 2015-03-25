@@ -158,9 +158,9 @@ private:
             throw std::runtime_error("Trying to execute work on a GLib thread that is shutting down.");
         }
 
-		/* Copy the work so that we can reuse it */
-		/* Lifecycle is handled with the source pointer when we attach
-		   it to the context. */
+        /* Copy the work so that we can reuse it */
+        /* Lifecycle is handled with the source pointer when we attach
+           it to the context. */
         auto heapWork = new std::function<void(void)>(work);
 
         auto source = srcBuilder();
@@ -186,6 +186,34 @@ public:
         simpleSource([]() -> std::shared_ptr<GSource>
         {
             return std::shared_ptr<GSource>(g_idle_source_new(), [](GSource * src)
+            {
+                if (src != nullptr)
+                {
+                    g_source_unref(src);
+                }
+            });
+        }, work);
+    }
+
+    void timeout (std::chrono::milliseconds length, std::function<void(void)> work)
+    {
+        simpleSource([length]() -> std::shared_ptr<GSource>
+        {
+            return std::shared_ptr<GSource>(g_timeout_source_new(length.count()), [](GSource * src)
+            {
+                if (src != nullptr)
+                {
+                    g_source_unref(src);
+                }
+            });
+        }, work);
+    }
+
+    void timeoutSeconds (std::chrono::seconds length, std::function<void(void)> work)
+    {
+        simpleSource([length]() -> std::shared_ptr<GSource>
+        {
+            return std::shared_ptr<GSource>(g_timeout_source_new_seconds(length.count()), [](GSource * src)
             {
                 if (src != nullptr)
                 {
