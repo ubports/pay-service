@@ -291,7 +291,7 @@ public:
 
                 if (error != nullptr)
                 {
-                    std::cerr << "Error from dbus message to service: " << error->message << std::endl;
+                    std::cerr << "Error from service on verification: " << error->message << std::endl;
                     g_clear_error(&error);
                 }
             },
@@ -316,7 +316,7 @@ public:
 
                 if (error != nullptr)
                 {
-                    std::cerr << "Error from dbus message to service: " << error->message << std::endl;
+                    std::cerr << "Error from service on purchase: " << error->message << std::endl;
                     g_clear_error(&error);
                 }
             },
@@ -326,7 +326,27 @@ public:
 
     bool startRefund (const char* itemid)
     {
-        // TODO: Do
+        std::string itemidcopy(itemid);
+        thread.executeOnThread([this, itemidcopy]()
+        {
+            proxy_pay_package_call_refund_item(proxy.get(),
+                                               itemidcopy.c_str(),
+                                               nullptr, /* cancellable */
+                                               [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
+            {
+                GError* error = nullptr;
+                proxy_pay_package_call_refund_item_finish(PROXY_PAY_PACKAGE(obj),
+                res,
+                &error);
+
+                if (error != nullptr)
+                {
+                    std::cerr << "Error from service on refund request: " << error->message << std::endl;
+                    g_clear_error(&error);
+                }
+            },
+            nullptr);
+        });
     }
 
     std::string
