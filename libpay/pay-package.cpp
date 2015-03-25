@@ -57,17 +57,16 @@ public:
         });
 
 
-        proxy = thread.executeOnThread<std::shared_ptr<proxyPayPackage>>([this]
+        proxy = thread.executeOnThread<std::shared_ptr<proxyPayPackage>>([this]()
         {
-
             GError* error = nullptr;
             auto proxy = std::shared_ptr<proxyPayPackage>(proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
-            G_DBUS_PROXY_FLAGS_NONE,
-            "com.canonical.pay",
-            path.c_str(),
-            nullptr,
-            &error),
-            [](proxyPayPackage * proxy)
+                                                                                                   G_DBUS_PROXY_FLAGS_NONE,
+                                                                                                   "com.canonical.pay",
+                                                                                                   path.c_str(),
+                                                                                                   nullptr,
+                                                                                                   &error),
+                                                          [](proxyPayPackage * proxy) -> void
             {
                 g_clear_object(&proxy);
             });
@@ -156,12 +155,13 @@ public:
     bool startVerification (const char* itemid)
     {
         std::string itemidcopy(itemid);
-        thread.executeOnThread([this, itemidcopy]
+        thread.executeOnThread([this, itemidcopy]()
         {
             proxy_pay_package_call_verify_item(proxy.get(),
-            itemidcopy.c_str(),
-            nullptr, /* cancellable */
-            [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void {
+                                               itemidcopy.c_str(),
+                                               nullptr, /* cancellable */
+                                               [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
+            {
                 GError* error = nullptr;
                 proxy_pay_package_call_verify_item_finish(PROXY_PAY_PACKAGE(obj),
                 res,
@@ -174,19 +174,19 @@ public:
                 }
             },
             nullptr);
-
         });
     }
 
     bool startPurchase (const char* itemid)
     {
         std::string itemidcopy(itemid);
-        thread.executeOnThread([this, itemidcopy]
+        thread.executeOnThread([this, itemidcopy]()
         {
             proxy_pay_package_call_purchase_item(proxy.get(),
-            itemidcopy.c_str(),
-            nullptr, /* cancellable */
-            [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void {
+                                                 itemidcopy.c_str(),
+                                                 nullptr, /* cancellable */
+                                                 [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
+            {
                 GError* error = nullptr;
                 proxy_pay_package_call_purchase_item_finish(PROXY_PAY_PACKAGE(obj),
                 res,
@@ -199,7 +199,6 @@ public:
                 }
             },
             nullptr);
-
         });
     }
 
