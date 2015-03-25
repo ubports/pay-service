@@ -126,7 +126,7 @@ public:
                                                                                                    G_DBUS_PROXY_FLAGS_NONE,
                                                                                                    "com.canonical.pay",
                                                                                                    path.c_str(),
-                                                                                                   nullptr,
+                                                                                                   thread.getCancellable().get(),
                                                                                                    &error),
                                                           [](proxyPayPackage * proxy) -> void
             {
@@ -281,7 +281,7 @@ public:
         {
             proxy_pay_package_call_verify_item(proxy.get(),
                                                itemidcopy.c_str(),
-                                               nullptr, /* cancellable */
+                                               thread.getCancellable().get(), /* cancellable */
                                                [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
             {
                 GError* error = nullptr;
@@ -306,7 +306,7 @@ public:
         {
             proxy_pay_package_call_purchase_item(proxy.get(),
                                                  itemidcopy.c_str(),
-                                                 nullptr, /* cancellable */
+                                                 thread.getCancellable().get(), /* cancellable */
                                                  [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
             {
                 GError* error = nullptr;
@@ -331,7 +331,7 @@ public:
         {
             proxy_pay_package_call_refund_item(proxy.get(),
                                                itemidcopy.c_str(),
-                                               nullptr, /* cancellable */
+                                               thread.getCancellable().get(), /* cancellable */
                                                [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
             {
                 GError* error = nullptr;

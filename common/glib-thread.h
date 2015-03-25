@@ -125,6 +125,11 @@ public:
         return g_cancellable_is_cancelled(_cancel.get()) == TRUE;
     }
 
+    std::shared_ptr<GCancellable> getCancellable (void)
+    {
+        return _cancel;
+    }
+
     template<typename T> auto executeOnThread (std::function<T(void)> work) -> T
     {
         if (isCancelled())
