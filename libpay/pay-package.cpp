@@ -39,6 +39,7 @@ class Package
 
     core::Signal<std::string, PayPackageItemStatus, std::chrono::system_clock::time_point> itemChanged;
     std::map <std::string, std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>> itemStatusCache;
+    std::map <std::string, std::chrono::system_clock::time_point> itemTimerCache;
     std::mutex context_mutex;
 
     GLib::ContextThread thread;
@@ -64,9 +65,60 @@ public:
         {
             itemStatusCache[itemid] = std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>(status,
                                                                                                              refundable_until);
+
         });
 
+        /* Manage the timers to signal when refundable status changes */
+        /* We're being kinda loose with the timers and not tracking them to remove them
+           or anything like that because they don't happen that often and the refundable
+           time doesn't change that much. The cost is so low of extra timers that we're
+           just erroring on that side of things */
+        itemChanged.connect([this](std::string itemid,
+                                   PayPackageItemStatus status,
+                                   std::chrono::system_clock::time_point refundable_until)
+        {
+            try
+            {
+                if (itemTimerCache[itemid] == refundable_until)
+                {
+                    if (refundable_until < std::chrono::system_clock::now())
+                    {
+                        itemTimerCache.erase(itemid);
+                    }
+                    return;
+                }
+            }
+            catch (std::out_of_range range)
+            {
+                /* If it's not there, that's cool, let's add it */
+            }
 
+            auto timerlen = refundable_until - std::chrono::system_clock::now();
+            if (timerlen > std::chrono::seconds {10})
+            {
+                auto timerfunc = [this, itemid]()
+                {
+                    try
+                    {
+                        auto iteminfo = itemStatusCache[itemid];
+                        itemChanged(itemid, iteminfo.first, iteminfo.second);
+                    }
+                    catch (std::out_of_range range) { }
+                };
+
+                thread.timeoutSeconds(std::chrono::duration_cast<std::chrono::seconds>(timerlen), timerfunc);
+
+                if (timerlen > expiretime)
+                {
+                    /* Two timers to signal the window closing */
+                    thread.timeoutSeconds(std::chrono::duration_cast<std::chrono::seconds>(timerlen - expiretime), timerfunc);
+                }
+
+                itemTimerCache[itemid] = refundable_until;
+            }
+        });
+
+        /* Connect in the proxy now that we've got all the signals setup, let the fun begin! */
         proxy = thread.executeOnThread<std::shared_ptr<proxyPayPackage>>([this]()
         {
             GError* error = nullptr;
