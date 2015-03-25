@@ -17,6 +17,9 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
+#include <thread>
+#include <future>
+
 #include <gio/gio.h>
 
 namespace GLib

@@ -25,6 +25,7 @@
 #include <mutex>
 
 #include "proxy-package.h"
+#include "glib-thread.h"
 
 namespace Pay
 {
