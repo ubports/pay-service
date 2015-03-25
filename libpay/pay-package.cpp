@@ -163,7 +163,7 @@ public:
         Package* notthis = reinterpret_cast<Package*>(user_data);
         notthis->itemChanged(itemid,
                              statusFromString(statusstr),
-                             std::chrono::system_clock::from_time_t((time_t)(refundable_until)));
+                             std::chrono::system_clock::from_time_t(std::time_t(refundable_until)));
     }
 
     inline static PayPackageItemStatus statusFromString (std::string statusstr)
