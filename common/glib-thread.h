@@ -150,19 +150,21 @@ public:
         return future.get();
     }
 
-    void executeOnThread (std::function<void(void)> work)
+private:
+    void simpleSource (std::function<std::shared_ptr<GSource>(void)> srcBuilder, std::function<void(void)> work)
     {
         if (isCancelled())
         {
             throw std::runtime_error("Trying to execute work on a GLib thread that is shutting down.");
         }
 
-        /* The reason why this case is different is that we're not waiting on
-           the return so we need to copy the function object */
+        /* Copy the work so that we can reuse it */
+        /* Lifecycle is handled with the source pointer when we attach
+           it to the context. */
         auto heapWork = new std::function<void(void)>(work);
 
-        auto source = g_idle_source_new();
-        g_source_set_callback(source,
+        auto source = srcBuilder();
+        g_source_set_callback(source.get(),
                               [](gpointer data) -> gboolean
         {
             std::function<void(void)>* heapWork = reinterpret_cast<std::function<void(void)> *>(data);
@@ -175,8 +177,50 @@ public:
             delete heapWork;
         });
 
-        g_source_attach(source, _context.get());
-        g_source_unref(source);
+        g_source_attach(source.get(), _context.get());
+    }
+
+public:
+    void executeOnThread (std::function<void(void)> work)
+    {
+        simpleSource([]() -> std::shared_ptr<GSource>
+        {
+            return std::shared_ptr<GSource>(g_idle_source_new(), [](GSource * src)
+            {
+                if (src != nullptr)
+                {
+                    g_source_unref(src);
+                }
+            });
+        }, work);
+    }
+
+    void timeout (std::chrono::milliseconds length, std::function<void(void)> work)
+    {
+        simpleSource([length]() -> std::shared_ptr<GSource>
+        {
+            return std::shared_ptr<GSource>(g_timeout_source_new(length.count()), [](GSource * src)
+            {
+                if (src != nullptr)
+                {
+                    g_source_unref(src);
+                }
+            });
+        }, work);
+    }
+
+    void timeoutSeconds (std::chrono::seconds length, std::function<void(void)> work)
+    {
+        simpleSource([length]() -> std::shared_ptr<GSource>
+        {
+            return std::shared_ptr<GSource>(g_timeout_source_new_seconds(length.count()), [](GSource * src)
+            {
+                if (src != nullptr)
+                {
+                    g_source_unref(src);
+                }
+            });
+        }, work);
     }
 };
 }
