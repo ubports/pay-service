@@ -137,6 +137,13 @@ public:
             throw std::runtime_error("Trying to execute work on a GLib thread that is shutting down.");
         }
 
+        /* If we're in this same thread just do the work instead of
+           queuing and waiting which will deadlock */
+        if (_context.get() == g_main_context_get_thread_default())
+        {
+            return work();
+        }
+
         std::promise<T> promise;
         std::function<gboolean(void)> magicFunc = [&promise, &work] (void) -> gboolean {
             promise.set_value(work());
