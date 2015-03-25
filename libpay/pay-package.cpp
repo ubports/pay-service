@@ -106,12 +106,12 @@ public:
                     catch (std::out_of_range range) { }
                 };
 
-                thread.timeoutSeconds(std::chrono::duration_cast<std::chrono::seconds>(timerlen), timerfunc);
+                thread.timeoutSeconds(timerlen, timerfunc);
 
                 if (timerlen > expiretime)
                 {
                     /* Two timers to signal the window closing */
-                    thread.timeoutSeconds(std::chrono::duration_cast<std::chrono::seconds>(timerlen - expiretime), timerfunc);
+                    thread.timeoutSeconds(timerlen - expiretime, timerfunc);
                 }
 
                 itemTimerCache[itemid] = refundable_until;
