@@ -39,14 +39,13 @@ class Package
     std::map <std::string, PayPackageItemStatus> itemStatusCache;
     std::mutex context_mutex;
 
-    std::thread t;
-    GMainLoop* loop;
-    GMainContext* context;
-    GCancellable* cancellable;
-    proxyPayPackage* proxy;
+    GLib::ContextThread thread;
+    std::shared_ptr<proxyPayPackage> proxy;
 
 public:
-    Package (const char* packageid) : id(packageid), cancellable(g_cancellable_new()), loop(nullptr)
+    Package (const char* packageid)
+        : id(packageid)
+        , thread([] {}, [this] {proxy.reset();})
     {
         path = std::string("/com/canonical/pay/");
         path += encodePath(id);
@@ -57,55 +56,36 @@ public:
             itemStatusCache[itemid] = status;
         });
 
-        context_mutex.lock();
-        t = std::thread([this]()
+
+        proxy = thread.executeOnThread<std::shared_ptr<proxyPayPackage>>([this]
         {
+
             GError* error = nullptr;
-            context = g_main_context_new();
-            loop = g_main_loop_new(context, FALSE);
-
-            g_main_context_push_thread_default(context);
-            context_mutex.unlock();
-
-            proxy = proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
-                                                             G_DBUS_PROXY_FLAGS_NONE,
-                                                             "com.canonical.pay",
-                                                             path.c_str(),
-                                                             NULL,
-                                                             &error);
+            auto proxy = std::shared_ptr<proxyPayPackage>(proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+            G_DBUS_PROXY_FLAGS_NONE,
+            "com.canonical.pay",
+            path.c_str(),
+            nullptr,
+            &error),
+            [](proxyPayPackage * proxy)
+            {
+                g_clear_object(&proxy);
+            });
 
             if (error != nullptr)
             {
                 throw std::runtime_error(error->message);
             }
 
-            g_signal_connect(proxy, "item-status-changed", G_CALLBACK(proxySignal), this);
+            g_signal_connect(proxy.get(), "item-status-changed", G_CALLBACK(proxySignal), this);
 
-            if (cancellable != nullptr && !g_cancellable_is_cancelled(cancellable))
-            {
-                g_main_loop_run(loop);
-            }
-
-            g_clear_object(&proxy);
-            g_clear_pointer(&loop, g_main_loop_unref);
-            g_clear_pointer(&context, g_main_context_unref);
+            return proxy;
         });
     }
 
     ~Package (void)
     {
-        g_cancellable_cancel(cancellable);
-        g_clear_object(&cancellable);
-
-        if (loop != nullptr)
-        {
-            g_main_loop_quit(loop);
-        }
-
-        if (t.joinable())
-        {
-            t.join();
-        }
+        thread.quit();
     }
 
     static void proxySignal (proxyPayPackage* proxy, const gchar* itemid, const gchar* statusstr, gpointer user_data)
@@ -173,83 +153,54 @@ public:
         return true;
     }
 
-    /* So, a lot of lamdas here. Which makes it a bit tricky to get a hold of
-       but I think there's a real gain in being able to see where all the memory
-       is allocated and freed in the same block of code. Two allocations and a
-       reference are created and they're free'd in various places. Watch for them,
-       always the tricky part about using C APIs. */
-    bool functionCall (void (*start) (proxyPayPackage*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
-                       gboolean (*finish) (proxyPayPackage*, GAsyncResult*, GError**),
-                       const char* itemid)
+    bool startVerification (const char* itemid)
     {
-        std::unique_lock<std::mutex> ul(context_mutex);
-
-        GSource* idlesrc = g_idle_source_new();
-
-        typedef struct
+        std::string itemidcopy(itemid);
+        thread.executeOnThread([this, itemidcopy]
         {
-            Package* notthis;
-            gchar* itemid;
-            void (*start) (proxyPayPackage*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer);
-            gboolean (*finish) (proxyPayPackage*, GAsyncResult*, GError**);
-        } startVerificationData;
-
-        startVerificationData* data = g_new0(startVerificationData, 1);
-        data->notthis = this;
-        data->itemid = g_strdup(itemid);
-        data->start = start;
-        data->finish = finish;
-
-        g_source_set_callback(idlesrc,
-                              [] (gpointer user_data)
-        {
-            /* Executes on the threads mainloop */
-            auto data = static_cast<startVerificationData*>(user_data);
-            data->start(data->notthis->proxy,
-                        data->itemid,
-                        data->notthis->cancellable,
-                        [](GObject * obj, GAsyncResult * res, gpointer user_data)
-            {
-                auto finish = reinterpret_cast<gboolean (*)(proxyPayPackage*, GAsyncResult*, GError**)>(user_data);
+            proxy_pay_package_call_verify_item(proxy.get(),
+            itemidcopy.c_str(),
+            nullptr, /* cancellable */
+            [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void {
                 GError* error = nullptr;
-                finish(PROXY_PAY_PACKAGE(obj),
-                       res,
-                       &error);
+                proxy_pay_package_call_verify_item_finish(PROXY_PAY_PACKAGE(obj),
+                res,
+                &error);
 
                 if (error != nullptr)
                 {
                     std::cerr << "Error from dbus message to service: " << error->message << std::endl;
                     g_clear_error(&error);
                 }
-
             },
-            reinterpret_cast<gpointer>(data->finish));
+            nullptr);
 
-            return G_SOURCE_REMOVE;
-        },
-        data,
-        [] (gpointer user_data)
-        {
-            /* Cleans up our allocated helper */
-            auto data = static_cast<startVerificationData*>(user_data);
-            g_free(data->itemid);
-            g_free(data);
         });
-
-        bool success = (g_source_attach(idlesrc, context) != 0);
-        g_source_unref(idlesrc);
-
-        return success;
-    }
-
-    bool startVerification (const char* itemid)
-    {
-        return functionCall(proxy_pay_package_call_verify_item, proxy_pay_package_call_verify_item_finish, itemid);
     }
 
     bool startPurchase (const char* itemid)
     {
-        return functionCall(proxy_pay_package_call_purchase_item, proxy_pay_package_call_purchase_item_finish, itemid);
+        std::string itemidcopy(itemid);
+        thread.executeOnThread([this, itemidcopy]
+        {
+            proxy_pay_package_call_purchase_item(proxy.get(),
+            itemidcopy.c_str(),
+            nullptr, /* cancellable */
+            [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void {
+                GError* error = nullptr;
+                proxy_pay_package_call_purchase_item_finish(PROXY_PAY_PACKAGE(obj),
+                res,
+                &error);
+
+                if (error != nullptr)
+                {
+                    std::cerr << "Error from dbus message to service: " << error->message << std::endl;
+                    g_clear_error(&error);
+                }
+            },
+            nullptr);
+
+        });
     }
 
     std::string
