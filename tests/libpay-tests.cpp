@@ -23,6 +23,8 @@
 
 #include <libpay/pay-package.h>
 
+#include <chrono>
+
 struct LibPayTests : public ::testing::Test
 {
 protected:
@@ -63,6 +65,13 @@ protected:
                                               "", /* python */
                                               nullptr); /* error */
 
+        dbus_test_dbus_mock_object_add_method(mock, pkgobj,
+                                              "RefundItem",
+                                              G_VARIANT_TYPE_STRING,
+                                              nullptr, /* out */
+                                              "", /* python */
+                                              nullptr); /* error */
+
         dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
 
         dbus_test_service_start_tasks(service);
@@ -89,6 +98,8 @@ protected:
             }
             cleartry++;
         }
+
+        ASSERT_LT(cleartry, 100);
     }
 };
 
@@ -104,8 +115,8 @@ TEST_F(LibPayTests, ItemLifecycle)
 
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_UNKNOWN, pay_package_item_status(package, "item"));
 
-    std::vector<std::pair<std::string, PayPackageItemStatus>> list;
-
+    /* Install a status observer */
+    std::vector<std::pair<std::string, PayPackageItemStatus>> statusList;
     EXPECT_TRUE(pay_package_item_observer_install(package, [](PayPackage * pkg,
                                                               const char * itemid,
                                                               PayPackageItemStatus status,
@@ -115,7 +126,20 @@ TEST_F(LibPayTests, ItemLifecycle)
         auto list = reinterpret_cast<std::vector<std::pair<std::string, PayPackageItemStatus>> *>(user_data);
         std::pair<std::string, PayPackageItemStatus> pair(std::string(itemid), status);
         list->push_back(pair);
-    }, &list));
+    }, &statusList));
+
+    /* Install a refund observer */
+    std::vector<std::pair<std::string, PayPackageRefundStatus>> refundList;
+    EXPECT_TRUE(pay_package_refund_observer_install(package, [](PayPackage * pkg,
+                                                              const char * itemid,
+                                                              PayPackageRefundStatus status,
+                                                              void * user_data)
+    {
+        std::cout << "        refund: " << itemid << " to: " << status << std::endl;
+        auto list = reinterpret_cast<std::vector<std::pair<std::string, PayPackageRefundStatus>> *>(user_data);
+        std::pair<std::string, PayPackageRefundStatus> pair(std::string(itemid), status);
+        list->push_back(pair);
+    }, &refundList));
 
     /* Wait for the thread to start on ARM */
     usleep(100000);
@@ -126,49 +150,102 @@ TEST_F(LibPayTests, ItemLifecycle)
                                            G_VARIANT_TYPE("(sst)"),
                                            g_variant_new("(sst)", "item", "verifying", 0),
                                            &error);
-    EXPECT_EQ(nullptr, error);
+    ASSERT_EQ(nullptr, error);
 
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
                                            G_VARIANT_TYPE("(sst)"),
                                            g_variant_new("(sst)", "item", "not purchased", 0),
                                            &error);
-    EXPECT_EQ(nullptr, error);
+    ASSERT_EQ(nullptr, error);
 
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
                                            G_VARIANT_TYPE("(sst)"),
                                            g_variant_new("(sst)", "item", "purchasing", 0),
                                            &error);
-    EXPECT_EQ(nullptr, error);
+    ASSERT_EQ(nullptr, error);
 
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
                                            G_VARIANT_TYPE("(sst)"),
                                            g_variant_new("(sst)", "item", "purchased", 0),
                                            &error);
-    EXPECT_EQ(nullptr, error);
+    ASSERT_EQ(nullptr, error);
+
+    guint64 refundtime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::hours{1});
+    dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
+                                           "ItemStatusChanged",
+                                           G_VARIANT_TYPE("(sst)"),
+                                           g_variant_new("(sst)", "item", "purchased", refundtime),
+                                           &error);
+    ASSERT_EQ(nullptr, error);
+
+    guint64 shorttime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::minutes{5});
+    dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
+                                           "ItemStatusChanged",
+                                           G_VARIANT_TYPE("(sst)"),
+                                           g_variant_new("(sst)", "item", "purchased", shorttime),
+                                           &error);
+    ASSERT_EQ(nullptr, error);
+
+    guint64 expiredtime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() - std::chrono::minutes{1});
+    dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
+                                           "ItemStatusChanged",
+                                           G_VARIANT_TYPE("(sst)"),
+                                           g_variant_new("(sst)", "item", "purchased", expiredtime),
+                                           &error);
+    ASSERT_EQ(nullptr, error);
 
     /* Wait for the signal to make it over */
     usleep(100000);
 
-    ASSERT_EQ(4, list.size());
-    EXPECT_EQ("item", list[0].first);
-    EXPECT_EQ("item", list[1].first);
-    EXPECT_EQ("item", list[2].first);
-    EXPECT_EQ("item", list[3].first);
+    /* Check stati */
+    ASSERT_EQ(7, statusList.size());
+    EXPECT_EQ("item", statusList[0].first);
+    EXPECT_EQ("item", statusList[1].first);
+    EXPECT_EQ("item", statusList[2].first);
+    EXPECT_EQ("item", statusList[3].first);
+    EXPECT_EQ("item", statusList[4].first);
+    EXPECT_EQ("item", statusList[5].first);
+    EXPECT_EQ("item", statusList[6].first);
 
-    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_VERIFYING,     list[0].second);
-    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, list[1].second);
-    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASING,    list[2].second);
-    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED,     list[3].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_VERIFYING,     statusList[0].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, statusList[1].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASING,    statusList[2].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED,     statusList[3].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED,     statusList[4].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED,     statusList[5].second);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED,     statusList[6].second);
 
+    /* Check refund stati */
+    ASSERT_EQ(7, refundList.size());
+    EXPECT_EQ("item", refundList[0].first);
+    EXPECT_EQ("item", refundList[1].first);
+    EXPECT_EQ("item", refundList[2].first);
+    EXPECT_EQ("item", refundList[3].first);
+    EXPECT_EQ("item", refundList[4].first);
+    EXPECT_EQ("item", refundList[5].first);
+    EXPECT_EQ("item", refundList[6].first);
+
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED,   refundList[0].second);
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED,   refundList[1].second);
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED,   refundList[2].second);
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE,  refundList[3].second);
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_REFUNDABLE,      refundList[4].second);
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING, refundList[5].second);
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE,  refundList[6].second);
+
+    /* Check the accessors */
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, pay_package_item_status(package, "item"));
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE, pay_package_refund_status(package, "item"));
+    EXPECT_FALSE(pay_package_item_is_refundable(package, "item"));
 
     pay_package_delete(package);
 
     /* Let's make sure we stop getting events as well */
-    list.clear();
+    statusList.clear();
+    refundList.clear();
 
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
@@ -180,7 +257,8 @@ TEST_F(LibPayTests, ItemLifecycle)
     /* Wait for the signal to make it over */
     usleep(100000);
 
-    EXPECT_EQ(0, list.size());
+    EXPECT_EQ(0, statusList.size());
+    EXPECT_EQ(0, refundList.size());
 }
 
 TEST_F(LibPayTests, ItemOperations)
