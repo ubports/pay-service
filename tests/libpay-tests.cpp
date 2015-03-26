@@ -117,29 +117,31 @@ TEST_F(LibPayTests, ItemLifecycle)
 
     /* Install a status observer */
     std::vector<std::pair<std::string, PayPackageItemStatus>> statusList;
-    EXPECT_TRUE(pay_package_item_observer_install(package, [](PayPackage * pkg,
-                                                              const char * itemid,
-                                                              PayPackageItemStatus status,
-                                                              void * user_data)
+    auto statusfunc = [](PayPackage * pkg,
+                         const char * itemid,
+                         PayPackageItemStatus status,
+                         void * user_data)
     {
         std::cout << "Status changed: " << itemid << " to: " << status << std::endl;
         auto list = reinterpret_cast<std::vector<std::pair<std::string, PayPackageItemStatus>> *>(user_data);
         std::pair<std::string, PayPackageItemStatus> pair(std::string(itemid), status);
         list->push_back(pair);
-    }, &statusList));
+    };
+    EXPECT_TRUE(pay_package_item_observer_install(package, statusfunc, &statusList));
 
     /* Install a refund observer */
     std::vector<std::pair<std::string, PayPackageRefundStatus>> refundList;
-    EXPECT_TRUE(pay_package_refund_observer_install(package, [](PayPackage * pkg,
-                                                              const char * itemid,
-                                                              PayPackageRefundStatus status,
-                                                              void * user_data)
+    auto refundfunc = [](PayPackage * pkg,
+                         const char * itemid,
+                         PayPackageRefundStatus status,
+                         void * user_data)
     {
         std::cout << "        refund: " << itemid << " to: " << status << std::endl;
         auto list = reinterpret_cast<std::vector<std::pair<std::string, PayPackageRefundStatus>> *>(user_data);
         std::pair<std::string, PayPackageRefundStatus> pair(std::string(itemid), status);
         list->push_back(pair);
-    }, &refundList));
+    };
+    EXPECT_TRUE(pay_package_refund_observer_install(package, refundfunc, &refundList));
 
     /* Wait for the thread to start on ARM */
     usleep(100000);
@@ -241,7 +243,13 @@ TEST_F(LibPayTests, ItemLifecycle)
     EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE, pay_package_refund_status(package, "item"));
     EXPECT_FALSE(pay_package_item_is_refundable(package, "item"));
 
-    pay_package_delete(package);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_UNKNOWN, pay_package_item_status(package, "not an item"));
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED, pay_package_refund_status(package, "not an item"));
+    EXPECT_FALSE(pay_package_item_is_refundable(package, "not an item"));
+
+	/* Remove the callbacks */
+    EXPECT_TRUE(pay_package_item_observer_uninstall(package, statusfunc, &statusList));
+    EXPECT_TRUE(pay_package_refund_observer_uninstall(package, refundfunc, &refundList));
 
     /* Let's make sure we stop getting events as well */
     statusList.clear();
@@ -259,6 +267,8 @@ TEST_F(LibPayTests, ItemLifecycle)
 
     EXPECT_EQ(0, statusList.size());
     EXPECT_EQ(0, refundList.size());
+
+    pay_package_delete(package);
 }
 
 TEST_F(LibPayTests, ItemOperations)
