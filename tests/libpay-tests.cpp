@@ -181,7 +181,7 @@ TEST_F(LibPayTests, ItemLifecycle)
                                            &error);
     ASSERT_EQ(nullptr, error);
 
-    guint64 shorttime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::minutes{5});
+    guint64 shorttime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::seconds{30});
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
                                            G_VARIANT_TYPE("(sst)"),
