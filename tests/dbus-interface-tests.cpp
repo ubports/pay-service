@@ -149,7 +149,7 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
                                                            nullptr,
                                                            nullptr));
 
-        EXPECT_STREQ("a(ss)", g_variant_get_type_string(itemslist));
+        EXPECT_STREQ("a(sst)", g_variant_get_type_string(itemslist));
         EXPECT_EQ(0, g_variant_n_children(itemslist));
 
         g_variant_unref(itemslist);
@@ -173,7 +173,7 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
     EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(service, client));
 }
 
-void signalAppend (GObject* obj, const gchar* itemid, const gchar* status, std::vector<std::string>& list)
+void signalAppend (GObject* obj, const gchar* itemid, const gchar* status, guint64 refundtime, std::vector<std::string>& list)
 {
     std::cout << "Signal append: " << itemid << ", " << status << std::endl;
     ASSERT_STREQ("fooitem", itemid);
