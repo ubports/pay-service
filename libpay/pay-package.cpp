@@ -40,7 +40,6 @@ class Package
     core::Signal<std::string, PayPackageItemStatus, std::chrono::system_clock::time_point> itemChanged;
     std::map <std::string, std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>> itemStatusCache;
     std::map <std::string, std::chrono::system_clock::time_point> itemTimerCache;
-    std::mutex context_mutex;
 
     GLib::ContextThread thread;
     std::shared_ptr<proxyPayPackage> proxy;
