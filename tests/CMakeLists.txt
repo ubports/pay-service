@@ -13,6 +13,7 @@ add_definitions(-DCORE_DBUS_ENABLE_GOOGLE_TEST_FIXTURE)
 
 include_directories(
   ${CMAKE_SOURCE_DIR}
+  "${CMAKE_SOURCE_DIR}/common"
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_BINARY_DIR}
 

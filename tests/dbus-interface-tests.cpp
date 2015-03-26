@@ -34,8 +34,40 @@
 #include "item-test.h"
 #include <thread>
 
+#include "glib-thread.h"
+
 struct DbusInterfaceTests : public ::testing::Test
 {
+	std::shared_ptr<GLib::ContextThread> thread;
+	std::shared_ptr<DbusTestService> service;
+
+	virtual void SetUp()
+	{
+		thread = std::make_shared<GLib::ContextThread>(
+			[]() {},
+			[this]() { service.reset(); }
+		);
+
+		service = thread->executeOnThread<std::shared_ptr<DbusTestService>>([]() {
+			auto service = std::shared_ptr<DbusTestService>(
+				dbus_test_service_new(nullptr), 
+				[](DbusTestService * service) { g_clear_object(&service); });
+
+			if (!service)
+				return service;
+
+			dbus_test_service_start_tasks(service.get());
+
+			return service;
+		});
+
+		ASSERT_NE(nullptr, service);
+	}
+
+	virtual void TearDown()
+	{
+		thread.reset();
+	}
 };
 
 TEST_F(DbusInterfaceTests, BasicAllocation)
