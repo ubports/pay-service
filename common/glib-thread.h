@@ -72,7 +72,7 @@ public:
     template<class Rep, class Period> void timeoutSeconds (const std::chrono::duration<Rep, Period>& length,
                                                            std::function<void(void)> work)
     {
-        return timeout(std::chrono::duration_cast<std::chrono::milliseconds>(length), work);
+        return timeoutSeconds(std::chrono::duration_cast<std::chrono::seconds>(length), work);
     }
 
 private:
