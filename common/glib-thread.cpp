@@ -185,10 +185,4 @@ void ContextThread::timeoutSeconds (const std::chrono::seconds& length,
     }, work);
 }
 
-
-
-
-
-
-
 } // ns GLib
