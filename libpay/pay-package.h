@@ -39,7 +39,8 @@ typedef enum
     PAY_PACKAGE_ITEM_STATUS_VERIFYING,     /*< nick=verifying */
     PAY_PACKAGE_ITEM_STATUS_PURCHASED,     /*< nick=purchased */
     PAY_PACKAGE_ITEM_STATUS_PURCHASING,    /*< nick=purchasing */
-    PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED  /*< nick=not-purchased */
+    PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, /*< nick=not-purchased */
+    PAY_PACKAGE_ITEM_STATUS_REFUNDING,     /*< nick=refunding */
 } PayPackageItemStatus;
 
 /**
@@ -52,6 +53,31 @@ typedef void (*PayPackageItemObserver) (PayPackage* package,
                                         const char* itemid,
                                         PayPackageItemStatus status,
                                         void* user_data);
+
+/**
+ * PayPackageRefundStatus:
+ *
+ * The states of refundable an item  an be in.
+ */
+typedef enum
+{
+    /*< prefix=PAY_PACKAGE_REFUND_STATUS */
+    PAY_PACKAGE_REFUND_STATUS_REFUNDABLE,      /*< nick=refundable */
+    PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE,  /*< nick=not-refundable */
+    PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED,   /*< nick=not-purchased */
+    PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING  /*< nick=window-expiring */
+} PayPackageRefundStatus;
+
+/**
+ * PayPackageItemRefundableObserver:
+ *
+ * Function to call when an item changes whether it is
+ * refundable or not.
+ */
+typedef void (*PayPackageRefundObserver) (PayPackage* package,
+                                          const char* itemid,
+                                          PayPackageRefundStatus status,
+                                          void* user_data);
 
 /**
  * pay_package_new:
@@ -87,6 +113,31 @@ PayPackageItemStatus pay_package_item_status (PayPackage* package,
                                               const char* itemid);
 
 /**
+ * pay_package_item_is_refundable:
+ * @package: Package the item is related to
+ * @itemid: ID of the item
+ *
+ * Checks whether it is refundable. Check with the status
+ * and makes sure it is REFUNDABLE.
+ *
+ * Return value: Non-zero if the item is refundable
+ */
+int pay_package_item_is_refundable (PayPackage* package,
+                                    const char* itemid);
+
+/**
+ * pay_package_refund_status:
+ * @package: Package the item is related to
+ * @itemid: ID of the item
+ *
+ * Checks the refund status of an individual item.
+ *
+ * Return value: The refund status of the item
+ */
+PayPackageRefundStatus pay_package_refund_status (PayPackage* package,
+                                                  const char* itemid);
+
+/**
  * pay_package_item_observer_install:
  * @package: Package to watch items on
  * @observer: Function to call if items change state
@@ -114,6 +165,36 @@ int pay_package_item_observer_install (PayPackage* package,
 int pay_package_item_observer_uninstall (PayPackage* package,
                                          PayPackageItemObserver observer,
                                          void* user_data);
+
+/**
+ * pay_package_refund_observer_install:
+ * @package: Package to watch items on
+ * @observer: Function to call if items changes refund staus
+ * @user_data: Data to pass to @observer
+ *
+ * Registers a function to call if the items refund status
+ * changes. This can be used to know when it is no longer
+ * refundable or when it is about to become unrefundable.
+ *
+ * Return value: zero when fails to install
+ */
+int pay_package_refund_observer_install (PayPackage* package,
+                                         PayPackageRefundObserver observer,
+                                         void* user_data);
+/**
+ * pay_package_refund_observer_uninstall:
+ * @package: Package to remove watch from
+ * @observer: Function to call if items change state
+ * @user_data: Data to pass to @observer
+ *
+ * Stops a refund observer from getting called.
+ *
+ * Return value: zero when fails to uninstall
+ */
+int pay_package_refund_observer_uninstall (PayPackage* package,
+                                           PayPackageRefundObserver observer,
+                                           void* user_data);
+
 
 /**
  * pay_package_item_start_verification:
@@ -147,6 +228,19 @@ int pay_package_item_start_verification (PayPackage* package,
  */
 int pay_package_item_start_purchase (PayPackage* package,
                                      const char* itemid);
+
+/**
+ * pay_package_item_start_refund:
+ * @package: package the item was purchased for
+ * @itemid: ID of the item to refund
+ *
+ * Requests that the pay-service start the process of refunding
+ * the item specified by @itemid.
+ *
+ * Return value: zero when unable to make request to pay service
+ */
+int pay_package_item_start_refund (PayPackage* package,
+                                   const char* itemid);
 
 #pragma GCC visibility pop
 
