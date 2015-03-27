@@ -278,25 +278,25 @@ public:
         return true;
     }
 
-    bool startVerification (const char* itemid)
+    template <void (*startFunc)(proxyPayPackage*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer), gboolean (*finishFunc) (proxyPayPackage*, GAsyncResult*, GError**)>
+    bool startBase (const char* itemid)
     {
         std::promise<bool> promise;
         thread.executeOnThread([this, itemid, &promise]()
         {
-            proxy_pay_package_call_verify_item(proxy.get(),
-                                               itemid,
-                                               thread.getCancellable().get(), /* cancellable */
-                                               [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
+            startFunc(proxy.get(),
+                      itemid,
+                      thread.getCancellable().get(), /* cancellable */
+                      [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
             {
                 auto promise = reinterpret_cast<std::promise<bool> *>(user_data);
                 GError* error = nullptr;
-                proxy_pay_package_call_verify_item_finish(PROXY_PAY_PACKAGE(obj),
-                res,
-                &error);
+
+                finishFunc(PROXY_PAY_PACKAGE(obj), res, &error);
 
                 if (error != nullptr)
                 {
-                    std::cerr << "Error from service on verification: " << error->message << std::endl;
+                    std::cerr << "Error from service: " << error->message << std::endl;
                     g_clear_error(&error);
                     promise->set_value(false);
                 }
@@ -312,54 +312,19 @@ public:
         return future.get();
     }
 
+    bool startVerification (const char* itemid)
+    {
+        return startBase<&proxy_pay_package_call_verify_item, &proxy_pay_package_call_verify_item_finish> (itemid);
+    }
+
     bool startPurchase (const char* itemid)
     {
-        std::string itemidcopy(itemid);
-        thread.executeOnThread([this, itemidcopy]()
-        {
-            proxy_pay_package_call_purchase_item(proxy.get(),
-                                                 itemidcopy.c_str(),
-                                                 thread.getCancellable().get(), /* cancellable */
-                                                 [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
-            {
-                GError* error = nullptr;
-                proxy_pay_package_call_purchase_item_finish(PROXY_PAY_PACKAGE(obj),
-                res,
-                &error);
-
-                if (error != nullptr)
-                {
-                    std::cerr << "Error from service on purchase: " << error->message << std::endl;
-                    g_clear_error(&error);
-                }
-            },
-            nullptr);
-        });
+        return startBase<&proxy_pay_package_call_purchase_item, &proxy_pay_package_call_purchase_item_finish> (itemid);
     }
 
     bool startRefund (const char* itemid)
     {
-        std::string itemidcopy(itemid);
-        thread.executeOnThread([this, itemidcopy]()
-        {
-            proxy_pay_package_call_refund_item(proxy.get(),
-                                               itemidcopy.c_str(),
-                                               thread.getCancellable().get(), /* cancellable */
-                                               [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
-            {
-                GError* error = nullptr;
-                proxy_pay_package_call_refund_item_finish(PROXY_PAY_PACKAGE(obj),
-                res,
-                &error);
-
-                if (error != nullptr)
-                {
-                    std::cerr << "Error from service on refund request: " << error->message << std::endl;
-                    g_clear_error(&error);
-                }
-            },
-            nullptr);
-        });
+        return startBase<&proxy_pay_package_call_refund_item, &proxy_pay_package_call_refund_item_finish> (itemid);
     }
 
     std::string
