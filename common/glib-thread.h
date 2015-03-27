@@ -43,6 +43,12 @@ public:
     void executeOnThread (std::function<void(void)> work);
     template<typename T> auto executeOnThread (std::function<T(void)> work) -> T
     {
+        if (std::this_thread::get_id() == _thread.get_id())
+        {
+            /* Don't block if we're on the same thread */
+            return work();
+        }
+
         std::promise<T> promise;
         std::function<void(void)> magicFunc = [&promise, &work] (void) -> void {
             promise.set_value(work());
