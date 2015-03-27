@@ -280,14 +280,15 @@ public:
 
     bool startVerification (const char* itemid)
     {
-        std::string itemidcopy(itemid);
-        thread.executeOnThread([this, itemidcopy]()
+        std::promise<bool> promise;
+        thread.executeOnThread([this, itemid, &promise]()
         {
             proxy_pay_package_call_verify_item(proxy.get(),
-                                               itemidcopy.c_str(),
+                                               itemid,
                                                thread.getCancellable().get(), /* cancellable */
                                                [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
             {
+                auto promise = reinterpret_cast<std::promise<bool> *>(user_data);
                 GError* error = nullptr;
                 proxy_pay_package_call_verify_item_finish(PROXY_PAY_PACKAGE(obj),
                 res,
@@ -297,10 +298,18 @@ public:
                 {
                     std::cerr << "Error from service on verification: " << error->message << std::endl;
                     g_clear_error(&error);
+                    promise->set_value(false);
+                }
+                else {
+                    promise->set_value(true);
                 }
             },
-            nullptr);
+            &promise);
         });
+
+        auto future = promise.get_future();
+        future.wait();
+        return future.get();
     }
 
     bool startPurchase (const char* itemid)
