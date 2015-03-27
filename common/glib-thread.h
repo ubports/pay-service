@@ -104,11 +104,6 @@ public:
     ~ContextThread (void)
     {
         quit();
-
-        if (_thread.joinable())
-        {
-            _thread.join();
-        }
     }
 
     void quit (void)
@@ -117,6 +112,16 @@ public:
         if (_loop != nullptr)
         {
             g_main_loop_quit(_loop.get());    /* Quit the loop */
+        }
+
+        /* Joining here because we want to ensure that the final afterLoop()
+           function is run before returning */
+        if (std::this_thread::get_id() != _thread.get_id())
+        {
+            if (_thread.joinable())
+            {
+                _thread.join();
+            }
         }
     }
 
