@@ -29,7 +29,7 @@ set_target_properties(libpay PROPERTIES
   OUTPUT_NAME "pay"
 )
 
-target_link_libraries(libpay ${SERVICE_DEPS_LIBRARIES})
+target_link_libraries(libpay ${SERVICE_DEPS_LIBRARIES} common-lib)
 set_target_properties(libpay PROPERTIES LINK_FLAGS "${ldflags} -Wl,--version-script,${CMAKE_CURRENT_SOURCE_DIR}/libpay.map")
 set_target_properties(libpay PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/libpay.map")
 
