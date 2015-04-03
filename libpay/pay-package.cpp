@@ -249,12 +249,16 @@ struct PayPackage_
 PayPackage*
 pay_package_new (const char* package_name)
 {
+    g_return_val_if_fail(package_name != nullptr, nullptr);
+
     Pay::Package* ret = new Pay::Package(package_name);
     return reinterpret_cast<PayPackage*>(ret);
 }
 
 void pay_package_delete (PayPackage* package)
 {
+    g_return_if_fail(package != nullptr);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     delete pkg;
 }
@@ -262,6 +266,8 @@ void pay_package_delete (PayPackage* package)
 PayPackageItemStatus pay_package_item_status (PayPackage* package,
                                               const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, PAY_PACKAGE_ITEM_STATUS_UNKNOWN);
+    g_return_val_if_fail(itemid != nullptr, PAY_PACKAGE_ITEM_STATUS_UNKNOWN);
 
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->itemStatus(itemid);
@@ -271,6 +277,9 @@ int pay_package_item_observer_install (PayPackage* package,
                                        PayPackageItemObserver observer,
                                        void* user_data)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(observer != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->addItemObserver(observer, user_data);
 }
@@ -279,6 +288,9 @@ int pay_package_item_observer_uninstall (PayPackage* package,
                                          PayPackageItemObserver observer,
                                          void* user_data)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(observer != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->removeItemObserver(observer, user_data);
 }
@@ -286,6 +298,9 @@ int pay_package_item_observer_uninstall (PayPackage* package,
 int pay_package_item_start_verification (PayPackage* package,
                                          const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(itemid != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->startVerification(itemid);
 }
@@ -293,6 +308,9 @@ int pay_package_item_start_verification (PayPackage* package,
 int pay_package_item_start_purchase (PayPackage* package,
                                      const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(itemid != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->startPurchase(itemid);
 }
