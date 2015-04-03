@@ -296,7 +296,10 @@ public:
 
                 if (error != nullptr)
                 {
-                    std::cerr << "Error from service: " << error->message << std::endl;
+                    if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+                    {
+                        std::cerr << "Error from service: " << error->message << std::endl;
+                    }
                     g_clear_error(&error);
                     promise->set_value(false);
                 }
