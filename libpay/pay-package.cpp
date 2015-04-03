@@ -78,7 +78,7 @@ public:
         {
             try
             {
-                if (itemTimerCache[itemid] == refundable_until)
+                if (itemTimerCache.at(itemid) == refundable_until)
                 {
                     if (refundable_until < std::chrono::system_clock::now())
                     {
@@ -99,7 +99,7 @@ public:
                 {
                     try
                     {
-                        auto iteminfo = itemStatusCache[itemid];
+                        auto iteminfo = itemStatusCache.at(itemid);
                         itemChanged(itemid, iteminfo.first, iteminfo.second);
                     }
                     catch (std::out_of_range range) { }
@@ -197,7 +197,7 @@ public:
     {
         try
         {
-            return itemStatusCache[itemid].first;
+            return itemStatusCache.at(itemid).first;
         }
         catch (std::out_of_range range)
         {
@@ -209,7 +209,8 @@ public:
     {
         try
         {
-            return calcRefundStatus(itemStatusCache[itemid].first, itemStatusCache[itemid].second);
+            auto entry = itemStatusCache.at(itemid);
+            return calcRefundStatus(entry.first, entry.second);
         }
         catch (std::out_of_range range)
         {
