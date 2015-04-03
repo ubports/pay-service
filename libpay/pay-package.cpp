@@ -62,9 +62,7 @@ public:
                                    PayPackageItemStatus status,
                                    std::chrono::system_clock::time_point refundable_until)
         {
-            itemStatusCache[itemid] = std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>(status,
-                                                                                                             refundable_until);
-
+            itemStatusCache[itemid] = std::make_pair(status, refundable_until);
         });
 
         /* Manage the timers to signal when refundable status changes */
