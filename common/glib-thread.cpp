@@ -46,17 +46,11 @@ ContextThread::ContextThread (std::function<void(void)> beforeLoop, std::functio
            for GDBus to send its events back to */
         auto context = std::shared_ptr<GMainContext>(g_main_context_new(), [](GMainContext * context)
         {
-            if (context != nullptr)
-            {
-                g_main_context_unref(context);
-            }
+            g_clear_pointer(&context, g_main_context_unref);
         });
         auto loop = std::shared_ptr<GMainLoop>(g_main_loop_new(context.get(), FALSE), [](GMainLoop * loop)
         {
-            if (loop != nullptr)
-            {
-                g_main_loop_unref(loop);
-            }
+            g_clear_pointer(&loop, g_main_loop_unref);
         });
 
         g_main_context_push_thread_default(context.get());
@@ -140,10 +134,7 @@ void ContextThread::simpleSource (std::function<GSource * (void)> srcBuilder, st
     auto source = std::shared_ptr<GSource>(srcBuilder(),
                                            [](GSource * src)
     {
-        if (src != nullptr)
-        {
-            g_source_unref(src);
-        }
+        g_clear_pointer(&src, g_source_unref);
     }
                                           );
     g_source_set_callback(source.get(),
