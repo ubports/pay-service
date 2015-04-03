@@ -414,6 +414,9 @@ int pay_package_item_is_refundable (PayPackage* package,
 PayPackageRefundStatus pay_package_refund_status (PayPackage* package,
                                                   const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE);
+    g_return_val_if_fail(itemid != nullptr, PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->refundStatus(itemid);
 }
@@ -444,6 +447,9 @@ int pay_package_refund_observer_install (PayPackage* package,
                                          PayPackageRefundObserver observer,
                                          void* user_data)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(observer != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->addRefundObserver(observer, user_data);
 }
@@ -452,6 +458,9 @@ int pay_package_refund_observer_uninstall (PayPackage* package,
                                            PayPackageRefundObserver observer,
                                            void* user_data)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(observer != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->removeRefundObserver(observer, user_data);
 }
@@ -479,6 +488,9 @@ int pay_package_item_start_purchase (PayPackage* package,
 int pay_package_item_start_refund (PayPackage* package,
                                    const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(itemid != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->startRefund(itemid);
 }
