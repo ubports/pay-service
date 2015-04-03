@@ -193,7 +193,7 @@ public:
         }
     }
 
-    PayPackageItemStatus itemStatus (const char* itemid)
+    PayPackageItemStatus itemStatus (const char* itemid) noexcept
     {
         try
         {
@@ -205,7 +205,7 @@ public:
         }
     }
 
-    PayPackageRefundStatus refundStatus (const char* itemid)
+    PayPackageRefundStatus refundStatus (const char* itemid) noexcept
     {
         try
         {
@@ -237,7 +237,7 @@ public:
         return PAY_PACKAGE_REFUND_STATUS_REFUNDABLE;
     }
 
-    bool addItemObserver (PayPackageItemObserver observer, void* user_data)
+    bool addItemObserver (PayPackageItemObserver observer, void* user_data) noexcept
     {
         /* Creates a connection to the signal for the observer and stores the connection
            object in the map so that we can remove it later, or it'll get disconnected
@@ -252,14 +252,14 @@ public:
         return true;
     }
 
-    bool removeItemObserver (PayPackageItemObserver observer, void* user_data)
+    bool removeItemObserver (PayPackageItemObserver observer, void* user_data) noexcept
     {
         std::pair<PayPackageItemObserver, void*> key(observer, user_data);
         itemObservers.erase(key);
         return true;
     }
 
-    bool addRefundObserver (PayPackageRefundObserver observer, void* user_data)
+    bool addRefundObserver (PayPackageRefundObserver observer, void* user_data) noexcept
     {
         refundObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
                                                                                              std::string itemid,
@@ -271,7 +271,7 @@ public:
         return true;
     }
 
-    bool removeRefundObserver (PayPackageRefundObserver observer, void* user_data)
+    bool removeRefundObserver (PayPackageRefundObserver observer, void* user_data) noexcept
     {
         std::pair<PayPackageRefundObserver, void*> key(observer, user_data);
         refundObservers.erase(key);
@@ -279,7 +279,7 @@ public:
     }
 
     template <void (*startFunc)(proxyPayPackage*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer), gboolean (*finishFunc) (proxyPayPackage*, GAsyncResult*, GError**)>
-    bool startBase (const char* itemid)
+    bool startBase (const char* itemid) noexcept
     {
         std::promise<bool> promise;
         thread.executeOnThread([this, itemid, &promise]()
@@ -312,17 +312,17 @@ public:
         return future.get();
     }
 
-    bool startVerification (const char* itemid)
+    bool startVerification (const char* itemid) noexcept
     {
         return startBase<&proxy_pay_package_call_verify_item, &proxy_pay_package_call_verify_item_finish> (itemid);
     }
 
-    bool startPurchase (const char* itemid)
+    bool startPurchase (const char* itemid) noexcept
     {
         return startBase<&proxy_pay_package_call_purchase_item, &proxy_pay_package_call_purchase_item_finish> (itemid);
     }
 
-    bool startRefund (const char* itemid)
+    bool startRefund (const char* itemid) noexcept
     {
         return startBase<&proxy_pay_package_call_refund_item, &proxy_pay_package_call_refund_item_finish> (itemid);
     }
