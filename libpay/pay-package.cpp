@@ -76,7 +76,7 @@ public:
         {
             try
             {
-                if (itemTimerCache.at(itemid) == refundable_until)
+                if (itemTimerCache[itemid] == refundable_until)
                 {
                     if (refundable_until < std::chrono::system_clock::now())
                     {
@@ -97,7 +97,7 @@ public:
                 {
                     try
                     {
-                        auto iteminfo = itemStatusCache.at(itemid);
+                        auto iteminfo = itemStatusCache[itemid];
                         itemChanged(itemid, iteminfo.first, iteminfo.second);
                     }
                     catch (std::out_of_range range) { }
@@ -195,7 +195,7 @@ public:
     {
         try
         {
-            return itemStatusCache.at(itemid).first;
+            return itemStatusCache[itemid].first;
         }
         catch (std::out_of_range range)
         {
@@ -207,7 +207,7 @@ public:
     {
         try
         {
-            auto entry = itemStatusCache.at(itemid);
+            auto entry = itemStatusCache[itemid];
             return calcRefundStatus(entry.first, entry.second);
         }
         catch (std::out_of_range range)
@@ -242,9 +242,9 @@ public:
            object in the map so that we can remove it later, or it'll get disconnected
            when the whole object gets destroyed */
         itemObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
-                                                                                           std::string itemid,
-                                                                                           PayPackageItemStatus status,
-                                                                                           std::chrono::system_clock::time_point refund)
+            std::string itemid,
+            PayPackageItemStatus status,
+            std::chrono::system_clock::time_point refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
         }));
@@ -261,9 +261,9 @@ public:
     bool addRefundObserver (PayPackageRefundObserver observer, void* user_data) noexcept
     {
         refundObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
-                                                                                             std::string itemid,
-                                                                                             PayPackageItemStatus status,
-                                                                                             std::chrono::system_clock::time_point refund)
+            std::string itemid,
+            PayPackageItemStatus status,
+            std::chrono::system_clock::time_point refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), calcRefundStatus(status, refund), user_data);
         }));
@@ -284,9 +284,9 @@ public:
         thread.executeOnThread([this, itemid, &promise]()
         {
             startFunc(proxy.get(),
-                      itemid,
-                      thread.getCancellable().get(), /* cancellable */
-                      [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
+            itemid,
+            thread.getCancellable().get(), /* cancellable */
+            [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
             {
                 auto promise = reinterpret_cast<std::promise<bool> *>(user_data);
                 GError* error = nullptr;
