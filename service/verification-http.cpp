@@ -55,7 +55,7 @@ public:
 
     virtual bool run (void)
     {
-        auto request = client->create_request(url, "GET", true, "");
+        request = client->create_request(url, "GET", true, "");
         /* Ensure we get JSON back */
         request->set_header("Accept", "application/json");
         request->finished.connect([this](Web::Response::Ptr response)
@@ -78,6 +78,7 @@ public:
 private:
     std::string url;
     Web::Factory::Ptr client;
+    Web::Request::Ptr request;
 };
 
 /*********************
