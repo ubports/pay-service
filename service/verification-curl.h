@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2014-2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -18,7 +18,7 @@
  */
 
 #include "verification-factory.h"
-#include "token-grabber.h"
+#include "webclient-factory.h"
 
 #include <memory>
 #include <string>
@@ -36,7 +36,7 @@ const std::string PAY_PURCHASES_PATH = "/purchases";
 
 class CurlFactory : public Factory {
 public:
-	CurlFactory (TokenGrabber::Ptr token);
+	CurlFactory (Web::Factory::Ptr in_factory);
 	CurlFactory (const std::string& endpoint);
 	~CurlFactory ();
 
@@ -51,7 +51,7 @@ public:
 private:
 	std::string endpoint;
 	std::string device;
-	TokenGrabber::Ptr tokenGrabber;
+    Web::Factory::Ptr wfactory;
 };
 
 } // ns Verification

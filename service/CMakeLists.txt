@@ -25,7 +25,10 @@ set(SERVICE_LIB_SOURCES
     token-grabber-u1.h
     token-grabber-u1.cpp
     verification-curl.cpp
-    verification-null.cpp)
+    verification-null.cpp
+    webclient-curl.cpp
+    webclient-null.cpp
+)
 
 set(SERVICE_LIB_GEN_SOURCES)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2014-2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -20,6 +20,7 @@
 #include "dbus-interface.h"
 #include "item-memory.h"
 #include "verification-curl.h"
+#include "webclient-curl.h"
 #include "purchase-ual.h"
 #include "qtbridge.h"
 #include "token-grabber-u1.h"
@@ -28,16 +29,18 @@ int
 main (int argv, char* argc[])
 {
     TokenGrabber::Ptr token;
+    Web::Factory::Ptr wfactory;
     Verification::Factory::Ptr vfactory;
     Purchase::Factory::Ptr pfactory;
     Item::Store::Ptr items;
     DBusInterface::Ptr dbus;
 
-    qt::core::world::build_and_run(argv, argc, [&token, &vfactory, &pfactory, &items, &dbus]()
+    qt::core::world::build_and_run(argv, argc, [&token, &wfactory, &vfactory, &pfactory, &items, &dbus]()
     {
         /* Initialize the other object after Qt is built */
         token = std::make_shared<TokenGrabberU1>();
-        vfactory = std::make_shared<Verification::CurlFactory>(token);
+        wfactory = std::make_shared<Web::CurlFactory>(token);
+        vfactory = std::make_shared<Verification::CurlFactory>(wfactory);
         pfactory = std::make_shared<Purchase::UalFactory>();
         items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
         dbus = std::make_shared<DBusInterface>(items);
