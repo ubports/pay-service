@@ -66,15 +66,15 @@ add_test(item-memory-tests ${CMAKE_CURRENT_BINARY_DIR}/item-memory-tests)
 # Verification Curl Factory
 #############################
 
-add_definitions("-DVERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints\"")
+add_definitions("-DVERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints\"")
 
 add_executable(
-  verification-curl-tests
-  verification-curl-tests.cpp
+  verification-http-tests
+  verification-http-tests.cpp
   )
 
 target_link_libraries(
-  verification-curl-tests
+  verification-http-tests
 
   pay-service-lib
 
@@ -83,16 +83,16 @@ target_link_libraries(
 )
 
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/simple.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/simple @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/good/simple.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/good/simple @ONLY)
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/device-id.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/device-id @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/good/device-id.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/good/device-id @ONLY)
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/package-name.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/package-name @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/package-name.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/package-name @ONLY)
 
-add_test(verification-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-tests)
+add_test(verification-http-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-http-tests)
 
 #############################
 # Purchase UAL

@@ -17,15 +17,15 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-curl.h"
+#include "verification-http.h"
 
 namespace Verification
 {
 
-class CurlItem : public Item
+class HttpItem : public Item
 {
 public:
-    CurlItem (std::string& app,
+    HttpItem (std::string& app,
               std::string& item,
               std::string& endpoint,
               std::string& device,
@@ -81,10 +81,10 @@ private:
 };
 
 /*********************
- * CurlFactory
+ * HttpFactory
  *********************/
 
-CurlFactory::CurlFactory (Web::Factory::Ptr in_factory) :
+HttpFactory::HttpFactory (Web::Factory::Ptr in_factory) :
     wfactory(in_factory)
 {
     // TODO: We should probably always assemble the URL when needed.
@@ -92,31 +92,31 @@ CurlFactory::CurlFactory (Web::Factory::Ptr in_factory) :
 }
 
 bool
-CurlFactory::running ()
+HttpFactory::running ()
 {
     return wfactory->running();
 }
 
 Item::Ptr
-CurlFactory::verifyItem (std::string& appid, std::string& itemid)
+HttpFactory::verifyItem (std::string& appid, std::string& itemid)
 {
-    return std::make_shared<CurlItem>(appid, itemid, endpoint, device, wfactory);
+    return std::make_shared<HttpItem>(appid, itemid, endpoint, device, wfactory);
 }
 
 void
-CurlFactory::setEndpoint (std::string& in_endpoint)
+HttpFactory::setEndpoint (std::string& in_endpoint)
 {
     endpoint = in_endpoint;
 }
 
 void
-CurlFactory::setDevice (std::string& in_device)
+HttpFactory::setDevice (std::string& in_device)
 {
     device = in_device;
 }
 
 std::string
-CurlFactory::get_base_url ()
+HttpFactory::get_base_url ()
 {
     const char* env_url = getenv(PAY_BASE_URL_ENVVAR.c_str());
     if (env_url != nullptr)

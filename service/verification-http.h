@@ -34,9 +34,9 @@ const std::string PAY_API_ROOT = "/api/2.0/click";
 const std::string PAY_PURCHASES_PATH = "/purchases";
 
 
-class CurlFactory : public Factory {
+class HttpFactory : public Factory {
 public:
-	CurlFactory (Web::Factory::Ptr in_factory);
+	HttpFactory (Web::Factory::Ptr in_factory);
 
 	virtual bool running ();
 	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);

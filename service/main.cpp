@@ -19,7 +19,7 @@
 
 #include "dbus-interface.h"
 #include "item-memory.h"
-#include "verification-curl.h"
+#include "verification-http.h"
 #include "webclient-curl.h"
 #include "purchase-ual.h"
 #include "qtbridge.h"
@@ -40,7 +40,7 @@ main (int argv, char* argc[])
         /* Initialize the other object after Qt is built */
         token = std::make_shared<TokenGrabberU1>();
         wfactory = std::make_shared<Web::CurlFactory>(token);
-        vfactory = std::make_shared<Verification::CurlFactory>(wfactory);
+        vfactory = std::make_shared<Verification::HttpFactory>(wfactory);
         pfactory = std::make_shared<Purchase::UalFactory>();
         items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
         dbus = std::make_shared<DBusInterface>(items);

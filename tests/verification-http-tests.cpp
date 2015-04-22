@@ -18,11 +18,11 @@
  */
 
 #include <gtest/gtest.h>
-#include "service/verification-curl.h"
+#include "service/verification-http.h"
 #include "token-grabber-null.h"
 #include "service/webclient-curl.h"
 
-struct VerificationCurlTests : public ::testing::Test
+struct VerificationHttpTests : public ::testing::Test
 {
 	protected:
 		virtual void SetUp() {
@@ -39,20 +39,20 @@ struct VerificationCurlTests : public ::testing::Test
 		std::string device;
 };
 
-TEST_F(VerificationCurlTests, InitTest) {
+TEST_F(VerificationHttpTests, InitTest) {
 	auto token = std::make_shared<TokenGrabberNull>();
     auto wfactory = std::make_shared<Web::CurlFactory>(token);
-	auto verify = std::make_shared<Verification::CurlFactory>(wfactory);
+	auto verify = std::make_shared<Verification::HttpFactory>(wfactory);
 	EXPECT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 	verify.reset();
 	EXPECT_EQ(nullptr, verify);
 }
 
-TEST_F(VerificationCurlTests, PurchaseItem) {
+TEST_F(VerificationHttpTests, PurchaseItem) {
 	auto token = std::make_shared<TokenGrabberNull>();
     auto wfactory = std::make_shared<Web::CurlFactory>(token);
-	auto verify = std::make_shared<Verification::CurlFactory>(wfactory);
+	auto verify = std::make_shared<Verification::HttpFactory>(wfactory);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 
@@ -92,10 +92,10 @@ TEST_F(VerificationCurlTests, PurchaseItem) {
 	EXPECT_EQ(Verification::Item::Status::ERROR, badstatus);
 }
 
-TEST_F(VerificationCurlTests, ClickScope) {
+TEST_F(VerificationHttpTests, ClickScope) {
 	auto token = std::make_shared<TokenGrabberNull>();
     auto wfactory = std::make_shared<Web::CurlFactory>(token);
-	auto verify = std::make_shared<Verification::CurlFactory>(wfactory);
+	auto verify = std::make_shared<Verification::HttpFactory>(wfactory);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 
@@ -114,10 +114,10 @@ TEST_F(VerificationCurlTests, ClickScope) {
 	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
 }
 
-TEST_F(VerificationCurlTests, DeviceId) {
+TEST_F(VerificationHttpTests, DeviceId) {
 	auto token = std::make_shared<TokenGrabberNull>();
     auto wfactory = std::make_shared<Web::CurlFactory>(token);
-	auto verify = std::make_shared<Verification::CurlFactory>(wfactory);
+	auto verify = std::make_shared<Verification::HttpFactory>(wfactory);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 	verify->setDevice(device);
@@ -137,21 +137,21 @@ TEST_F(VerificationCurlTests, DeviceId) {
 	EXPECT_EQ(Verification::Item::Status::NOT_PURCHASED, status);
 }
 
-TEST_F(VerificationCurlTests, testGetBaseUrl)
+TEST_F(VerificationHttpTests, testGetBaseUrl)
 {
     const char *value = getenv(Verification::PAY_BASE_URL_ENVVAR.c_str());
     if (value != nullptr) {
         ASSERT_EQ(0, unsetenv(Verification::PAY_BASE_URL_ENVVAR.c_str()));
     }
-    ASSERT_EQ(Verification::PAY_BASE_URL, Verification::CurlFactory::get_base_url());
+    ASSERT_EQ(Verification::PAY_BASE_URL, Verification::HttpFactory::get_base_url());
     
 }
 
-TEST_F(VerificationCurlTests, testGetBaseUrlFromEnv)
+TEST_F(VerificationHttpTests, testGetBaseUrlFromEnv)
 {
     const std::string expected{"http://localhost:8080"};
     ASSERT_EQ(0, setenv(Verification::PAY_BASE_URL_ENVVAR.c_str(),
                         expected.c_str(), 1));
-    ASSERT_EQ(expected, Verification::CurlFactory::get_base_url());
+    ASSERT_EQ(expected, Verification::HttpFactory::get_base_url());
     ASSERT_EQ(0, unsetenv(Verification::PAY_BASE_URL_ENVVAR.c_str()));
 }
