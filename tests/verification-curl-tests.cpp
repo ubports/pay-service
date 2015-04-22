@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include "service/verification-curl.h"
 #include "token-grabber-null.h"
+#include "service/webclient-curl.h"
 
 struct VerificationCurlTests : public ::testing::Test
 {
@@ -40,7 +41,8 @@ struct VerificationCurlTests : public ::testing::Test
 
 TEST_F(VerificationCurlTests, InitTest) {
 	auto token = std::make_shared<TokenGrabberNull>();
-	auto verify = std::make_shared<Verification::CurlFactory>(token);
+    auto wfactory = std::make_shared<Web::CurlFactory>(token);
+	auto verify = std::make_shared<Verification::CurlFactory>(wfactory);
 	EXPECT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 	verify.reset();
@@ -49,7 +51,8 @@ TEST_F(VerificationCurlTests, InitTest) {
 
 TEST_F(VerificationCurlTests, PurchaseItem) {
 	auto token = std::make_shared<TokenGrabberNull>();
-	auto verify = std::make_shared<Verification::CurlFactory>(token);
+    auto wfactory = std::make_shared<Web::CurlFactory>(token);
+	auto verify = std::make_shared<Verification::CurlFactory>(wfactory);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 
@@ -91,7 +94,8 @@ TEST_F(VerificationCurlTests, PurchaseItem) {
 
 TEST_F(VerificationCurlTests, ClickScope) {
 	auto token = std::make_shared<TokenGrabberNull>();
-	auto verify = std::make_shared<Verification::CurlFactory>(token);
+    auto wfactory = std::make_shared<Web::CurlFactory>(token);
+	auto verify = std::make_shared<Verification::CurlFactory>(wfactory);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 
@@ -112,7 +116,8 @@ TEST_F(VerificationCurlTests, ClickScope) {
 
 TEST_F(VerificationCurlTests, DeviceId) {
 	auto token = std::make_shared<TokenGrabberNull>();
-	auto verify = std::make_shared<Verification::CurlFactory>(token);
+    auto wfactory = std::make_shared<Web::CurlFactory>(token);
+	auto verify = std::make_shared<Verification::CurlFactory>(wfactory);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
 	verify->setDevice(device);

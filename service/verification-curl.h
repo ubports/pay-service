@@ -37,8 +37,6 @@ const std::string PAY_PURCHASES_PATH = "/purchases";
 class CurlFactory : public Factory {
 public:
 	CurlFactory (Web::Factory::Ptr in_factory);
-	CurlFactory (const std::string& endpoint);
-	~CurlFactory ();
 
 	virtual bool running ();
 	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
