@@ -44,9 +44,6 @@ TEST_F(WebclientCurlTests, InitRequestTest) {
     auto factory = std::make_shared<Web::CurlFactory>(token);
     ASSERT_NE(nullptr, factory);
 
-    auto request = factory->create_request("file:///tmp/unknown",
-                                           "GET",
-                                           false,
-                                           "");
+    auto request = factory->create_request("file:///tmp/unknown", false);
     EXPECT_NE(nullptr, request);
 }

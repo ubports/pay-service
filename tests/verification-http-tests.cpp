@@ -41,7 +41,7 @@ struct VerificationHttpTests : public ::testing::Test
 
 TEST_F(VerificationHttpTests, InitTest) {
 	auto token = std::make_shared<TokenGrabberNull>();
-    auto wfactory = std::make_shared<Web::CurlFactory>(token);
+	auto wfactory = std::make_shared<Web::CurlFactory>(token);
 	auto verify = std::make_shared<Verification::HttpFactory>(wfactory);
 	EXPECT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
@@ -51,7 +51,7 @@ TEST_F(VerificationHttpTests, InitTest) {
 
 TEST_F(VerificationHttpTests, PurchaseItem) {
 	auto token = std::make_shared<TokenGrabberNull>();
-    auto wfactory = std::make_shared<Web::CurlFactory>(token);
+	auto wfactory = std::make_shared<Web::CurlFactory>(token);
 	auto verify = std::make_shared<Verification::HttpFactory>(wfactory);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
@@ -94,7 +94,7 @@ TEST_F(VerificationHttpTests, PurchaseItem) {
 
 TEST_F(VerificationHttpTests, ClickScope) {
 	auto token = std::make_shared<TokenGrabberNull>();
-    auto wfactory = std::make_shared<Web::CurlFactory>(token);
+	auto wfactory = std::make_shared<Web::CurlFactory>(token);
 	auto verify = std::make_shared<Verification::HttpFactory>(wfactory);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);
@@ -116,7 +116,7 @@ TEST_F(VerificationHttpTests, ClickScope) {
 
 TEST_F(VerificationHttpTests, DeviceId) {
 	auto token = std::make_shared<TokenGrabberNull>();
-    auto wfactory = std::make_shared<Web::CurlFactory>(token);
+	auto wfactory = std::make_shared<Web::CurlFactory>(token);
 	auto verify = std::make_shared<Verification::HttpFactory>(wfactory);
 	ASSERT_NE(nullptr, verify);
 	verify->setEndpoint(endpoint);

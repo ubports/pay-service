@@ -17,7 +17,6 @@
 #include "webclient-factory.h"
 #include "token-grabber.h"
 
-#include <memory>
 #include <string>
 
 
@@ -28,16 +27,14 @@ namespace Web {
 
 class CurlFactory : public Factory {
 public:
-    CurlFactory (TokenGrabber::Ptr token);
-    ~CurlFactory ();
+	CurlFactory (TokenGrabber::Ptr token);
+	~CurlFactory ();
 
-	virtual bool running ();
+	virtual bool running () override;
 	virtual Request::Ptr create_request (const std::string& url,
-                                         const std::string& method,
-                                         bool sign,
-                                         const std::string& data);
+                                         bool sign) override;
 private:
-    TokenGrabber::Ptr tokenGrabber;
+	TokenGrabber::Ptr tokenGrabber;
 };
 
 } // ns Web

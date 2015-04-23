@@ -55,22 +55,25 @@ public:
 
     virtual bool run (void)
     {
-        request = client->create_request(url, "GET", true, "");
+        request = client->create_request(url, true);
         /* Ensure we get JSON back */
         request->set_header("Accept", "application/json");
         request->finished.connect([this](Web::Response::Ptr response)
+        {
+            if (response->is_success ())
             {
-                if (response->is_success ()) {
-                    verificationComplete(Status::PURCHASED);
-                } else {
-                    verificationComplete(Status::NOT_PURCHASED);
-                }
-            });
+                verificationComplete(Status::PURCHASED);
+            }
+            else
+            {
+                verificationComplete(Status::NOT_PURCHASED);
+            }
+        });
         request->error.connect([this](std::string error)
-            {
-                std::cerr << "Error verifying item '" << error << "' at URL '" << url << "'" << std::endl;
-                verificationComplete(Status::ERROR);
-            });
+        {
+            std::cerr << "Error verifying item '" << error << "' at URL '" << url << "'" << std::endl;
+            verificationComplete(Status::ERROR);
+        });
         request->run();
 
         return true;

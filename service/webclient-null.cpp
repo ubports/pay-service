@@ -55,9 +55,7 @@ NullFactory::running ()
 
 Request::Ptr
 NullFactory::create_request (const std::string& url,
-                             const std::string& method,
-                             bool sign,
-                             const std::string& data)
+                             bool sign)
 {
     return std::make_shared<NullRequest>();
 }

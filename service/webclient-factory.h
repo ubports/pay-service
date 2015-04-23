@@ -25,22 +25,22 @@
 namespace Web {
 
 class Response {
- public:
-    virtual std::string& body () = 0;
-    virtual bool is_success () = 0;
+public:
+	virtual std::string& body () = 0;
+	virtual bool is_success () = 0;
 
-    typedef std::shared_ptr<Response> Ptr;
+	typedef std::shared_ptr<Response> Ptr;
 };
 
 class Request {
 public:
 	virtual bool run (void) = 0;
-    virtual void set_header (const std::string& key,
-                             const std::string& value) = 0;
+	virtual void set_header (const std::string& key,
+                           const std::string& value) = 0;
 
 	typedef std::shared_ptr<Request> Ptr;
 
-    core::Signal<std::string> error;
+	core::Signal<std::string> error;
 	core::Signal<Response::Ptr> finished;
 };
 
@@ -50,9 +50,7 @@ public:
 
 	virtual bool running () = 0;
 	virtual Request::Ptr create_request (const std::string& url,
-                                         const std::string& method,
-                                         bool sign,
-                                         const std::string& data) = 0;
+                                         bool sign) = 0;
 
 	typedef std::shared_ptr<Factory> Ptr;
 };

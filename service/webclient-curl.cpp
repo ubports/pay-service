@@ -25,7 +25,8 @@
 namespace Web
 {
 
-class CurlResponse : public Response {
+class CurlResponse : public Response
+{
 public:
     CurlResponse (int status, std::string body) :
         _body(body),
@@ -53,15 +54,11 @@ class CurlRequest : public Request
 {
 public:
     CurlRequest (const std::string& url,
-                 const std::string& method,
                  bool sign,
-                 const std::string& postdata,
                  TokenGrabber::Ptr token) :
         stop(false),
         _url(url),
-        _method(method),
         _sign(sign),
-        _postData(postdata),
         _token(token)
     {
     }
@@ -100,12 +97,18 @@ public:
             curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
             curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
 
-            if (_sign) {
-                /* Sign the request */
-                auto auth = _token->signUrl(_url, _method);
+            /* Sign the request if needed */
+            if (_sign)
+            {
+                /* TODO: This needs to support other methods. */
+                auto auth = _token->signUrl(_url, "GET");
                 if (!auth.empty())
                 {
                     set_header("Authorization", auth);
+                }
+                else
+                {
+                    std::cerr << "WARNING: Signing failed, submitting unsigned request." << std::endl;
                 }
             }
 
@@ -122,7 +125,7 @@ public:
             {
                 long responsecode = 0;
                 curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &responsecode);
-                
+
                 finished(std::make_shared<CurlResponse>(responsecode,
                                                         transferBuffer));
             }
@@ -161,9 +164,7 @@ private:
     struct curl_slist* curlHeaders = NULL;
 
     std::string _url;
-    std::string _method;
     bool _sign;
-    std::string _postData;
     TokenGrabber::Ptr _token;
 
     /* This is the callback from cURL as it does the transfer. We're
@@ -209,11 +210,9 @@ CurlFactory::running ()
 
 Request::Ptr
 CurlFactory::create_request (const std::string& url,
-                             const std::string& method,
-                             bool sign,
-                             const std::string& data)
+                             bool sign)
 {
-    return std::make_shared<CurlRequest>(url, method, sign, data, tokenGrabber);
+    return std::make_shared<CurlRequest>(url, sign, tokenGrabber);
 }
 
 } // ns Web

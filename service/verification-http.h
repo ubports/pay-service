@@ -20,11 +20,10 @@
 #include "verification-factory.h"
 #include "webclient-factory.h"
 
-#include <memory>
 #include <string>
 
-#ifndef VERIFICATION_CURL_HPP__
-#define VERIFICATION_CURL_HPP__ 1
+#ifndef VERIFICATION_HTTP_HPP__
+#define VERIFICATION_HTTP_HPP__ 1
 
 namespace Verification {
 
@@ -54,4 +53,4 @@ private:
 
 } // ns Verification
 
-#endif /* VERIFICATION_CURL_HPP__ */
+#endif /* VERIFICATION_HTTP_HPP__ */
