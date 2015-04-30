@@ -102,6 +102,8 @@ struct PurchaseUALTests : public ::testing::Test
 					g_main_iteration(TRUE);
 				cleartry++;
 			}
+
+			ASSERT_LT(cleartry, 100);
 		}
 };
 

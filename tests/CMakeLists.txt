@@ -13,6 +13,7 @@ add_definitions(-DCORE_DBUS_ENABLE_GOOGLE_TEST_FIXTURE)
 
 include_directories(
   ${CMAKE_SOURCE_DIR}
+  "${CMAKE_SOURCE_DIR}/common"
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_BINARY_DIR}
 
@@ -39,7 +40,7 @@ target_link_libraries(
   ${GMOCK_BOTH_LIBRARIES}
 )
 
-add_test(NAME dbus-interface-tests COMMAND dbus-test-runner --task ${CMAKE_CURRENT_BINARY_DIR}/dbus-interface-tests)
+add_test(dbus-interface-tests ${CMAKE_CURRENT_BINARY_DIR}/dbus-interface-tests)
 
 #############################
 # Memory Item Store

@@ -1,6 +1,6 @@
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fPIE ${GCOV_FLAGS}")
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} "${CMAKE_SOURCE_DIR}/common")
 
 
 ######################
@@ -36,7 +36,7 @@ add_gdbus_codegen_with_namespace(SERVICE_LIB_GEN_SOURCES proxy-payui com.canonic
 add_library(pay-service-lib STATIC ${SERVICE_LIB_SOURCES} ${SERVICE_LIB_GEN_SOURCES})
 
 message(${SERVICE_DEPS_LIBRARIES})
-target_link_libraries(pay-service-lib ${SERVICE_DEPS_LIBRARIES} "-lpthread")
+target_link_libraries(pay-service-lib common-lib ${SERVICE_DEPS_LIBRARIES} "-lpthread")
 
 add_executable(pay-service main.cpp)
 target_link_libraries(pay-service
