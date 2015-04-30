@@ -88,7 +88,7 @@ struct VerificationHttpTests : public ::testing::Test
 			core::ScopedConnection connection = item->verificationComplete.connect(func);
 			std::unique_lock<std::mutex> lk(m);
 			EXPECT_TRUE(item->run());
-			const std::chrono::milliseconds timeout_duration{20};
+			const std::chrono::seconds timeout_duration{1};
 			EXPECT_EQ(std::cv_status::no_timeout, cv.wait_for(lk, timeout_duration));
 		}
 
