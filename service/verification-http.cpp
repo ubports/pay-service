@@ -25,38 +25,31 @@ namespace Verification
 class HttpItem : public Item
 {
 public:
-    HttpItem (std::string& app,
-              std::string& item,
-              std::string& endpoint,
-              std::string& device,
-              Web::Factory::Ptr webclient) :
-        client(webclient)
+    HttpItem(const std::string& app_in,
+             const std::string& item_in,
+             Web::ClickPurchasesApi::Ptr cpa_in):
+        app {app_in},
+        item {item_in},
+    cpa {cpa_in}
     {
-        url = endpoint;
-
-        if (app != "click-scope")
-        {
-            url += "/" + app;
-        }
-        // TODO: Needs regression testing, and redirect support.
-        url += "/" + item;
-        if (app == "click-scope"
-                && url.find("file:///") == std::string::npos)
-        {
-            url += "/";
-        }
-
-        if (!device.empty())
-        {
-            url += "?device=" + device;
-        }
-
     }
 
     virtual bool run (void)
     {
-        request = client->create_request(url, true);
-        /* Ensure we get JSON back */
+        /* There are two forms here for appid + itemid:
+           1. if appid is 'click-scope', we're verifying the package itself which is in 'item'
+           2. otherwise, we're verifying an iap where app is the package and item is the item
+           Yes, this is confusing. :-) */
+        if (app != "click-scope")
+        {
+            request = cpa->getItemInfo(app/*package*/, item/*item*/);
+        }
+        else
+        {
+            request = cpa->getPackageInfo(item/*package*/, false);
+        }
+
+        // Ensure we get JSON back
         request->set_header("Accept", "application/json");
         request->finished.connect([this](Web::Response::Ptr response)
         {
@@ -71,16 +64,18 @@ public:
         });
         request->error.connect([this](std::string error)
         {
-            std::cerr << "Error verifying item '" << error << "' at URL '" << url << "'" << std::endl;
+            std::cerr << "Error verifying item '" << error << std::endl;
             verificationComplete(Status::ERROR);
         });
         request->run();
 
         return true;
     }
+
 private:
-    std::string url;
-    Web::Factory::Ptr client;
+    std::string app;
+    std::string item;
+    Web::ClickPurchasesApi::Ptr cpa;
     Web::Request::Ptr request;
 };
 
@@ -88,47 +83,23 @@ private:
  * HttpFactory
  *********************/
 
-HttpFactory::HttpFactory (Web::Factory::Ptr in_factory) :
-    wfactory(in_factory)
+HttpFactory::HttpFactory (Web::ClickPurchasesApi::Ptr in_cpa):
+    cpa {in_cpa}
 {
-    // TODO: We should probably always assemble the URL when needed.
-    endpoint = get_base_url() + PAY_API_ROOT + PAY_PURCHASES_PATH;
 }
 
 bool
-HttpFactory::running ()
+HttpFactory::running()
 {
-    return wfactory->running();
+    return cpa->running();
 }
 
 Item::Ptr
-HttpFactory::verifyItem (std::string& appid, std::string& itemid)
+HttpFactory::verifyItem (const std::string& appid, const std::string& itemid)
 {
-    return std::make_shared<HttpItem>(appid, itemid, endpoint, device, wfactory);
+    return std::make_shared<HttpItem>(appid, itemid, cpa);
 }
 
-void
-HttpFactory::setEndpoint (std::string& in_endpoint)
-{
-    endpoint = in_endpoint;
-}
-
-void
-HttpFactory::setDevice (std::string& in_device)
-{
-    device = in_device;
-}
-
-std::string
-HttpFactory::get_base_url ()
-{
-    const char* env_url = getenv(PAY_BASE_URL_ENVVAR.c_str());
-    if (env_url != nullptr)
-    {
-        return env_url;
-    }
-    return PAY_BASE_URL;
-}
 
 } // ns Verification
 

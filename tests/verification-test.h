@@ -62,7 +62,7 @@ public:
 		return m_running;
 	}
 
-	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid) {
+	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) {
 		bool purchased = false;
 		try {
 			std::pair<std::string, std::string> key(appid, itemid);
@@ -78,7 +78,7 @@ public:
 		m_running = running;
 	}
 
-	void test_setPurchase (std::string& appid, std::string& itemid, bool purchased) {
+	void test_setPurchase (const std::string& appid, const std::string& itemid, bool purchased) {
 		std::pair<std::string, std::string> key(appid, itemid);
 		itemStatus[key] = purchased;
 	}

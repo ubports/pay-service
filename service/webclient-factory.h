@@ -15,6 +15,7 @@
  */
 
 #include <core/signal.h>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -36,7 +37,7 @@ class Request {
 public:
 	virtual bool run (void) = 0;
 	virtual void set_header (const std::string& key,
-                           const std::string& value) = 0;
+	                         const std::string& value) = 0;
 
 	typedef std::shared_ptr<Request> Ptr;
 
@@ -50,9 +51,16 @@ public:
 
 	virtual bool running () = 0;
 	virtual Request::Ptr create_request (const std::string& url,
-                                         bool sign) = 0;
+	                                     bool sign) = 0;
+
+	/** A testing hook invoked before calling the web;
+            can be used for verifying url & headers, and for injecting test ones */
+        virtual void setPreWebHook(std::function<void(std::string&, std::map<std::string,std::string>&)> hook) { preWebHook = hook; }
 
 	typedef std::shared_ptr<Factory> Ptr;
+
+protected:
+        std::function<void(std::string&, std::map<std::string,std::string>&)> preWebHook;
 };
 
 } // ns Web
