@@ -127,10 +127,7 @@ TEST_F(VerificationHttpTests, Verify)
 		auto vfactory = create_vfactory(web_request);
 		auto item = vfactory->verifyItem(test.appid, test.itemid);
 
-		Verification::Item::Status status;
-		auto on_completed = [&status](Verification::Item::Status s){status = s;};
-		run_item(item, on_completed);
-		EXPECT_EQ(test.expected_status, status);
+		run_item_expecting_status(item, test.expected_status);
 	}
 }
 
