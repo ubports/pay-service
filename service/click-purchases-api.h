@@ -23,7 +23,7 @@
 #include "webclient-factory.h"
 
 #include <string>
-#include <memory>
+#include <memory> // std::unique_ptr
 
 namespace Web
 {
