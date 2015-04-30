@@ -38,124 +38,61 @@ namespace Purchase
 
 class UalItem : public Item
 {
-private:
-    class HelperThread
+public:
+    typedef std::shared_ptr<Item> Ptr;
+
+    UalItem (const std::string& in_appid, const std::string& in_itemid, const std::shared_ptr<MirConnection>& mir) :
+        appid(in_appid),
+        itemid(in_itemid),
+        connection(mir),
+        thread()
     {
-    private:
-        /* Members Only */
-        std::string socketname;
-        GLib::ContextThread thread;
-        std::string helperid;
-        std::string appid;
-        std::string purchaseUrl;
-        Item::Status status = Item::ERROR;
 
-        static void helper_stop_static_helper (const gchar* appid, const gchar* instanceid, const gchar* helpertype,
-                                               gpointer user_data)
-        {
-            auto notthis = static_cast<HelperThread*>(user_data);
-            notthis->helperStop(std::string(appid));
-        }
+    }
 
-        void helperStop (std::string stop_appid)
-        {
-            if (stop_appid != appid)
-            {
-                return;
-            }
-
-            status = Item::PURCHASED;
-            helperid.clear(); /* It has stopped, now an invalid ID */
-            thread.quit();
-        }
-
-    public:
-        core::Signal<Item::Status> helperFinished;
-
-        HelperThread (const std::string& in_socketname, const std::string& in_appid, const std::string& in_purchaseUrl)
-            : socketname(in_socketname)
-            , appid(in_appid)
-            , purchaseUrl(in_purchaseUrl)
-            , thread([this]
-        {
-            if (!ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, HELPER_TYPE, this))
-                throw std::runtime_error("Unable to register Stop Helper");
-            /* TODO: Add failed when in UAL */
-        },
-        [this]
-        {
-            /* Clean up */
-            if (!ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE, this))
-                throw std::runtime_error("Unable to unregister Stop Helper");
-
-            /* If we've still got a helper ID we need to kill it. */
-            if (!helperid.empty())
-            {
-                ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, appid.c_str(), helperid.c_str());
-                helperid.clear();
-            }
-
-            helperFinished(status);
-        })
-
-        {
-            helperid = thread.executeOnThread<std::string>([this]() -> std::string
-            {
-                /* Building a URL to pass info to the Pay UI */
-                std::string retval;
-                std::array<const gchar*, 3> urls{
-                    socketname.c_str(),
-                    purchaseUrl.c_str(),
-                    nullptr
-                };
-
-                gchar* helperid = ubuntu_app_launch_start_multiple_helper(HELPER_TYPE, appid.c_str(), urls.data());
-                if (helperid != nullptr)
-                {
-                    retval = helperid;
-                    g_free(helperid);
-                }
-
-                return retval;
-            });
-        }
-
-        ~HelperThread (void)
-        {
-            /* Quit before other variables are free'd */
-            thread.quit();
-        }
-    };
-
-    class MirSocketThread
+    ~UalItem ()
     {
-        /* From Init */
-        std::shared_ptr<MirConnection> connection;
-        std::string appid;
-        std::string ui_appid;
-
-        /* Built at Init */
-        std::shared_ptr<MirPromptSession> session;
-        std::string socketName;
-
-        /* On thread */
-        std::shared_ptr<proxyPayPayui> payuiobj;
-        std::shared_ptr<GDBusConnection> bus;
-        int fdlist[1] = {0};
-        GLib::ContextThread thread;
-
-        /* Creates a Mir Prompt Session by finding the overlay pid and making it. */
-        std::shared_ptr<MirPromptSession> setupSession (void)
+        if (!instanceid.empty())
         {
+            if (!thread.executeOnThread<bool>([this]()
+        {
+            return ubuntu_app_launch_stop_multiple_helper("pay-ui", ui_appid.c_str(), instanceid.c_str());
+            }))
+            {
+                g_warning("Error");
+            }
+        }
+    }
+
+    /* Goes through the basis phases of building up the environment for the
+       UI to run in. Ensures we've got an AppID, builds the session, sets up
+       the socket to pass the session. And then starts the UI. */
+    virtual bool run (void)
+    {
+        ui_appid = discoverUiAppid();
+        if (ui_appid.empty())
+        {
+            g_warning("Empty UI App ID for PayUI");
+            return false;
+        }
+
+        auto purchase_url = buildPurchaseUrl();
+        if (purchase_url.empty())
+        {
+            g_warning("Unable to determine purchase URL");
+            return false;
+        }
+
+        instanceid = thread.executeOnThread<std::string>([this, purchase_url]()
+        {
+            std::string instid;
+
             pid_t overlaypid = appid2pid(appid);
             if (overlaypid == 0)
             {
-                /* We can't overlay nothin' */
-                g_warning("Unable to find PID for: %s", appid.c_str());
-                return nullptr;
+                return instid;
             }
 
-            /* Setup the trusted prompt session */
             auto session = std::shared_ptr<MirPromptSession>(
                                mir_connection_create_prompt_session_sync(connection.get(), overlaypid, stateChanged, this),
                                [](MirPromptSession * session)
@@ -168,387 +105,32 @@ private:
 
             if (!session)
             {
-                g_critical("Unable to create a trusted prompt session");
+                return instid;
             }
 
-            return session;
-        }
+            std::array<const gchar*, 2>urls {purchase_url.c_str(), nullptr};
+            auto instance_c = ubuntu_app_launch_start_session_helper("pay-ui",
+                                                                     session.get(),
+                                                                     ui_appid.c_str(),
+                                                                     urls.data());
+            instid = std::string(instance_c);
+            g_free(instance_c);
+            return instid;
+        });
 
-        /* Creates the abstract socket for communicating the file handle to the
-           Pay UI and builds a thread to service it */
-        std::string setupSocket ()
-        {
-            return thread.executeOnThread<std::string>([this]()
-            {
-                GError* error = nullptr;
-                std::string socketName;
-
-                bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
-                                                                      nullptr), [](GDBusConnection * bus)
-                {
-                    g_clear_object(&bus);
-                });
-                if (!bus)
-                {
-                    g_critical("Unable to get session bus");
-                    return std::string();
-                }
-
-                /* Export an Object on DBus */
-                payuiobj = std::shared_ptr<proxyPayPayui>(
-                               proxy_pay_payui_skeleton_new(),
-                               [](proxyPayPayui * payui)
-                {
-                    if (payui != nullptr)
-                    {
-                        g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(payui));
-                        g_object_unref(payui);
-                    }
-                });
-                g_signal_connect(payuiobj.get(), "handle-get-mir-socket", G_CALLBACK(mirHandle), fdlist);
-
-                auto encodedAppId = encodePath(ui_appid);
-                /* Loop until we fine an object path that isn't taken (probably only once) */
-                while (socketName.empty())
-                {
-                    gchar* tryname = g_strdup_printf("/com/canonical/pay/%s/%X", encodedAppId.c_str(), g_random_int());
-                    g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(payuiobj.get()),
-                                                     bus.get(),
-                                                     tryname,
-                                                     &error);
-
-                    if (error == NULL)
-                    {
-                        socketName = std::string(tryname);
-                    }
-                    else
-                    {
-                        /* Always print the error, but if the object path is in use let's
-                           not exit the loop. Let's just try again. */
-                        bool exitnow = (error->domain != G_DBUS_ERROR || error->code != G_DBUS_ERROR_OBJECT_PATH_IN_USE);
-                        g_critical("Unable to export payui object: %s", error->message);
-                        g_error_free(error);
-                        if (exitnow)
-                        {
-                            g_free(tryname);
-                            break;
-                        }
-                    }
-
-                    g_free(tryname);
-                }
-
-                /* If we didn't get a socket name, we should just exit. And
-                   make sure to clean up the socket. */
-                if (socketName.empty())
-                {
-                    g_critical("Unable to export object to any name");
-                    return std::string();
-                }
-
-                auto mirwait = mir_prompt_session_new_fds_for_prompt_providers(session.get(),
-                                                                               1,
-                                                                               [](MirPromptSession * session, size_t count, int const * fdsin, void* context) -> void
-                {
-                    g_debug("FDs %d Returned from Mir", count);
-                    if (count != 1) return;
-                    int* fdout = reinterpret_cast<int*>(context);
-                    fdout[0] = fdsin[0];
-                },
-                fdlist);
-
-                mir_wait_for(mirwait);
-
-                if (fdlist[0] == 0)
-                {
-                    g_critical("FD from Mir was a 0");
-                    return std::string();
-                }
-
-                return socketName;
-            });
-        }
-
-        static bool mirHandle (GObject* obj, GDBusMethodInvocation* invocation, gpointer user_data)
-        {
-            int* fds = reinterpret_cast<int*>(user_data);
-
-            if (fds[0] == 0)
-            {
-                g_critical("No FDs to give!");
-                return false;
-            }
-
-            /* Index into fds */
-            GVariant* handle = g_variant_new_handle(0);
-            GVariant* tuple = g_variant_new_tuple(&handle, 1);
-
-            GError* error = nullptr;
-            GUnixFDList* list = g_unix_fd_list_new();
-            g_unix_fd_list_append(list, fds[0], &error);
-
-            if (error == nullptr)
-            {
-                g_dbus_method_invocation_return_value_with_unix_fd_list(invocation, tuple, list);
-            }
-
-            g_object_unref(list);
-
-            if (error != nullptr)
-            {
-                g_critical("Unable to pass FD %d: %s", fds[0], error->message);
-                g_error_free(error);
-                return false;
-            }
-
-            return true;
-        }
-
-        static std::string encodePath (const std::string& input)
-        {
-            std::string output = "";
-            bool first = true;
-
-            for (unsigned char c : input)
-            {
-                if ((c >= 'a' && c <= 'z') ||
-                        (c >= 'A' && c <= 'Z') ||
-                        (c >= '0' && c <= '9' && !first))
-                {
-                    output += c;
-                }
-                else
-                {
-                    char buffer[5] = {0};
-                    std::snprintf(buffer, sizeof(buffer), "_%2X", c);
-                    output += buffer;
-                }
-
-                first = false;
-            }
-
-            return output;
-        }
-
-        static pid_t pidForUpstartJob (const gchar* jobname)
-        {
-            GError* error = nullptr;
-
-            if (jobname == nullptr)
-            {
-                return 0;
-            }
-
-            auto bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
-                                                                       NULL), [](GDBusConnection * bus)
-            {
-                g_clear_object(&bus);
-            });
-            if (!bus)
-            {
-                g_critical("Unable to get session bus");
-                return 0;
-            }
-
-            GVariant* retval = nullptr;
-            retval = g_dbus_connection_call_sync(
-                         bus.get(),
-                         "com.ubuntu.Upstart",
-                         "/com/ubuntu/Upstart",
-                         "com.ubuntu.Upstart0_6",
-                         "GetJobByName",
-                         g_variant_new("(s)", jobname),
-                         G_VARIANT_TYPE("(o)"),
-                         G_DBUS_CALL_FLAGS_NO_AUTO_START,
-                         -1, /* timeout */
-                         NULL, /* cancel */
-                         &error);
-
-            if (error != NULL)
-            {
-                g_warning("Unable to get path for job '%s': %s", jobname, error->message);
-                g_error_free(error);
-                return 0;
-            }
-
-            gchar* path = nullptr;
-            g_variant_get(retval, "(o)", &path);
-            g_variant_unref(retval);
-
-            retval = g_dbus_connection_call_sync(
-                         bus.get(),
-                         "com.ubuntu.Upstart",
-                         path,
-                         "com.ubuntu.Upstart0_6.Job",
-                         "GetInstanceByName",
-                         g_variant_new("(s)", ""),
-                         G_VARIANT_TYPE("(o)"),
-                         G_DBUS_CALL_FLAGS_NO_AUTO_START,
-                         -1, /* timeout */
-                         NULL, /* cancel */
-                         &error);
-
-            g_free(path);
-
-            if (error != NULL)
-            {
-                g_warning("Unable to get instance for job '%s': %s", jobname, error->message);
-                g_error_free(error);
-                return 0;
-            }
-
-            g_variant_get(retval, "(o)", &path);
-            g_variant_unref(retval);
-
-            retval = g_dbus_connection_call_sync(
-                         bus.get(),
-                         "com.ubuntu.Upstart",
-                         path,
-                         "org.freedesktop.DBus.Properties",
-                         "Get",
-                         g_variant_new("(ss)", "com.ubuntu.Upstart0_6.Instance", "processes"),
-                         G_VARIANT_TYPE("(v)"),
-                         G_DBUS_CALL_FLAGS_NO_AUTO_START,
-                         -1, /* timeout */
-                         NULL, /* cancel */
-                         &error);
-
-            g_free(path);
-
-            if (error != NULL)
-            {
-                g_warning("Unable to get processes for job '%s': %s", jobname, error->message);
-                g_error_free(error);
-                return 0;
-            }
-
-            GPid pid = 0;
-            GVariant* variant = g_variant_get_child_value(retval, 0);
-            GVariant* array = g_variant_get_variant(variant);
-            if (g_variant_n_children(array) > 0)
-            {
-                /* (si) */
-                GVariant* firstitem = g_variant_get_child_value(array, 0);
-                GVariant* vpid = g_variant_get_child_value(firstitem, 1);
-                pid = g_variant_get_int32(vpid);
-                g_variant_unref(vpid);
-                g_variant_unref(firstitem);
-            }
-            g_variant_unref(variant);
-            g_variant_unref(array);
-            g_variant_unref(retval);
-
-            return pid;
-        }
-
-        /* Figures out the PID that we should be overlaying with the PayUI */
-        static pid_t appid2pid (std::string& appid)
-        {
-            if (appid == "click-scope")
-            {
-                /* FIXME: Before other scopes can use pay, we'll need to figure out
-                   how to detect if they're scopes or not. But for now we'll only just
-                   look for 'click-scope' as it's our primary use-case */
-                return pidForUpstartJob("unity8-dash");
-            }
-            else
-            {
-                return ubuntu_app_launch_get_primary_pid(appid.c_str());
-            }
-        }
-
-        static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
-        {
-            g_debug("Mir Prompt session is in state: %d", state);
-        }
-
-    public:
-        MirSocketThread (std::shared_ptr<MirConnection> in_connection, const std::string& in_appid,
-                         const std::string& in_ui_appid)
-            : connection(in_connection)
-            , appid(in_appid)
-            , ui_appid(in_ui_appid)
-            , thread([]() {}, [this]()
-        {
-            payuiobj.reset();
-            bus.reset();
-        })
-        {
-            session = setupSession();
-            socketName = setupSocket();
-        }
-
-        ~MirSocketThread (void)
-        {
-            /* Quit before other variables are free'd */
-            thread.quit();
-        }
-
-        std::string getSocketName (void)
-        {
-            return socketName;
-        }
-    };
-
-public:
-    typedef std::shared_ptr<Item> Ptr;
-
-    UalItem (const std::string& in_appid, const std::string& in_itemid, const std::shared_ptr<MirConnection>& mir) :
-        appid(in_appid),
-        itemid(in_itemid),
-        connection(mir)
-    {
-
-    }
-
-    ~UalItem ()
-    {
-        helperFinishedConnection->disconnect();
-        helperFinishedConnection.reset();
-        helperThread.reset();
-        socketThread.reset();
-    }
-
-    /* Goes through the basis phases of building up the environment for the
-       UI to run in. Ensures we've got an AppID, builds the session, sets up
-       the socket to pass the session. And then starts the UI. */
-    virtual bool run (void)
-    {
-        helperThread.reset();
-        socketThread.reset();
-
-        auto ui_appid = discoverUiAppid();
-
-        if (ui_appid.empty())
-        {
-            g_debug("Empty UI App ID");
-            return false;
-        }
-
-        socketThread = std::make_shared<MirSocketThread>(connection, appid, ui_appid);
-        helperThread = std::make_shared<HelperThread>(socketThread->getSocketName(), ui_appid, buildPurchaseUrl());
-
-        helperFinishedConnection = std::make_shared<core::Connection>(helperThread->helperFinished.connect([this](
-                                                                                                               Item::Status status)
-        {
-            purchaseComplete(status);
-        }));
-
-        return true;
+        return !instanceid.empty();
     }
 
 private:
     /* Set at init */
     std::string appid;
+    std::string ui_appid;
     std::string itemid;
+    std::string instanceid;
+    GLib::ContextThread thread;
 
     /* Given to us by our parents */
     std::shared_ptr<MirConnection> connection;
-
-    /* Created by run, destroyed with the object */
-    std::shared_ptr<HelperThread> helperThread;
-    std::shared_ptr<MirSocketThread> socketThread;
-    std::shared_ptr<core::Connection> helperFinishedConnection;
 
     /* Looks through a directory to find the first entry that is a .desktop file
        and uses that as our AppID. We don't support more than one entry being in
@@ -618,6 +200,137 @@ private:
         return purchase_url;
     }
 
+    static pid_t pidForUpstartJob (const gchar* jobname)
+    {
+        GError* error = nullptr;
+
+        if (jobname == nullptr)
+        {
+            return 0;
+        }
+
+        auto bus = std::shared_ptr<GDBusConnection>(g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr,
+                                                                   NULL), [](GDBusConnection * bus)
+        {
+            g_clear_object(&bus);
+        });
+        if (!bus)
+        {
+            g_critical("Unable to get session bus");
+            return 0;
+        }
+
+        GVariant* retval = nullptr;
+        retval = g_dbus_connection_call_sync(
+                     bus.get(),
+                     "com.ubuntu.Upstart",
+                     "/com/ubuntu/Upstart",
+                     "com.ubuntu.Upstart0_6",
+                     "GetJobByName",
+                     g_variant_new("(s)", jobname),
+                     G_VARIANT_TYPE("(o)"),
+                     G_DBUS_CALL_FLAGS_NO_AUTO_START,
+                     -1, /* timeout */
+                     NULL, /* cancel */
+                     &error);
+
+        if (error != NULL)
+        {
+            g_warning("Unable to get path for job '%s': %s", jobname, error->message);
+            g_error_free(error);
+            return 0;
+        }
+
+        gchar* path = nullptr;
+        g_variant_get(retval, "(o)", &path);
+        g_variant_unref(retval);
+
+        retval = g_dbus_connection_call_sync(
+                     bus.get(),
+                     "com.ubuntu.Upstart",
+                     path,
+                     "com.ubuntu.Upstart0_6.Job",
+                     "GetInstanceByName",
+                     g_variant_new("(s)", ""),
+                     G_VARIANT_TYPE("(o)"),
+                     G_DBUS_CALL_FLAGS_NO_AUTO_START,
+                     -1, /* timeout */
+                     NULL, /* cancel */
+                     &error);
+
+        g_free(path);
+
+        if (error != NULL)
+        {
+            g_warning("Unable to get instance for job '%s': %s", jobname, error->message);
+            g_error_free(error);
+            return 0;
+        }
+
+        g_variant_get(retval, "(o)", &path);
+        g_variant_unref(retval);
+
+        retval = g_dbus_connection_call_sync(
+                     bus.get(),
+                     "com.ubuntu.Upstart",
+                     path,
+                     "org.freedesktop.DBus.Properties",
+                     "Get",
+                     g_variant_new("(ss)", "com.ubuntu.Upstart0_6.Instance", "processes"),
+                     G_VARIANT_TYPE("(v)"),
+                     G_DBUS_CALL_FLAGS_NO_AUTO_START,
+                     -1, /* timeout */
+                     NULL, /* cancel */
+                     &error);
+
+        g_free(path);
+
+        if (error != NULL)
+        {
+            g_warning("Unable to get processes for job '%s': %s", jobname, error->message);
+            g_error_free(error);
+            return 0;
+        }
+
+        GPid pid = 0;
+        GVariant* variant = g_variant_get_child_value(retval, 0);
+        GVariant* array = g_variant_get_variant(variant);
+        if (g_variant_n_children(array) > 0)
+        {
+            /* (si) */
+            GVariant* firstitem = g_variant_get_child_value(array, 0);
+            GVariant* vpid = g_variant_get_child_value(firstitem, 1);
+            pid = g_variant_get_int32(vpid);
+            g_variant_unref(vpid);
+            g_variant_unref(firstitem);
+        }
+        g_variant_unref(variant);
+        g_variant_unref(array);
+        g_variant_unref(retval);
+
+        return pid;
+    }
+
+    /* Figures out the PID that we should be overlaying with the PayUI */
+    static pid_t appid2pid (std::string& appid)
+    {
+        if (appid == "click-scope")
+        {
+            /* FIXME: Before other scopes can use pay, we'll need to figure out
+               how to detect if they're scopes or not. But for now we'll only just
+               look for 'click-scope' as it's our primary use-case */
+            return pidForUpstartJob("unity8-dash");
+        }
+        else
+        {
+            return ubuntu_app_launch_get_primary_pid(appid.c_str());
+        }
+    }
+
+    static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
+    {
+        g_debug("Mir Prompt session is in state: %d", state);
+    }
 };
 
 class UalFactory::Impl
