@@ -87,8 +87,12 @@ private:
     // get the purchases URL; e.g. https://software-center.ubuntu.com/api/2.0/click/purchases
     std::string get_purchases_url()
     {
-        static constexpr char const* PAY_API_ROOT {"/api/2.0/click"};
-        static constexpr char const* PAY_PURCHASES_PATH {"/purchases"};
+        static constexpr char const* PAY_API_ROOT
+        {"/api/2.0/click"
+        };
+        static constexpr char const* PAY_PURCHASES_PATH
+        {"/purchases"
+        };
 
         std::string url {get_base_url()};
         url += PAY_API_ROOT;
@@ -98,8 +102,12 @@ private:
 
     static const char* get_base_url()
     {
-        static constexpr char const* BASE_URL_ENVVAR {"PURCHASES_BASE_URL"};
-        static constexpr char const* DEFAULT_BASE {"https://software-center.ubuntu.com"};
+        static constexpr char const* BASE_URL_ENVVAR
+        {"PURCHASES_BASE_URL"
+        };
+        static constexpr char const* DEFAULT_BASE
+        {"https://software-center.ubuntu.com"
+        };
 
         const char* env = getenv(BASE_URL_ENVVAR);
         return env && *env ? env : DEFAULT_BASE;
