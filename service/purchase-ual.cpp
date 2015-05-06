@@ -60,7 +60,7 @@ public:
         {
             if (!thread.executeOnThread<bool>([this]()
         {
-            return ubuntu_app_launch_stop_multiple_helper("pay-ui", ui_appid.c_str(), instanceid.c_str());
+            return ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, ui_appid.c_str(), instanceid.c_str());
             }))
             {
                 g_warning("Error");
@@ -112,10 +112,10 @@ public:
                 return instid;
             }
 
-            ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, "pay-ui", this);
+            ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
 
             std::array<const gchar*, 2>urls {purchase_url.c_str(), nullptr};
-            auto instance_c = ubuntu_app_launch_start_session_helper("pay-ui",
+            auto instance_c = ubuntu_app_launch_start_session_helper(HELPER_TYPE,
                                                                      session.get(),
                                                                      ui_appid.c_str(),
                                                                      urls.data());
@@ -149,7 +149,7 @@ private:
         const gchar* clickhookdir = g_getenv("PAY_SERVICE_CLICK_DIR");
         if (clickhookdir == nullptr)
         {
-            gchar* cacheclickdir = g_build_filename(g_get_user_cache_dir(), "pay-service", "pay-ui", nullptr);
+            gchar* cacheclickdir = g_build_filename(g_get_user_cache_dir(), "pay-service", HELPER_TYPE, nullptr);
             g_debug("Looking for Pay UI in: %s", cacheclickdir);
             dir = g_dir_open(cacheclickdir, 0, nullptr);
             g_free(cacheclickdir);
