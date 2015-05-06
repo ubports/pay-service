@@ -43,19 +43,10 @@ target_link_libraries(pay-service
 
 install(TARGETS pay-service RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
 
-###########################
-# Mir Connection Demangler
-###########################
-
-add_executable(mir-connection-demangler mir-connection-demangler.c proxy-payui.c proxy-payui.h)
-target_link_libraries(mir-connection-demangler ${SERVICE_DEPS_LIBRARIES})
-install(TARGETS mir-connection-demangler RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
-
 #############################
 # Untrusted Helper Exec Tool
 #############################
 
-add_definitions(-DSOCKET_TOOL="${CMAKE_INSTALL_FULL_PKGLIBEXECDIR}/mir-connection-demangler")
 add_executable(exec-tool exec-tool.c)
 target_link_libraries(exec-tool ${SERVICE_DEPS_LIBRARIES})
 install(TARGETS exec-tool RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/ubuntu-app-launch/pay-ui")
