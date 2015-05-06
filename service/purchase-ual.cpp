@@ -49,6 +49,7 @@ public:
         thread([]() {}, [this]()
     {
         purchaseComplete(status);
+        ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
     })
     {
 
