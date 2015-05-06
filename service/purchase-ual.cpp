@@ -42,10 +42,14 @@ public:
     typedef std::shared_ptr<Item> Ptr;
 
     UalItem (const std::string& in_appid, const std::string& in_itemid, const std::shared_ptr<MirConnection>& mir) :
+        status(Item::ERROR),
         appid(in_appid),
         itemid(in_itemid),
         connection(mir),
-        thread()
+        thread([]() {}, [this]()
+    {
+        purchaseComplete(status);
+    })
     {
 
     }
@@ -108,6 +112,8 @@ public:
                 return instid;
             }
 
+            ubuntu_app_launch_observer_add_helper_stop(helper_stop_static_helper, "pay-ui", this);
+
             std::array<const gchar*, 2>urls {purchase_url.c_str(), nullptr};
             auto instance_c = ubuntu_app_launch_start_session_helper("pay-ui",
                                                                      session.get(),
@@ -128,6 +134,7 @@ private:
     std::string itemid;
     std::string instanceid;
     GLib::ContextThread thread;
+    Item::Status status;
 
     /* Given to us by our parents */
     std::shared_ptr<MirConnection> connection;
@@ -330,6 +337,27 @@ private:
     static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
     {
         g_debug("Mir Prompt session is in state: %d", state);
+    }
+
+    static void helper_stop_static_helper (const gchar* appid,
+                                           const gchar* instanceid,
+                                           const gchar* helpertype,
+                                           gpointer user_data)
+    {
+        UalItem* notthis = static_cast<UalItem*>(user_data);
+        notthis->helperStop(std::string(appid));
+    }
+
+    void helperStop (std::string stop_appid)
+    {
+        if (stop_appid != ui_appid)
+        {
+            return;
+        }
+
+        status = Item::PURCHASED;
+        instanceid.clear();
+        thread.quit();
     }
 };
 

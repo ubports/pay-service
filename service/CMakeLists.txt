@@ -31,7 +31,6 @@ set(SERVICE_LIB_GEN_SOURCES)
 
 add_gdbus_codegen_with_namespace(SERVICE_LIB_GEN_SOURCES proxy-service com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.xml)
 add_gdbus_codegen_with_namespace(SERVICE_LIB_GEN_SOURCES proxy-package com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.package.xml)
-add_gdbus_codegen_with_namespace(SERVICE_LIB_GEN_SOURCES proxy-payui com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.payui.xml)
 
 add_library(pay-service-lib STATIC ${SERVICE_LIB_SOURCES} ${SERVICE_LIB_GEN_SOURCES})
 
