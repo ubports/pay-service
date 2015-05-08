@@ -30,17 +30,19 @@ main (int argv, char* argc[])
 {
     TokenGrabber::Ptr token;
     Web::Factory::Ptr wfactory;
+    Web::ClickPurchasesApi::Ptr cpa;
     Verification::Factory::Ptr vfactory;
     Purchase::Factory::Ptr pfactory;
     Item::Store::Ptr items;
     DBusInterface::Ptr dbus;
 
-    qt::core::world::build_and_run(argv, argc, [&token, &wfactory, &vfactory, &pfactory, &items, &dbus]()
+    qt::core::world::build_and_run(argv, argc, [&token, &wfactory, &cpa, &vfactory, &pfactory, &items, &dbus]()
     {
         /* Initialize the other object after Qt is built */
         token = std::make_shared<TokenGrabberU1>();
         wfactory = std::make_shared<Web::CurlFactory>(token);
-        vfactory = std::make_shared<Verification::HttpFactory>(wfactory);
+        cpa = std::make_shared<Web::ClickPurchasesApi>(wfactory);
+        vfactory = std::make_shared<Verification::HttpFactory>(cpa);
         pfactory = std::make_shared<Purchase::UalFactory>();
         items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
         dbus = std::make_shared<DBusInterface>(items);
