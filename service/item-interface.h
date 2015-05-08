@@ -39,7 +39,8 @@ public:
         VERIFYING,
         PURCHASING,
         NOT_PURCHASED,
-        PURCHASED
+        PURCHASED,
+        REFUNDING
     };
 
     static const char* statusString (Status stat)
@@ -56,6 +57,8 @@ public:
                 return "not purchased";
             case PURCHASED:
                 return "purchased";
+            case REFUNDING:
+                return "refunding";
         }
         return "error";
     }

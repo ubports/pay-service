@@ -3,8 +3,8 @@
 	<interface name="com.canonical.pay.package">
 		<!-- Base stuff -->
 		<method name="ListItems">
-			<!-- item id, status -->
-			<arg type="a(ss)" name="items" direction="out" />
+			<!-- item id, status, refund expiration -->
+			<arg type="a(sst)" name="items" direction="out" />
 		</method>
 		<method name="VerifyItem">
 			<arg type="s" name="item" direction="in" />
@@ -12,9 +12,13 @@
 		<method name="PurchaseItem">
 			<arg type="s" name="item" direction="in" />
 		</method>
+		<method name="RefundItem">
+			<arg type="s" name="item" direction="in" />
+		</method>
 		<signal name="ItemStatusChanged">
 			<arg type="s" name="item" direction="out" />
 			<arg type="s" name="status" direction="out" />
+			<arg type="t" name="refund" direction="out" />
 		</signal>
 	</interface>
 </node>

@@ -95,6 +95,7 @@ endif ()
 ##  Subdirectories
 ##
 
+add_subdirectory(common)
 add_subdirectory(libpay)
 add_subdirectory(service)
 add_subdirectory(data)

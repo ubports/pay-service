@@ -104,11 +104,6 @@ public:
     ~ContextThread (void)
     {
         quit();
-
-        if (_thread.joinable())
-        {
-            _thread.join();
-        }
     }
 
     void quit (void)
@@ -118,6 +113,16 @@ public:
         {
             g_main_loop_quit(_loop.get());    /* Quit the loop */
         }
+
+        /* Joining here because we want to ensure that the final afterLoop()
+           function is run before returning */
+        if (std::this_thread::get_id() != _thread.get_id())
+        {
+            if (_thread.joinable())
+            {
+                _thread.join();
+            }
+        }
     }
 
     bool isCancelled (void)
@@ -125,11 +130,23 @@ public:
         return g_cancellable_is_cancelled(_cancel.get()) == TRUE;
     }
 
+    std::shared_ptr<GCancellable> getCancellable (void)
+    {
+        return _cancel;
+    }
+
     template<typename T> auto executeOnThread (std::function<T(void)> work) -> T
     {
         if (isCancelled())
         {
             throw std::runtime_error("Trying to execute work on a GLib thread that is shutting down.");
+        }
+
+        /* If we're in this same thread just do the work instead of
+           queuing and waiting which will deadlock */
+        if (_context.get() == g_main_context_get_thread_default())
+        {
+            return work();
         }
 
         std::promise<T> promise;
@@ -154,7 +171,7 @@ public:
     }
 
 private:
-    void simpleSource (std::function<std::shared_ptr<GSource>(void)> srcBuilder, std::function<void(void)> work)
+    void simpleSource (std::function<GSource * (void)> srcBuilder, std::function<void(void)> work)
     {
         if (isCancelled())
         {
@@ -166,7 +183,15 @@ private:
            it to the context. */
         auto heapWork = new std::function<void(void)>(work);
 
-        auto source = srcBuilder();
+        auto source = std::shared_ptr<GSource>(srcBuilder(),
+                                               [](GSource * src)
+        {
+            if (src != nullptr)
+            {
+                g_source_unref(src);
+            }
+        }
+                                              );
         g_source_set_callback(source.get(),
                               [](gpointer data) -> gboolean
         {
@@ -186,43 +211,24 @@ private:
 public:
     void executeOnThread (std::function<void(void)> work)
     {
-        simpleSource([]() -> std::shared_ptr<GSource>
+        simpleSource(g_idle_source_new, work);
+    }
+
+    template<class Rep, class Period> void timeout (const std::chrono::duration<Rep, Period>& length,
+                                                    std::function<void(void)> work)
+    {
+        simpleSource([length]()
         {
-            return std::shared_ptr<GSource>(g_idle_source_new(), [](GSource * src)
-            {
-                if (src != nullptr)
-                {
-                    g_source_unref(src);
-                }
-            });
+            return g_timeout_source_new(std::chrono::duration_cast<std::chrono::milliseconds>(length).count());
         }, work);
     }
 
-    void timeout (std::chrono::milliseconds length, std::function<void(void)> work)
+    template<class Rep, class Period> void timeoutSeconds (const std::chrono::duration<Rep, Period>& length,
+                                                           std::function<void(void)> work)
     {
-        simpleSource([length]() -> std::shared_ptr<GSource>
+        simpleSource([length]()
         {
-            return std::shared_ptr<GSource>(g_timeout_source_new(length.count()), [](GSource * src)
-            {
-                if (src != nullptr)
-                {
-                    g_source_unref(src);
-                }
-            });
-        }, work);
-    }
-
-    void timeoutSeconds (std::chrono::seconds length, std::function<void(void)> work)
-    {
-        simpleSource([length]() -> std::shared_ptr<GSource>
-        {
-            return std::shared_ptr<GSource>(g_timeout_source_new_seconds(length.count()), [](GSource * src)
-            {
-                if (src != nullptr)
-                {
-                    g_source_unref(src);
-                }
-            });
+            return g_timeout_source_new_seconds(std::chrono::duration_cast<std::chrono::seconds>(length).count());
         }, work);
     }
 };
