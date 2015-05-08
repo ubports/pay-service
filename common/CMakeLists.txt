@@ -1,7 +1,12 @@
 
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fPIE ${GCOV_FLAGS}")
+
 set(COMMON_SOURCES
+	glib-thread.cpp
 	glib-thread.h)
+
+add_library(common-lib STATIC ${COMMON_SOURCES})
 
 macro(list_prefix _outvar _listvar _prefix)
 	set(${_outvar})

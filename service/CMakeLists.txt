@@ -36,7 +36,7 @@ add_gdbus_codegen_with_namespace(SERVICE_LIB_GEN_SOURCES proxy-payui com.canonic
 add_library(pay-service-lib STATIC ${SERVICE_LIB_SOURCES} ${SERVICE_LIB_GEN_SOURCES})
 
 message(${SERVICE_DEPS_LIBRARIES})
-target_link_libraries(pay-service-lib ${SERVICE_DEPS_LIBRARIES} "-lpthread")
+target_link_libraries(pay-service-lib common-lib ${SERVICE_DEPS_LIBRARIES} "-lpthread")
 
 add_executable(pay-service main.cpp)
 target_link_libraries(pay-service
