@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2014-2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -18,13 +18,12 @@
  */
 
 #include "verification-factory.h"
-#include "token-grabber.h"
+#include "webclient-factory.h"
 
-#include <memory>
 #include <string>
 
-#ifndef VERIFICATION_CURL_HPP__
-#define VERIFICATION_CURL_HPP__ 1
+#ifndef VERIFICATION_HTTP_HPP__
+#define VERIFICATION_HTTP_HPP__ 1
 
 namespace Verification {
 
@@ -34,11 +33,9 @@ const std::string PAY_API_ROOT = "/api/2.0/click";
 const std::string PAY_PURCHASES_PATH = "/purchases";
 
 
-class CurlFactory : public Factory {
+class HttpFactory : public Factory {
 public:
-	CurlFactory (TokenGrabber::Ptr token);
-	CurlFactory (const std::string& endpoint);
-	~CurlFactory ();
+	HttpFactory (Web::Factory::Ptr in_factory);
 
 	virtual bool running ();
 	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
@@ -51,9 +48,9 @@ public:
 private:
 	std::string endpoint;
 	std::string device;
-	TokenGrabber::Ptr tokenGrabber;
+    Web::Factory::Ptr wfactory;
 };
 
 } // ns Verification
 
-#endif /* VERIFICATION_CURL_HPP__ */
+#endif /* VERIFICATION_HTTP_HPP__ */

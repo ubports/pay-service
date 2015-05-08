@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2014-2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -12,12 +12,9 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Authors:
- *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-curl.h"
+#include "webclient-curl.h"
 
 #include <string>
 #include <thread>
@@ -25,42 +22,48 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
-namespace Verification
+namespace Web
 {
 
-class CurlItem : public Item
+class CurlResponse : public Response
 {
 public:
-    CurlItem (std::string& app,
-              std::string& item,
-              std::string& endpoint,
-              std::string& device,
-              TokenGrabber::Ptr intoken) :
-        stop(false),
-        token(intoken)
+    CurlResponse (int status, std::string body) :
+        _body(body),
+        _status(status)
     {
-        url = endpoint;
-
-        if (app != "click-scope")
-        {
-            url += "/" + app;
-        }
-        // TODO: Needs regression testing, and redirect support.
-        url += "/" + item;
-        if (app == "click-scope"
-                && url.find("file:///") == std::string::npos)
-        {
-            url += "/";
-        }
-
-        if (!device.empty())
-        {
-            url += "?device=" + device;
-        }
-
     }
 
-    ~CurlItem (void)
+    virtual std::string& body ()
+    {
+        return _body;
+    }
+
+    virtual bool is_success ()
+    {
+        return _status == 200 ? true : false;
+    }
+
+private:
+    std::string _body;
+    int _status;
+};
+
+
+class CurlRequest : public Request
+{
+public:
+    CurlRequest (const std::string& url,
+                 bool sign,
+                 TokenGrabber::Ptr token) :
+        stop(false),
+        _url(url),
+        _sign(sign),
+        _token(token)
+    {
+    }
+
+    ~CurlRequest (void)
     {
         stopThread();
     }
@@ -90,25 +93,24 @@ public:
 
             /* Helps with threads */
             curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1);
-            curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(handle, CURLOPT_URL, _url.c_str());
             curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
             curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
 
-            /* Setup the authorization right before doing the request */
-            struct curl_slist* curlHeaders = NULL;
-
-            /* Sign the request */
-            auto auth = token->signUrl(url, "GET");
-            if (!auth.empty())
+            /* Sign the request if needed */
+            if (_sign)
             {
-                authheader = "Authorization: ";
-                authheader += auth;
-                // TODO: Need regression test for this.
-                curlHeaders = curl_slist_append(curlHeaders, authheader.c_str());
+                /* TODO: This needs to support other methods. */
+                auto auth = _token->signUrl(_url, "GET");
+                if (!auth.empty())
+                {
+                    set_header("Authorization", auth);
+                }
+                else
+                {
+                    std::cerr << "WARNING: Signing failed, submitting unsigned request." << std::endl;
+                }
             }
-
-            /* Ensure we get JSON back */
-            curlHeaders = curl_slist_append(curlHeaders, "Accept: application/json");
 
             /* Actually set them in cURL */
             if (curlHeaders != nullptr)
@@ -124,19 +126,12 @@ public:
                 long responsecode = 0;
                 curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &responsecode);
 
-                if (responsecode == 200)
-                {
-                    verificationComplete(Status::PURCHASED);
-                }
-                else
-                {
-                    verificationComplete(Status::NOT_PURCHASED);
-                }
+                finished(std::make_shared<CurlResponse>(responsecode,
+                                                        transferBuffer));
             }
             else
             {
-                std::cerr << "CURL error '" << curl_easy_strerror(status) << "' from URL '" << url << "'" << std::endl;
-                verificationComplete(Status::ERROR);
+                error(curl_easy_strerror(status));
             }
 
             /* Clean up headers */
@@ -151,29 +146,44 @@ public:
 
         return true;
     }
+
+    virtual void set_header (const std::string& key,
+                             const std::string& value)
+    {
+        std::string headerText = key;
+        headerText += + ": ";
+        headerText += value;
+        curlHeaders = curl_slist_append(curlHeaders, headerText.c_str());
+    }
+
 private:
     std::string transferBuffer;
     std::thread exec;
-    std::string url;
-    TokenGrabber::Ptr token;
     bool stop;
+
+    struct curl_slist* curlHeaders = NULL;
+
+    std::string _url;
+    bool _sign;
+    TokenGrabber::Ptr _token;
 
     /* This is the callback from cURL as it does the transfer. We're
        pretty simple in that we're just putting it into a string. */
-    static size_t curlWrite (void* buffer, size_t size, size_t nmemb, void* user_data)
+    static size_t curlWrite (void* buffer, size_t size, size_t nmemb,
+                             void* user_data)
     {
         auto datasize = size * nmemb;
-        //std::cout << "Got data: " << datasize << std::endl;
-        CurlItem* item = static_cast<CurlItem*>(user_data);
-        if (item->stop)
+        CurlRequest* request = static_cast<CurlRequest*>(user_data);
+        if (request->stop)
         {
             std::cout << "cURL transaction stopped prematurely" << std::endl;
             return 0;
         }
-        item->transferBuffer.append(static_cast<char*>(buffer), datasize);
+        request->transferBuffer.append(static_cast<char*>(buffer), datasize);
         return datasize;
     }
 };
+
 
 /*********************
  * CurlFactory
@@ -182,9 +192,6 @@ private:
 CurlFactory::CurlFactory (TokenGrabber::Ptr token) :
     tokenGrabber(token)
 {
-    // TODO: We should probably always assemble the URL when needed.
-    endpoint = get_base_url() + PAY_API_ROOT + PAY_PURCHASES_PATH;
-
     /* TODO: We should check to see if we have networking someday */
     curl_global_init(CURL_GLOBAL_SSL);
 }
@@ -201,34 +208,11 @@ CurlFactory::running ()
     return true;
 }
 
-Item::Ptr
-CurlFactory::verifyItem (std::string& appid, std::string& itemid)
+Request::Ptr
+CurlFactory::create_request (const std::string& url,
+                             bool sign)
 {
-    return std::make_shared<CurlItem>(appid, itemid, endpoint, device, tokenGrabber);
+    return std::make_shared<CurlRequest>(url, sign, tokenGrabber);
 }
 
-void
-CurlFactory::setEndpoint (std::string& in_endpoint)
-{
-    endpoint = in_endpoint;
-}
-
-void
-CurlFactory::setDevice (std::string& in_device)
-{
-    device = in_device;
-}
-
-std::string
-CurlFactory::get_base_url ()
-{
-    const char* env_url = getenv(PAY_BASE_URL_ENVVAR.c_str());
-    if (env_url != nullptr)
-    {
-        return env_url;
-    }
-    return PAY_BASE_URL;
-}
-
-} // ns Verification
-
+} // ns Web
