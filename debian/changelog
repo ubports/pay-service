@@ -1,3 +1,35 @@
+pay-service (2.0.0+15.10.20150508-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * debian/libpay2.symbols: update to released version.
+
+  [ Charles Kerr ]
+  * Move the knowledge of the Click Purchases API from the Verification
+    classes into its own class, ClickPurchasesAPI.
+
+  [ Rodney Dawes ]
+  * Move the HTTP factory out to a separate class which can be used
+    outside of just purchase verification. added: service/webclient-
+    curl.cpp service/webclient-curl.h service/webclient-factory.h
+    service/webclient-null.cpp service/webclient-null.h tests/webclient-
+    curl-tests.cpp renamed: service/verification-curl.cpp =>
+    service/verification-http.cpp service/verification-curl.h =>
+    service/verification-http.h tests/verification-curl-endpoints/ =>
+    tests/verification-http-endpoints/ tests/verification-curl-tests.cpp
+    => tests/verification-http-tests.cpp
+
+  [ Ted Gould ]
+  * Add API to libpay for refunds
+  * Convert libpay over to using GLib Context Thread added: common/
+    common/CMakeLists.txt renamed: service/glib-thread.h => common/glib-
+    thread.h
+  * Factor out GLib thread component and cleanup Purchase UAL added:
+    service/glib-thread.h
+  * Put the glib-thread into a static lib with a cleaner header file
+    added: common/glib-thread.cpp
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 08 May 2015 18:32:53 +0000
+
 pay-service (2.0.0+14.10.20140916-0ubuntu1) utopic; urgency=low
 
   [ Martin Pitt ]

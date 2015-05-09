@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -12,30 +12,37 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Authors:
- *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-null.h"
+#include "webclient-null.h"
 
-namespace Verification
+namespace Web
 {
 
-class NullItem : public Item
+class NullRequest : public Request
 {
 public:
-    NullItem (void)
+    NullRequest (void)
     {
     }
 
-    ~NullItem (void)
+    ~NullRequest (void)
     {
     }
 
     virtual bool run (void)
     {
         return false;
+    }
+
+    virtual void set_header (const std::string& key,
+                             const std::string& value)
+    {
+    }
+
+    virtual void set_parameter (const std::string& key,
+                                const std::string& value)
+    {
     }
 };
 
@@ -46,10 +53,11 @@ NullFactory::running ()
     return false;
 }
 
-Item::Ptr
-NullFactory::verifyItem (const std::string& appid, const std::string& itemid)
+Request::Ptr
+NullFactory::create_request (const std::string& url,
+                             bool sign)
 {
-    return std::make_shared<NullItem>();
+    return std::make_shared<NullRequest>();
 }
 
-} // ns Verification
+} // ns Web

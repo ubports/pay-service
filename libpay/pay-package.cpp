@@ -62,9 +62,7 @@ public:
                                    PayPackageItemStatus status,
                                    std::chrono::system_clock::time_point refundable_until)
         {
-            itemStatusCache[itemid] = std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>(status,
-                                                                                                             refundable_until);
-
+            itemStatusCache[itemid] = std::make_pair(status, refundable_until);
         });
 
         /* Manage the timers to signal when refundable status changes */
@@ -193,7 +191,7 @@ public:
         }
     }
 
-    PayPackageItemStatus itemStatus (const char* itemid)
+    PayPackageItemStatus itemStatus (const char* itemid) noexcept
     {
         try
         {
@@ -205,11 +203,12 @@ public:
         }
     }
 
-    PayPackageRefundStatus refundStatus (const char* itemid)
+    PayPackageRefundStatus refundStatus (const char* itemid) noexcept
     {
         try
         {
-            return calcRefundStatus(itemStatusCache[itemid].first, itemStatusCache[itemid].second);
+            auto entry = itemStatusCache[itemid];
+            return calcRefundStatus(entry.first, entry.second);
         }
         catch (std::out_of_range range)
         {
@@ -237,41 +236,41 @@ public:
         return PAY_PACKAGE_REFUND_STATUS_REFUNDABLE;
     }
 
-    bool addItemObserver (PayPackageItemObserver observer, void* user_data)
+    bool addItemObserver (PayPackageItemObserver observer, void* user_data) noexcept
     {
         /* Creates a connection to the signal for the observer and stores the connection
            object in the map so that we can remove it later, or it'll get disconnected
            when the whole object gets destroyed */
         itemObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
-                                                                                           std::string itemid,
-                                                                                           PayPackageItemStatus status,
-                                                                                           std::chrono::system_clock::time_point refund)
+            std::string itemid,
+            PayPackageItemStatus status,
+            std::chrono::system_clock::time_point refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
         }));
         return true;
     }
 
-    bool removeItemObserver (PayPackageItemObserver observer, void* user_data)
+    bool removeItemObserver (PayPackageItemObserver observer, void* user_data) noexcept
     {
         std::pair<PayPackageItemObserver, void*> key(observer, user_data);
         itemObservers.erase(key);
         return true;
     }
 
-    bool addRefundObserver (PayPackageRefundObserver observer, void* user_data)
+    bool addRefundObserver (PayPackageRefundObserver observer, void* user_data) noexcept
     {
         refundObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
-                                                                                             std::string itemid,
-                                                                                             PayPackageItemStatus status,
-                                                                                             std::chrono::system_clock::time_point refund)
+            std::string itemid,
+            PayPackageItemStatus status,
+            std::chrono::system_clock::time_point refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), calcRefundStatus(status, refund), user_data);
         }));
         return true;
     }
 
-    bool removeRefundObserver (PayPackageRefundObserver observer, void* user_data)
+    bool removeRefundObserver (PayPackageRefundObserver observer, void* user_data) noexcept
     {
         std::pair<PayPackageRefundObserver, void*> key(observer, user_data);
         refundObservers.erase(key);
@@ -279,15 +278,15 @@ public:
     }
 
     template <void (*startFunc)(proxyPayPackage*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer), gboolean (*finishFunc) (proxyPayPackage*, GAsyncResult*, GError**)>
-    bool startBase (const char* itemid)
+    bool startBase (const char* itemid) noexcept
     {
         std::promise<bool> promise;
         thread.executeOnThread([this, itemid, &promise]()
         {
             startFunc(proxy.get(),
-                      itemid,
-                      thread.getCancellable().get(), /* cancellable */
-                      [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
+            itemid,
+            thread.getCancellable().get(), /* cancellable */
+            [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
             {
                 auto promise = reinterpret_cast<std::promise<bool> *>(user_data);
                 GError* error = nullptr;
@@ -296,7 +295,10 @@ public:
 
                 if (error != nullptr)
                 {
-                    std::cerr << "Error from service: " << error->message << std::endl;
+                    if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+                    {
+                        std::cerr << "Error from service: " << error->message << std::endl;
+                    }
                     g_clear_error(&error);
                     promise->set_value(false);
                 }
@@ -312,17 +314,17 @@ public:
         return future.get();
     }
 
-    bool startVerification (const char* itemid)
+    bool startVerification (const char* itemid) noexcept
     {
         return startBase<&proxy_pay_package_call_verify_item, &proxy_pay_package_call_verify_item_finish> (itemid);
     }
 
-    bool startPurchase (const char* itemid)
+    bool startPurchase (const char* itemid) noexcept
     {
         return startBase<&proxy_pay_package_call_purchase_item, &proxy_pay_package_call_purchase_item_finish> (itemid);
     }
 
-    bool startRefund (const char* itemid)
+    bool startRefund (const char* itemid) noexcept
     {
         return startBase<&proxy_pay_package_call_refund_item, &proxy_pay_package_call_refund_item_finish> (itemid);
     }
@@ -375,6 +377,7 @@ PayPackage*
 pay_package_new (const char* package_name)
 {
     g_return_val_if_fail(package_name != nullptr, nullptr);
+
     try
     {
         Pay::Package* ret = new Pay::Package(package_name);
@@ -388,6 +391,8 @@ pay_package_new (const char* package_name)
 
 void pay_package_delete (PayPackage* package)
 {
+    g_return_if_fail(package != nullptr);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     delete pkg;
 }
@@ -395,6 +400,8 @@ void pay_package_delete (PayPackage* package)
 PayPackageItemStatus pay_package_item_status (PayPackage* package,
                                               const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, PAY_PACKAGE_ITEM_STATUS_UNKNOWN);
+    g_return_val_if_fail(itemid != nullptr, PAY_PACKAGE_ITEM_STATUS_UNKNOWN);
 
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->itemStatus(itemid);
@@ -409,6 +416,9 @@ int pay_package_item_is_refundable (PayPackage* package,
 PayPackageRefundStatus pay_package_refund_status (PayPackage* package,
                                                   const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE);
+    g_return_val_if_fail(itemid != nullptr, PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->refundStatus(itemid);
 }
@@ -417,6 +427,9 @@ int pay_package_item_observer_install (PayPackage* package,
                                        PayPackageItemObserver observer,
                                        void* user_data)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(observer != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->addItemObserver(observer, user_data);
 }
@@ -425,6 +438,9 @@ int pay_package_item_observer_uninstall (PayPackage* package,
                                          PayPackageItemObserver observer,
                                          void* user_data)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(observer != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->removeItemObserver(observer, user_data);
 }
@@ -433,6 +449,9 @@ int pay_package_refund_observer_install (PayPackage* package,
                                          PayPackageRefundObserver observer,
                                          void* user_data)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(observer != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->addRefundObserver(observer, user_data);
 }
@@ -441,6 +460,9 @@ int pay_package_refund_observer_uninstall (PayPackage* package,
                                            PayPackageRefundObserver observer,
                                            void* user_data)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(observer != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->removeRefundObserver(observer, user_data);
 }
@@ -448,6 +470,9 @@ int pay_package_refund_observer_uninstall (PayPackage* package,
 int pay_package_item_start_verification (PayPackage* package,
                                          const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(itemid != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->startVerification(itemid);
 }
@@ -455,6 +480,9 @@ int pay_package_item_start_verification (PayPackage* package,
 int pay_package_item_start_purchase (PayPackage* package,
                                      const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(itemid != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->startPurchase(itemid);
 }
@@ -462,6 +490,9 @@ int pay_package_item_start_purchase (PayPackage* package,
 int pay_package_item_start_refund (PayPackage* package,
                                    const char* itemid)
 {
+    g_return_val_if_fail(package != nullptr, 0);
+    g_return_val_if_fail(itemid != nullptr, 0);
+
     auto pkg = reinterpret_cast<Pay::Package*>(package);
     return pkg->startRefund(itemid);
 }

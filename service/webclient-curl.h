@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -12,26 +12,31 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Authors:
- *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-factory.h"
+#include "webclient-factory.h"
+#include "token-grabber.h"
 
-#ifndef VERIFICATION_NULL_HPP__
-#define VERIFICATION_NULL_HPP__ 1
+#include <string>
 
-namespace Verification {
 
-class NullFactory : public Factory {
+#ifndef WEBCLIENT_CURL_HPP__
+#define WEBCLIENT_CURL_HPP__ 1
+
+namespace Web {
+
+class CurlFactory : public Factory {
 public:
-	virtual bool running () override;
-	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) override;
+	CurlFactory (TokenGrabber::Ptr token);
+	~CurlFactory ();
 
-	typedef std::shared_ptr<NullFactory> Ptr;
+	virtual bool running () override;
+	virtual Request::Ptr create_request (const std::string& url,
+                                         bool sign) override;
+private:
+	TokenGrabber::Ptr tokenGrabber;
 };
 
-} // ns Verification
+} // ns Web
 
-#endif /* VERIFICATION_NULL_HPP__ */
+#endif /* WEBCLIENT_CURL_HPP__ */

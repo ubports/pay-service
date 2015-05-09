@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2014-2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -17,38 +17,26 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <core/signal.h>
+#include "verification-factory.h"
+#include "click-purchases-api.h"
 
-#ifndef VERIFICATION_FACTORY_HPP__
-#define VERIFICATION_FACTORY_HPP__ 1
+#include <string>
+
+#ifndef VERIFICATION_HTTP_HPP__
+#define VERIFICATION_HTTP_HPP__ 1
 
 namespace Verification {
 
-class Item {
+class HttpFactory : public Factory {
 public:
-	enum Status {
-		ERROR,
-		NOT_PURCHASED,
-		PURCHASED
-	};
+	HttpFactory (Web::ClickPurchasesApi::Ptr cpa_in);
+	virtual bool running () override;
+	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) override;
 
-	virtual bool run (void) = 0;
-
-	typedef std::shared_ptr<Item> Ptr;
-
-	core::Signal<Status> verificationComplete;
-};
-
-class Factory {
-public:
-	virtual ~Factory() = default;
-
-	virtual bool running () = 0;
-	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) = 0;
-
-	typedef std::shared_ptr<Factory> Ptr;
+private:
+	Web::ClickPurchasesApi::Ptr cpa;
 };
 
 } // ns Verification
 
-#endif /* VERIFICATION_FACTORY_HPP__ */
+#endif /* VERIFICATION_HTTP_HPP__ */

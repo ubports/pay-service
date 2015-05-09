@@ -8,6 +8,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} "${CMAKE_SOURCE_DIR}/common")
 ######################
 
 set(SERVICE_LIB_SOURCES
+    click-purchases-api.h
+    click-purchases-api.cpp
     dbus-interface.h
     dbus-interface.cpp
     item-interface.h
@@ -24,8 +26,11 @@ set(SERVICE_LIB_SOURCES
     token-grabber.h
     token-grabber-u1.h
     token-grabber-u1.cpp
-    verification-curl.cpp
-    verification-null.cpp)
+    verification-http.cpp
+    verification-null.cpp
+    webclient-curl.cpp
+    webclient-null.cpp
+)
 
 set(SERVICE_LIB_GEN_SOURCES)
 
