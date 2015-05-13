@@ -65,7 +65,7 @@ public:
         });
         request->error.connect([this](std::string error)
         {
-            std::cerr << "Error verifying item '" << error << std::endl;
+            std::cerr << "Error refunding item '" << error << std::endl;
             finished(false);
         });
         request->run();
