@@ -123,28 +123,14 @@ public:
             }
         }
 
-        // FIXME: this field will get give a false negative e.g. if the item's
-        // currently verifying... Maybe 'purchased' should be refactored into
-        // a standalone field { PURCHASED, NOT_PURCHASED, UNKNOWN } separate
-        // from status?
-        const bool was_purchased = getStatus() == Item::Status::PURCHASED;
+        const auto cached_status = getStatus();
 
         setStatus(Item::Status::REFUNDING);
 
-        ritem->finished.connect([this, was_purchased](bool success)
+        ritem->finished.connect([this, cached_status](bool success)
         {
-            if (success)
-            {
-                setStatus(Item::Status::NOT_PURCHASED);
-            }
-            else if (was_purchased)
-            {
-                setStatus(Item::Status::PURCHASED);
-            }
-            else
-            {
-                setStatus(Item::Status::UNKNOWN);
-            }
+            auto new_status = success ? Status::NOT_PURCHASED : cached_status;
+            setStatus(new_status);
         });
 
         return ritem->run();
