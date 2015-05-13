@@ -74,6 +74,14 @@ public:
         return req;
     }
 
+    Request::Ptr refundPackage(const std::string& package_name)
+    {
+        auto req = m_wfactory->create_request(get_refund_url(), true);
+        maybe_add_device_header(req);
+        req->set_post("name=" + package_name);
+        return req;
+    }
+
 private:
 
     void maybe_add_device_header(Request::Ptr request)
@@ -84,19 +92,25 @@ private:
         }
     }
 
-    // get the purchases URL; e.g. https://software-center.ubuntu.com/api/2.0/click/purchases
-    std::string get_purchases_url()
-    {
-        static constexpr char const* PAY_API_ROOT
-        {"/api/2.0/click"
-        };
-        static constexpr char const* PAY_PURCHASES_PATH
-        {"/purchases"
-        };
+    static constexpr char const* PAY_API_ROOT
+    {"/api/2.0/click"
+    };
 
+    // get the refund URL; e.g. https://software-center.ubuntu.com/api/2.0/click/refunds/
+    std::string get_refund_url() const
+    {
         std::string url {get_base_url()};
         url += PAY_API_ROOT;
-        url += PAY_PURCHASES_PATH;
+        url += "/refunds/";
+        return url;
+    }
+
+    // get the purchases URL; e.g. https://software-center.ubuntu.com/api/2.0/click/purchases
+    std::string get_purchases_url() const
+    {
+        std::string url {get_base_url()};
+        url += PAY_API_ROOT;
+        url += "/purchases";
         return url;
     }
 
@@ -149,6 +163,12 @@ ClickPurchasesApi::getItemInfo(const std::string& package_name,
                                const std::string& sku)
 {
     return impl->getItemInfo(package_name, sku);
+}
+
+Request::Ptr
+ClickPurchasesApi::refundPackage(const std::string& package_name)
+{
+    return impl->refundPackage(package_name);
 }
 
 void
