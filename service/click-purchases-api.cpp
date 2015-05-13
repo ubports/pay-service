@@ -92,9 +92,6 @@ private:
         }
     }
 
-    static constexpr char const* PAY_API_ROOT
-    {"/api/2.0/click"
-    };
 
     // get the refund URL; e.g. https://software-center.ubuntu.com/api/2.0/click/refunds/
     std::string get_refund_url() const
@@ -116,16 +113,14 @@ private:
 
     static const char* get_base_url()
     {
-        static constexpr char const* BASE_URL_ENVVAR
-        {"PURCHASES_BASE_URL"
-        };
-        static constexpr char const* DEFAULT_BASE
-        {"https://software-center.ubuntu.com"
-        };
+        static constexpr char const* BASE_URL_ENVVAR = "PURCHASES_BASE_URL";
+        static constexpr char const* DEFAULT_BASE = "https://software-center.ubuntu.com";
 
         const char* env = getenv(BASE_URL_ENVVAR);
         return env && *env ? env : DEFAULT_BASE;
     }
+
+    static constexpr char const* PAY_API_ROOT = "/api/2.0/click";
 
     Factory::Ptr m_wfactory;
     std::string m_device_id;
