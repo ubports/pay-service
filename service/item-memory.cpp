@@ -217,7 +217,7 @@ private:
     /****** std::shared_ptr<> is threadsafe **********/
     /* Verification item if we're in the state of verifying or null otherwise */
     Verification::Item::Ptr vitem;
-    /* Refund item if we're in the state of verifying or null otherwise */
+    /* Refund item if we're in the state of refunding or null otherwise */
     Refund::Item::Ptr ritem;
     /* Purchase item if we're in the state of purchasing or null otherwise */
     Purchase::Item::Ptr pitem;

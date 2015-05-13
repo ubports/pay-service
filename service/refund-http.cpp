@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014-2015 Canonical Ltd.
+ * Copyright © 2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -12,9 +12,6 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Authors:
- *   Charles Kerr <charles.kerr@canonical.com>
  */
 
 #include <json/json.h> // jsoncpp
@@ -38,8 +35,6 @@ public:
 
     virtual bool run (void)
     {
-        std::cerr << "app " << app << " item " << item << std::endl;
-
         if (app == "click-scope")
         {
             request = cpa->refundPackage(item/*package*/);

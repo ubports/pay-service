@@ -20,10 +20,7 @@
 
 #include <condition_variable>
 #include <mutex>
-
 #include <string>
-#include <fstream>
-#include <streambuf>
 
 struct WebclientCurlTests : public ::testing::Test
 {
