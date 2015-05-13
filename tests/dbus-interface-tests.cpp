@@ -154,16 +154,22 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
 
         g_variant_unref(itemslist);
 
+        const char* package_name = "bar-item-id";
+
         /* Try to check on an item */
         EXPECT_FALSE(proxy_pay_package_call_verify_item_sync(package,
-                                                             "bar-item-id",
+                                                             package_name,
                                                              nullptr, nullptr));
 
         /* Try to purchase an item */
         EXPECT_FALSE(proxy_pay_package_call_purchase_item_sync(package,
-                                                               "bar-item-id",
+                                                               package_name,
                                                                nullptr, nullptr));
 
+        // try to refund an item
+        EXPECT_FALSE(proxy_pay_package_call_refund_item_sync(package,
+                                                             package_name,
+                                                             nullptr, nullptr));
 
         g_clear_object(&service);
 

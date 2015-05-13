@@ -272,11 +272,34 @@ public:
         }
         else if (g_strcmp0(method, "RefundItem") == 0)
         {
-            GVariant* vitemid = g_variant_get_child_value(params, 0);
-            std::string itemid(g_variant_get_string(vitemid, NULL));
-            g_variant_unref(vitemid);
+            std::string itemid;
 
-            g_dbus_method_invocation_return_error(invocation, errorQuark, 3, "Unable to refund item '%s'", itemid.c_str());
+            if (g_variant_n_children(params) == 1)
+            {
+                auto vitemid = g_variant_get_child_value(params, 0);
+                if (g_variant_is_of_type(vitemid, G_VARIANT_TYPE_STRING))
+                {
+                    itemid = g_variant_get_string(vitemid, NULL);
+                }
+                g_variant_unref(vitemid);
+            }
+
+            if (itemid.empty())
+            {
+                g_dbus_method_invocation_return_error(invocation, errorQuark, 3, "%s", "Unable to refund item: no itemid provided");
+            }
+            else
+            {
+                auto item = items->getItem(package, itemid);
+                if (item->refund())
+                {
+                    g_dbus_method_invocation_return_value(invocation, NULL);
+                }
+                else
+                {
+                    g_dbus_method_invocation_return_error(invocation, errorQuark, 3, "Unable to refund item '%s'", itemid.c_str());
+                }
+            }
         }
     }
 
