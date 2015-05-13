@@ -18,7 +18,6 @@
  */
 
 #include "purchase-ual.h"
-#include "proxy-payui.h"
 
 #include <thread>
 #include <future>
