@@ -20,6 +20,7 @@
 #include "dbus-interface.h"
 #include "item-memory.h"
 #include "verification-http.h"
+#include "refund-http.h"
 #include "webclient-curl.h"
 #include "purchase-ual.h"
 #include "qtbridge.h"
@@ -32,19 +33,21 @@ main (int argv, char* argc[])
     Web::Factory::Ptr wfactory;
     Web::ClickPurchasesApi::Ptr cpa;
     Verification::Factory::Ptr vfactory;
+    Refund::Factory::Ptr rfactory;
     Purchase::Factory::Ptr pfactory;
     Item::Store::Ptr items;
     DBusInterface::Ptr dbus;
 
-    qt::core::world::build_and_run(argv, argc, [&token, &wfactory, &cpa, &vfactory, &pfactory, &items, &dbus]()
+    qt::core::world::build_and_run(argv, argc, [&token, &wfactory, &cpa, &vfactory, &rfactory, &pfactory, &items, &dbus]()
     {
         /* Initialize the other object after Qt is built */
         token = std::make_shared<TokenGrabberU1>();
         wfactory = std::make_shared<Web::CurlFactory>(token);
         cpa = std::make_shared<Web::ClickPurchasesApi>(wfactory);
         vfactory = std::make_shared<Verification::HttpFactory>(cpa);
+        rfactory = std::make_shared<Refund::HttpFactory>(cpa);
         pfactory = std::make_shared<Purchase::UalFactory>();
-        items = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+        items = std::make_shared<Item::MemoryStore>(vfactory, rfactory, pfactory);
         dbus = std::make_shared<DBusInterface>(items);
     });
 

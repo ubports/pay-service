@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include "service/item-memory.h"
 #include "service/verification-null.h"
+#include "service/refund-null.h"
 #include "service/purchase-null.h"
 
 #include "verification-test.h"
@@ -33,17 +34,21 @@ struct MemoryItemTests : public ::testing::Test
 
 		virtual void TearDown() {
 		}
+
+		std::shared_ptr<Item::MemoryStore> create_null_store() {
+			auto v = std::make_shared<Verification::NullFactory>();
+			auto r = std::make_shared<Refund::NullFactory>();
+			auto p = std::make_shared<Purchase::NullFactory>();
+			EXPECT_NE(nullptr, v);
+			EXPECT_NE(nullptr, r);
+			EXPECT_NE(nullptr, p);
+			return std::make_shared<Item::MemoryStore>(v, r, p);
+		}
 };
 
 /* Test to make sure the basic stuff doesn't crash to ensure we can move forward */
 TEST_F(MemoryItemTests, BasicCreate) {
-	auto vfactory = std::make_shared<Verification::NullFactory>();
-	ASSERT_NE(nullptr, vfactory);
-
-	auto pfactory = std::make_shared<Purchase::NullFactory>();
-	ASSERT_NE(nullptr, vfactory);
-
-	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+	auto store = create_null_store();
 	EXPECT_NE(nullptr, store);
 	/* Force a destruction in the test */
 	store.reset();
@@ -52,12 +57,7 @@ TEST_F(MemoryItemTests, BasicCreate) {
 
 /* Verify that the initial state is empty */
 TEST_F(MemoryItemTests, InitialState) {
-	auto vfactory = std::make_shared<Verification::NullFactory>();
-	auto pfactory = std::make_shared<Purchase::NullFactory>();
-	ASSERT_NE(nullptr, vfactory);
-	ASSERT_NE(nullptr, pfactory);
-
-	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+	auto store = create_null_store();
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -69,12 +69,7 @@ TEST_F(MemoryItemTests, InitialState) {
 
 /* Verify that the memory store saves things */
 TEST_F(MemoryItemTests, StoreItems) {
-	auto vfactory = std::make_shared<Verification::NullFactory>();
-	auto pfactory = std::make_shared<Purchase::NullFactory>();
-	ASSERT_NE(nullptr, vfactory);
-	ASSERT_NE(nullptr, pfactory);
-
-	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+	auto store = create_null_store();
 
 	auto apps = store->listApplications();
 	EXPECT_EQ(0, apps.size());
@@ -103,11 +98,13 @@ TEST_F(MemoryItemTests, StoreItems) {
 
 TEST_F(MemoryItemTests, VerifyItem) {
 	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto rfactory = std::make_shared<Refund::NullFactory>();
 	auto pfactory = std::make_shared<Purchase::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, rfactory);
 	ASSERT_NE(nullptr, pfactory);
 
-	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, rfactory, pfactory);
 
 	std::string appname("my-application");
 	std::string itemname("my-item");
@@ -137,13 +134,14 @@ TEST_F(MemoryItemTests, VerifyItem) {
 
 TEST_F(MemoryItemTests, PurchaseItemNull) {
 	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto rfactory = std::make_shared<Refund::NullFactory>();
 	auto pfactory = std::make_shared<Purchase::NullFactory>();
 	ASSERT_NE(nullptr, vfactory);
 	ASSERT_NE(nullptr, pfactory);
 
 	vfactory->test_setRunning(true);
 
-	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, rfactory, pfactory);
 
 	std::string appname("my-application");
 	std::string itemname("my-item");
@@ -158,13 +156,14 @@ TEST_F(MemoryItemTests, PurchaseItemNull) {
 
 TEST_F(MemoryItemTests, PurchaseItem) {
 	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto rfactory = std::make_shared<Refund::NullFactory>();
 	auto pfactory = std::make_shared<Purchase::TestFactory>();
 	ASSERT_NE(nullptr, vfactory);
 	ASSERT_NE(nullptr, pfactory);
 
 	vfactory->test_setRunning(true);
 
-	auto store = std::make_shared<Item::MemoryStore>(vfactory, pfactory);
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, rfactory, pfactory);
 
 	std::string appname("my-application");
 	std::string itemname("my-item");

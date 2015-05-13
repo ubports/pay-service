@@ -60,8 +60,8 @@ public:
             bool success = false;
 
             if (reader.parse(response->body(), root) &&
-                root.isObject() &&
-                root.isMember("success"))
+                    root.isObject() &&
+                    root.isMember("success"))
             {
                 success = root["success"].asBool();
             }
