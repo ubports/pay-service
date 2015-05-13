@@ -23,8 +23,9 @@
 #include "service/refund-null.h"
 #include "service/purchase-null.h"
 
-#include "verification-test.h"
 #include "purchase-test.h"
+#include "refund-test.h"
+#include "verification-test.h"
 
 struct MemoryItemTests : public ::testing::Test
 {
@@ -201,4 +202,66 @@ TEST_F(MemoryItemTests, PurchaseItem) {
 	usleep(50 * 1000);
 
 	EXPECT_EQ(Item::Item::Status::PURCHASED, pitem->getStatus());
+}
+
+TEST_F(MemoryItemTests, SuccessfulRefund) {
+	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto rfactory = std::make_shared<Refund::TestFactory>();
+	auto pfactory = std::make_shared<Purchase::TestFactory>();
+	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, rfactory);
+	ASSERT_NE(nullptr, pfactory);
+	rfactory->test_setRunning(true);
+	vfactory->test_setRunning(true);
+
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, rfactory, pfactory);
+
+	// start with a purchased item
+	std::string appname("my-application");
+	std::string itemname("my-item");
+	auto item = store->getItem(appname, itemname);
+	ASSERT_NE(nullptr, item);
+	pfactory->test_setPurchase(appname, itemname, true);
+	vfactory->test_setPurchase(appname, itemname, true);
+	ASSERT_TRUE(item->verify());
+	usleep(50 * 1000);
+	ASSERT_EQ(Item::Item::Status::PURCHASED, item->getStatus());
+
+	// now refund it
+	rfactory->test_setRunning(true);
+	rfactory->test_setRefunded(appname, itemname, true);
+	ASSERT_TRUE(item->refund());
+	usleep(50 * 1000);
+	ASSERT_EQ(Item::Item::Status::NOT_PURCHASED, item->getStatus());
+}
+
+TEST_F(MemoryItemTests, FailedRefund) {
+	auto vfactory = std::make_shared<Verification::TestFactory>();
+	auto rfactory = std::make_shared<Refund::TestFactory>();
+	auto pfactory = std::make_shared<Purchase::TestFactory>();
+	ASSERT_NE(nullptr, vfactory);
+	ASSERT_NE(nullptr, rfactory);
+	ASSERT_NE(nullptr, pfactory);
+	rfactory->test_setRunning(true);
+	vfactory->test_setRunning(true);
+
+	auto store = std::make_shared<Item::MemoryStore>(vfactory, rfactory, pfactory);
+
+	// start with a purchased item
+	std::string appname("my-application");
+	std::string itemname("my-item");
+	auto item = store->getItem(appname, itemname);
+	ASSERT_NE(nullptr, item);
+	pfactory->test_setPurchase(appname, itemname, true);
+	vfactory->test_setPurchase(appname, itemname, true);
+	ASSERT_TRUE(item->verify());
+	usleep(50 * 1000);
+	ASSERT_EQ(Item::Item::Status::PURCHASED, item->getStatus());
+
+	// try to refund it, and confirm that it's still purchased
+	rfactory->test_setRunning(true);
+	rfactory->test_setRefunded(appname, itemname, false);
+	ASSERT_TRUE(item->refund());
+	usleep(100 * 1000);
+	ASSERT_EQ(Item::Item::Status::PURCHASED, item->getStatus());
 }
