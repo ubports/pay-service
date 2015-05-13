@@ -30,18 +30,17 @@ public:
     {
     }
 
-    virtual bool run (void)
+    virtual bool run (void) override
     {
         return false;
     }
 
     virtual void set_header (const std::string& key,
-                             const std::string& value)
+                             const std::string& value) override
     {
     }
 
-    virtual void set_parameter (const std::string& key,
-                                const std::string& value)
+    virtual void set_post (const std::vector<char>& body) override
     {
     }
 };

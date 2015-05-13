@@ -18,6 +18,13 @@
 #include "service/webclient-curl.h"
 #include "token-grabber-null.h"
 
+#include <condition_variable>
+#include <mutex>
+
+#include <string>
+#include <fstream>
+#include <streambuf>
+
 struct WebclientCurlTests : public ::testing::Test
 {
 protected:
@@ -30,6 +37,24 @@ protected:
     }
 
     TokenGrabber::Ptr token;
+
+    void run_request(Web::Request::Ptr& req, Web::Response::Ptr& response, std::string& error)
+    {
+        std::mutex m;
+        std::condition_variable cv;
+        core::ScopedConnection fin = req->finished.connect([&cv,&response](Web::Response::Ptr r){
+            response = r;
+            cv.notify_all();
+        });
+        core::ScopedConnection err = req->error.connect([&cv,&error](std::string e){
+            error = e;
+            cv.notify_all();
+        });
+        std::unique_lock<std::mutex> lk(m);
+        EXPECT_TRUE(req->run());
+        const std::chrono::seconds timeout_duration{1};
+        EXPECT_EQ(std::cv_status::no_timeout, cv.wait_for(lk, timeout_duration));
+    }
 };
 
 
@@ -46,4 +71,23 @@ TEST_F(WebclientCurlTests, InitRequestTest) {
 
     auto request = factory->create_request("file:///tmp/unknown", false);
     EXPECT_NE(nullptr, request);
+}
+
+TEST_F(WebclientCurlTests, Post)
+{
+    auto factory = std::make_shared<Web::CurlFactory>(token);
+    ASSERT_NE(nullptr, factory);
+
+    auto request = factory->create_request("file:///tmp/unknown", false);
+    request->set_post("name=com.ubuntu.developer.dev.appname");
+
+    Web::Response::Ptr response;
+    std::string error;
+    run_request(request, response, error);
+
+    // TODO: a fake webserver, e.g. tornado,
+    // so that it can look for the POST and return
+    // a real response that we can test here
+    EXPECT_FALSE(error.empty());
+    EXPECT_FALSE(response);
 }

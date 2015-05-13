@@ -15,9 +15,12 @@
  */
 
 #include <core/signal.h>
+
+#include <cstring> // strlen()
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 
 #ifndef WEBCLIENT_FACTORY_HPP__
@@ -36,8 +39,12 @@ public:
 class Request {
 public:
 	virtual bool run (void) = 0;
+
 	virtual void set_header (const std::string& key,
 	                         const std::string& value) = 0;
+
+	virtual void set_post (const std::vector<char>& body) =0;
+	void set_post (const char* body) { set_post(std::vector<char>(body, body+strlen(body))); }
 
 	typedef std::shared_ptr<Request> Ptr;
 

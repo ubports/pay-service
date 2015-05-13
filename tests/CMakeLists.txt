@@ -86,7 +86,7 @@ add_test(webclient-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/webclient-curl-tests)
 # Verification HTTP Factory
 #############################
 
-add_definitions("-DVERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints\"")
+add_definitions(-DVERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints\")
 
 add_executable(
   verification-http-tests

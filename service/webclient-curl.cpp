@@ -70,6 +70,11 @@ public:
         stopThread();
     }
 
+    void set_post (const std::vector<char>& body) override
+    {
+        _body = body;
+    }
+
     void stopThread (void)
     {
         stop = true;
@@ -104,11 +109,23 @@ public:
             curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
             curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
 
+            if (_body.empty())
+            {
+                curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L);
+            }
+            else
+            {
+                curl_easy_setopt(handle, CURLOPT_POST, 1L);
+                curl_easy_setopt(handle, CURLOPT_POSTFIELDS, &_body.front());
+                curl_easy_setopt(handle, CURLOPT_POSTFIELDSIZE, (long)_body.size());
+            }
+
             /* Sign the request if needed */
             if (_sign)
             {
-                /* TODO: This needs to support other methods. */
-                auto auth = _token->signUrl(_url, "GET");
+                const char* method_name = _body.empty() ? "GET" : "POST";
+                auto auth = _token->signUrl(_url, method_name);
+
                 if (!auth.empty())
                 {
                     set_header("Authorization", auth);
@@ -172,8 +189,9 @@ private:
     std::thread exec;
     bool stop;
 
-    std::map<std::string,std::string> _headers;
     std::string _url;
+    std::map<std::string,std::string> _headers;
+    std::vector<char> _body;
     bool _sign;
     TokenGrabber::Ptr _token;
 
