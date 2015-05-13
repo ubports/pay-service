@@ -27,9 +27,9 @@ public:
     HttpItem(const std::string& app_in,
              const std::string& item_in,
              Web::ClickPurchasesApi::Ptr cpa_in):
-        app {app_in},
-        item {item_in},
-    cpa {cpa_in}
+        app(app_in),
+        item(item_in),
+        cpa(cpa_in)
     {
     }
 
