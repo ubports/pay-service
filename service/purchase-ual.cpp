@@ -44,28 +44,13 @@ public:
         status(Item::ERROR),
         appid(in_appid),
         itemid(in_itemid),
-        connection(mir),
-        thread([]() {}, [this]()
-    {
-        purchaseComplete(status);
-        ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
-    })
+        connection(mir)
     {
 
     }
 
     ~UalItem ()
     {
-        if (!instanceid.empty())
-        {
-            if (!thread.executeOnThread<bool>([this]()
-        {
-            return ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, ui_appid.c_str(), instanceid.c_str());
-            }))
-            {
-                g_warning("Error");
-            }
-        }
     }
 
     /* Goes through the basis phases of building up the environment for the
@@ -87,7 +72,17 @@ public:
             return false;
         }
 
-        instanceid = thread.executeOnThread<std::string>([this, purchase_url]()
+        thread = std::make_shared<GLib::ContextThread>([]() {}, [this]()
+        {
+            if (!instanceid.empty())
+            {
+                ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, ui_appid.c_str(), instanceid.c_str());
+                instanceid.clear();
+            }
+            purchaseComplete(status);
+            ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
+        });
+        instanceid = thread->executeOnThread<std::string>([this, purchase_url]()
         {
             std::string instid;
 
@@ -133,7 +128,7 @@ private:
     std::string ui_appid;
     std::string itemid;
     std::string instanceid;
-    GLib::ContextThread thread;
+    std::shared_ptr<GLib::ContextThread> thread;
     Item::Status status;
 
     /* Given to us by our parents */
@@ -345,7 +340,7 @@ private:
                                            gpointer user_data)
     {
         UalItem* notthis = static_cast<UalItem*>(user_data);
-		g_debug("UAL Stop callback, appid: '%s', instance: '%s', helper: '%s'", appid, instanceid, helpertype);
+        g_debug("UAL Stop callback, appid: '%s', instance: '%s', helper: '%s'", appid, instanceid, helpertype);
 
         if (instanceid == nullptr) /* Causes std::string to hate us, and we don't care about it if not set */
         {
@@ -369,7 +364,7 @@ private:
 
         status = Item::PURCHASED;
         instanceid.clear();
-        thread.quit();
+        thread->quit();
     }
 };
 
