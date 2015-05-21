@@ -80,6 +80,7 @@ main (int argc, char * argv[])
 	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 	g_return_val_if_fail(bus != NULL, -1);
 
+	g_debug("Pay UI Exec: %s", exec);
 	ubuntu_app_launch_helper_set_exec(exec);
 	g_free(exec);
 
