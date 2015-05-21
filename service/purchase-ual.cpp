@@ -345,12 +345,24 @@ private:
                                            gpointer user_data)
     {
         UalItem* notthis = static_cast<UalItem*>(user_data);
-        notthis->helperStop(std::string(appid));
+		g_debug("UAL Stop callback, appid: '%s', instance: '%s', helper: '%s'", appid, instanceid, helpertype);
+
+        if (instanceid == nullptr) /* Causes std::string to hate us, and we don't care about it if not set */
+        {
+            return;
+        }
+
+        notthis->helperStop(std::string(appid), std::string(instanceid));
     }
 
-    void helperStop (std::string stop_appid)
+    void helperStop (std::string stop_appid, std::string stop_instanceid)
     {
         if (stop_appid != ui_appid)
+        {
+            return;
+        }
+
+        if (instanceid.empty() || instanceid != stop_instanceid)
         {
             return;
         }
