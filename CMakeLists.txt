@@ -99,7 +99,7 @@ if (NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
   list(APPEND filter-list "${CMAKE_BINARY_DIR}/*")
 endif()
 ENABLE_COVERAGE_REPORT(
-  TARGETS libpay pay-service-lib
+  TARGETS libpay pay-service-lib pay-service
   TESTS dbus-interface-tests item-memory-tests webclient-curl-tests verification-http-tests purchase-ual-tests libpay-tests
   FILTER ${filter-list}
 )
