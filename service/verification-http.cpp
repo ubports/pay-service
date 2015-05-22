@@ -67,8 +67,8 @@ public:
                     Json::Reader reader(Json::Features::strictMode());
                     Json::Value root;
                     if (reader.parse(response->body(), root) &&
-                        root.isObject() &&
-                        root.isMember("state"))
+                            root.isObject() &&
+                            root.isMember("state"))
                     {
                         auto state = root["state"].asString();
                         if (state == "available")

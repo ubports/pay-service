@@ -48,7 +48,7 @@ public:
     {
         // https://developer.staging.ubuntu.com/docs/api/iap.html#retrieve-item-details-by-sku
         auto url = get_inventory_url() + '/' + package_name +
-            "/items/by-sku/" + sku;
+                   "/items/by-sku/" + sku;
 
         auto req = m_wfactory->create_request(url, true);
         maybe_add_device_header(req);
