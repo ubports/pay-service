@@ -30,7 +30,7 @@ public:
 		ERROR,
 		NOT_PURCHASED,
 		PURCHASED,
-        APPROVED
+		APPROVED
 	};
 
 	virtual bool run (void) = 0;
