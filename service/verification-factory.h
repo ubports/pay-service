@@ -29,7 +29,8 @@ public:
 	enum Status {
 		ERROR,
 		NOT_PURCHASED,
-		PURCHASED
+		PURCHASED,
+        APPROVED
 	};
 
 	virtual bool run (void) = 0;

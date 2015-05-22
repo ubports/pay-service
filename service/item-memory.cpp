@@ -96,6 +96,9 @@ public:
                 case Verification::Item::NOT_PURCHASED:
                     setStatus(Item::Status::NOT_PURCHASED);
                     break;
+                case Verification::Item::APPROVED:
+                    setStatus(Item::Status::APPROVED);
+                    break;
                 case Verification::Item::ERROR:
                 default: /* Fall through, an error is same as status we don't know */
                     setStatus(Item::Status::UNKNOWN);

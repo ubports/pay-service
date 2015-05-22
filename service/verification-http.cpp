@@ -19,6 +19,9 @@
 
 #include "verification-http.h"
 
+#include <json/json.h>
+
+
 namespace Verification
 {
 
@@ -55,7 +58,37 @@ public:
         {
             if (response->is_success ())
             {
-                verificationComplete(Status::PURCHASED);
+                if (app == "click-scope")
+                {
+                    verificationComplete(Status::PURCHASED);
+                }
+                else
+                {
+                    Json::Reader reader(Json::Features::strictMode());
+                    Json::Value root;
+                    if (reader.parse(response->body(), root) &&
+                        root.isObject() &&
+                        root.isMember("state"))
+                    {
+                        auto state = root["state"].asString();
+                        if (state == "available")
+                        {
+                            verificationComplete(Status::NOT_PURCHASED);
+                        }
+                        else if (state == "purchased")
+                        {
+                            verificationComplete(Status::PURCHASED);
+                        }
+                        else if (state == "approved")
+                        {
+                            verificationComplete(Status::APPROVED);
+                        }
+                        else
+                        {
+                            verificationComplete(Status::ERROR);
+                        }
+                    }
+                }
             }
             else
             {

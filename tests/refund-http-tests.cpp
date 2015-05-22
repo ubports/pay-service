@@ -31,7 +31,7 @@ struct RefundHttpTests : public ::testing::Test
 	protected:
 		virtual void SetUp() {
 			web_request.expected_headers = std::map<std::string,std::string>{ { "Accept", "application/json" } };
-			web_request.expected_endpoint = "https://software-center.ubuntu.com/api/2.0/click/refunds/";
+			web_request.expected_endpoint = "https://myapps.developer.ubuntu.com/api/2.0/click/refunds/";
 		}
 
 		virtual void TearDown() {

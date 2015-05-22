@@ -106,14 +106,14 @@ target_link_libraries(
 )
 
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/good/simple.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/good/simple @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/packages/good/items/by-sku/simple.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/packages/good/items/by-sku/simple @ONLY)
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/good/device-id.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/good/device-id @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/packages/good/items/by-sku/device-id.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/packages/good/items/by-sku/device-id @ONLY)
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/package-name.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/package-name @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/api/2.0/click/purchases/package-name.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/api/2.0/click/purchases/package-name @ONLY)
 
 add_test(verification-http-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-http-tests)
 
