@@ -60,6 +60,13 @@ build_exec (const gchar * appid)
 	return exec;
 }
 
+gchar *
+build_dir (const gchar * appid)
+{
+
+	return NULL;
+}
+
 int
 main (int argc, char * argv[])
 {
@@ -77,12 +84,19 @@ main (int argc, char * argv[])
 		return -1;
 	}
 
+	gchar * dir = build_dir(appid);
+	if (dir == NULL) {
+		return -1;
+	}
+
 	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 	g_return_val_if_fail(bus != NULL, -1);
 
 	g_debug("Pay UI Exec: %s", exec);
-	ubuntu_app_launch_helper_set_exec(exec);
+	g_debug("Pay UI Dir:  %s", dir);
+	ubuntu_app_launch_helper_set_exec(exec, dir);
 	g_free(exec);
+	g_free(dir);
 
 	/* Ensuring the messages get on the bus before we quit */
 	g_dbus_connection_flush_sync(bus, NULL, NULL);
