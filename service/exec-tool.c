@@ -63,8 +63,50 @@ build_exec (const gchar * appid)
 gchar *
 build_dir (const gchar * appid)
 {
+	GError * error = NULL;
+	gchar * package = NULL;
 
-	return NULL;
+	/* 'Parse' the App ID */
+	if (!ubuntu_app_launch_app_id_parse(appid, &package, NULL, NULL)) {
+		g_warning("Unable to parse App ID: '%s'", appid);
+		return NULL;
+	}
+
+	/* Check click to find out where the files are */
+	ClickDB * db = click_db_new();
+
+	/* If TEST_CLICK_DB is unset, this reads the system database. */
+	click_db_read(db, g_getenv("TEST_CLICK_DB"), &error);
+	if (error != NULL) {
+		g_warning("Unable to read Click database: %s", error->message);
+		g_error_free(error);
+		g_free(package);
+		return NULL;
+	}
+
+	/* If TEST_CLICK_USER is unset, this uses the current user name. */
+	ClickUser * user = click_user_new_for_user(db, g_getenv("TEST_CLICK_USER"), &error);
+	if (error != NULL) {
+		g_warning("Unable to read Click database: %s", error->message);
+		g_error_free(error);
+		g_free(package);
+		g_object_unref(db);
+		return NULL;
+	}
+
+	gchar * pkgdir = click_user_get_path(user, package, &error);
+
+	g_object_unref(user);
+	g_object_unref(db);
+	g_free(package);
+
+	if (error != NULL) {
+		g_warning("Unable to get the Click package directory for %s: %s", package, error->message);
+		g_error_free(error);
+		return NULL;
+	}
+
+	return pkgdir;
 }
 
 int
