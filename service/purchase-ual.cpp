@@ -79,6 +79,12 @@ public:
                 ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, ui_appid.c_str(), instanceid.c_str());
                 instanceid.clear();
             }
+
+            if (session)
+            {
+                session.reset();
+            }
+
             purchaseComplete(status);
             ubuntu_app_launch_observer_delete_helper_stop(helper_stop_static_helper, HELPER_TYPE, this);
         });
@@ -92,9 +98,9 @@ public:
                 return instid;
             }
 
-            auto session = std::shared_ptr<MirPromptSession>(
-                               mir_connection_create_prompt_session_sync(connection.get(), overlaypid, stateChanged, this),
-                               [](MirPromptSession * session)
+            session = std::shared_ptr<MirPromptSession>(
+                          mir_connection_create_prompt_session_sync(connection.get(), overlaypid, stateChanged, this),
+                          [](MirPromptSession * session)
             {
                 if (session != nullptr)
                 {
@@ -129,6 +135,7 @@ private:
     std::string itemid;
     std::string instanceid;
     std::shared_ptr<GLib::ContextThread> thread;
+    std::shared_ptr<MirPromptSession> session;
     Item::Status status;
 
     /* Given to us by our parents */
