@@ -217,6 +217,11 @@ public:
         const gchar* encoded_package = path + std::strlen("/com/canonical/pay/");
         std::string package = DBusInterface::decodePath(std::string(encoded_package));
 
+        auto params_str = g_variant_print(params, true);
+        g_debug("%s sender(%s) path(%s) method(%s) package(%s) params(%s)",
+                G_STRFUNC, sender, path, method, package.c_str(), params_str);
+        g_free(params_str);
+
         if (g_strcmp0(method, "ListItems") == 0)
         {
             GVariantBuilder builder;

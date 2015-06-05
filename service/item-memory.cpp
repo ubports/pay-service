@@ -23,6 +23,8 @@
 #include <core/signal.h>
 #include <memory>
 
+#include <glib.h>
+
 namespace Item
 {
 
@@ -110,6 +112,7 @@ public:
     {
         if (!rfactory->running())
         {
+            g_debug("%s refund already running", G_STRFUNC);
             return false;
         }
 
@@ -119,6 +122,7 @@ public:
 
             if (ritem == nullptr)
             {
+                g_debug("%s failed to get ritem", G_STRFUNC);
                 return false;
             }
         }
@@ -129,10 +133,12 @@ public:
 
         ritem->finished.connect([this, cached_status](bool success)
         {
+            g_debug("%s ritem returned success flag %d", G_STRFUNC, (int)success);
             auto new_status = success ? Status::NOT_PURCHASED : cached_status;
             setStatus(new_status);
         });
 
+        g_debug("%s running refund ritem", G_STRFUNC);
         return ritem->run();
     }
 

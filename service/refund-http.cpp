@@ -16,6 +16,8 @@
 
 #include <json/json.h> // jsoncpp
 
+#include <glib.h>
+
 #include "refund-http.h"
 
 namespace Refund
@@ -61,6 +63,8 @@ public:
                 success = root["success"].asBool();
             }
 
+            g_debug("%s got response %s; signalling success=%d",
+                    G_STRLOC, response->body().c_str(), (int)success);
             finished(success);
         });
         request->error.connect([this](std::string error)
