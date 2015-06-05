@@ -110,7 +110,7 @@ public:
             curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
             curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
 
-            if (getenv("PAY_SERVICE_HTTP_VERBOSE") != nullptr)
+            if (getenv("U1_DEBUG") != nullptr)
             {
                 curl_easy_setopt(handle, CURLOPT_VERBOSE, 1L);
             }
