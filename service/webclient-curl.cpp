@@ -16,6 +16,7 @@
 
 #include "webclient-curl.h"
 
+#include <cstdlib> // getenv()
 #include <string>
 #include <thread>
 
@@ -108,6 +109,11 @@ public:
             curl_easy_setopt(handle, CURLOPT_URL, _url.c_str());
             curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
             curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
+
+            if (getenv("PAY_SERVICE_HTTP_VERBOSE") != nullptr)
+            {
+                curl_easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+            }
 
             if (_body.empty())
             {
