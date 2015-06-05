@@ -1,3 +1,10 @@
+pay-service (2.0.0+15.10.20150604.2-0ubuntu1) wily; urgency=medium
+
+  [ Ted Gould ]
+  * Move trusted session code to use libUAL session untrusted helpers
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Thu, 04 Jun 2015 21:12:34 +0000
+
 pay-service (2.0.0+15.10.20150508-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]
