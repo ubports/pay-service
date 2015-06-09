@@ -113,7 +113,7 @@ private:
 
     static const char* get_base_url()
     {
-        static constexpr char const* BASE_URL_ENVVAR = "PURCHASES_BASE_URL";
+        static constexpr char const* BASE_URL_ENVVAR = "PAY_BASE_URL";
         static constexpr char const* DEFAULT_BASE = "https://software-center.ubuntu.com";
 
         const char* env = getenv(BASE_URL_ENVVAR);
