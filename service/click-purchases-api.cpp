@@ -78,7 +78,8 @@ public:
     {
         auto req = m_wfactory->create_request(get_refund_url(), true);
         maybe_add_device_header(req);
-        req->set_post("name=" + package_name);
+        req->set_post("{\"name\": \"" + package_name + "\"}");
+        req->set_header("Content-Type", "application/json");
         return req;
     }
 
@@ -113,7 +114,7 @@ private:
 
     static const char* get_base_url()
     {
-        static constexpr char const* BASE_URL_ENVVAR = "PURCHASES_BASE_URL";
+        static constexpr char const* BASE_URL_ENVVAR = "PAY_BASE_URL";
         static constexpr char const* DEFAULT_BASE = "https://software-center.ubuntu.com";
 
         const char* env = getenv(BASE_URL_ENVVAR);

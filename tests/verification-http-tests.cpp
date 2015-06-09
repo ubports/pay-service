@@ -140,7 +140,7 @@ TEST_F(VerificationHttpTests, DeviceId)
 
 TEST_F(VerificationHttpTests, EnvironmentVariableNotSet)
 {
-	const char* key {"PURCHASES_BASE_URL"};
+	const char* key {"PAY_BASE_URL"};
 	ASSERT_TRUE((getenv(key)==nullptr) || unsetenv(key)); // ensure it's unset
 
 	auto vfactory = create_vfactory(web_request);
@@ -149,7 +149,7 @@ TEST_F(VerificationHttpTests, EnvironmentVariableNotSet)
 
 TEST_F(VerificationHttpTests, EnvironmentVariableSet)
 {
-	const char* key {"PURCHASES_BASE_URL"};
+	const char* key {"PAY_BASE_URL"};
 	web_request.expected_endpoint = "http://localhost:8080";
 	ASSERT_EQ(0, setenv(key, web_request.expected_endpoint.c_str(), 1)); // ensure it's set
 
