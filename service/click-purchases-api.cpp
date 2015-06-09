@@ -78,7 +78,8 @@ public:
     {
         auto req = m_wfactory->create_request(get_refund_url(), true);
         maybe_add_device_header(req);
-        req->set_post("name=" + package_name);
+        req->set_post("{\"name\": \"" + package_name + "\"}");
+        req->set_header("Content-Type", "application/json");
         return req;
     }
 
