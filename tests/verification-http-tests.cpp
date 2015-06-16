@@ -122,7 +122,7 @@ TEST_F(VerificationHttpTests, Verify)
 		{ "click-scope", "package-name", Verification::Item::Status::ERROR }
 	};
 
-    // ERROR expected for click-scope case currently as it ends with /
+	// ERROR expected for click-scope case currently as it ends with /
 	for (auto& test : tests)
 	{
 		auto vfactory = create_vfactory(web_request);
