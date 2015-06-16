@@ -167,8 +167,12 @@ TEST_F(PurchaseUALTests, PurchaseTest) {
 	g_free(untrustedappid);
 
 	gchar * instanceid = find_env(env, "INSTANCE_ID");
-	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed("('stopped', ['JOB=untrusted-helper', 'INSTANCE=pay-ui:%1:payuihelper'])", instanceid), NULL);
+	gchar * gvariantstr = g_strdup_printf("('stopped', ['JOB=untrusted-helper', 'INSTANCE=pay-ui:%s:payuihelper'])", instanceid);
+	dbus_test_dbus_mock_object_emit_signal(mock, obj, "EventEmitted", G_VARIANT_TYPE("(sas)"), g_variant_new_parsed(gvariantstr), NULL);
+	g_free(gvariantstr);
 	g_free(instanceid);
+
+	g_variant_unref(env);
 
 	usleep(20 * 1000);
 
