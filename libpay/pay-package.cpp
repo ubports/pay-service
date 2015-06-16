@@ -320,17 +320,35 @@ public:
 
     bool startVerification (const char* itemid) noexcept
     {
-        return startBase<&proxy_pay_package_call_verify_item, &proxy_pay_package_call_verify_item_finish> (itemid);
+        g_debug("%s %s", G_STRFUNC, itemid);
+
+        auto ok = startBase<&proxy_pay_package_call_verify_item,
+                            &proxy_pay_package_call_verify_item_finish> (itemid);
+
+        g_debug("%s returning %d", G_STRFUNC, (int)ok);
+        return ok;
     }
 
     bool startPurchase (const char* itemid) noexcept
     {
-        return startBase<&proxy_pay_package_call_purchase_item, &proxy_pay_package_call_purchase_item_finish> (itemid);
+        g_debug("%s %s", G_STRFUNC, itemid);
+
+        auto ok = startBase<&proxy_pay_package_call_purchase_item,
+                            &proxy_pay_package_call_purchase_item_finish> (itemid);
+
+        g_debug("%s returning %d", G_STRFUNC, (int)ok);
+        return ok;
     }
 
     bool startRefund (const char* itemid) noexcept
     {
-        return startBase<&proxy_pay_package_call_refund_item, &proxy_pay_package_call_refund_item_finish> (itemid);
+        g_debug("%s %s", G_STRFUNC, itemid);
+
+        auto ok = startBase<&proxy_pay_package_call_refund_item,
+                            &proxy_pay_package_call_refund_item_finish> (itemid);
+
+        g_debug("%s returning %d", G_STRFUNC, (int)ok);
+        return ok;
     }
 
     std::string

@@ -38,7 +38,7 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
                    accounts-qt5
                    libcurl
                    jsoncpp
-                   ubuntu-app-launch-2
+                   ubuntu-app-launch-2>=0.5
                    dbustest-1
                    gio-2.0
                    gio-unix-2.0
