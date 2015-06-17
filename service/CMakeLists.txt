@@ -23,6 +23,11 @@ set(SERVICE_LIB_SOURCES
     purchase-null.cpp
     purchase-ual.h
     purchase-ual.cpp
+    refund-factory.h
+    refund-http.h
+    refund-http.cpp
+    refund-null.h
+    refund-null.cpp
     token-grabber.h
     token-grabber-u1.h
     token-grabber-u1.cpp

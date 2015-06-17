@@ -41,6 +41,8 @@ public:
     Request::Ptr getItemInfo(const std::string& package_name,
                              const std::string& sku);
 
+    Request::Ptr refundPackage(const std::string& package_name);
+
     void setDevice(const std::string& device_id);
 
     typedef std::shared_ptr<ClickPurchasesApi> Ptr;

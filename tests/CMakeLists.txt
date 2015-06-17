@@ -86,12 +86,15 @@ add_test(webclient-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/webclient-curl-tests)
 # Verification HTTP Factory
 #############################
 
-add_definitions("-DVERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints\"")
-
 add_executable(
   verification-http-tests
   verification-http-tests.cpp
   )
+
+set_target_properties(
+  verification-http-tests
+  PROPERTIES
+  COMPILE_DEFINITIONS "VERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints\"")
 
 target_link_libraries(
   verification-http-tests
@@ -113,6 +116,31 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/package-name @ONLY)
 
 add_test(verification-http-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-http-tests)
+
+#############################
+# Refund HTTP Factory
+#############################
+
+add_executable(
+  refund-http-tests
+  refund-http-tests.cpp
+  )
+
+set_target_properties(
+  refund-http-tests
+  PROPERTIES
+  COMPILE_DEFINITIONS "REFUND_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/refund-http-endpoints\"")
+
+target_link_libraries(
+  refund-http-tests
+
+  pay-service-lib
+
+  ${SERVICE_DEPS_LIBRARIES}
+  ${GMOCK_BOTH_LIBRARIES}
+)
+
+add_test(refund-http-tests ${CMAKE_CURRENT_BINARY_DIR}/refund-http-tests)
 
 #############################
 # Purchase UAL

@@ -217,6 +217,11 @@ public:
         const gchar* encoded_package = path + std::strlen("/com/canonical/pay/");
         std::string package = DBusInterface::decodePath(std::string(encoded_package));
 
+        auto params_str = g_variant_print(params, true);
+        g_debug("%s sender(%s) path(%s) method(%s) package(%s) params(%s)",
+                G_STRFUNC, sender, path, method, package.c_str(), params_str);
+        g_free(params_str);
+
         if (g_strcmp0(method, "ListItems") == 0)
         {
             GVariantBuilder builder;
@@ -276,7 +281,15 @@ public:
             std::string itemid(g_variant_get_string(vitemid, NULL));
             g_variant_unref(vitemid);
 
-            g_dbus_method_invocation_return_error(invocation, errorQuark, 3, "Unable to refund item '%s'", itemid.c_str());
+            auto item = items->getItem(package, itemid);
+            if (item->refund())
+            {
+                g_dbus_method_invocation_return_value(invocation, NULL);
+            }
+            else
+            {
+                g_dbus_method_invocation_return_error(invocation, errorQuark, 3, "Unable to refund item '%s'", itemid.c_str());
+            }
         }
     }
 
