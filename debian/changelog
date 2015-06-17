@@ -1,3 +1,20 @@
+pay-service (2.0.0+15.10.20150617-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Charles Kerr ]
+  * Implement the "RefundItem" service method.
+
+  [ Rodney Dawes ]
+  * Fix verification of purchased apps.
+  * Implement the "RefundItem" service method.
+  * Remove the explicit gcc 4.9 requirement. Remove the locally included
+    coverage cmake modules. Use cmake-extras to enable coverage. Add
+    dependencies for cmake-extras, gcovr, and lcov. (LP: #1452334)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 17 Jun 2015 16:58:27 +0000
+
 pay-service (2.0.0+15.10.20150604.2-0ubuntu1) wily; urgency=medium
 
   [ Ted Gould ]
