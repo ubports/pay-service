@@ -60,7 +60,7 @@ public:
     {
         // https://developer.staging.ubuntu.com/docs/api/click-purchases.html#get-subscription-details
 
-        auto url = get_purchases_url() + '/' + package_name;
+        auto url = get_purchases_url() + '/' + package_name + '/';
 
         if (include_item_purchases)
         {
