@@ -46,11 +46,9 @@ public:
     Request::Ptr getItemInfo(const std::string& package_name,
                              const std::string& sku)
     {
-        // according to ted, we have verbal agreement from u1 that this url form
-        // will be implemented to query a specific sku; e.g.
-        // /api/2.0/click/purchases/packagename/itemid
-
-        auto url = get_purchases_url() + '/' + package_name + '/' + sku;
+        // https://developer.staging.ubuntu.com/docs/api/iap.html#retrieve-item-details-by-sku
+        auto url = get_inventory_url() + '/' + package_name +
+                   "/items/by-sku/" + sku;
 
         auto req = m_wfactory->create_request(url, true);
         maybe_add_device_header(req);
@@ -94,7 +92,7 @@ private:
     }
 
 
-    // get the refund URL; e.g. https://software-center.ubuntu.com/api/2.0/click/refunds/
+    // get the refund URL; e.g. https://myapps.developer.ubuntu.com/api/2.0/click/refunds/
     std::string get_refund_url() const
     {
         std::string url {get_base_url()};
@@ -103,7 +101,7 @@ private:
         return url;
     }
 
-    // get the purchases URL; e.g. https://software-center.ubuntu.com/api/2.0/click/purchases
+    // get the purchases URL; e.g. https://myapps.developer.ubuntu.com/api/2.0/click/purchases
     std::string get_purchases_url() const
     {
         std::string url {get_base_url()};
@@ -112,12 +110,20 @@ private:
         return url;
     }
 
+    // get the inventory URL: e.g. https://myapps.developer.ubuntu.com/packages
+    std::string get_inventory_url() const
+    {
+        std::string url {get_base_url()};
+        url += "/packages";
+        return url;
+    }
+
     static const char* get_base_url()
     {
         static constexpr char const* BASE_URL_ENVVAR = "PAY_BASE_URL";
-        static constexpr char const* DEFAULT_BASE = "https://software-center.ubuntu.com";
-
+        static constexpr char const* DEFAULT_BASE = "https://myapps.developer.ubuntu.com";
         const char* env = getenv(BASE_URL_ENVVAR);
+
         return env && *env ? env : DEFAULT_BASE;
     }
 

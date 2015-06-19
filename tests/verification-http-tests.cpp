@@ -32,7 +32,7 @@ struct VerificationHttpTests : public ::testing::Test
 	protected:
 		virtual void SetUp() {
 			web_request.expected_headers = std::map<std::string,std::string>{ { "Accept", "application/json" } };
-			web_request.expected_endpoint = "https://software-center.ubuntu.com/api/2.0/click/purchases/";
+			web_request.expected_endpoint = "https://myapps.developer.ubuntu.com/";
 			web_request.fake_endpoint = std::string("file://") + VERIFICATION_CURL_ENDPOINTS_DIR + '/';
 		}
 
