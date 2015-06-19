@@ -29,49 +29,49 @@ namespace Purchase {
 
 class TestItem : public Item {
 public:
-	TestItem (bool purchased) : m_purchased(purchased) {
-	}
+    TestItem (bool purchased) : m_purchased(purchased) {
+    }
 
-	~TestItem (void) {
-		if (t.joinable())
-			t.join();
-	}
+    ~TestItem (void) {
+        if (t.joinable())
+            t.join();
+    }
 
-	virtual bool run (void) {
-		t = std::thread([this]() {
-			/* Fastest website in the world */
-			usleep(10 * 1000);
-			purchaseComplete(m_purchased ? Status::PURCHASED : Status::NOT_PURCHASED);
-		});
-		return true;
-	}
+    virtual bool run (void) {
+        t = std::thread([this]() {
+            /* Fastest website in the world */
+            usleep(10 * 1000);
+            purchaseComplete(m_purchased ? Status::PURCHASED : Status::NOT_PURCHASED);
+        });
+        return true;
+    }
 private:
-	bool m_purchased;
-	std::thread t;
+    bool m_purchased;
+    std::thread t;
 };
 
 class TestFactory : public Factory {
 public:
-	virtual Item::Ptr purchaseItem (std::string& appid, std::string& itemid) {
-		bool purchased = false;
-		try {
-			std::pair<std::string, std::string> key(appid, itemid);
-			purchased = itemStatus.at(key);
-		} catch (std::out_of_range) {
-			/* If it's not there, we'll assume it's not purchased */
-		}
+    virtual Item::Ptr purchaseItem (std::string& appid, std::string& itemid) {
+        bool purchased = false;
+        try {
+            std::pair<std::string, std::string> key(appid, itemid);
+            purchased = itemStatus.at(key);
+        } catch (std::out_of_range) {
+            /* If it's not there, we'll assume it's not purchased */
+        }
 
-		return std::make_shared<TestItem>(purchased);
-	}
+        return std::make_shared<TestItem>(purchased);
+    }
 
-	void test_setPurchase (std::string& appid, std::string& itemid, bool purchased) {
-		std::pair<std::string, std::string> key(appid, itemid);
-		itemStatus[key] = purchased;
-	}
+    void test_setPurchase (std::string& appid, std::string& itemid, bool purchased) {
+        std::pair<std::string, std::string> key(appid, itemid);
+        itemStatus[key] = purchased;
+    }
 
-	typedef std::shared_ptr<TestFactory> Ptr;
+    typedef std::shared_ptr<TestFactory> Ptr;
 private:
-	std::map<std::pair<std::string, std::string>, bool> itemStatus;
+    std::map<std::pair<std::string, std::string>, bool> itemStatus;
 };
 
 } // ns Purchase

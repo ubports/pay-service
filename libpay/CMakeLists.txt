@@ -44,19 +44,14 @@ configure_file("pay.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/pay-${api-version}.pc" @
 ######################
 
 macro(list_prefix _outvar _listvar _prefix)
-	set(${_outvar})
-	foreach(_item IN LISTS ${_listvar})
-		list(APPEND ${_outvar} ${_prefix}${_item})
-	endforeach()
+    set(${_outvar})
+    foreach(_item IN LISTS ${_listvar})
+        list(APPEND ${_outvar} ${_prefix}${_item})
+    endforeach()
 endmacro(list_prefix)
 
 list_prefix(libpay-headers-full libpay-headers "${CMAKE_CURRENT_SOURCE_DIR}/")
-add_test(NAME libpay-headers-style COMMAND
-	astyle "--options=${CMAKE_SOURCE_DIR}/data/astyle-config" ${libpay-headers-full})
-
 list_prefix(libpay-sources-full libpay-sources "${CMAKE_CURRENT_SOURCE_DIR}/")
-add_test(NAME libpay-sources-style COMMAND
-	astyle "--options=${CMAKE_SOURCE_DIR}/data/astyle-config" ${libpay-sources-full})
 
 ######################
 # Installation
