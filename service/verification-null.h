@@ -26,10 +26,10 @@ namespace Verification {
 
 class NullFactory : public Factory {
 public:
-	virtual bool running () override;
-	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) override;
+    virtual bool running () override;
+    virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) override;
 
-	typedef std::shared_ptr<NullFactory> Ptr;
+    typedef std::shared_ptr<NullFactory> Ptr;
 };
 
 } // ns Verification

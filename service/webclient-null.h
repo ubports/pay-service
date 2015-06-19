@@ -23,11 +23,11 @@ namespace Web {
 
 class NullFactory : public Factory {
 public:
-	virtual bool running () override;
-	virtual Request::Ptr create_request (const std::string& url,
+    virtual bool running () override;
+    virtual Request::Ptr create_request (const std::string& url,
                                          bool sign) override;
 
-	typedef std::shared_ptr<NullFactory> Ptr;
+    typedef std::shared_ptr<NullFactory> Ptr;
 };
 
 } // ns Web

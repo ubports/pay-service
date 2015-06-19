@@ -22,4 +22,4 @@ install(FILES pay-test-app.svg DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicol
 
 configure_file("pay-test-app.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/pay-test-app.desktop" @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pay-test-app.desktop"
-	DESTINATION "${CMAKE_INSTALL_DATADIR}/applications/")
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/applications/")

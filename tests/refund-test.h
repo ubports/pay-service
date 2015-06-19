@@ -26,62 +26,62 @@ namespace Refund {
 
 class TestItem : public Item {
 public:
-	TestItem (bool refunded):
-		m_refunded(refunded) {
-	}
+    TestItem (bool refunded):
+        m_refunded(refunded) {
+    }
 
-	~TestItem () {
-		if (t.joinable())
-			t.join();
-	}
+    ~TestItem () {
+        if (t.joinable())
+            t.join();
+    }
 
-	bool run (void) override {
-		if (t.joinable())
-			t.join();
+    bool run (void) override {
+        if (t.joinable())
+            t.join();
 
-		t = std::thread([this]() {
-			usleep(10 * 1000);
-			finished(m_refunded);
-		});
-		return true;
-	}
+        t = std::thread([this]() {
+            usleep(10 * 1000);
+            finished(m_refunded);
+        });
+        return true;
+    }
 private:
-	const bool m_refunded;
-	std::thread t;
+    const bool m_refunded;
+    std::thread t;
 };
 
 class TestFactory : public Factory {
 public:
-	TestFactory() =default;
+    TestFactory() =default;
 
-	bool running () override {
-		return m_running;
-	}
+    bool running () override {
+        return m_running;
+    }
 
-	Item::Ptr refund (const std::string& appid, const std::string& itemid) override {
+    Item::Ptr refund (const std::string& appid, const std::string& itemid) override {
 
-		bool success = false;
-		auto it = itemStatus.find(std::make_pair(appid, itemid));
-		if (it != itemStatus.end())
-			success = it->second;
+        bool success = false;
+        auto it = itemStatus.find(std::make_pair(appid, itemid));
+        if (it != itemStatus.end())
+            success = it->second;
 
-		return std::make_shared<TestItem>(success);
-	}
+        return std::make_shared<TestItem>(success);
+    }
 
-	void test_setRunning (bool running) {
-		m_running = running;
-	}
+    void test_setRunning (bool running) {
+        m_running = running;
+    }
 
-	void test_setRefunded (const std::string& appid, const std::string& itemid, bool refunded) {
-		auto key = std::make_pair(appid, itemid);
-		itemStatus[key] = refunded;
-	}
+    void test_setRefunded (const std::string& appid, const std::string& itemid, bool refunded) {
+        auto key = std::make_pair(appid, itemid);
+        itemStatus[key] = refunded;
+    }
 
-	typedef std::shared_ptr<TestFactory> Ptr;
+    typedef std::shared_ptr<TestFactory> Ptr;
 private:
 
-	bool m_running = false;
-	std::map<std::pair<std::string, std::string>, bool> itemStatus;
+    bool m_running = false;
+    std::map<std::pair<std::string, std::string>, bool> itemStatus;
 };
 
 } // ns Refund

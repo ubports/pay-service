@@ -2,8 +2,7 @@ Source: pay-service
 Section: gnome
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: astyle,
-               click-dev,
+Build-Depends: click-dev,
                cmake,
                cmake-extras,
                dbus,

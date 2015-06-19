@@ -1,6 +1,6 @@
 {
 global:
-	pay_package_*;
+    pay_package_*;
 local:
-	*;
+    *;
 };
