@@ -1,3 +1,17 @@
+pay-service (2.0.0+15.10.20150619.1-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Rodney Dawes ]
+  * Switch to using myapps.d.u.c instead of s-c.u.c as the host. Use the
+    correct URL for validating in-app purchases. Parse the JSON for by-
+    sku verification checks.
+  * Switch to using space characters everywhere. Remove usage of astyle,
+    as it modifies code during the running of tests.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 19 Jun 2015 19:46:57 +0000
+
 pay-service (2.0.0+15.10.20150617-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]
