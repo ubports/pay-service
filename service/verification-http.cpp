@@ -58,47 +58,57 @@ public:
         {
             if (response->is_success ())
             {
+                Json::Reader reader(Json::Features::strictMode());
+                Json::Value root;
+                reader.parse(response->body(), root);
+
                 if (app == "click-scope")
                 {
-                    verificationComplete(Status::PURCHASED);
+                    if  (root.isObject() && root.isMember("state"))
+                    {
+                        auto state = root["state"].asString();
+                        uint64_t refundable_until{0};
+                        if (root.isMember("refundable_until"))
+                        {
+                            refundable_until = root["refundable_until"].asUInt64();
+                        }
+                        verificationComplete(Status::PURCHASED,
+                                             refundable_until);
+                    }
                 }
                 else
                 {
-                    Json::Reader reader(Json::Features::strictMode());
-                    Json::Value root;
-                    if (reader.parse(response->body(), root) &&
-                            root.isObject() &&
-                            root.isMember("state"))
+                    if (root.isObject() && root.isMember("state"))
                     {
                         auto state = root["state"].asString();
                         if (state == "available")
                         {
-                            verificationComplete(Status::NOT_PURCHASED);
+                            verificationComplete(Status::NOT_PURCHASED, 0);
                         }
                         else if (state == "purchased")
                         {
-                            verificationComplete(Status::PURCHASED);
+                            verificationComplete(Status::PURCHASED, 0);
                         }
                         else if (state == "approved")
                         {
-                            verificationComplete(Status::APPROVED);
+                            verificationComplete(Status::APPROVED, 0);
                         }
                         else
                         {
-                            verificationComplete(Status::ERROR);
+                            verificationComplete(Status::ERROR, 0);
                         }
                     }
                 }
             }
             else
             {
-                verificationComplete(Status::NOT_PURCHASED);
+                verificationComplete(Status::NOT_PURCHASED, 0);
             }
         });
         request->error.connect([this](std::string error)
         {
             std::cerr << "Error verifying item '" << error << std::endl;
-            verificationComplete(Status::ERROR);
+            verificationComplete(Status::ERROR, 0);
         });
         request->run();
 

@@ -81,7 +81,8 @@ struct VerificationHttpTests : public ::testing::Test
         {
             std::mutex m;
             std::condition_variable cv;
-            auto func = [&on_completed, &cv](Verification::Item::Status status) {
+            auto func = [&on_completed, &cv](Verification::Item::Status status,
+                                             uint64_t refundable_until) {
                 on_completed(status);
                 cv.notify_all();
             };

@@ -28,6 +28,7 @@ class TestItem : public Item
 {
     std::string _id;
     std::string _app;
+    uint64_t refund_timeout;
     Status status = Status::UNKNOWN;
     bool verifyResult = false;
     bool refundResult = false;
@@ -53,6 +54,11 @@ public:
     Item::Status getStatus (void) override
     {
         return status;
+    }
+
+    uint64_t getRefundExpiry (void) override
+    {
+        return refund_timeout;
     }
 
     bool verify (void) override

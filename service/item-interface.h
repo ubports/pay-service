@@ -68,6 +68,7 @@ public:
 
     virtual std::string& getId (void) = 0;
     virtual Status getStatus (void) = 0;
+    virtual uint64_t getRefundExpiry (void) = 0;
     virtual bool verify (void) = 0;
     virtual bool refund (void) = 0;
     virtual bool purchase (void) = 0;
