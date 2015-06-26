@@ -62,7 +62,8 @@ public:
                                    PayPackageItemStatus status,
                                    std::chrono::system_clock::time_point refundable_until)
         {
-            g_debug("Updating itemStatusCache for: %s", itemid.c_str());
+            g_debug("Updating itemStatusCache for '%s', timeout is: %lld",
+                    itemid.c_str(), std::chrono::system_clock::to_time_t(refundable_until));
             itemStatusCache[itemid] = std::make_pair(status, refundable_until);
         });
 
