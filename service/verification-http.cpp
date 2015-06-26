@@ -20,10 +20,22 @@
 #include "verification-http.h"
 
 #include <json/json.h>
+#include <time.h>
 
 
 namespace Verification
 {
+
+static time_t parse_iso_utc_timestamp(const std::string& isotime)
+{
+    if (isotime.empty()) {
+        return 0;
+    }
+
+    struct tm time_parts{0};
+    strptime(isotime.c_str(), "%Y-%m-%dT%H:%M:%sZ", &time_parts);
+    return mktime(&time_parts);
+}
 
 class HttpItem : public Item
 {
@@ -70,7 +82,8 @@ public:
                         uint64_t refundable_until{0};
                         if (root.isMember("refundable_until"))
                         {
-                            refundable_until = root["refundable_until"].asUInt64();
+                            auto tmp_r = root["refundable_until"].asString();
+                            refundable_until = parse_iso_utc_timestamp(tmp_r);
                         }
                         verificationComplete(Status::PURCHASED,
                                              refundable_until);
