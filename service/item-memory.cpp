@@ -213,8 +213,6 @@ private:
         std::unique_lock<std::mutex> ul(refund_mutex);
         refund_timeout = expires;
         ul.unlock();
-
-        statusChanged(status, expires);
     }
 
     /***** Only set at init *********/
