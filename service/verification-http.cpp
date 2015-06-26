@@ -19,8 +19,8 @@
 
 #include "verification-http.h"
 
+#include <QDateTime>
 #include <json/json.h>
-#include <time.h>
 
 
 namespace Verification
@@ -32,11 +32,11 @@ static time_t parse_iso_utc_timestamp(const std::string& isotime)
         return 0;
     }
 
-    struct tm time_parts;
+    QDateTime when = QDateTime::fromString(QString::fromStdString(isotime),
+                                           Qt::ISODate);
+    when.setTimeSpec(Qt::OffsetFromUTC);
 
-    memset(&time_parts, 0, sizeof(struct tm));
-    strptime(isotime.c_str(), "%Y-%m-%dT%H:%M:%OS%z", &time_parts);
-    return mktime(&time_parts);
+    return when.toTime_t();
 }
 
 class HttpItem : public Item
