@@ -62,6 +62,7 @@ public:
                                    PayPackageItemStatus status,
                                    std::chrono::system_clock::time_point refundable_until)
         {
+            g_debug("Updating itemStatusCache for: %s", itemid.c_str());
             itemStatusCache[itemid] = std::make_pair(status, refundable_until);
         });
 
@@ -223,6 +224,9 @@ public:
     inline PayPackageRefundStatus calcRefundStatus (PayPackageItemStatus item,
                                                     std::chrono::system_clock::time_point refundtime)
     {
+        g_debug("Checking refund status with timeout: %lld",
+                std::chrono::system_clock::to_time_t(refundtime));
+
         if (item != PAY_PACKAGE_ITEM_STATUS_PURCHASED)
         {
             return PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED;
