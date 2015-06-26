@@ -83,7 +83,9 @@ public:
                         if (root.isMember("refundable_until"))
                         {
                             auto tmp_r = root["refundable_until"].asString();
+                            std::cerr << "DEBUG: refundable_until: " << tmp_r.c_str() << std::endl;
                             refundable_until = parse_iso_utc_timestamp(tmp_r);
+                            std::cerr << "DEBUG: parsed_refundable: " << refundable_until << std::endl;
                         }
                         verificationComplete(Status::PURCHASED,
                                              refundable_until);
