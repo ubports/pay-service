@@ -32,8 +32,10 @@ static time_t parse_iso_utc_timestamp(const std::string& isotime)
         return 0;
     }
 
-    struct tm time_parts{0};
-    strptime(isotime.c_str(), "%Y-%m-%dT%H:%M:%sZ", &time_parts);
+    struct tm time_parts;
+
+    memset(&time_parts, 0, sizeof(struct tm));
+    strptime(isotime.c_str(), "%Y-%m-%dT%H:%M:%OS%z", &time_parts);
     return mktime(&time_parts);
 }
 
