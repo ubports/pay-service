@@ -189,7 +189,7 @@ public:
     }
 
     typedef std::shared_ptr<MemoryItem> Ptr;
-    core::Signal<Item::Status> statusChanged;
+    core::Signal<Item::Status, uint64_t> statusChanged;
 
 private:
     void setStatus (Item::Status in_status)
@@ -204,7 +204,7 @@ private:
             /* NOTE: in_status here as it's on the stack and the status
                that this signal should be associated with */
         {
-            statusChanged(in_status);
+            statusChanged(in_status, getRefundExpiry());
         }
     }
 
@@ -295,9 +295,9 @@ MemoryStore::getItem (std::string& application, std::string& itemid)
                                                   refundFactory,
                                                   purchaseFactory);
 
-        mitem->statusChanged.connect([this, mitem](Item::Status status)
+        mitem->statusChanged.connect([this, mitem](Item::Status status, uint64_t refund_timeout)
         {
-            itemChanged(mitem->getApp(), mitem->getId(), status);
+            itemChanged(mitem->getApp(), mitem->getId(), status, refund_timeout);
         });
 
         item = std::dynamic_pointer_cast<Item, MemoryItem>(mitem);

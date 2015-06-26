@@ -85,7 +85,7 @@ public:
 
     typedef std::shared_ptr<Store> Ptr;
 
-    core::Signal<std::string&, std::string&, Item::Status> itemChanged;
+    core::Signal<std::string&, std::string&, Item::Status, uint64_t> itemChanged;
 };
 
 } // namespace Item

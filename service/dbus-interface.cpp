@@ -67,7 +67,7 @@ public:
             g_main_context_push_thread_default(context);
 
             core::ScopedConnection itemupdate(items->itemChanged.connect([this](std::string pkg, std::string item,
-                                                                                Item::Item::Status status)
+                                                                                Item::Item::Status status, uint64_t refund_timeout)
             {
                 if (bus == nullptr)
                 {
@@ -89,7 +89,7 @@ public:
                                               g_variant_new("(sst)",
                                                             item.c_str(),
                                                             strstatus,
-                                                            mitem->getRefundExpiry()),
+                                                            refund_timeout),
                                               nullptr);
             }));
 
