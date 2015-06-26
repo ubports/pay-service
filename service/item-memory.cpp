@@ -97,9 +97,9 @@ public:
         vitem->verificationComplete.connect([this](Verification::Item::Status status, uint64_t refundable_until)
         {
             g_debug("Verification completed with refund_timeout: %lld", refundable_until);
+            setRefundExpiry(refundable_until);
             switch (status)
             {
-                setRefundExpiry(refundable_until);
                 case Verification::Item::PURCHASED:
                     setStatus(Item::Status::PURCHASED);
                     break;
@@ -204,7 +204,7 @@ private:
             /* NOTE: in_status here as it's on the stack and the status
                that this signal should be associated with */
         {
-            statusChanged(in_status, getRefundExpiry());
+            statusChanged(in_status, refund_timeout);
         }
     }
 
@@ -213,6 +213,8 @@ private:
         std::unique_lock<std::mutex> ul(refund_mutex);
         refund_timeout = expires;
         ul.unlock();
+
+        statusChanged(status, expires);
     }
 
     /***** Only set at init *********/
