@@ -37,9 +37,9 @@ class Package
     std::map <std::pair<PayPackageItemObserver, void*>, core::ScopedConnection> itemObservers;
     std::map <std::pair<PayPackageRefundObserver, void*>, core::ScopedConnection> refundObservers;
 
-    core::Signal<std::string, PayPackageItemStatus, std::chrono::system_clock::time_point> itemChanged;
-    std::map <std::string, std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>> itemStatusCache;
-    std::map <std::string, std::chrono::system_clock::time_point> itemTimerCache;
+    core::Signal<std::string, PayPackageItemStatus, uint64_t> itemChanged;
+    std::map <std::string, std::pair<PayPackageItemStatus, uint64_t>> itemStatusCache;
+    std::map <std::string, uint64_t> itemTimerCache;
 
     GLib::ContextThread thread;
     std::shared_ptr<proxyPayPackage> proxy;
@@ -60,10 +60,10 @@ public:
         /* Keeps item cache up-to-data as we get signals about it */
         itemChanged.connect([this](std::string itemid,
                                    PayPackageItemStatus status,
-                                   std::chrono::system_clock::time_point refundable_until)
+                                   uint64_t refundable_until)
         {
             g_debug("Updating itemStatusCache for '%s', timeout is: %lld",
-                    itemid.c_str(), std::chrono::system_clock::to_time_t(refundable_until));
+                    itemid.c_str(), refundable_until);
             itemStatusCache[itemid] = std::make_pair(status, refundable_until);
         });
 
@@ -74,13 +74,13 @@ public:
            just erroring on that side of things */
         itemChanged.connect([this](std::string itemid,
                                    PayPackageItemStatus status,
-                                   std::chrono::system_clock::time_point refundable_until)
+                                   uint64_t refundable_until)
         {
             try
             {
                 if (itemTimerCache[itemid] == refundable_until)
                 {
-                    if (refundable_until < std::chrono::system_clock::now())
+                    if (refundable_until < std::time(nullptr))
                     {
                         itemTimerCache.erase(itemid);
                     }
@@ -92,7 +92,7 @@ public:
                 /* If it's not there, that's cool, let's add it */
             }
 
-            auto timerlen = refundable_until - std::chrono::system_clock::now();
+            auto timerlen = std::chrono::system_clock::from_time_t(refundable_until) - std::chrono::system_clock::now();
             if (timerlen > std::chrono::seconds {10})
             {
                 auto timerfunc = [this, itemid]()
@@ -162,7 +162,7 @@ public:
         Package* notthis = reinterpret_cast<Package*>(user_data);
         notthis->itemChanged(itemid,
                              statusFromString(statusstr),
-                             std::chrono::system_clock::from_time_t(std::time_t(refundable_until)));
+                             refundable_until);
     }
 
     inline static PayPackageItemStatus statusFromString (std::string statusstr)
@@ -223,18 +223,17 @@ public:
     }
 
     inline PayPackageRefundStatus calcRefundStatus (PayPackageItemStatus item,
-                                                    std::chrono::system_clock::time_point refundtime)
+                                                    uint64_t refundtime)
     {
-        g_debug("Checking refund status with timeout: %lld",
-                std::chrono::system_clock::to_time_t(refundtime));
+        g_debug("Checking refund status with timeout: %lld", refundtime);
 
         if (item != PAY_PACKAGE_ITEM_STATUS_PURCHASED)
         {
             return PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED;
         }
 
-        auto timeleft = refundtime - std::chrono::system_clock::now();
-        if (timeleft < std::chrono::seconds(10)) // Honestly, they can't refund this quickly anyway
+        auto timeleft = std::chrono::system_clock::from_time_t(refundtime) - std::chrono::system_clock::now();
+        if (timeleft < std::chrono::seconds {10}) // Honestly, they can't refund this quickly anyway
         {
             return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
         }
@@ -253,7 +252,7 @@ public:
         itemObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
             std::string itemid,
             PayPackageItemStatus status,
-            std::chrono::system_clock::time_point refund)
+            uint64_t refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
         }));
@@ -272,7 +271,7 @@ public:
         refundObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
             std::string itemid,
             PayPackageItemStatus status,
-            std::chrono::system_clock::time_point refund)
+            uint64_t refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), calcRefundStatus(status, refund), user_data);
         }));
