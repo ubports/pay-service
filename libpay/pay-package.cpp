@@ -105,14 +105,15 @@ public:
                     catch (std::out_of_range range) { }
                 };
 
+                /*
                 thread.timeoutSeconds(timerlen, timerfunc);
 
                 if (timerlen > expiretime)
                 {
-                    /* Two timers to signal the window closing */
+                    // Two timers to signal the window closing
                     thread.timeoutSeconds(timerlen - expiretime, timerfunc);
                 }
-
+                */
                 itemTimerCache[itemid] = refundable_until;
             }
         });
