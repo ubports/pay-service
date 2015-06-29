@@ -39,15 +39,11 @@ class Package
 
     core::Signal<std::string, PayPackageItemStatus, uint64_t> itemChanged;
     std::map <std::string, std::pair<PayPackageItemStatus, uint64_t>> itemStatusCache;
-    std::map <std::string, uint64_t> itemTimerCache;
 
     GLib::ContextThread thread;
     std::shared_ptr<proxyPayPackage> proxy;
 
-    const std::chrono::minutes expiretime
-    {
-        1
-    };
+    const uint64_t expiretime{60}; // 60 seconds prior status is "expiring"
 
 public:
     Package (const char* packageid)
@@ -65,57 +61,6 @@ public:
             g_debug("Updating itemStatusCache for '%s', timeout is: %lld",
                     itemid.c_str(), refundable_until);
             itemStatusCache[itemid] = std::make_pair(status, refundable_until);
-        });
-
-        /* Manage the timers to signal when refundable status changes */
-        /* We're being kinda loose with the timers and not tracking them to remove them
-           or anything like that because they don't happen that often and the refundable
-           time doesn't change that much. The cost is so low of extra timers that we're
-           just erroring on that side of things */
-        itemChanged.connect([this](std::string itemid,
-                                   PayPackageItemStatus status,
-                                   uint64_t refundable_until)
-        {
-            try
-            {
-                if (itemTimerCache[itemid] == refundable_until)
-                {
-                    if (refundable_until < std::time(nullptr))
-                    {
-                        itemTimerCache.erase(itemid);
-                    }
-                    return;
-                }
-            }
-            catch (std::out_of_range range)
-            {
-                /* If it's not there, that's cool, let's add it */
-            }
-
-            auto timerlen = std::chrono::system_clock::from_time_t(refundable_until) - std::chrono::system_clock::now();
-            if (timerlen > std::chrono::seconds {10})
-            {
-                auto timerfunc = [this, itemid]()
-                {
-                    try
-                    {
-                        auto iteminfo = itemStatusCache[itemid];
-                        itemChanged(itemid, iteminfo.first, iteminfo.second);
-                    }
-                    catch (std::out_of_range range) { }
-                };
-
-                /*
-                thread.timeoutSeconds(timerlen, timerfunc);
-
-                if (timerlen > expiretime)
-                {
-                    // Two timers to signal the window closing
-                    thread.timeoutSeconds(timerlen - expiretime, timerfunc);
-                }
-                */
-                itemTimerCache[itemid] = refundable_until;
-            }
         });
 
         /* Connect in the proxy now that we've got all the signals setup, let the fun begin! */
@@ -233,8 +178,13 @@ public:
             return PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED;
         }
 
-        auto timeleft = std::chrono::system_clock::from_time_t(refundtime) - std::chrono::system_clock::now();
-        if (timeleft < std::chrono::seconds {10}) // Honestly, they can't refund this quickly anyway
+        if (refundtime < std::time(nullptr))
+        {
+            return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
+        }
+
+        auto timeleft = refundtime - std::time(nullptr);
+        if (timeleft < 10 /* seconds */) // Honestly, they can't refund this quickly anyway
         {
             return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
         }
