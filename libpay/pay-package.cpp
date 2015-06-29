@@ -157,6 +157,23 @@ public:
 
     PayPackageRefundStatus refundStatus (const char* itemid) noexcept
     {
+        std::promise<bool> promise;
+
+        itemChanged.connect([this, &promise, &itemid](const std::string& cbitem,
+                                                      PayPackageItemStatus,
+                                                      uint64_t)
+                            {
+                                if (cbitem == itemid)
+                                {
+                                    promise.set_value(true);
+                                }
+                            });
+        startVerification(itemid);
+
+        auto future = promise.get_future();
+        future.wait();
+        future.get();
+
         try
         {
             auto entry = itemStatusCache[itemid];

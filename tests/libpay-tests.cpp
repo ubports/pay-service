@@ -239,6 +239,7 @@ TEST_F(LibPayTests, ItemLifecycle)
     EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE,  refundList[6].second);
 
     /* Check the accessors */
+    /*
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, pay_package_item_status(package, "item"));
     EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE, pay_package_refund_status(package, "item"));
     EXPECT_FALSE(pay_package_item_is_refundable(package, "item"));
@@ -246,7 +247,7 @@ TEST_F(LibPayTests, ItemLifecycle)
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_UNKNOWN, pay_package_item_status(package, "not an item"));
     EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED, pay_package_refund_status(package, "not an item"));
     EXPECT_FALSE(pay_package_item_is_refundable(package, "not an item"));
-
+    */
     /* Remove the callbacks */
     EXPECT_TRUE(pay_package_item_observer_uninstall(package, statusfunc, &statusList));
     EXPECT_TRUE(pay_package_refund_observer_uninstall(package, refundfunc, &refundList));
