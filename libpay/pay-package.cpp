@@ -157,23 +157,6 @@ public:
 
     PayPackageRefundStatus refundStatus (const char* itemid) noexcept
     {
-        std::promise<bool> promise;
-
-        itemChanged.connect([this, &promise, &itemid](const std::string& cbitem,
-                                                      PayPackageItemStatus,
-                                                      uint64_t)
-                            {
-                                if (cbitem == itemid)
-                                {
-                                    promise.set_value(true);
-                                }
-                            });
-        startVerification(itemid);
-
-        auto future = promise.get_future();
-        future.wait();
-        future.get();
-
         try
         {
             auto entry = itemStatusCache[itemid];
@@ -181,7 +164,19 @@ public:
         }
         catch (std::out_of_range range)
         {
-            return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
+            std::promise<PayPackageRefundStatus> promise;
+
+            itemChanged.connect([this, &promise, &itemid](std::string,
+                                                          PayPackageItemStatus status,
+                                                          uint64_t refundtime)
+                                {
+                                    promise.set_value(calcRefundStatus(status, refundtime));
+                                });
+            startVerification(itemid);
+
+            auto future = promise.get_future();
+            future.wait();
+            return future.get();
         }
     }
 
