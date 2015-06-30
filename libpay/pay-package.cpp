@@ -43,7 +43,7 @@ class Package
     GLib::ContextThread thread;
     std::shared_ptr<proxyPayPackage> proxy;
 
-    const uint64_t expiretime{60}; // 60 seconds prior status is "expiring"
+    constexpr static uint64_t expiretime{60}; // 60 seconds prior status is "expiring"
 
 public:
     Package (const char* packageid)
@@ -178,17 +178,13 @@ public:
             return PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED;
         }
 
-        if (refundtime < std::time(nullptr))
-        {
-            return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
-        }
+        const auto now = std::time(nullptr);
 
-        auto timeleft = refundtime - std::time(nullptr);
-        if (timeleft < 10 /* seconds */) // Honestly, they can't refund this quickly anyway
+        if (refundtime < (now + 10 /* seconds */)) // Honestly, they can't refund this quickly anyway
         {
             return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
         }
-        if (timeleft < expiretime)
+        if (refundtime < (now + expiretime))
         {
             return PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING;
         }
@@ -387,7 +383,9 @@ PayPackageItemStatus pay_package_item_status (PayPackage* package,
 int pay_package_item_is_refundable (PayPackage* package,
                                     const char* itemid)
 {
-    return pay_package_refund_status(package, itemid) == PAY_PACKAGE_REFUND_STATUS_REFUNDABLE;
+    auto status = pay_package_refund_status(package, itemid);
+    return (status == PAY_PACKAGE_REFUND_STATUS_REFUNDABLE ||
+            status == PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING);
 }
 
 PayPackageRefundStatus pay_package_refund_status (PayPackage* package,
