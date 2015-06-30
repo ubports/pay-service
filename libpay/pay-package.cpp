@@ -164,19 +164,7 @@ public:
         }
         catch (std::out_of_range range)
         {
-            std::promise<PayPackageRefundStatus> promise;
-
-            itemChanged.connect([this, &promise, &itemid](std::string,
-                                                          PayPackageItemStatus status,
-                                                          uint64_t refundtime)
-                                {
-                                    promise.set_value(calcRefundStatus(status, refundtime));
-                                });
-            startVerification(itemid);
-
-            auto future = promise.get_future();
-            future.wait();
-            return future.get();
+            return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
         }
     }
 
