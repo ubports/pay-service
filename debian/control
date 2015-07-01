@@ -5,14 +5,13 @@ Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: astyle,
                click-dev,
                cmake,
+               cmake-extras,
                dbus,
                dbus-test-runner,
                debhelper (>= 9),
+               gcovr,
                google-mock,
-# We rely on C++11 features, and to prevent from ABI breaks
-# in libstdc++ causing us issues, we explicitly select a G++
-# version.
-               g++-4.9,
+               lcov,
                libaccounts-qt5-dev,
                libclick-0.4-dev,
                libcurl4-gnutls-dev,
