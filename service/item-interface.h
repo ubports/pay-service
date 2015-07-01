@@ -40,7 +40,8 @@ public:
         PURCHASING,
         NOT_PURCHASED,
         PURCHASED,
-        REFUNDING
+        REFUNDING,
+        APPROVED
     };
 
     static const char* statusString (Status stat)
@@ -59,6 +60,8 @@ public:
                 return "purchased";
             case REFUNDING:
                 return "refunding";
+            case APPROVED:
+                return "approved";
         }
         return "error";
     }
@@ -87,4 +90,3 @@ public:
 } // namespace Item
 
 #endif // ITEM_INTERFACE_HPP__
-

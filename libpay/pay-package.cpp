@@ -185,6 +185,10 @@ public:
         {
             return PAY_PACKAGE_ITEM_STATUS_REFUNDING;
         }
+        else if (statusstr == "approved")
+        {
+            return PAY_PACKAGE_ITEM_STATUS_APPROVED;
+        }
         else
         {
             return PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
