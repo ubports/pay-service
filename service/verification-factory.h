@@ -29,7 +29,8 @@ public:
 	enum Status {
 		ERROR,
 		NOT_PURCHASED,
-		PURCHASED
+		PURCHASED,
+		APPROVED
 	};
 
 	virtual bool run (void) = 0;
@@ -44,7 +45,7 @@ public:
 	virtual ~Factory() = default;
 
 	virtual bool running () = 0;
-	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid) = 0;
+	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) = 0;
 
 	typedef std::shared_ptr<Factory> Ptr;
 };

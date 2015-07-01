@@ -28,21 +28,19 @@ class TestItem : public Item
 {
     std::string _id;
     std::string _app;
-    Item::Status status;
-    bool verifyResult;
-    bool purchaseResult;
+    Status status = Status::UNKNOWN;
+    bool verifyResult = false;
+    bool refundResult = false;
+    bool purchaseResult = false;
 
 public:
     TestItem (std::string& app, std::string& id) :
         _id(id),
-        _app(app),
-        status(Item::Status::UNKNOWN),
-        verifyResult(false),
-        purchaseResult(false)
+        _app(app)
     {
     }
 
-    std::string& getId (void)
+    std::string& getId (void) override
     {
         return _id;
     }
@@ -52,17 +50,22 @@ public:
         return _app;
     }
 
-    Item::Status getStatus (void)
+    Item::Status getStatus (void) override
     {
         return status;
     }
 
-    bool verify (void)
+    bool verify (void) override
     {
         return verifyResult;
     }
 
-    bool purchase (void)
+    bool refund (void) override
+    {
+        return verifyResult;
+    }
+
+    bool purchase (void) override
     {
         return purchaseResult;
     }

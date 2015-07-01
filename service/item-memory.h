@@ -19,6 +19,7 @@
 
 #include "item-interface.h"
 #include "verification-factory.h"
+#include "refund-factory.h"
 #include "purchase-factory.h"
 #include <memory>
 #include <iostream>
@@ -30,8 +31,11 @@ namespace Item
 class MemoryStore : public Store
 {
 public:
-    MemoryStore (const Verification::Factory::Ptr& factory, const Purchase::Factory::Ptr& pfactory) :
+    MemoryStore (const Verification::Factory::Ptr& factory,
+                 const Refund::Factory::Ptr& rfactory,
+                 const Purchase::Factory::Ptr& pfactory) :
         verificationFactory(factory),
+        refundFactory(rfactory),
         purchaseFactory(pfactory)
     {
         if (verificationFactory == nullptr)
@@ -46,6 +50,7 @@ public:
 private:
     std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
     Verification::Factory::Ptr verificationFactory;
+    Refund::Factory::Ptr refundFactory;
     Purchase::Factory::Ptr purchaseFactory;
 };
 

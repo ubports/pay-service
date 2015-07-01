@@ -30,22 +30,27 @@ class NullItem : public Item
 public:
     NullItem (std::string id) : _id(id) {};
 
-    std::string& getId (void)
+    std::string& getId (void) override
     {
         return _id;
     }
 
-    Item::Status getStatus (void)
+    Item::Status getStatus (void) override
     {
         return Item::Status::UNKNOWN;
     }
 
-    bool verify (void)
+    bool verify (void) override
     {
         return false;
     }
 
-    bool purchase (void)
+    bool refund (void) override
+    {
+        return false;
+    }
+
+    bool purchase (void) override
     {
         return false;
     }

@@ -7,7 +7,6 @@ set (PROJECT_VERSION "14.04.0")
 set (PACKAGE ${CMAKE_PROJECT_NAME})
 
 option (enable_tests "Build the package's automatic tests." ON)
-option (enable_lcov "Generate lcov code coverage reports." OFF)
 
 if (${enable_tests})
   enable_testing ()
@@ -37,6 +36,7 @@ find_package (Qt5Core REQUIRED)
 pkg_check_modules (SERVICE_DEPS REQUIRED
                    accounts-qt5
                    libcurl
+                   jsoncpp
                    ubuntu-app-launch-2
                    dbustest-1
                    gio-2.0
@@ -63,9 +63,6 @@ add_custom_target (dist
                    COMMAND bzr export --root=${ARCHIVE_NAME} ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.gz
                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-add_custom_target (clean-coverage
-                   COMMAND find ${CMAKE_BINARY_DIR} -name '*.gcda' | xargs rm -f)
-
 add_custom_target (cppcheck COMMAND cppcheck --enable=all -q --error-exitcode=2 --inline-suppr
                    ${CMAKE_SOURCE_DIR}/src
                    ${CMAKE_SOURCE_DIR}/tests)
@@ -78,23 +75,10 @@ set (CC_WARNING_ARGS " -Wall -Wshadow -Wextra -Wunused -Wformat=2 -Wno-missing-f
 set (CXX_WARNING_ARGS " -Wall -Wextra -pedantic -Wno-missing-field-initializers")
 
 ##
-##  Coverage Flags
-##
-
-if (${enable_tests})
-  if (${enable_lcov})
-    include(EnableCoverageReport) # Using gcov CMake modules from https://code.cor-lab.org/projects/rsc
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage" )
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage" )
-    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} --coverage" )
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage" )
-  endif ()
-endif ()
-
-##
 ##  Subdirectories
 ##
 
+add_subdirectory(common)
 add_subdirectory(libpay)
 add_subdirectory(service)
 add_subdirectory(data)
@@ -107,17 +91,15 @@ add_subdirectory(pay-test-app)
 ##
 ##  Coverage Reports
 ##
-
-if (${enable_tests})
-  if (${enable_lcov})
-  	set(filter-list)
-	list(APPEND filter-list "/usr/include")
-	list(APPEND filter-list "${CMAKE_SOURCE_DIR}/tests/*")
-	if (NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
-	  list(APPEND filter-list "${CMAKE_BINARY_DIR}/*")
-	endif()
-    ENABLE_COVERAGE_REPORT(TARGETS pay-service FILTER ${filter-list})
-  endif ()
-endif ()
-
-
+include(EnableCoverageReport)
+set(filter-list)
+list(APPEND filter-list "/usr/include")
+list(APPEND filter-list "${CMAKE_SOURCE_DIR}/tests/*")
+if (NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+  list(APPEND filter-list "${CMAKE_BINARY_DIR}/*")
+endif()
+ENABLE_COVERAGE_REPORT(
+  TARGETS libpay pay-service-lib pay-service
+  TESTS dbus-interface-tests item-memory-tests webclient-curl-tests verification-http-tests refund-http-tests purchase-ual-tests libpay-tests
+  FILTER ${filter-list}
+)

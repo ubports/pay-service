@@ -13,6 +13,7 @@ add_definitions(-DCORE_DBUS_ENABLE_GOOGLE_TEST_FIXTURE)
 
 include_directories(
   ${CMAKE_SOURCE_DIR}
+  "${CMAKE_SOURCE_DIR}/common"
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_BINARY_DIR}
 
@@ -39,7 +40,7 @@ target_link_libraries(
   ${GMOCK_BOTH_LIBRARIES}
 )
 
-add_test(NAME dbus-interface-tests COMMAND dbus-test-runner --task ${CMAKE_CURRENT_BINARY_DIR}/dbus-interface-tests)
+add_test(dbus-interface-tests ${CMAKE_CURRENT_BINARY_DIR}/dbus-interface-tests)
 
 #############################
 # Memory Item Store
@@ -62,18 +63,41 @@ target_link_libraries(
 add_test(item-memory-tests ${CMAKE_CURRENT_BINARY_DIR}/item-memory-tests)
 
 #############################
-# Verification Curl Factory
+# Webclient Curl Factory
 #############################
 
-add_definitions("-DVERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints\"")
-
 add_executable(
-  verification-curl-tests
-  verification-curl-tests.cpp
-  )
+  webclient-curl-tests
+  webclient-curl-tests.cpp
+)
 
 target_link_libraries(
-  verification-curl-tests
+  webclient-curl-tests
+
+  pay-service-lib
+
+  ${SERVICE_DEPS_LIBRARIES}
+  ${GMOCK_BOTH_LIBRARIES}
+)
+
+add_test(webclient-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/webclient-curl-tests)
+
+#############################
+# Verification HTTP Factory
+#############################
+
+add_executable(
+  verification-http-tests
+  verification-http-tests.cpp
+  )
+
+set_target_properties(
+  verification-http-tests
+  PROPERTIES
+  COMPILE_DEFINITIONS "VERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints\"")
+
+target_link_libraries(
+  verification-http-tests
 
   pay-service-lib
 
@@ -82,16 +106,41 @@ target_link_libraries(
 )
 
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/simple.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/simple @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/packages/good/items/by-sku/simple.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/packages/good/items/by-sku/simple @ONLY)
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/good/device-id.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/good/device-id @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/packages/good/items/by-sku/device-id.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/packages/good/items/by-sku/device-id @ONLY)
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-curl-endpoints/package-name.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-endpoints/package-name @ONLY)
+  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/api/2.0/click/purchases/package-name.in
+  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/api/2.0/click/purchases/package-name @ONLY)
 
-add_test(verification-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-curl-tests)
+add_test(verification-http-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-http-tests)
+
+#############################
+# Refund HTTP Factory
+#############################
+
+add_executable(
+  refund-http-tests
+  refund-http-tests.cpp
+  )
+
+set_target_properties(
+  refund-http-tests
+  PROPERTIES
+  COMPILE_DEFINITIONS "REFUND_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/refund-http-endpoints\"")
+
+target_link_libraries(
+  refund-http-tests
+
+  pay-service-lib
+
+  ${SERVICE_DEPS_LIBRARIES}
+  ${GMOCK_BOTH_LIBRARIES}
+)
+
+add_test(refund-http-tests ${CMAKE_CURRENT_BINARY_DIR}/refund-http-tests)
 
 #############################
 # Purchase UAL

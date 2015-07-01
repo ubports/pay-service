@@ -62,8 +62,12 @@ static QString enum2str (PayPackageItemStatus val)
 		return QString("Purchased");
 	case PAY_PACKAGE_ITEM_STATUS_PURCHASING:
 		return QString("Purchasing");
+	case PAY_PACKAGE_ITEM_STATUS_REFUNDING:
+		return QString("Refunding");
 	case PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED:
 		return QString("Not Purchased");
+	case PAY_PACKAGE_ITEM_STATUS_APPROVED:
+		return QString("Purchase Approved");
 	case PAY_PACKAGE_ITEM_STATUS_UNKNOWN:
 		break;
 	}

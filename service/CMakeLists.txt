@@ -1,6 +1,6 @@
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fPIE ${GCOV_FLAGS}")
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} "${CMAKE_SOURCE_DIR}/common")
 
 
 ######################
@@ -8,6 +8,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ######################
 
 set(SERVICE_LIB_SOURCES
+    click-purchases-api.h
+    click-purchases-api.cpp
     dbus-interface.h
     dbus-interface.cpp
     item-interface.h
@@ -21,11 +23,19 @@ set(SERVICE_LIB_SOURCES
     purchase-null.cpp
     purchase-ual.h
     purchase-ual.cpp
+    refund-factory.h
+    refund-http.h
+    refund-http.cpp
+    refund-null.h
+    refund-null.cpp
     token-grabber.h
     token-grabber-u1.h
     token-grabber-u1.cpp
-    verification-curl.cpp
-    verification-null.cpp)
+    verification-http.cpp
+    verification-null.cpp
+    webclient-curl.cpp
+    webclient-null.cpp
+)
 
 set(SERVICE_LIB_GEN_SOURCES)
 
@@ -36,7 +46,7 @@ add_gdbus_codegen_with_namespace(SERVICE_LIB_GEN_SOURCES proxy-payui com.canonic
 add_library(pay-service-lib STATIC ${SERVICE_LIB_SOURCES} ${SERVICE_LIB_GEN_SOURCES})
 
 message(${SERVICE_DEPS_LIBRARIES})
-target_link_libraries(pay-service-lib ${SERVICE_DEPS_LIBRARIES} "-lpthread")
+target_link_libraries(pay-service-lib common-lib ${SERVICE_DEPS_LIBRARIES} "-lpthread")
 
 add_executable(pay-service main.cpp)
 target_link_libraries(pay-service

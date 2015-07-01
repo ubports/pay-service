@@ -23,17 +23,23 @@
 #include <core/signal.h>
 #include <memory>
 
+#include <glib.h>
+
 namespace Item
 {
 
 class MemoryItem : public Item
 {
 public:
-    MemoryItem (std::string& in_app, std::string& in_id, Verification::Factory::Ptr& in_vfactory,
+    MemoryItem (std::string& in_app,
+                std::string& in_id,
+                Verification::Factory::Ptr& in_vfactory,
+                Refund::Factory::Ptr& in_rfactory,
                 Purchase::Factory::Ptr& in_pfactory) :
         app(in_app),
         id(in_id),
         vfactory(in_vfactory),
+        rfactory(in_rfactory),
         pfactory(in_pfactory),
         vitem(nullptr),
         pitem(nullptr),
@@ -48,17 +54,17 @@ public:
         return app;
     }
 
-    std::string& getId (void)
+    std::string& getId (void) override
     {
         return id;
     }
 
-    Item::Status getStatus (void)
+    Item::Status getStatus (void) override
     {
         return status;
     }
 
-    bool verify (void)
+    bool verify (void) override
     {
         if (!vfactory->running())
         {
@@ -92,6 +98,9 @@ public:
                 case Verification::Item::NOT_PURCHASED:
                     setStatus(Item::Status::NOT_PURCHASED);
                     break;
+                case Verification::Item::APPROVED:
+                    setStatus(Item::Status::APPROVED);
+                    break;
                 case Verification::Item::ERROR:
                 default: /* Fall through, an error is same as status we don't know */
                     setStatus(Item::Status::UNKNOWN);
@@ -102,7 +111,41 @@ public:
         return vitem->run();
     }
 
-    bool purchase (void)
+    bool refund (void) override
+    {
+        if (!rfactory->running())
+        {
+            g_debug("%s refund already running", G_STRFUNC);
+            return false;
+        }
+
+        if (ritem == nullptr)
+        {
+            ritem = rfactory->refund(app, id);
+
+            if (ritem == nullptr)
+            {
+                g_debug("%s failed to get ritem", G_STRFUNC);
+                return false;
+            }
+        }
+
+        const auto cached_status = getStatus();
+
+        setStatus(Item::Status::REFUNDING);
+
+        ritem->finished.connect([this, cached_status](bool success)
+        {
+            g_debug("%s ritem returned success flag %d", G_STRFUNC, (int)success);
+            auto new_status = success ? Status::NOT_PURCHASED : cached_status;
+            setStatus(new_status);
+        });
+
+        g_debug("%s running refund ritem", G_STRFUNC);
+        return ritem->run();
+    }
+
+    bool purchase (void) override
     {
         /* First check to see if a purchase makes sense */
         if (status == PURCHASED)
@@ -162,14 +205,15 @@ private:
     std::string id;
     /* Application ID */
     std::string app;
-    /* Pointer to the factory to use */
     Verification::Factory::Ptr vfactory;
-    /* Pointer to the factory to use */
+    Refund::Factory::Ptr rfactory;
     Purchase::Factory::Ptr pfactory;
 
     /****** std::shared_ptr<> is threadsafe **********/
     /* Verification item if we're in the state of verifying or null otherwise */
     Verification::Item::Ptr vitem;
+    /* Refund item if we're in the state of refunding or null otherwise */
+    Refund::Item::Ptr ritem;
     /* Purchase item if we're in the state of purchasing or null otherwise */
     Purchase::Item::Ptr pitem;
 
@@ -226,7 +270,12 @@ MemoryStore::getItem (std::string& application, std::string& itemid)
 
     if (item == nullptr)
     {
-        auto mitem = std::make_shared<MemoryItem>(application, itemid, verificationFactory, purchaseFactory);
+        auto mitem = std::make_shared<MemoryItem>(application,
+                                                  itemid,
+                                                  verificationFactory,
+                                                  refundFactory,
+                                                  purchaseFactory);
+
         mitem->statusChanged.connect([this, mitem](Item::Status status)
         {
             itemChanged(mitem->getApp(), mitem->getId(), status);

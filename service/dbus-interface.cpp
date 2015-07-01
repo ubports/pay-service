@@ -85,7 +85,7 @@ public:
                                               path.c_str(),
                                               "com.canonical.pay.package",
                                               "ItemStatusChanged",
-                                              g_variant_new("(ss)", item.c_str(), strstatus),
+                                              g_variant_new("(sst)", item.c_str(), strstatus, 0),
                                               nullptr);
             }));
 
@@ -217,11 +217,16 @@ public:
         const gchar* encoded_package = path + std::strlen("/com/canonical/pay/");
         std::string package = DBusInterface::decodePath(std::string(encoded_package));
 
+        auto params_str = g_variant_print(params, true);
+        g_debug("%s sender(%s) path(%s) method(%s) package(%s) params(%s)",
+                G_STRFUNC, sender, path, method, package.c_str(), params_str);
+        g_free(params_str);
+
         if (g_strcmp0(method, "ListItems") == 0)
         {
             GVariantBuilder builder;
             g_variant_builder_init(&builder, G_VARIANT_TYPE_TUPLE);
-            g_variant_builder_open(&builder, G_VARIANT_TYPE("a(ss)"));
+            g_variant_builder_open(&builder, G_VARIANT_TYPE("a(sst)"));
 
             auto litems = items->getItems(package);
             for (auto item : *litems)
@@ -230,6 +235,7 @@ public:
 
                 g_variant_builder_add_value(&builder, g_variant_new_string(item.first.c_str()));
                 g_variant_builder_add_value(&builder, g_variant_new_string(Item::Item::statusString(item.second->getStatus())));
+                g_variant_builder_add_value(&builder, g_variant_new_uint64(0));
 
                 g_variant_builder_close(&builder);
             }
@@ -267,6 +273,22 @@ public:
             else
             {
                 g_dbus_method_invocation_return_error(invocation, errorQuark, 2, "Unable to purchase item '%s'", itemid.c_str());
+            }
+        }
+        else if (g_strcmp0(method, "RefundItem") == 0)
+        {
+            GVariant* vitemid = g_variant_get_child_value(params, 0);
+            std::string itemid(g_variant_get_string(vitemid, NULL));
+            g_variant_unref(vitemid);
+
+            auto item = items->getItem(package, itemid);
+            if (item->refund())
+            {
+                g_dbus_method_invocation_return_value(invocation, NULL);
+            }
+            else
+            {
+                g_dbus_method_invocation_return_error(invocation, errorQuark, 3, "Unable to refund item '%s'", itemid.c_str());
             }
         }
     }

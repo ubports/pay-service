@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -12,26 +12,38 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Authors:
- *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "verification-factory.h"
+#include <core/signal.h>
 
-#ifndef VERIFICATION_NULL_HPP__
-#define VERIFICATION_NULL_HPP__ 1
+#ifndef REFUND_FACTORY_HPP__
+#define REFUND_FACTORY_HPP__ 1
 
-namespace Verification {
+namespace Refund
+{
 
-class NullFactory : public Factory {
+class Item
+{
+
 public:
-	virtual bool running () override;
-	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) override;
+    virtual bool run (void) =0;
 
-	typedef std::shared_ptr<NullFactory> Ptr;
+    typedef std::shared_ptr<Item> Ptr;
+
+    core::Signal<bool> finished;
 };
 
-} // ns Verification
+class Factory
+{
+public:
+    virtual ~Factory() =default;
 
-#endif /* VERIFICATION_NULL_HPP__ */
+    virtual bool running () =0;
+    virtual Item::Ptr refund (const std::string& appid, const std::string& itemid) =0;
+
+    typedef std::shared_ptr<Factory> Ptr;
+};
+
+} // ns Refund
+
+#endif /* REFUND_FACTORY_HPP__ */

@@ -39,7 +39,9 @@ public:
         VERIFYING,
         PURCHASING,
         NOT_PURCHASED,
-        PURCHASED
+        PURCHASED,
+        REFUNDING,
+        APPROVED
     };
 
     static const char* statusString (Status stat)
@@ -56,6 +58,10 @@ public:
                 return "not purchased";
             case PURCHASED:
                 return "purchased";
+            case REFUNDING:
+                return "refunding";
+            case APPROVED:
+                return "approved";
         }
         return "error";
     }
@@ -63,6 +69,7 @@ public:
     virtual std::string& getId (void) = 0;
     virtual Status getStatus (void) = 0;
     virtual bool verify (void) = 0;
+    virtual bool refund (void) = 0;
     virtual bool purchase (void) = 0;
 
     typedef std::shared_ptr<Item> Ptr;
@@ -83,4 +90,3 @@ public:
 } // namespace Item
 
 #endif // ITEM_INTERFACE_HPP__
-
