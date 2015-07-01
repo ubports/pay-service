@@ -1,12 +1,17 @@
-pay-service (2.0.0+14.10.20140916-0ubuntu2) UNRELEASED; urgency=medium
+pay-service (2.0.0+15.04.20150701.2-0ubuntu1) vivid; urgency=medium
 
+  [ Rodney Dawes ]
   * Fix coverage build.
   * Drop explicit gcc4.9 dependency.
   * Required refactoring of HTTP and click purchase API code.
   * Required refactoring of glib main loop integration code.
   * Add support for refunding app purchases.
 
- -- Rodney Dawes <rodney.dawes@canonical.com>  Wed, 01 Jul 2015 17:19:39 -0400
+  [ CI Train Bot ]
+  * debian/libpay2.symbols: update to released version.
+  * New rebuild forced.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 01 Jul 2015 21:26:51 +0000
 
 pay-service (2.0.0+14.10.20140916-0ubuntu1) utopic; urgency=low
 
