@@ -14,34 +14,21 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "webclient-null.h"
+#include "refund-null.h"
 
-namespace Web
+namespace Refund
 {
 
-class NullRequest : public Request
+class NullItem : public Item
 {
 public:
-    NullRequest (void)
-    {
-    }
 
-    ~NullRequest (void)
-    {
-    }
+    NullItem() =default;
+    ~NullItem() =default;
 
-    virtual bool run (void) override
+    bool run (void) override
     {
         return false;
-    }
-
-    virtual void set_header (const std::string& key,
-                             const std::string& value) override
-    {
-    }
-
-    virtual void set_post (const std::vector<char>& body) override
-    {
     }
 };
 
@@ -52,11 +39,10 @@ NullFactory::running ()
     return false;
 }
 
-Request::Ptr
-NullFactory::create_request (const std::string& url,
-                             bool sign)
+Item::Ptr
+NullFactory::refund (const std::string& appid, const std::string& itemid)
 {
-    return std::make_shared<NullRequest>();
+    return std::make_shared<NullItem>();
 }
 
-} // ns Web
+} // ns Refund

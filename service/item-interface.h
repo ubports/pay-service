@@ -66,6 +66,7 @@ public:
     virtual std::string& getId (void) = 0;
     virtual Status getStatus (void) = 0;
     virtual bool verify (void) = 0;
+    virtual bool refund (void) = 0;
     virtual bool purchase (void) = 0;
 
     typedef std::shared_ptr<Item> Ptr;

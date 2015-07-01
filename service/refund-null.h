@@ -14,49 +14,22 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "webclient-null.h"
+#include "refund-factory.h"
 
-namespace Web
+#ifndef REFUND_NULL_HPP__
+#define REFUND_NULL_HPP__ 1
+
+namespace Refund
 {
 
-class NullRequest : public Request
+class NullFactory : public Factory
 {
 public:
-    NullRequest (void)
-    {
-    }
-
-    ~NullRequest (void)
-    {
-    }
-
-    virtual bool run (void) override
-    {
-        return false;
-    }
-
-    virtual void set_header (const std::string& key,
-                             const std::string& value) override
-    {
-    }
-
-    virtual void set_post (const std::vector<char>& body) override
-    {
-    }
+    bool running () override;
+    Item::Ptr refund (const std::string& appid, const std::string& itemid) override;
+    typedef std::shared_ptr<NullFactory> Ptr;
 };
 
-
-bool
-NullFactory::running ()
-{
-    return false;
-}
-
-Request::Ptr
-NullFactory::create_request (const std::string& url,
-                             bool sign)
-{
-    return std::make_shared<NullRequest>();
-}
-
 } // ns Web
+
+#endif /* REFUND_NULL_HPP__ */
