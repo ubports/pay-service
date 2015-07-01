@@ -53,9 +53,11 @@ private:
 class CurlRequest : public Request
 {
 public:
-    CurlRequest (const std::string& url,
+    CurlRequest (std::function<void(std::string&, std::map<std::string,std::string>&)> preWebHook,
+                 const std::string& url,
                  bool sign,
                  TokenGrabber::Ptr token) :
+        _preWebHook(preWebHook),
         stop(false),
         _url(url),
         _sign(sign),
@@ -83,6 +85,11 @@ public:
         stopThread();
         transferBuffer.clear();
         stop = false;
+
+        if (_preWebHook)
+        {
+            _preWebHook(_url, _headers);
+        }
 
         /* Do the execution in another thread so we can wait on the
            network socket. */
@@ -112,9 +119,15 @@ public:
                 }
             }
 
-            /* Actually set them in cURL */
-            if (curlHeaders != nullptr)
+            // set our headers in curl
+            struct curl_slist* curlHeaders = NULL;
+            if (!_headers.empty())
             {
+                for (auto& kv : _headers)
+                {
+                    auto line = kv.first + ": " + kv.second;
+                    curlHeaders = curl_slist_append(curlHeaders, line.c_str());
+                }
                 curl_easy_setopt(handle, CURLOPT_HTTPHEADER, curlHeaders);
             }
 
@@ -134,14 +147,14 @@ public:
                 error(curl_easy_strerror(status));
             }
 
+            curl_easy_cleanup(handle);
+
             /* Clean up headers */
             if (curlHeaders != nullptr)
             {
                 curl_slist_free_all (curlHeaders) ;
                 curlHeaders = nullptr;
             }
-
-            curl_easy_cleanup(handle);
         });
 
         return true;
@@ -150,19 +163,16 @@ public:
     virtual void set_header (const std::string& key,
                              const std::string& value)
     {
-        std::string headerText = key;
-        headerText += + ": ";
-        headerText += value;
-        curlHeaders = curl_slist_append(curlHeaders, headerText.c_str());
+        _headers[key] = value;
     }
 
 private:
+    std::function<void(std::string&, std::map<std::string,std::string>&)> _preWebHook;
     std::string transferBuffer;
     std::thread exec;
     bool stop;
 
-    struct curl_slist* curlHeaders = NULL;
-
+    std::map<std::string,std::string> _headers;
     std::string _url;
     bool _sign;
     TokenGrabber::Ptr _token;
@@ -212,7 +222,7 @@ Request::Ptr
 CurlFactory::create_request (const std::string& url,
                              bool sign)
 {
-    return std::make_shared<CurlRequest>(url, sign, tokenGrabber);
+    return std::make_shared<CurlRequest>(preWebHook, url, sign, tokenGrabber);
 }
 
 } // ns Web

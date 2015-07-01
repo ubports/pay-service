@@ -8,6 +8,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} "${CMAKE_SOURCE_DIR}/common")
 ######################
 
 set(SERVICE_LIB_SOURCES
+    click-purchases-api.h
+    click-purchases-api.cpp
     dbus-interface.h
     dbus-interface.cpp
     item-interface.h

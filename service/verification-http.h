@@ -18,7 +18,7 @@
  */
 
 #include "verification-factory.h"
-#include "webclient-factory.h"
+#include "click-purchases-api.h"
 
 #include <string>
 
@@ -27,28 +27,14 @@
 
 namespace Verification {
 
-const std::string PAY_BASE_URL_ENVVAR = "PAY_BASE_URL";
-const std::string PAY_BASE_URL = "https://software-center.ubuntu.com";
-const std::string PAY_API_ROOT = "/api/2.0/click";
-const std::string PAY_PURCHASES_PATH = "/purchases";
-
-
 class HttpFactory : public Factory {
 public:
-	HttpFactory (Web::Factory::Ptr in_factory);
-
-	virtual bool running ();
-	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
-
-	void setEndpoint (std::string& endpoint);
-	void setDevice (std::string& device);
-
-    static std::string get_base_url ();
+	HttpFactory (Web::ClickPurchasesApi::Ptr cpa_in);
+	virtual bool running () override;
+	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) override;
 
 private:
-	std::string endpoint;
-	std::string device;
-    Web::Factory::Ptr wfactory;
+	Web::ClickPurchasesApi::Ptr cpa;
 };
 
 } // ns Verification

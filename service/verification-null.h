@@ -26,8 +26,8 @@ namespace Verification {
 
 class NullFactory : public Factory {
 public:
-	virtual bool running ();
-	virtual Item::Ptr verifyItem (std::string& appid, std::string& itemid);
+	virtual bool running () override;
+	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) override;
 
 	typedef std::shared_ptr<NullFactory> Ptr;
 };
