@@ -34,8 +34,40 @@
 #include "item-test.h"
 #include <thread>
 
+#include "glib-thread.h"
+
 struct DbusInterfaceTests : public ::testing::Test
 {
+	std::shared_ptr<GLib::ContextThread> thread;
+	std::shared_ptr<DbusTestService> service;
+
+	virtual void SetUp()
+	{
+		thread = std::make_shared<GLib::ContextThread>(
+			[]() {},
+			[this]() { service.reset(); }
+		);
+
+		service = thread->executeOnThread<std::shared_ptr<DbusTestService>>([]() {
+			auto service = std::shared_ptr<DbusTestService>(
+				dbus_test_service_new(nullptr), 
+				[](DbusTestService * service) { g_clear_object(&service); });
+
+			if (!service)
+				return service;
+
+			dbus_test_service_start_tasks(service.get());
+
+			return service;
+		});
+
+		ASSERT_NE(nullptr, service);
+	}
+
+	virtual void TearDown()
+	{
+		thread.reset();
+	}
 };
 
 TEST_F(DbusInterfaceTests, BasicAllocation)
@@ -117,7 +149,7 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
                                                            nullptr,
                                                            nullptr));
 
-        EXPECT_STREQ("a(ss)", g_variant_get_type_string(itemslist));
+        EXPECT_STREQ("a(sst)", g_variant_get_type_string(itemslist));
         EXPECT_EQ(0, g_variant_n_children(itemslist));
 
         g_variant_unref(itemslist);
@@ -141,7 +173,7 @@ TEST_F(DbusInterfaceTests, NullStoreTests)
     EXPECT_EQ(core::testing::ForkAndRunResult::empty, core::testing::fork_and_run(service, client));
 }
 
-void signalAppend (GObject* obj, const gchar* itemid, const gchar* status, std::vector<std::string>& list)
+void signalAppend (GObject* obj, const gchar* itemid, const gchar* status, guint64 refundtime, std::vector<std::string>& list)
 {
     std::cout << "Signal append: " << itemid << ", " << status << std::endl;
     ASSERT_STREQ("fooitem", itemid);
