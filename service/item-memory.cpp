@@ -96,11 +96,11 @@ public:
         /* NOTE: This will execute on the verification item's thread */
         vitem->verificationComplete.connect([this](Verification::Item::Status status, uint64_t refundable_until)
         {
-            g_debug("Verification completed with refund_timeout: %lld", refundable_until);
-            setRefundExpiry(refundable_until);
+            setRefundExpiry(0);
             switch (status)
             {
                 case Verification::Item::PURCHASED:
+                    setRefundExpiry(refundable_until);
                     setStatus(Item::Status::PURCHASED);
                     break;
                 case Verification::Item::NOT_PURCHASED:
