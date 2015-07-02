@@ -43,7 +43,8 @@ public:
         pfactory(in_pfactory),
         vitem(nullptr),
         pitem(nullptr),
-        status(Item::Status::UNKNOWN)
+        status(Item::Status::UNKNOWN),
+        refund_timeout(0)
     {
         /* We init into the unknown state and then wait for someone
            to ask us to do something about it. */
@@ -62,6 +63,11 @@ public:
     Item::Status getStatus (void) override
     {
         return status;
+    }
+
+    uint64_t getRefundExpiry (void) override
+    {
+        return refund_timeout;
     }
 
     bool verify (void) override
@@ -88,11 +94,13 @@ public:
         /* When the verification item has run it's course we need to
            update our status */
         /* NOTE: This will execute on the verification item's thread */
-        vitem->verificationComplete.connect([this](Verification::Item::Status status)
+        vitem->verificationComplete.connect([this](Verification::Item::Status status, uint64_t refundable_until)
         {
+            setRefundExpiry(0);
             switch (status)
             {
                 case Verification::Item::PURCHASED:
+                    setRefundExpiry(refundable_until);
                     setStatus(Item::Status::PURCHASED);
                     break;
                 case Verification::Item::NOT_PURCHASED:
@@ -181,7 +189,7 @@ public:
     }
 
     typedef std::shared_ptr<MemoryItem> Ptr;
-    core::Signal<Item::Status> statusChanged;
+    core::Signal<Item::Status, uint64_t> statusChanged;
 
 private:
     void setStatus (Item::Status in_status)
@@ -196,8 +204,15 @@ private:
             /* NOTE: in_status here as it's on the stack and the status
                that this signal should be associated with */
         {
-            statusChanged(in_status);
+            statusChanged(in_status, refund_timeout);
         }
+    }
+
+    void setRefundExpiry (uint64_t expires)
+    {
+        std::unique_lock<std::mutex> ul(refund_mutex);
+        refund_timeout = expires;
+        ul.unlock();
     }
 
     /***** Only set at init *********/
@@ -220,6 +235,10 @@ private:
     /****** status is protected with it's own mutex *******/
     std::mutex status_mutex;
     Item::Status status;
+
+    /****** refund_timeout is protected with it's own mutex *******/
+    std::mutex refund_mutex;
+    uint64_t refund_timeout;
 };
 
 std::list<std::string>
@@ -239,7 +258,7 @@ MemoryStore::listApplications (void)
 }
 
 std::shared_ptr<std::map<std::string, Item::Ptr>>
-                                               MemoryStore::getItems (std::string& application)
+MemoryStore::getItems (std::string& application)
 {
     auto app = data[application];
 
@@ -276,9 +295,9 @@ MemoryStore::getItem (std::string& application, std::string& itemid)
                                                   refundFactory,
                                                   purchaseFactory);
 
-        mitem->statusChanged.connect([this, mitem](Item::Status status)
+        mitem->statusChanged.connect([this, mitem](Item::Status status, uint64_t refund_timeout)
         {
-            itemChanged(mitem->getApp(), mitem->getId(), status);
+            itemChanged(mitem->getApp(), mitem->getId(), status, refund_timeout);
         });
 
         item = std::dynamic_pointer_cast<Item, MemoryItem>(mitem);

@@ -37,7 +37,7 @@ public:
 
     typedef std::shared_ptr<Item> Ptr;
 
-    core::Signal<Status> verificationComplete;
+    core::Signal<Status, uint64_t> verificationComplete;
 };
 
 class Factory {

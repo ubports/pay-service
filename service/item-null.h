@@ -40,6 +40,11 @@ public:
         return Item::Status::UNKNOWN;
     }
 
+    uint64_t getRefundExpiry (void) override
+    {
+        return 0;
+    }
+
     bool verify (void) override
     {
         return false;

@@ -68,6 +68,7 @@ public:
 
     virtual std::string& getId (void) = 0;
     virtual Status getStatus (void) = 0;
+    virtual uint64_t getRefundExpiry (void) = 0;
     virtual bool verify (void) = 0;
     virtual bool refund (void) = 0;
     virtual bool purchase (void) = 0;
@@ -84,7 +85,7 @@ public:
 
     typedef std::shared_ptr<Store> Ptr;
 
-    core::Signal<std::string&, std::string&, Item::Status> itemChanged;
+    core::Signal<std::string&, std::string&, Item::Status, uint64_t> itemChanged;
 };
 
 } // namespace Item

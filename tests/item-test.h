@@ -28,6 +28,7 @@ class TestItem : public Item
 {
     std::string _id;
     std::string _app;
+    uint64_t refund_timeout;
     Status status = Status::UNKNOWN;
     bool verifyResult = false;
     bool refundResult = false;
@@ -55,6 +56,11 @@ public:
         return status;
     }
 
+    uint64_t getRefundExpiry (void) override
+    {
+        return refund_timeout;
+    }
+
     bool verify (void) override
     {
         return verifyResult;
@@ -75,11 +81,11 @@ public:
         status = instatus;
         if (signal)
         {
-            statusChanged(instatus);
+            statusChanged(instatus, getRefundExpiry());
         }
     }
 
-    core::Signal<Item::Status> statusChanged;
+    core::Signal<Item::Status, uint64_t> statusChanged;
 };
 
 class TestStore : public Store
@@ -122,9 +128,10 @@ public:
         if (item == nullptr)
         {
             auto titem = std::make_shared<TestItem>(application, itemid);
-            titem->statusChanged.connect([this, titem](Item::Status status)
+            titem->statusChanged.connect([this, titem](Item::Status status,
+                                                       uint64_t timeout)
             {
-                itemChanged(titem->getApp(), titem->getId(), status);
+                itemChanged(titem->getApp(), titem->getId(), status, timeout);
             });
             item = std::dynamic_pointer_cast<Item, TestItem>(titem);
             (*app)[itemid] = item;
