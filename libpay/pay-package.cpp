@@ -37,17 +37,13 @@ class Package
     std::map <std::pair<PayPackageItemObserver, void*>, core::ScopedConnection> itemObservers;
     std::map <std::pair<PayPackageRefundObserver, void*>, core::ScopedConnection> refundObservers;
 
-    core::Signal<std::string, PayPackageItemStatus, std::chrono::system_clock::time_point> itemChanged;
-    std::map <std::string, std::pair<PayPackageItemStatus, std::chrono::system_clock::time_point>> itemStatusCache;
-    std::map <std::string, std::chrono::system_clock::time_point> itemTimerCache;
+    core::Signal<std::string, PayPackageItemStatus, uint64_t> itemChanged;
+    std::map <std::string, std::pair<PayPackageItemStatus, uint64_t>> itemStatusCache;
 
     GLib::ContextThread thread;
     std::shared_ptr<proxyPayPackage> proxy;
 
-    const std::chrono::minutes expiretime
-    {
-        1
-    };
+    constexpr static uint64_t expiretime{60}; // 60 seconds prior status is "expiring"
 
 public:
     Package (const char* packageid)
@@ -60,59 +56,11 @@ public:
         /* Keeps item cache up-to-data as we get signals about it */
         itemChanged.connect([this](std::string itemid,
                                    PayPackageItemStatus status,
-                                   std::chrono::system_clock::time_point refundable_until)
+                                   uint64_t refundable_until)
         {
+            g_debug("Updating itemStatusCache for '%s', timeout is: %lld",
+                    itemid.c_str(), refundable_until);
             itemStatusCache[itemid] = std::make_pair(status, refundable_until);
-        });
-
-        /* Manage the timers to signal when refundable status changes */
-        /* We're being kinda loose with the timers and not tracking them to remove them
-           or anything like that because they don't happen that often and the refundable
-           time doesn't change that much. The cost is so low of extra timers that we're
-           just erroring on that side of things */
-        itemChanged.connect([this](std::string itemid,
-                                   PayPackageItemStatus status,
-                                   std::chrono::system_clock::time_point refundable_until)
-        {
-            try
-            {
-                if (itemTimerCache[itemid] == refundable_until)
-                {
-                    if (refundable_until < std::chrono::system_clock::now())
-                    {
-                        itemTimerCache.erase(itemid);
-                    }
-                    return;
-                }
-            }
-            catch (std::out_of_range range)
-            {
-                /* If it's not there, that's cool, let's add it */
-            }
-
-            auto timerlen = refundable_until - std::chrono::system_clock::now();
-            if (timerlen > std::chrono::seconds {10})
-            {
-                auto timerfunc = [this, itemid]()
-                {
-                    try
-                    {
-                        auto iteminfo = itemStatusCache[itemid];
-                        itemChanged(itemid, iteminfo.first, iteminfo.second);
-                    }
-                    catch (std::out_of_range range) { }
-                };
-
-                thread.timeoutSeconds(timerlen, timerfunc);
-
-                if (timerlen > expiretime)
-                {
-                    /* Two timers to signal the window closing */
-                    thread.timeoutSeconds(timerlen - expiretime, timerfunc);
-                }
-
-                itemTimerCache[itemid] = refundable_until;
-            }
         });
 
         /* Connect in the proxy now that we've got all the signals setup, let the fun begin! */
@@ -160,7 +108,7 @@ public:
         Package* notthis = reinterpret_cast<Package*>(user_data);
         notthis->itemChanged(itemid,
                              statusFromString(statusstr),
-                             std::chrono::system_clock::from_time_t(std::time_t(refundable_until)));
+                             refundable_until);
     }
 
     inline static PayPackageItemStatus statusFromString (std::string statusstr)
@@ -221,19 +169,22 @@ public:
     }
 
     inline PayPackageRefundStatus calcRefundStatus (PayPackageItemStatus item,
-                                                    std::chrono::system_clock::time_point refundtime)
+                                                    uint64_t refundtime)
     {
+        g_debug("Checking refund status with timeout: %lld", refundtime);
+
         if (item != PAY_PACKAGE_ITEM_STATUS_PURCHASED)
         {
             return PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED;
         }
 
-        auto timeleft = refundtime - std::chrono::system_clock::now();
-        if (timeleft < std::chrono::seconds(10)) // Honestly, they can't refund this quickly anyway
+        const auto now = std::time(nullptr);
+
+        if (refundtime < (now + 10 /* seconds */)) // Honestly, they can't refund this quickly anyway
         {
             return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
         }
-        if (timeleft < expiretime)
+        if (refundtime < (now + expiretime))
         {
             return PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING;
         }
@@ -248,7 +199,7 @@ public:
         itemObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
             std::string itemid,
             PayPackageItemStatus status,
-            std::chrono::system_clock::time_point refund)
+            uint64_t refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
         }));
@@ -267,7 +218,7 @@ public:
         refundObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
             std::string itemid,
             PayPackageItemStatus status,
-            std::chrono::system_clock::time_point refund)
+            uint64_t refund)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), calcRefundStatus(status, refund), user_data);
         }));
@@ -432,7 +383,9 @@ PayPackageItemStatus pay_package_item_status (PayPackage* package,
 int pay_package_item_is_refundable (PayPackage* package,
                                     const char* itemid)
 {
-    return pay_package_refund_status(package, itemid) == PAY_PACKAGE_REFUND_STATUS_REFUNDABLE;
+    auto status = pay_package_refund_status(package, itemid);
+    return (status == PAY_PACKAGE_REFUND_STATUS_REFUNDABLE ||
+            status == PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING);
 }
 
 PayPackageRefundStatus pay_package_refund_status (PayPackage* package,

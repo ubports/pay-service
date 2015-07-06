@@ -25,11 +25,11 @@
 class TokenGrabberNull : public TokenGrabber
 {
 public: 
-	virtual std::string signUrl (std::string url, std::string type)
-	{
-		std::string retval;
-		return retval;
-	}
+    virtual std::string signUrl (std::string url, std::string type)
+    {
+        std::string retval;
+        return retval;
+    }
 };
 
 #endif /* TOKEN_GRABBER_NULL_HPP__ */

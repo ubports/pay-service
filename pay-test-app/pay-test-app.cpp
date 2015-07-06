@@ -8,13 +8,13 @@
 
 int main (int argc, char * argv[])
 {
-	QGuiApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
 
-	qmlRegisterType<Package>("Pay", 1, 0, "Package");
+    qmlRegisterType<Package>("Pay", 1, 0, "Package");
 
-	QtQuick2ApplicationViewer view;
-	view.setMainQmlFile(QStringLiteral("pay-test-app.qml"));
-	view.showExpanded();
+    QtQuick2ApplicationViewer view;
+    view.setMainQmlFile(QStringLiteral("pay-test-app.qml"));
+    view.showExpanded();
 
-	return app.exec();
+    return app.exec();
 }

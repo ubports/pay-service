@@ -29,12 +29,12 @@ namespace Verification {
 
 class HttpFactory : public Factory {
 public:
-	HttpFactory (Web::ClickPurchasesApi::Ptr cpa_in);
-	virtual bool running () override;
-	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) override;
+    HttpFactory (Web::ClickPurchasesApi::Ptr cpa_in);
+    virtual bool running () override;
+    virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) override;
 
 private:
-	Web::ClickPurchasesApi::Ptr cpa;
+    Web::ClickPurchasesApi::Ptr cpa;
 };
 
 } // ns Verification

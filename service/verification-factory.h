@@ -26,28 +26,28 @@ namespace Verification {
 
 class Item {
 public:
-	enum Status {
-		ERROR,
-		NOT_PURCHASED,
-		PURCHASED,
-		APPROVED
-	};
+    enum Status {
+        ERROR,
+        NOT_PURCHASED,
+        PURCHASED,
+        APPROVED
+    };
 
-	virtual bool run (void) = 0;
+    virtual bool run (void) = 0;
 
-	typedef std::shared_ptr<Item> Ptr;
+    typedef std::shared_ptr<Item> Ptr;
 
-	core::Signal<Status> verificationComplete;
+    core::Signal<Status, uint64_t> verificationComplete;
 };
 
 class Factory {
 public:
-	virtual ~Factory() = default;
+    virtual ~Factory() = default;
 
-	virtual bool running () = 0;
-	virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) = 0;
+    virtual bool running () = 0;
+    virtual Item::Ptr verifyItem (const std::string& appid, const std::string& itemid) = 0;
 
-	typedef std::shared_ptr<Factory> Ptr;
+    typedef std::shared_ptr<Factory> Ptr;
 };
 
 } // ns Verification

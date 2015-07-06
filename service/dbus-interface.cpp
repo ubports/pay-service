@@ -67,7 +67,7 @@ public:
             g_main_context_push_thread_default(context);
 
             core::ScopedConnection itemupdate(items->itemChanged.connect([this](std::string pkg, std::string item,
-                                                                                Item::Item::Status status)
+                                                                                Item::Item::Status status, uint64_t refund_timeout)
             {
                 if (bus == nullptr)
                 {
@@ -78,6 +78,7 @@ public:
                 std::string path("/com/canonical/pay/");
                 path += encodedpkg;
 
+                auto mitem = items->getItem(pkg, item);
                 const char* strstatus = Item::Item::statusString(status);
 
                 g_dbus_connection_emit_signal(bus,
@@ -85,7 +86,10 @@ public:
                                               path.c_str(),
                                               "com.canonical.pay.package",
                                               "ItemStatusChanged",
-                                              g_variant_new("(sst)", item.c_str(), strstatus, 0),
+                                              g_variant_new("(sst)",
+                                                            item.c_str(),
+                                                            strstatus,
+                                                            refund_timeout),
                                               nullptr);
             }));
 
