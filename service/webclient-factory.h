@@ -30,41 +30,41 @@ namespace Web {
 
 class Response {
 public:
-	virtual std::string& body () = 0;
-	virtual bool is_success () = 0;
+    virtual std::string& body () = 0;
+    virtual bool is_success () = 0;
 
-	typedef std::shared_ptr<Response> Ptr;
+    typedef std::shared_ptr<Response> Ptr;
 };
 
 class Request {
 public:
-	virtual bool run (void) = 0;
+    virtual bool run (void) = 0;
 
-	virtual void set_header (const std::string& key,
-	                         const std::string& value) = 0;
+    virtual void set_header (const std::string& key,
+                             const std::string& value) = 0;
 
-	virtual void set_post (const std::vector<char>& body) =0;
-	void set_post (const std::string& body) { set_post(std::vector<char>(body.begin(), body.end())); }
+    virtual void set_post (const std::vector<char>& body) =0;
+    void set_post (const std::string& body) { set_post(std::vector<char>(body.begin(), body.end())); }
 
-	typedef std::shared_ptr<Request> Ptr;
+    typedef std::shared_ptr<Request> Ptr;
 
-	core::Signal<std::string> error;
-	core::Signal<Response::Ptr> finished;
+    core::Signal<std::string> error;
+    core::Signal<Response::Ptr> finished;
 };
 
 class Factory {
 public:
-	virtual ~Factory() = default;
+    virtual ~Factory() = default;
 
-	virtual bool running () = 0;
-	virtual Request::Ptr create_request (const std::string& url,
-	                                     bool sign) = 0;
+    virtual bool running () = 0;
+    virtual Request::Ptr create_request (const std::string& url,
+                                         bool sign) = 0;
 
-	/** A testing hook invoked before calling the web;
+    /** A testing hook invoked before calling the web;
             can be used for verifying url & headers, and for injecting test ones */
         virtual void setPreWebHook(std::function<void(std::string&, std::map<std::string,std::string>&)> hook) { preWebHook = hook; }
 
-	typedef std::shared_ptr<Factory> Ptr;
+    typedef std::shared_ptr<Factory> Ptr;
 
 protected:
         std::function<void(std::string&, std::map<std::string,std::string>&)> preWebHook;

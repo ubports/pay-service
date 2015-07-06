@@ -27,14 +27,14 @@ namespace Web {
 
 class CurlFactory : public Factory {
 public:
-	CurlFactory (TokenGrabber::Ptr token);
-	~CurlFactory ();
+    CurlFactory (TokenGrabber::Ptr token);
+    ~CurlFactory ();
 
-	virtual bool running () override;
-	virtual Request::Ptr create_request (const std::string& url,
+    virtual bool running () override;
+    virtual Request::Ptr create_request (const std::string& url,
                                          bool sign) override;
 private:
-	TokenGrabber::Ptr tokenGrabber;
+    TokenGrabber::Ptr tokenGrabber;
 };
 
 } // ns Web
