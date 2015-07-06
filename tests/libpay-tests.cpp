@@ -150,28 +150,28 @@ TEST_F(LibPayTests, ItemLifecycle)
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
                                            G_VARIANT_TYPE("(sst)"),
-                                           g_variant_new("(sst)", "item", "verifying", 0),
+                                           g_variant_new("(sst)", "item", "verifying", (guint64)0),
                                            &error);
     ASSERT_EQ(nullptr, error);
 
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
                                            G_VARIANT_TYPE("(sst)"),
-                                           g_variant_new("(sst)", "item", "not purchased", 0),
+                                           g_variant_new("(sst)", "item", "not purchased", (guint64)0),
                                            &error);
     ASSERT_EQ(nullptr, error);
 
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
                                            G_VARIANT_TYPE("(sst)"),
-                                           g_variant_new("(sst)", "item", "purchasing", 0),
+                                           g_variant_new("(sst)", "item", "purchasing", (guint64)0),
                                            &error);
     ASSERT_EQ(nullptr, error);
 
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
                                            G_VARIANT_TYPE("(sst)"),
-                                           g_variant_new("(sst)", "item", "purchased", 0),
+                                           g_variant_new("(sst)", "item", "purchased", (guint64)0),
                                            &error);
     ASSERT_EQ(nullptr, error);
 
@@ -258,7 +258,7 @@ TEST_F(LibPayTests, ItemLifecycle)
     dbus_test_dbus_mock_object_emit_signal(mock, pkgobj,
                                            "ItemStatusChanged",
                                            G_VARIANT_TYPE("(sst)"),
-                                           g_variant_new("(sst)", "item", "purchasing", 0),
+                                           g_variant_new("(sst)", "item", "purchasing", (guint64)0),
                                            &error);
     EXPECT_EQ(nullptr, error);
 

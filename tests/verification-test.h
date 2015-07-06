@@ -29,7 +29,10 @@ namespace Verification {
 
 class TestItem : public Item {
 public:
-    TestItem (bool purchased) : m_purchased(purchased) {
+    TestItem (bool purchased, uint64_t refund_timeout=0)
+        : m_purchased(purchased),
+        m_refund_timeout(refund_timeout)
+    {
     }
 
     ~TestItem (void) {
@@ -44,12 +47,17 @@ public:
         t = std::thread([this]() {
             /* Fastest website in the world */
             usleep(10 * 1000);
-            verificationComplete(m_purchased ? Status::PURCHASED : Status::NOT_PURCHASED);
+            if (m_purchased) {
+                verificationComplete(Status::PURCHASED, m_refund_timeout);
+            } else {
+                verificationComplete(Status::NOT_PURCHASED, 0);
+            }
         });
         return true;
     }
 private:
     bool m_purchased;
+    uint64_t m_refund_timeout;
     std::thread t;
 };
 
