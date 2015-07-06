@@ -1,3 +1,13 @@
+pay-service (2.0.0+15.04.20150706-0ubuntu1) vivid; urgency=medium
+
+  [ Rodney Dawes ]
+  * Ensure refund expiration time is properly cached and sent via dbus
+    signal. Switch to using space characters everywhere. Remove usage of
+    astyle, as it modifies code during the running of tests. (LP:
+    #1468032)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Mon, 06 Jul 2015 18:50:44 +0000
+
 pay-service (2.0.0+15.04.20150701.2-0ubuntu1) vivid; urgency=medium
 
   [ Rodney Dawes ]
