@@ -1,9 +1,11 @@
-
 # Here be Go
-add_custom_target(pay-service-ng ALL
-  COMMAND GOPATH=${CMAKE_CURRENT_SOURCE_DIR} go build pay-service-ng
+
+set(SERVICE_NG_TARGET pay-service-2)
+
+add_custom_target(${SERVICE_NG_TARGET} ALL
+  COMMAND GOPATH=${CMAKE_CURRENT_SOURCE_DIR} go build ${SERVICE_NG_TARGET}
 )
 
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/pay-service-ng
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${SERVICE_NG_TARGET}
   DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR}
 )
