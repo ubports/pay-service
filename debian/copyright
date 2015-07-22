@@ -10,15 +10,15 @@ Files: libpay/*
 Copyright: 2014 Canonical, Ltd.
 License: LGPL-3
 
-Files: service-ng/src/external/github.com/AlekSi/gocov-xml/*
+Files: service-ng/src/github.com/AlekSi/gocov-xml/*
 Copyright: 2013 Alexey Palazhchenko
 License: MIT
 
-Files: service-ng/src/external/github.com/axw/gocov/*
+Files: service-ng/src/github.com/axw/gocov/*
 Copyright: 2012 The Gocov Authors
 License: MIT
 
-Files: service-ng/src/external/github.com/godbus/dbus/*
+Files: service-ng/src/github.com/godbus/dbus/*
 Copyright: 2013 George Reinke <guelfey@gmail.com>, Google Inc.
 License: BSD-Simplified
 

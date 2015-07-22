@@ -17,8 +17,8 @@ set -x
 set -e
 
 for upstream in `cat vendor.cfg`; do
-    if [ ! -d external/${upstream} ]; then
-        mkdir -p external/${upstream}
+    if [ ! -d ${upstream} ]; then
+        mkdir -p ${upstream}
     fi
     HOST="`echo ${upstream} | cut -d/ -f1`"
     CODE_TMP=`mktemp -d -u`
@@ -36,7 +36,7 @@ for upstream in `cat vendor.cfg`; do
         echo "Unknown external source type: ${dirname}"
     fi
     if [ -e $CODE_TMP/${dirname} ]; then
-        cp -a ${CODE_TMP}/${dirname} external/${pardir}
+        cp -a ${CODE_TMP}/${dirname} ${pardir}
     fi
     rm -rf ${CODE_TMP}
 done
