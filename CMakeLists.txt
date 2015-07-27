@@ -81,6 +81,7 @@ set (CXX_WARNING_ARGS " -Wall -Wextra -pedantic -Wno-missing-field-initializers"
 add_subdirectory(common)
 add_subdirectory(libpay)
 add_subdirectory(service)
+add_subdirectory(service-ng)
 add_subdirectory(data)
 if (${enable_tests})
   add_subdirectory(tests)
