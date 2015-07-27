@@ -1,3 +1,19 @@
+pay-service (2.0.0+15.10.20150727-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Rodney Dawes ]
+  * Add initial go build system integration.
+  * Add script and config file to update external go lib sources. Import
+    some external go lib sources that we'll need here. Add an os.Exit()
+    call to the main() in the new go service.
+  * Build the common lib with -fPIC instead of -fPIE as libpay needs it.
+    (LP: #1477710)
+  * Implement basic empty dbus service.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Mon, 27 Jul 2015 17:33:40 +0000
+
 pay-service (2.0.0+15.10.20150721-0ubuntu1) wily; urgency=medium
 
   [ Andreas Pokorny ]
