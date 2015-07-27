@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=com.canonical.payments
+Exec=@CMAKE_INSTALL_FULL_PKGLIBEXECDIR@/pay-service-2

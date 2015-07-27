@@ -16,30 +16,17 @@
  *
  */
 
-package main
+package service
 
-import (
-    "log"
-    "os"
-    "os/signal"
-    "syscall"
-    "pay-service-2/service"
-)
+import "github.com/godbus/dbus"
 
-
-func main() {
-    signals := make(chan os.Signal, 1)
-    signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
-
-    service, err := service.New()
-    if err != nil {
-        log.Fatalf("Unable to create daemon: %s", err)
-    }
-
-    err = service.Run()
-    if err != nil {
-        log.Fatalf("Unable to run daemon: %s", err)
-    }
-
-    <-signals // Block so the daemon can run
+// DbusWrapper is an interface to be implemented by any struct that wants to be
+// injectable into this daemon for dbus communication.
+type DbusWrapper interface {
+    Connect() error
+    Names() []string
+    RequestName(name string, flags dbus.RequestNameFlags) (dbus.RequestNameReply, error)
+    GetNameOwner(name string) (string, error)
+    Export(object interface{}, path dbus.ObjectPath, iface string) error
+    Emit(path dbus.ObjectPath, name string, values ...interface{}) error
 }

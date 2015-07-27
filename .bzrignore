@@ -16,3 +16,4 @@ click-db/test.conf
 libpay.so.1.0.0
 libpay-tests
 verification-curl-endpoints/package-name
+*.service
