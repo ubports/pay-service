@@ -111,7 +111,7 @@ struct VerificationHttpTests : public ::testing::Test
         }
 };
 
-TEST_F(VerificationHttpTests, Verify)
+TEST_F(VerificationHttpTests, DISABLED_Verify)
 {
     const struct {
         const std::string appid;
