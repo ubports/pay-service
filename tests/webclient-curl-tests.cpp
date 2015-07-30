@@ -62,7 +62,7 @@ TEST_F(WebclientCurlTests, InitTest) {
     EXPECT_EQ(nullptr, factory);
 }
 
-TEST_F(WebclientCurlTests, DISABLED_InitRequestTest) {
+TEST_F(WebclientCurlTests, InitRequestTest) {
     auto factory = std::make_shared<Web::CurlFactory>(token);
     ASSERT_NE(nullptr, factory);
 
