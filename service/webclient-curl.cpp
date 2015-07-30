@@ -105,7 +105,7 @@ public:
             CURL* handle = curl_easy_init();
 
             /* Helps with threads */
-            curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1);
+            curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1L);
             curl_easy_setopt(handle, CURLOPT_URL, _url.c_str());
             curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, curlWrite);
             curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
