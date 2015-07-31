@@ -1,3 +1,16 @@
+pay-service (2.0.0+15.10.20150731-0ubuntu1) wily; urgency=medium
+
+  [ Charles Kerr ]
+  * Re-enable tests that were disabled temporarily to expedite the gcc5
+    landing
+
+  [ Rodney Dawes ]
+  * Add some unit tests for the new go service. Integrate tests into the
+    cmake build. Remove gocov and gocov-xml vendorings in favor of
+    future packages.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 31 Jul 2015 19:59:09 +0000
+
 pay-service (2.0.0+15.10.20150730-0ubuntu2~gcc5.1) wily; urgency=medium
 
   * Build using GCC 5.
