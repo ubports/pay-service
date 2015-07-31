@@ -111,7 +111,7 @@ struct VerificationHttpTests : public ::testing::Test
         }
 };
 
-TEST_F(VerificationHttpTests, DISABLED_Verify)
+TEST_F(VerificationHttpTests, Verify)
 {
     const struct {
         const std::string appid;
@@ -133,14 +133,14 @@ TEST_F(VerificationHttpTests, DISABLED_Verify)
     }
 }
 
-TEST_F(VerificationHttpTests, DISABLED_DeviceId)
+TEST_F(VerificationHttpTests, DeviceId)
 {
     auto vfactory = create_vfactory(web_request, "1234");
     run_item (vfactory->verifyItem("appid", "itemid"));
 }
 
 
-TEST_F(VerificationHttpTests, DISABLED_EnvironmentVariableNotSet)
+TEST_F(VerificationHttpTests, EnvironmentVariableNotSet)
 {
     const char* key {"PAY_BASE_URL"};
     ASSERT_TRUE((getenv(key)==nullptr) || unsetenv(key)); // ensure it's unset
@@ -149,7 +149,7 @@ TEST_F(VerificationHttpTests, DISABLED_EnvironmentVariableNotSet)
     run_item (vfactory->verifyItem("appid", "itemid"));
 }
 
-TEST_F(VerificationHttpTests, DISABLED_EnvironmentVariableSet)
+TEST_F(VerificationHttpTests, EnvironmentVariableSet)
 {
     const char* key {"PAY_BASE_URL"};
     web_request.expected_endpoint = "http://localhost:8080";
