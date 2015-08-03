@@ -45,15 +45,16 @@ func main() {
     }
 
     shutdown := func() {
-        shutdownError := daemon.Shutdown()
-        if shutdownError != nil {
-            fmt.Errorf("Unable to shut down: %s", shutdownError)
-            os.Exit(1)
-        }
-
-        os.Exit(0)
+        close(signals)
     }
     daemon.ShutdownTimer = time.AfterFunc(service.ShutdownTimeout, shutdown)
 
     <-signals // Block so the daemon can run
+    err = daemon.Shutdown()
+    if err != nil {
+        fmt.Errorf("Unable to shut down: %s", err)
+        os.Exit(1)
+    }
+
+    os.Exit(0)
 }
