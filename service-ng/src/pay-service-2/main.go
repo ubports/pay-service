@@ -27,6 +27,7 @@ import (
 )
 
 
+
 func main() {
     signals := make(chan os.Signal, 1)
     signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
@@ -40,6 +41,17 @@ func main() {
     if err != nil {
         log.Fatalf("Unable to run daemon: %s", err)
     }
+
+    shutdown := func() {
+        shutdownError := service.Shutdown()
+        if shutdownError != nil {
+            fmt.Errorf("Unable to shut down: %s", shutdownError)
+            os.Exit(1)
+        }
+
+        os.Exit(0)
+    }
+    service.shutdownTimer = time.AfterFunc(shutdownTimeout, shutdown)
 
     <-signals // Block so the daemon can run
 }

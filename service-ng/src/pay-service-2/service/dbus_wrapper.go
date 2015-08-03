@@ -24,6 +24,7 @@ import "github.com/godbus/dbus"
 // injectable into this daemon for dbus communication.
 type DbusWrapper interface {
     Connect() error
+    Stop() error
     Names() []string
     RequestName(name string, flags dbus.RequestNameFlags) (dbus.RequestNameReply, error)
     GetNameOwner(name string) (string, error)

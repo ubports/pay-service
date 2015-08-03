@@ -39,6 +39,10 @@ func (server *DbusServer) Connect() error {
     return err
 }
 
+func (server *DbusServer) Stop() error {
+    return server.connection.Close()
+}
+
 // Names returns a list of names owned by the DBus connection.
 //
 // Returns:
