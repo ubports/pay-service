@@ -176,3 +176,25 @@ func TestEmit_beforeConnect(t *testing.T) {
         t.Error("Expected an error due to emit before server was connected")
     }
 }
+
+// Test that Stop stops.
+/*
+func TestStop(t *testing.T) {
+    server := new(DbusServer)
+
+    err := server.Connect()
+    if err != nil {
+        t.Errorf("Unexpected error while connecting: %s", err)
+    }
+
+    err := server.Stop()
+    if err != nil {
+        t.Errorf("Error wile disconnecting: %s", err)
+    }
+
+    names := server.Names()
+    if names != nil {
+        t.Errorf("Expected no names to be returned.")
+    }
+}
+*/

@@ -22,7 +22,6 @@ import (
     "fmt"
     "github.com/godbus/dbus"
     "github.com/godbus/dbus/introspect"
-    "os"
     "time"
 )
 
@@ -45,13 +44,13 @@ const (
         `</node>`
 
     // shutdownTimeout is the amount of time we exit after last called
-    shutdownTimeout = time.Duration(30) * time.Second
+    ShutdownTimeout = time.Duration(30) * time.Second
 )
 
 // Service represents the actual service daemon.
 type Service struct {
     server         DbusWrapper
-    shutdownTimer  *time.Timer
+    ShutdownTimer  *time.Timer
 }
 
 /*

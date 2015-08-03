@@ -19,10 +19,12 @@
 package main
 
 import (
+    "fmt"
     "log"
     "os"
     "os/signal"
     "syscall"
+    "time"
     "pay-service-2/service"
 )
 
@@ -32,18 +34,18 @@ func main() {
     signals := make(chan os.Signal, 1)
     signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
-    service, err := service.New()
+    daemon, err := service.New()
     if err != nil {
         log.Fatalf("Unable to create daemon: %s", err)
     }
 
-    err = service.Run()
+    err = daemon.Run()
     if err != nil {
         log.Fatalf("Unable to run daemon: %s", err)
     }
 
     shutdown := func() {
-        shutdownError := service.Shutdown()
+        shutdownError := daemon.Shutdown()
         if shutdownError != nil {
             fmt.Errorf("Unable to shut down: %s", shutdownError)
             os.Exit(1)
@@ -51,7 +53,7 @@ func main() {
 
         os.Exit(0)
     }
-    service.shutdownTimer = time.AfterFunc(shutdownTimeout, shutdown)
+    daemon.ShutdownTimer = time.AfterFunc(service.ShutdownTimeout, shutdown)
 
     <-signals // Block so the daemon can run
 }
