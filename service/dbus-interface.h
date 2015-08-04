@@ -29,7 +29,7 @@ class DBusInterfaceImpl;
 class DBusInterface
 {
 public:
-    DBusInterface (const Item::Store::Ptr& in_items);
+    explicit DBusInterface (const Item::Store::Ptr& in_items);
     ~DBusInterface () { };
 
     static std::string encodePath (const std::string& input);

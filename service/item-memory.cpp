@@ -40,11 +40,7 @@ public:
         id(in_id),
         vfactory(in_vfactory),
         rfactory(in_rfactory),
-        pfactory(in_pfactory),
-        vitem(nullptr),
-        pitem(nullptr),
-        status(Item::Status::UNKNOWN),
-        refund_timeout(0)
+        pfactory(in_pfactory)
     {
         /* We init into the unknown state and then wait for someone
            to ask us to do something about it. */
@@ -170,7 +166,7 @@ public:
                 return false;
             }
 
-            pitem->purchaseComplete.connect([this](Purchase::Item::Status status)
+            pitem->purchaseComplete.connect([this](Purchase::Item::Status /*status*/)
             {
                 /* Verifying on each time the purchase UI runs right now because
                    we're not getting reliable status back from them. */
@@ -216,10 +212,10 @@ private:
     }
 
     /***** Only set at init *********/
-    /* Item ID */
-    std::string id;
     /* Application ID */
     std::string app;
+    /* Item ID */
+    std::string id;
     Verification::Factory::Ptr vfactory;
     Refund::Factory::Ptr rfactory;
     Purchase::Factory::Ptr pfactory;
@@ -234,11 +230,11 @@ private:
 
     /****** status is protected with it's own mutex *******/
     std::mutex status_mutex;
-    Item::Status status;
+    Item::Status status = Item::Status::UNKNOWN;
 
     /****** refund_timeout is protected with it's own mutex *******/
     std::mutex refund_mutex;
-    uint64_t refund_timeout;
+    uint64_t refund_timeout = 0;
 };
 
 std::list<std::string>

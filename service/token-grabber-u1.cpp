@@ -96,7 +96,7 @@ void TokenGrabberU1Qt::run (void)
     service.getCredentials();
 }
 
-void TokenGrabberU1Qt::accountChanged(Accounts::AccountId id)
+void TokenGrabberU1Qt::accountChanged(Accounts::AccountId /*id*/)
 {
     /* We don't need to worry about @id here because there
        can only be one U1 account for the user at a time, so
@@ -135,16 +135,15 @@ std::string TokenGrabberU1Qt::signUrl (std::string url, std::string type)
     return retval;
 }
 
-TokenGrabberU1::TokenGrabberU1 (void) :
-    grabber(nullptr)
-{
+TokenGrabberU1::TokenGrabberU1 ():
     //qt = std::make_shared<TokenGrabberU1Qt>();
-    qtfuture = qt::core::world::enter_with_task_and_expect_result<std::shared_ptr<TokenGrabberU1Qt>>([]()
+    qtfuture(qt::core::world::enter_with_task_and_expect_result<std::shared_ptr<TokenGrabberU1Qt>>([]()
     {
         auto qtgrabber = std::make_shared<TokenGrabberU1Qt>();
         qtgrabber->run();
         return qtgrabber;
-    });
+    }))
+{
 }
 
 TokenGrabberU1::~TokenGrabberU1 (void)

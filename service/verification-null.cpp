@@ -47,7 +47,7 @@ NullFactory::running ()
 }
 
 Item::Ptr
-NullFactory::verifyItem (const std::string& appid, const std::string& itemid)
+NullFactory::verifyItem (const std::string& /*appid*/, const std::string& /*itemid*/)
 {
     return std::make_shared<NullItem>();
 }

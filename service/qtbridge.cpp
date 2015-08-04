@@ -50,7 +50,7 @@ QEvent::Type qt_core_world_task_event_type()
 class TaskEvent : public QEvent
 {
 public:
-    TaskEvent(const std::function<void()>& task)
+    explicit TaskEvent(const std::function<void()>& task)
         : QEvent(qt_core_world_task_event_type()),
           task(task)
     {
@@ -84,7 +84,7 @@ class TaskHandler : public QObject
     Q_OBJECT
 
 public:
-    TaskHandler(QObject* parent) : QObject(parent)
+    explicit TaskHandler(QObject* parent) : QObject(parent)
     {
     }
 
