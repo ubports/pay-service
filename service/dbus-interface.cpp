@@ -68,9 +68,7 @@ public:
                     return;
                 }
 
-                std::string encodedpkg = DBusInterface::encodePath(pkg);
-                std::string path("/com/canonical/pay/");
-                path += encodedpkg;
+                const auto path = getPathFromPackage(pkg);
 
                 auto mitem = items->getItem(pkg, item);
                 const char* strstatus = Item::Item::statusString(status);
@@ -141,6 +139,24 @@ public:
         }
     }
 
+    static constexpr char const * baseObjectPath{"/com/canonical/pay"};
+
+    static std::string getPathFromPackage(const std::string& pkg)
+    {
+        std::string path = baseObjectPath;
+        path += '/';
+        path += DBusInterface::encodePath(pkg);
+        return path;
+    }
+
+    static std::string getPackageFromPath(const std::string& path)
+    {
+        std::string pkg = path;
+        pkg.erase(0, strlen(baseObjectPath) + 1/*strlen("/")*/);
+        pkg = DBusInterface::decodePath(pkg);
+        return pkg;
+    }
+
     void busAcquired (GDBusConnection* bus);
 
     /* Signal up that we're ready on the interface side of things */
@@ -165,14 +181,10 @@ public:
         g_variant_builder_init(&builder, G_VARIANT_TYPE_TUPLE);
         g_variant_builder_open(&builder, G_VARIANT_TYPE("ao"));
 
-        for (auto package : packages)
+        for (const auto& pkg : packages)
         {
-            std::string prefix("/com/canonical/pay/");
-            std::string encoded = DBusInterface::encodePath(package);
-
-            prefix += encoded;
-
-            g_variant_builder_add_value(&builder, g_variant_new_object_path(prefix.c_str()));
+            const auto path = getPathFromPackage(pkg);
+            g_variant_builder_add_value(&builder, g_variant_new_object_path(path.c_str()));
         }
 
         g_variant_builder_close(&builder); // tuple
@@ -212,8 +224,7 @@ public:
     void packageCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
                      GDBusMethodInvocation* invocation)
     {
-        const gchar* encoded_package = path + std::strlen("/com/canonical/pay/");
-        std::string package = DBusInterface::decodePath(std::string(encoded_package));
+        const auto package = getPackageFromPath(path);
 
         auto params_str = g_variant_print(params, true);
         g_debug("%s sender(%s) path(%s) method(%s) package(%s) params(%s)",
@@ -375,11 +386,11 @@ void DBusInterfaceImpl::busAcquired (GDBusConnection* inbus)
 
     g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(serviceProxy),
                                      bus,
-                                     "/com/canonical/pay",
+                                     baseObjectPath,
                                      NULL);
 
     subtree_registration = g_dbus_connection_register_subtree(bus,
-                                                              "/com/canonical/pay",
+                                                              baseObjectPath,
                                                               &subtreeVtable,
                                                               G_DBUS_SUBTREE_FLAGS_DISPATCH_TO_UNENUMERATED_NODES,
                                                               this,
