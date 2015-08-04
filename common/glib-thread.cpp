@@ -24,8 +24,6 @@ namespace GLib
 
 
 ContextThread::ContextThread (std::function<void()> beforeLoop, std::function<void()> afterLoop)
-    : _context(nullptr)
-    , _loop(nullptr)
 {
     _cancel = std::shared_ptr<GCancellable>(g_cancellable_new(), [](GCancellable * cancel)
     {
@@ -79,7 +77,7 @@ ContextThread::ContextThread (std::function<void()> beforeLoop, std::function<vo
     _context = context_value.first;
     _loop = context_value.second;
 
-    if (_context == nullptr || _loop == nullptr)
+    if (!_context || !_loop)
     {
         throw std::runtime_error("Unable to create GLib Thread");
     }
@@ -93,7 +91,7 @@ ContextThread::~ContextThread ()
 void ContextThread::quit ()
 {
     g_cancellable_cancel(_cancel.get()); /* Force the cancellation on ongoing tasks */
-    if (_loop != nullptr)
+    if (_loop)
     {
         g_main_loop_quit(_loop.get());    /* Quit the loop */
     }
