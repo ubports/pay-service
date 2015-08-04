@@ -38,7 +38,7 @@ ContextThread::ContextThread (std::function<void()> beforeLoop, std::function<vo
     /* NOTE: We copy afterLoop but reference beforeLoop. We're blocking so we
        know that beforeLoop will stay valid long enough, but we can't say the
        same for afterLoop */
-    _thread = std::thread([&context_promise, &beforeLoop, afterLoop, this]() -> void
+    _thread = std::thread([&context_promise, &beforeLoop, afterLoop, this]()
     {
         /* Build up the context and loop for the async events and a place
            for GDBus to send its events back to */
@@ -136,7 +136,7 @@ void ContextThread::simpleSource (std::function<GSource * ()> srcBuilder, std::f
     }
                                           );
     g_source_set_callback(source.get(),
-                          [](gpointer data) -> gboolean
+                          [](gpointer data)
     {
         std::function<void()>* heapWork = reinterpret_cast<std::function<void()> *>(data);
         (*heapWork)();

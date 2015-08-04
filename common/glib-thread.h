@@ -50,7 +50,7 @@ public:
         }
 
         std::promise<T> promise;
-        std::function<void()> magicFunc = [&promise, &work] () -> void {
+        std::function<void()> magicFunc = [&promise, &work] () {
             promise.set_value(work());
         };
 
