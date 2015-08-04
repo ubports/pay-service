@@ -138,13 +138,13 @@ void ContextThread::simpleSource (std::function<GSource * ()> srcBuilder, std::f
     g_source_set_callback(source.get(),
                           [](gpointer data)
     {
-        std::function<void()>* heapWork = reinterpret_cast<std::function<void()> *>(data);
+        auto heapWork = static_cast<std::function<void()> *>(data);
         (*heapWork)();
         return G_SOURCE_REMOVE;
     }, heapWork,
     [](gpointer data)
     {
-        std::function<void()>* heapWork = reinterpret_cast<std::function<void()> *>(data);
+        auto heapWork = static_cast<std::function<void()> *>(data);
         delete heapWork;
     });
 
