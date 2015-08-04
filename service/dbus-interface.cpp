@@ -432,12 +432,6 @@ DBusInterface::DBusInterface (const Item::Store::Ptr& in_items)
     impl->run();
 }
 
-bool
-DBusInterface::busStatus ()
-{
-    return true;
-}
-
 std::string
 DBusInterface::encodePath (const std::string& input)
 {

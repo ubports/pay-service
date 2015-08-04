@@ -32,8 +32,6 @@ public:
     DBusInterface (const Item::Store::Ptr& in_items);
     ~DBusInterface () { };
 
-    bool busStatus ();
-
     static std::string encodePath (const std::string& input);
     static std::string decodePath (const std::string& input);
 
