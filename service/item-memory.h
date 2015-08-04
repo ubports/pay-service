@@ -43,9 +43,9 @@ public:
             throw std::invalid_argument("factory");
         }
     }
-    std::list<std::string> listApplications (void);
-    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application);
-    Item::Ptr getItem (std::string& application, std::string& itemid);
+    std::list<std::string> listApplications (void) override;
+    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (const std::string& application) override;
+    Item::Ptr getItem (const std::string& application, const std::string& itemid) override;
 
 private:
     std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;

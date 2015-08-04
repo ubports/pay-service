@@ -31,8 +31,8 @@ namespace Item
 class MemoryItem : public Item
 {
 public:
-    MemoryItem (std::string& in_app,
-                std::string& in_id,
+    MemoryItem (const std::string& in_app,
+                const std::string& in_id,
                 Verification::Factory::Ptr& in_vfactory,
                 Refund::Factory::Ptr& in_rfactory,
                 Purchase::Factory::Ptr& in_pfactory) :
@@ -46,12 +46,12 @@ public:
            to ask us to do something about it. */
     }
 
-    std::string& getApp (void)
+    const std::string& getApp (void)
     {
         return app;
     }
 
-    std::string& getId (void) override
+    const std::string& getId (void) override
     {
         return id;
     }
@@ -254,7 +254,7 @@ MemoryStore::listApplications (void)
 }
 
 std::shared_ptr<std::map<std::string, Item::Ptr>>
-MemoryStore::getItems (std::string& application)
+MemoryStore::getItems (const std::string& application)
 {
     auto app = data[application];
 
@@ -268,7 +268,7 @@ MemoryStore::getItems (std::string& application)
 }
 
 Item::Ptr
-MemoryStore::getItem (std::string& application, std::string& itemid)
+MemoryStore::getItem (const std::string& application, const std::string& itemid)
 {
     if (verificationFactory == nullptr)
     {
