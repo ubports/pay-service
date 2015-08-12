@@ -40,7 +40,7 @@ NullFactory::running ()
 }
 
 Item::Ptr
-NullFactory::refund (const std::string& appid, const std::string& itemid)
+NullFactory::refund (const std::string& /*appid*/, const std::string& /*itemid*/)
 {
     return std::make_shared<NullItem>();
 }

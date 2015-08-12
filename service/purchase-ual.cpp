@@ -41,7 +41,6 @@ public:
     typedef std::shared_ptr<Item> Ptr;
 
     UalItem (const std::string& in_appid, const std::string& in_itemid, const std::shared_ptr<MirConnection>& mir) :
-        status(Item::ERROR),
         appid(in_appid),
         itemid(in_itemid),
         connection(mir)
@@ -136,7 +135,7 @@ private:
     std::string instanceid;
     std::shared_ptr<GLib::ContextThread> thread;
     std::shared_ptr<MirPromptSession> session;
-    Item::Status status;
+    Item::Status status = Item::ERROR;
 
     /* Given to us by our parents */
     std::shared_ptr<MirConnection> connection;
@@ -336,7 +335,7 @@ private:
         }
     }
 
-    static void stateChanged (MirPromptSession* session, MirPromptSessionState state, void* user_data)
+    static void stateChanged (MirPromptSession* /*session*/, MirPromptSessionState state, void* /*user_data*/)
     {
         g_debug("Mir Prompt session is in state: %d", state);
     }
@@ -413,9 +412,9 @@ UalFactory::purchaseItem (std::string& appid, std::string& itemid)
     return impl->purchaseItem(appid, itemid);
 }
 
-UalFactory::UalFactory ()
+UalFactory::UalFactory ():
+    impl(std::make_shared<Impl>())
 {
-    impl = std::make_shared<Impl>();
     if (!impl)
     {
         throw std::runtime_error("Unable to build implementation of UAL Factory");

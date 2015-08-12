@@ -31,7 +31,7 @@ namespace Web
 class ClickPurchasesApi
 {
 public:
-    ClickPurchasesApi(Web::Factory::Ptr wfactory);
+    explicit ClickPurchasesApi(Web::Factory::Ptr wfactory);
     virtual ~ClickPurchasesApi();
     bool running();
 

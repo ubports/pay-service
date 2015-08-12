@@ -27,7 +27,7 @@ namespace Web {
 
 class CurlFactory : public Factory {
 public:
-    CurlFactory (TokenGrabber::Ptr token);
+    explicit CurlFactory (TokenGrabber::Ptr token);
     ~CurlFactory ();
 
     virtual bool running () override;

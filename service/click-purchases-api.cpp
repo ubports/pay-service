@@ -26,7 +26,7 @@ class ClickPurchasesApi::Impl
 {
 public:
 
-    Impl(Factory::Ptr wfactory):
+    explicit Impl(Factory::Ptr wfactory):
         m_wfactory(wfactory)
     {
     }

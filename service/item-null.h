@@ -30,7 +30,7 @@ class NullItem : public Item
 public:
     NullItem (std::string id) : _id(id) {};
 
-    std::string& getId (void) override
+    const std::string& getId (void) override
     {
         return _id;
     }
@@ -64,17 +64,17 @@ public:
 class NullStore : public Store
 {
 public:
-    std::list<std::string> listApplications (void)
+    std::list<std::string> listApplications (void) override
     {
         return std::list<std::string>();
     }
 
-    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application)
+    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (const std::string& application) override
     {
         return std::make_shared<std::map<std::string, Item::Ptr>>();
     }
 
-    Item::Ptr getItem (std::string& application, std::string& itemid)
+    Item::Ptr getItem (const std::string& application, const std::string& itemid) override
     {
         auto retval = std::make_shared<NullItem>(itemid);
         return retval;
