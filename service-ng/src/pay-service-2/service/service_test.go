@@ -57,4 +57,9 @@ func TestServiceRunStop(t *testing.T) {
     if name != names[0] {
         t.Errorf("Name owner was '%s', expected to be '%s'.", name, names[0])
     }
+
+    err = service.Shutdown()
+    if err != nil {
+        t.Errorf("Error shutting down service: %s", err)
+    }
 }
