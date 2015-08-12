@@ -1,3 +1,14 @@
+pay-service (2.0.0+15.10.20150812-0ubuntu1) wily; urgency=medium
+
+  [ Charles Kerr ]
+  * Cleanups and compiler warning fixes
+
+  [ Rodney Dawes ]
+  * Add a default timeout to exit the service when unused.
+  * Update the vendored dbus lib.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 12 Aug 2015 13:34:07 +0000
+
 pay-service (2.0.0+15.10.20150731-0ubuntu1) wily; urgency=medium
 
   [ Charles Kerr ]
