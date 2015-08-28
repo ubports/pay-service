@@ -42,16 +42,72 @@ func NewPayService(dbusConnection DbusWrapper,
     return payiface, nil
 }
 
-func (iface *PayService) ListPurchasedItems(message dbus.Message) (map[string]string, *dbus.Error) {
+func (iface *PayService) AcknowledgeItem(message dbus.Message, item_id string) (map[string]interface{}, *dbus.Error) {
+    package_id := package_id_from_path(message)
+
+    fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
+
+    // Acknowledge the item and return the item info and status.
+    item := make(map[string]interface{})
+    item["id"] = item_id
+
+    return item, nil
+}
+
+func (iface *PayService) GetItem(message dbus.Message, item_id string) (map[string]interface{}, *dbus.Error) {
+    package_id := package_id_from_path(message)
+
+    fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
+
+    // Get the item and return its info.
+    item := make(map[string]interface{})
+    item["id"] = item_id
+
+    return item, nil
+}
+
+func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]map[string]interface{}, *dbus.Error) {
+    package_id := package_id_from_path(message)
+
+    fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
+
+    // Get the purchased items, and their properties, for the package.
+    purchasedItems := make([]map[string]interface{}, 0)
+
+    // Need to actually get the items from somewhere, then validate and return
+    return purchasedItems, nil
+}
+
+func (iface *PayService) PurchaseItem(message dbus.Message, item_id string) (map[string]interface{}, *dbus.Error) {
+    package_id := package_id_from_path(message)
+
+    fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
+
+    // Purchase the item and return the item info and status.
+    item := make(map[string]interface{})
+    item["id"] = item_id
+
+    return item, nil
+}
+
+func (iface *PayService) RefundItem(message dbus.Message, item_id string) (map[string]interface{}, *dbus.Error) {
+    package_id := package_id_from_path(message)
+
+    fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
+
+    // Refund the item and return the item info and status.
+    item := make(map[string]interface{})
+    item["id"] = item_id
+
+    return item, nil
+}
+
+/* Get the decoded package_id from a path
+ */
+func package_id_from_path(message dbus.Message) (string) {
     // Get the package ID
     called_path := message.Headers[dbus.FieldPath].String()
     package_id := path.Base(called_path)
 
-    fmt.Println("DEBUG - ListPurchasedItems called for package: %s", package_id)
-
-    // Get the list of purchased items for the package
-    purchasedItems := make(map[string]string)
-
-    // Need to actually get the items from somewhere, then validate and return
-    return purchasedItems, nil
+    return package_id
 }
