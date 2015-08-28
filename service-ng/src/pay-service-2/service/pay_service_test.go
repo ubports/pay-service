@@ -37,6 +37,8 @@ func TestListPurchasedItems(t *testing.T) {
     }
 
     var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
     replyMap, dbusErr := payiface.ListPurchasedItems(m)
     if dbusErr != nil {
         t.Errorf("Unexpected error listing purchased items: %s", dbusErr)

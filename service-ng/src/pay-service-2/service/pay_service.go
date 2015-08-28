@@ -21,6 +21,7 @@ package service
 import (
     "fmt"
     "github.com/godbus/dbus"
+    "path"
 )
 
 type PayService struct {
@@ -42,6 +43,13 @@ func NewPayService(dbusConnection DbusWrapper,
 }
 
 func (iface *PayService) ListPurchasedItems(message dbus.Message) (map[string]string, *dbus.Error) {
+    // Get the package ID
+    called_path := message.Headers[dbus.FieldPath].String()
+    package_id := path.Base(called_path)
+
+    fmt.Println("DEBUG - ListPurchasedItems called for package: %s", package_id)
+
+    // Get the list of purchased items for the package
     purchasedItems := make(map[string]string)
 
     // Need to actually get the items from somewhere, then validate and return
