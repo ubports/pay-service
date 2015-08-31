@@ -22,16 +22,22 @@ import (
     "fmt"
     "github.com/godbus/dbus"
     "path"
+    "time"
 )
 
 type PayService struct {
     dbusConnection DbusWrapper
     baseObjectPath dbus.ObjectPath
+    shutdownTimer  time.Timer
 }
 
 func NewPayService(dbusConnection DbusWrapper,
-    interfaceName string, baseObjectPath dbus.ObjectPath) (*PayService, error) {
-    payiface := &PayService{dbusConnection: dbusConnection}
+    interfaceName string, baseObjectPath dbus.ObjectPath,
+    shutdownTimer time.Timer) (*PayService, error) {
+    payiface := &PayService{
+        dbusConnection: dbusConnection,
+        shutdownTimer: shutdownTimer,
+    }
 
     if !baseObjectPath.IsValid() {
         return nil, fmt.Errorf(`Invalid base object path: "%s"`, baseObjectPath)
@@ -43,6 +49,7 @@ func NewPayService(dbusConnection DbusWrapper,
 }
 
 func (iface *PayService) AcknowledgeItem(message dbus.Message, item_id string) (map[string]dbus.Variant, *dbus.Error) {
+    iface.pause_timer()
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - AcknowledgeItem called for package:", package_id)
@@ -51,10 +58,13 @@ func (iface *PayService) AcknowledgeItem(message dbus.Message, item_id string) (
     item := make(map[string]dbus.Variant)
     item["id"] = dbus.MakeVariant(item_id)
 
+    // Reset the timeout
+    iface.reset_timer()
     return item, nil
 }
 
 func (iface *PayService) GetItem(message dbus.Message, item_id string) (map[string]dbus.Variant, *dbus.Error) {
+    iface.pause_timer()
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - GetItem called for package:", package_id)
@@ -67,6 +77,7 @@ func (iface *PayService) GetItem(message dbus.Message, item_id string) (map[stri
 }
 
 func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]map[string]dbus.Variant, *dbus.Error) {
+    iface.pause_timer()
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
@@ -74,11 +85,14 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]map[string]d
     // Get the purchased items, and their properties, for the package.
     purchasedItems := make([]map[string]dbus.Variant, 0)
 
+    // Reset the timeout
+    iface.reset_timer()
     // Need to actually get the items from somewhere, then validate and return
     return purchasedItems, nil
 }
 
 func (iface *PayService) PurchaseItem(message dbus.Message, item_id string) (map[string]dbus.Variant, *dbus.Error) {
+    iface.pause_timer()
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - PurchaseItem called for package:", package_id)
@@ -87,10 +101,13 @@ func (iface *PayService) PurchaseItem(message dbus.Message, item_id string) (map
     item := make(map[string]dbus.Variant)
     item["id"] = dbus.MakeVariant(item_id)
 
+    // Reset the timeout
+    iface.reset_timer()
     return item, nil
 }
 
 func (iface *PayService) RefundItem(message dbus.Message, item_id string) (map[string]dbus.Variant, *dbus.Error) {
+    iface.pause_timer()
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - RefundItem called for package:", package_id)
@@ -99,7 +116,17 @@ func (iface *PayService) RefundItem(message dbus.Message, item_id string) (map[s
     item := make(map[string]dbus.Variant)
     item["id"] = dbus.MakeVariant(item_id)
 
+    // Reset the timeout
+    iface.reset_timer()
     return item, nil
+}
+
+func (iface *PayService) pause_timer() bool {
+    return iface.shutdownTimer.Stop()
+}
+
+func (iface *PayService) reset_timer() bool {
+    return iface.shutdownTimer.Reset(ShutdownTimeout)
 }
 
 /* Get the decoded package_id from a path

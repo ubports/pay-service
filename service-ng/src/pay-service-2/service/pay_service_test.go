@@ -21,13 +21,18 @@ package service
 import (
     "github.com/godbus/dbus"
     "testing"
+    "time"
 )
+
+func fake_timeout() {    
+}
 
 func TestAcknowledgeItemConsumable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    timer := time.AfterFunc(time.Duration(10) * time.Second, fake_timeout)
+    
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", *timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -52,8 +57,9 @@ func TestAcknowledgeItemConsumable(t *testing.T) {
 func TestAcknowledgeItemUnlockable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := time.AfterFunc(time.Duration(10) * time.Second, fake_timeout)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", *timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -78,8 +84,9 @@ func TestAcknowledgeItemUnlockable(t *testing.T) {
 func TestGetItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := time.AfterFunc(time.Duration(10) * time.Second, fake_timeout)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", *timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -104,8 +111,9 @@ func TestGetItem(t *testing.T) {
 func TestGetPurchasedItems(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := time.AfterFunc(time.Duration(10) * time.Second, fake_timeout)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", *timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -130,8 +138,9 @@ func TestGetPurchasedItems(t *testing.T) {
 func TestPurchaseItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := time.AfterFunc(time.Duration(10) * time.Second, fake_timeout)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", *timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -156,8 +165,9 @@ func TestPurchaseItem(t *testing.T) {
 func TestRefundItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := time.AfterFunc(time.Duration(10) * time.Second, fake_timeout)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", *timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
