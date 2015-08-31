@@ -42,62 +42,62 @@ func NewPayService(dbusConnection DbusWrapper,
     return payiface, nil
 }
 
-func (iface *PayService) AcknowledgeItem(message dbus.Message, item_id string) (map[string]interface{}, *dbus.Error) {
+func (iface *PayService) AcknowledgeItem(message dbus.Message, item_id string) (map[string]dbus.Variant, *dbus.Error) {
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
 
     // Acknowledge the item and return the item info and status.
-    item := make(map[string]interface{})
-    item["id"] = item_id
+    item := make(map[string]dbus.Variant)
+    item["id"] = dbus.MakeVariant(item_id)
 
     return item, nil
 }
 
-func (iface *PayService) GetItem(message dbus.Message, item_id string) (map[string]interface{}, *dbus.Error) {
+func (iface *PayService) GetItem(message dbus.Message, item_id string) (map[string]dbus.Variant, *dbus.Error) {
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
 
     // Get the item and return its info.
-    item := make(map[string]interface{})
-    item["id"] = item_id
+    item := make(map[string]dbus.Variant)
+    item["id"] = dbus.MakeVariant(item_id)
 
     return item, nil
 }
 
-func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]map[string]interface{}, *dbus.Error) {
+func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]map[string]dbus.Variant, *dbus.Error) {
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
 
     // Get the purchased items, and their properties, for the package.
-    purchasedItems := make([]map[string]interface{}, 0)
+    purchasedItems := make([]map[string]dbus.Variant, 0)
 
     // Need to actually get the items from somewhere, then validate and return
     return purchasedItems, nil
 }
 
-func (iface *PayService) PurchaseItem(message dbus.Message, item_id string) (map[string]interface{}, *dbus.Error) {
+func (iface *PayService) PurchaseItem(message dbus.Message, item_id string) (map[string]dbus.Variant, *dbus.Error) {
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
 
     // Purchase the item and return the item info and status.
-    item := make(map[string]interface{})
-    item["id"] = item_id
+    item := make(map[string]dbus.Variant)
+    item["id"] = dbus.MakeVariant(item_id)
 
     return item, nil
 }
 
-func (iface *PayService) RefundItem(message dbus.Message, item_id string) (map[string]interface{}, *dbus.Error) {
+func (iface *PayService) RefundItem(message dbus.Message, item_id string) (map[string]dbus.Variant, *dbus.Error) {
     package_id := package_id_from_path(message)
 
     fmt.Println("DEBUG - GetPurchasedItems called for package:", package_id)
 
     // Refund the item and return the item info and status.
-    item := make(map[string]interface{})
-    item["id"] = item_id
+    item := make(map[string]dbus.Variant)
+    item["id"] = dbus.MakeVariant(item_id)
 
     return item, nil
 }
