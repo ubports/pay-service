@@ -38,7 +38,7 @@ const (
     // introspectionXml is the XML to be used for the Introspection interface.
     introspectionXml = `
         <node>
-            <interface name="` + interfaceName + `">
+            <interface name="` + busName + `">
             </interface>` +
         introspect.IntrospectDataString +
         `</node>`
@@ -68,7 +68,7 @@ func New() (*Service, error) {
 
     var err error
     service.payiface, err = NewPayService(service.server,
-        busName, baseObjectPath)
+        interfaceName, baseObjectPath)
     if err != nil {
         return nil, fmt.Errorf("Unable to create pay service interface: %s", err)
     }
@@ -93,6 +93,12 @@ func (service *Service) Run() error {
         "org.freedesktop.DBus.Introspectable")
     if err != nil {
         return fmt.Errorf("Unable to export introspection: %s", err)
+    }
+
+    err = service.server.ExportSubtree(service.payiface,
+        baseObjectPath, interfaceName)
+    if err != nil {
+        return fmt.Errorf("Unable to export interface subtree: %s", err)
     }
 
     // Now that all interfaces are exported and ready, request our name. Things

@@ -109,6 +109,15 @@ func (server *DbusServer) Export(object interface{}, path dbus.ObjectPath, iface
     return server.connection.Export(object, path, iface)
 }
 
+func (server *DbusServer) ExportSubtree(object interface{},
+    path dbus.ObjectPath, iface string) error {
+    if server.connection == nil {
+        return fmt.Errorf("Server is not connected")
+    }
+
+    return server.connection.ExportSubtree(object, path, iface)
+}
+
 // Emit emits a DBus signal.
 //
 // Parameters:
