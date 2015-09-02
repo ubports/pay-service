@@ -19,7 +19,6 @@
 package service
 
 import (
-    "fmt"
     "time"
 )
 
@@ -30,8 +29,7 @@ type FakeTimer struct {
     stopCalled bool
 }
 
-func (timer FakeTimer) Reset(duration time.Duration) bool {
-    fmt.Println("Reset called.")
+func (timer *FakeTimer) Reset(duration time.Duration) bool {
     timer.resetCalled = true
     retval := true
 
@@ -42,8 +40,7 @@ func (timer FakeTimer) Reset(duration time.Duration) bool {
     return retval
 }
 
-func (timer FakeTimer) Stop() bool {
-    fmt.Println("Stop called.")
+func (timer *FakeTimer) Stop() bool {
     timer.stopCalled = true
 
     if timer.duration == 0 {

@@ -50,11 +50,11 @@ func TestAcknowledgeItemConsumable(t *testing.T) {
         t.Errorf("Expected values in map, got none instead.")
     }
 
-    if timer.stopCalled != true{
+    if !timer.stopCalled {
         t.Errorf("Timer was not stopped.")
     }
 
-    if timer.resetCalled != true {
+    if !timer.resetCalled {
         t.Errorf("Timer was not reset.")
     }
 }

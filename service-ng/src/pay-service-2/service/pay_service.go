@@ -72,6 +72,8 @@ func (iface *PayService) GetItem(message dbus.Message, item_id string) (map[stri
     item := make(map[string]dbus.Variant)
     item["id"] = dbus.MakeVariant(item_id)
 
+    // Reset the timeout
+    iface.reset_timer()
     return item, nil
 }
 
