@@ -23,11 +23,13 @@ import (
     "testing"
 )
 
+
 func TestAcknowledgeItemConsumable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    timer := new(FakeTimer)
+    
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -46,14 +48,23 @@ func TestAcknowledgeItemConsumable(t *testing.T) {
 
     if len(reply) == 0 {
         t.Errorf("Expected values in map, got none instead.")
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
     }
 }
 
 func TestAcknowledgeItemUnlockable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -73,13 +84,22 @@ func TestAcknowledgeItemUnlockable(t *testing.T) {
     if len(reply) == 0 {
         t.Errorf("Expected values in map, got none instead.")
     }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
 }
 
 func TestGetItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -99,13 +119,22 @@ func TestGetItem(t *testing.T) {
     if len(reply) == 0 {
         t.Errorf("Expected values in map, got none instead.")
     }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
 }
 
 func TestGetPurchasedItems(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -125,13 +154,22 @@ func TestGetPurchasedItems(t *testing.T) {
     if len(reply) != 0 {
         t.Errorf("Expected 0 values in map, got %d instead.", len(reply))
     }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
 }
 
 func TestPurchaseItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -151,13 +189,22 @@ func TestPurchaseItem(t *testing.T) {
     if len(reply) == 0 {
         t.Errorf("Expected 0 values in map, got none instead.")
     }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
 }
 
 func TestRefundItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo")
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -176,5 +223,13 @@ func TestRefundItem(t *testing.T) {
 
     if len(reply) == 0 {
         t.Errorf("Expected values in map, got none instead.")
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
     }
 }
