@@ -1,4 +1,4 @@
-/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */ 
+/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright © 2015 Canonical Ltd.
  *
@@ -49,8 +49,9 @@ const (
 
 // Service represents the actual service daemon.
 type Service struct {
-    server         DbusWrapper
-    ShutdownTimer  *time.Timer
+    server        DbusWrapper
+    payiface      *PayService
+    ShutdownTimer *time.Timer
 }
 
 /*
@@ -64,6 +65,13 @@ func New() (*Service, error) {
     service := new(Service)
 
     service.server = new(DbusServer)
+
+    var err error
+    service.payiface, err = NewPayService(service.server,
+        busName, baseObjectPath)
+    if err != nil {
+        return nil, fmt.Errorf("Unable to create pay service interface: %s", err)
+    }
 
     return service, nil
 }
