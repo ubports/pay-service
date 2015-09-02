@@ -1,3 +1,15 @@
+pay-service (2.0.0+15.10.20150902-0ubuntu1) wily; urgency=medium
+
+  [ Rodney Dawes ]
+  * Add initial stub method calls for new DBus API. Add initial test
+    code stubs for new DBus API.
+  * Export the new method subtree over dbus.
+  * Import the ExportSubtree support for godbus.
+  * Pause and reset the shutdown timer whenever dbus methods are called.
+  * Update the bzrignore file.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 02 Sep 2015 16:50:43 +0000
+
 pay-service (2.0.0+15.10.20150826-0ubuntu1) wily; urgency=medium
 
   [ Rodney Dawes ]
