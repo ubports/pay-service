@@ -31,6 +31,7 @@ type FakeDbusServer struct {
     requestNameCalled  bool
     getNameOwnerCalled bool
     exportCalled       bool
+    exportSubtreeCalled bool
     emitCalled         bool
 
     failConnect      bool
@@ -95,6 +96,19 @@ func (server *FakeDbusServer) GetNameOwner(name string) (string, error) {
 
 func (server *FakeDbusServer) Export(object interface{}, path dbus.ObjectPath, iface string) error {
     server.exportCalled = true
+
+    if server.failExport {
+        if server.failSpecificExportInterface == "" || iface == server.failSpecificExportInterface {
+            return fmt.Errorf("Failed at user request")
+        }
+    }
+
+    return nil
+}
+
+func (server *FakeDbusServer) ExportSubtree(object interface{},
+    path dbus.ObjectPath, iface string) error {
+    server.exportSubtreeCalled = true
 
     if server.failExport {
         if server.failSpecificExportInterface == "" || iface == server.failSpecificExportInterface {
