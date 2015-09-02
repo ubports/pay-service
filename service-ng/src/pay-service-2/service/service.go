@@ -51,7 +51,7 @@ const (
 type Service struct {
     server        DbusWrapper
     payiface      *PayService
-    ShutdownTimer *time.Timer
+    ShutdownTimer Timer
 }
 
 /*
@@ -69,7 +69,7 @@ func New() (*Service, error) {
 
     var err error
     service.payiface, err = NewPayService(service.server,
-        interfaceName, baseObjectPath, *service.ShutdownTimer)
+        interfaceName, baseObjectPath, service.ShutdownTimer)
     if err != nil {
         return nil, fmt.Errorf("Unable to create pay service interface: %s", err)
     }

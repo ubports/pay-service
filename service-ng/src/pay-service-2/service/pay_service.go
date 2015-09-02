@@ -22,18 +22,17 @@ import (
     "fmt"
     "github.com/godbus/dbus"
     "path"
-    "time"
 )
 
 type PayService struct {
     dbusConnection DbusWrapper
     baseObjectPath dbus.ObjectPath
-    shutdownTimer  time.Timer
+    shutdownTimer  Timer
 }
 
 func NewPayService(dbusConnection DbusWrapper,
     interfaceName string, baseObjectPath dbus.ObjectPath,
-    shutdownTimer time.Timer) (*PayService, error) {
+    shutdownTimer Timer) (*PayService, error) {
     payiface := &PayService{
         dbusConnection: dbusConnection,
         shutdownTimer: shutdownTimer,
