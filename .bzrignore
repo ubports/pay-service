@@ -12,8 +12,11 @@ pay-service.conf
 verification-curl-tests
 tests/verification-curl-endpoints/good/simple
 purchase-ual-tests
-click-db/test.conf
 libpay.so.1.0.0
 libpay-tests
 verification-curl-endpoints/package-name
 *.service
+
+
+build/
+builddir/
