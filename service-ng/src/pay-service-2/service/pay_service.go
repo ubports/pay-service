@@ -134,7 +134,7 @@ func (iface *PayService) resetTimer() bool {
  */
 func packageNameFromPath(message dbus.Message) (string) {
     // Get the package ID
-    calledPath := message.Headers[dbus.FieldPath].String()
+    calledPath := DecodeDbusPath(message.Headers[dbus.FieldPath].String())
     packageName := path.Base(calledPath)
 
     return packageName
