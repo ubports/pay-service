@@ -41,7 +41,6 @@ set(SERVICE_LIB_GEN_SOURCES)
 
 add_gdbus_codegen_with_namespace(SERVICE_LIB_GEN_SOURCES proxy-service com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.xml)
 add_gdbus_codegen_with_namespace(SERVICE_LIB_GEN_SOURCES proxy-package com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.package.xml)
-add_gdbus_codegen_with_namespace(SERVICE_LIB_GEN_SOURCES proxy-payui com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.payui.xml)
 
 add_library(pay-service-lib STATIC ${SERVICE_LIB_SOURCES} ${SERVICE_LIB_GEN_SOURCES})
 
@@ -54,19 +53,10 @@ target_link_libraries(pay-service
 
 install(TARGETS pay-service RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
 
-###########################
-# Mir Connection Demangler
-###########################
-
-add_executable(mir-connection-demangler mir-connection-demangler.c proxy-payui.c proxy-payui.h)
-target_link_libraries(mir-connection-demangler ${SERVICE_DEPS_LIBRARIES})
-install(TARGETS mir-connection-demangler RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
-
 #############################
 # Untrusted Helper Exec Tool
 #############################
 
-add_definitions(-DSOCKET_TOOL="${CMAKE_INSTALL_FULL_PKGLIBEXECDIR}/mir-connection-demangler")
 add_executable(exec-tool exec-tool.c)
 target_link_libraries(exec-tool ${SERVICE_DEPS_LIBRARIES})
 install(TARGETS exec-tool RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/ubuntu-app-launch/pay-ui")
