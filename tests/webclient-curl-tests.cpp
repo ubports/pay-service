@@ -70,7 +70,7 @@ TEST_F(WebclientCurlTests, InitRequestTest) {
     EXPECT_NE(nullptr, request);
 }
 
-TEST_F(WebclientCurlTests, Post)
+TEST_F(WebclientCurlTests, DISABLED_Post)
 {
     auto factory = std::make_shared<Web::CurlFactory>(token);
     ASSERT_NE(nullptr, factory);
