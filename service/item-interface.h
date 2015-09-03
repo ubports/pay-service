@@ -66,7 +66,7 @@ public:
         return "error";
     }
 
-    virtual std::string& getId (void) = 0;
+    virtual const std::string& getId (void) = 0;
     virtual Status getStatus (void) = 0;
     virtual uint64_t getRefundExpiry (void) = 0;
     virtual bool verify (void) = 0;
@@ -80,12 +80,12 @@ class Store
 {
 public:
     virtual std::list<std::string> listApplications (void) = 0;
-    virtual std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application) = 0;
-    virtual Item::Ptr getItem (std::string& application, std::string& item) = 0;
+    virtual std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (const std::string& application) = 0;
+    virtual Item::Ptr getItem (const std::string& application, const std::string& item) = 0;
 
     typedef std::shared_ptr<Store> Ptr;
 
-    core::Signal<std::string&, std::string&, Item::Status, uint64_t> itemChanged;
+    core::Signal<const std::string&, const std::string&, Item::Status, uint64_t> itemChanged;
 };
 
 } // namespace Item

@@ -28,7 +28,7 @@ namespace Refund
 class HttpFactory : public Factory
 {
 public:
-    HttpFactory (Web::ClickPurchasesApi::Ptr cpa_in);
+    explicit HttpFactory (Web::ClickPurchasesApi::Ptr cpa_in);
     bool running () override;
     Item::Ptr refund (const std::string& appid, const std::string& itemid) override;
 

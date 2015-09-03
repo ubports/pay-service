@@ -35,12 +35,12 @@ public:
         return false;
     }
 
-    virtual void set_header (const std::string& key,
-                             const std::string& value) override
+    virtual void set_header (const std::string& /*key*/,
+                             const std::string& /*value*/) override
     {
     }
 
-    virtual void set_post (const std::vector<char>& body) override
+    virtual void set_post (const std::vector<char>& /*body*/) override
     {
     }
 };
@@ -53,8 +53,8 @@ NullFactory::running ()
 }
 
 Request::Ptr
-NullFactory::create_request (const std::string& url,
-                             bool sign)
+NullFactory::create_request (const std::string& /*url*/,
+                             bool /*sign*/)
 {
     return std::make_shared<NullRequest>();
 }
