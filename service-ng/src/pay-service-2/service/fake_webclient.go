@@ -19,7 +19,10 @@
 package service
 
 import (
+    "fmt"
     "net/http"
+    "net/url"
+    "strings"
 )
 
 
@@ -30,6 +33,28 @@ func (client *FakeWebClient) Call(iri string, method string,
     headers http.Header, data string) (string, error) {
 
     // FIXME: Will need to return fake JSONs/error results for testing
+    parsed, err := url.Parse(iri)
+    if err != nil {
+        return "", fmt.Errorf("Error parsing URL '%s': %s", iri, err)
+    }
+    fmt.Println("HTTP called with URL: %s", iri)
+
+    if strings.HasSuffix(parsed.Path, "/click/purchases/") {
+        return `[
+            {
+                "open_id": "https://login.ubuntu.com/+id/open_id",
+                "package_name": "foobar.example",
+                "refundable_until": null,
+                "state": "Complete"
+            },
+            {
+                "open_id": "https://login.ubuntu.com/+id/open_id",
+                "package_name": "bazbar.example",
+                "refundable_until": "2099-12-31T23:59:59Z",
+                "state": "Complete"
+            }
+        ]`, nil
+    }
 
     return "", nil
 }

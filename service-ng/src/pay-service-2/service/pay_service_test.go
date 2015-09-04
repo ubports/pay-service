@@ -132,7 +132,7 @@ func TestGetItem(t *testing.T) {
     }
 }
 
-func TestGetPurchasedItems(t *testing.T) {
+func TestGetPurchasedItemsClickScope(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := new(FakeTimer)
@@ -149,14 +149,14 @@ func TestGetPurchasedItems(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
     reply, dbusErr := payiface.GetPurchasedItems(m)
     if dbusErr != nil {
         t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
     }
 
-    if len(reply) != 0 {
-        t.Errorf("Expected 0 values in map, got %d instead.", len(reply))
+    if len(reply) != 2 {
+        t.Errorf("Expected 2 items in list, got %d instead.", len(reply))
     }
 
     if !timer.stopCalled {
