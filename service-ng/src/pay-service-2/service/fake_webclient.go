@@ -29,5 +29,7 @@ type FakeWebClient struct {
 func (client *FakeWebClient) Call(ri string, method string,
     headers http.Header, data string) (string, error) {
 
+    // FIXME: Will need to return fake JSONs/error results for testing
+
     return "", nil
 }
