@@ -20,6 +20,7 @@ package service
 
 import (
     "fmt"
+    "io/ioutil"
     "net/http"
 )
 
@@ -54,9 +55,9 @@ func (client *WebClient) Call(iri string, method string,
     if err != nil {
         return "", fmt.Errorf("Error in response: %s", err)
     }
+    defer response.Body.Close()
 
-    var body []byte
-    _, err = response.Body.Read(body)
+    body, err := ioutil.ReadAll(response.Body)
     if err != nil {
         return "", fmt.Errorf("Error reading response body: %s", err)
     }
