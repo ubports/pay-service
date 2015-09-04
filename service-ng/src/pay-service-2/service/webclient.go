@@ -46,6 +46,7 @@ func (client *WebClient) Call(iri string, method string,
     request.Header = headers
 
     // FIXME: Sign the URL and set Authorization header
+    // FIXME: Will also need to add redirect handler to re-sign new URLs
     // request.Header.Set("Authorization", signature)
 
     // Run the request
