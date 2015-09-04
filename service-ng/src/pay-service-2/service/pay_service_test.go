@@ -28,8 +28,9 @@ func TestAcknowledgeItemConsumable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := new(FakeTimer)
-    
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -63,8 +64,9 @@ func TestAcknowledgeItemUnlockable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := new(FakeTimer)
+    client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -98,8 +100,9 @@ func TestGetItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := new(FakeTimer)
+    client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -133,8 +136,9 @@ func TestGetPurchasedItems(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := new(FakeTimer)
+    client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -168,8 +172,9 @@ func TestPurchaseItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := new(FakeTimer)
+    client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -203,8 +208,9 @@ func TestRefundItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := new(FakeTimer)
+    client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }

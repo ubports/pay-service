@@ -34,7 +34,8 @@ func main() {
     signals := make(chan os.Signal, 1)
     signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
-    daemon, err := service.New()
+    client := service.NewWebClient()
+    daemon, err := service.New(client)
     if err != nil {
         log.Fatalf("Unable to create daemon: %s", err)
     }

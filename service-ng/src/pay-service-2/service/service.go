@@ -61,7 +61,7 @@ type Service struct {
  * - New daemon
  * - Error (nil if none)
  */
-func New() (*Service, error) {
+func New(webClient WebClientIface) (*Service, error) {
     service := new(Service)
 
     service.server = new(DbusServer)
@@ -69,7 +69,7 @@ func New() (*Service, error) {
 
     var err error
     service.payiface, err = NewPayService(service.server,
-        interfaceName, baseObjectPath, service.ShutdownTimer)
+        interfaceName, baseObjectPath, service.ShutdownTimer, webClient)
     if err != nil {
         return nil, fmt.Errorf("Unable to create pay service interface: %s", err)
     }

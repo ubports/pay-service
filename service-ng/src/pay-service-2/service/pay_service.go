@@ -28,14 +28,16 @@ type PayService struct {
     dbusConnection DbusWrapper
     baseObjectPath dbus.ObjectPath
     shutdownTimer  Timer
+    client         WebClientIface
 }
 
 func NewPayService(dbusConnection DbusWrapper,
     interfaceName string, baseObjectPath dbus.ObjectPath,
-    shutdownTimer Timer) (*PayService, error) {
+    shutdownTimer Timer, client WebClientIface) (*PayService, error) {
     payiface := &PayService{
         dbusConnection: dbusConnection,
         shutdownTimer: shutdownTimer,
+        client: client,
     }
 
     if !baseObjectPath.IsValid() {
