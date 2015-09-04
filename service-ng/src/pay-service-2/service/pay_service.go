@@ -114,9 +114,9 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
         }
         var data interface{}
         err = json.Unmarshal([]byte(result), &data)
-        m := data.([]map[string]interface{})
+        m := data.([]interface{})
         for index := range m {
-            itemMap := m[index]
+            itemMap := m[index].(map[string]interface{})
             details := make(ItemDetails)
             for k, v := range itemMap {
                 switch vv := v.(type) {
@@ -193,6 +193,9 @@ func (iface *PayService) resetTimer() bool {
 func packageNameFromPath(message dbus.Message) (string) {
     // Get the package ID
     calledPath := DecodeDbusPath(message.Headers[dbus.FieldPath].String())
+    if calledPath[0] == '"' && calledPath[len(calledPath) - 1] == '"' {
+        calledPath = calledPath[1:len(calledPath) - 1]
+    }
     packageName := path.Base(calledPath)
 
     return packageName

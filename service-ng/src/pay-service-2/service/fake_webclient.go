@@ -37,7 +37,6 @@ func (client *FakeWebClient) Call(iri string, method string,
     if err != nil {
         return "", fmt.Errorf("Error parsing URL '%s': %s", iri, err)
     }
-    fmt.Println("HTTP called with URL: %s", iri)
 
     if strings.HasSuffix(parsed.Path, "/click/purchases/") {
         return `[
