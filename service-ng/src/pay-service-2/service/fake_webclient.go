@@ -54,6 +54,21 @@ func (client *FakeWebClient) Call(iri string, method string,
         ]`, nil
     }
 
+    if parsed.Path == "/api/2.0/click/purchases/foo.example/" {
+        return `
+            {
+                "open_id": "https://login.ubuntu.com/+id/open_id",
+                "package_name": "foo.example",
+                "refundable_until": null,
+                "state": "Complete"
+            }
+        `, nil
+    }
+
+    if parsed.Path == "/api/2.0/click/refunds/" && method == "POST" {
+        return `{"success": true}`, nil
+    }
+
     if parsed.Path == "/packages/foo.example/purchases/" {
         return `
         {
@@ -78,14 +93,42 @@ func (client *FakeWebClient) Call(iri string, method string,
                             "items": [
                                 {
                                     "id": 1,
-                                    "sku": "sku1",
+                                    "sku": "consumable",
                                     "title": "Item 1 Title",
                                     "description": "Item 1 Description",
                                     "icon": "http://example.com/icons/item1.png",
                                     "type": "consumable",
-                                    "state": "purchased",
+                                    "state": "approved",
                                     "_links": {
                                         "self": {"href": "/packages/app.example/items/1"}
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": 2,
+                        "requested_timestamp": "2015-03-12T14:33:23.000Z",
+                        "requested_device": "device123",
+                        "user_id": "user1",
+                        "status": "successful",
+                        "completed_timestamp": "2015-03-12T14:38:11.000Z",
+                        "_links": {
+                            "self": {"href": "/packages/app.example/purchases/2"},
+                            "package": {"href": "/packages/app.example"}
+                        },
+                        "_embedded": {
+                            "items": [
+                                {
+                                    "id": 2,
+                                    "sku": "unlockable",
+                                    "title": "Item 2",
+                                    "description": "Item 2 Description",
+                                    "icon": "http://example.com/icons/item2.png",
+                                    "type": "unlockable",
+                                    "state": "approved",
+                                    "_links": {
+                                        "self": {"href": "/packages/app.example/items/2"}
                                     }
                                 }
                             ]
@@ -96,8 +139,55 @@ func (client *FakeWebClient) Call(iri string, method string,
         }`, nil
     }
 
-    if parsed.Path == "/api/2.0/click/refunds/" && method == "POST" {
-        return `{"success": true}`, nil
+    // Details for the consumable item
+    if parsed.Path == "/packages/foo.example/items/by-sku/consumable/" {
+        return `
+        {
+            "id": 1,
+            "sku": "consumable",
+            "title": "Item 1 Title",
+            "description": "Item 1 Description",
+            "icon": "http://example.com/icons/item1.png",
+            "type": "consumable",
+            "state": "available",
+            "_links": {
+                "self": {"href": "/packages/app.example/items/1"}
+            }
+        }`, nil
+    }
+
+    // Acknowledge the consumable item
+    if parsed.Path == "/packages/foo.example/items/1/" && method == "PUT" {
+        return `
+        {
+            "id": 1,
+            "sku": "consumable",
+            "title": "Item 1 Title",
+            "description": "Item 1 Description",
+            "icon": "http://example.com/icons/item1.png",
+            "type": "consumable",
+            "state": "available",
+            "_links": {
+                "self": {"href": "/packages/app.example/items/1"}
+            }
+        }`, nil
+    }
+
+    // Acknowledge the unlockable item
+    if parsed.Path == "/packages/foo.example/items/2/" && method == "PUT" {
+        return `
+        {
+            "id": 2,
+            "sku": "unlockable",
+            "title": "Item 2",
+            "description": "Item 2 Description",
+            "icon": "http://example.com/icons/item2.png",
+            "type": "unlockable",
+            "state": "purchased",
+            "_links": {
+                "self": {"href": "/packages/app.example/items/2"}
+            }
+        }`, nil
     }
 
     return "", nil

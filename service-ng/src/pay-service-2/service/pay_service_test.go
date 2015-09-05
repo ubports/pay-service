@@ -41,10 +41,14 @@ func TestAcknowledgeItemConsumable(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
-    _, dbusErr := payiface.AcknowledgeItem(m, "bar")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    result, dbusErr := payiface.AcknowledgeItem(m, "consumable")
     if dbusErr != nil {
-        t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
+        t.Errorf("Unexpected error: %s", dbusErr)
+    }
+
+    if result["state"].Value().(string) != "available" {
+        t.Errorf("Acknowledge of consumable item failed.")
     }
 
     if !timer.stopCalled {
@@ -73,12 +77,15 @@ func TestAcknowledgeItemUnlockable(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
-    _, dbusErr := payiface.AcknowledgeItem(m, "bar")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    result, dbusErr := payiface.AcknowledgeItem(m, "unlockable")
     if dbusErr != nil {
-        t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
+        t.Errorf("Unexpected error: %s", dbusErr)
     }
 
+    if result["state"].Value().(string) != "purchased" {
+        t.Errorf("Acknowledge of unlockable item failed.")
+    }
     if !timer.stopCalled {
         t.Errorf("Timer was not stopped.")
     }
@@ -88,7 +95,7 @@ func TestAcknowledgeItemUnlockable(t *testing.T) {
     }
 }
 
-func TestGetItem(t *testing.T) {
+func TestGetItemConsumable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := new(FakeTimer)
@@ -105,10 +112,42 @@ func TestGetItem(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
-    _, dbusErr := payiface.GetItem(m, "bar")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    _, dbusErr := payiface.GetItem(m, "consumable")
     if dbusErr != nil {
-        t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
+        t.Errorf("Unexpected error geting item details: %s", dbusErr)
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
+}
+
+func TestGetItemClickScope(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    _, dbusErr := payiface.GetItem(m, "foo.example")
+    if dbusErr != nil {
+        t.Errorf("Unexpected error geting item details: %s", dbusErr)
     }
 
     if !timer.stopCalled {
@@ -179,8 +218,8 @@ func TestGetPurchasedItemsInAppPurchase(t *testing.T) {
         t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
     }
 
-    if len(reply) != 1 {
-        t.Errorf("Expected 1 item in list, got %d instead.", len(reply))
+    if len(reply) != 2 {
+        t.Errorf("Expected 2 items in list, got %d instead.", len(reply))
     }
 
     if !timer.stopCalled {
@@ -211,8 +250,8 @@ func TestPurchaseItem(t *testing.T) {
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
     m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
     _, dbusErr := payiface.PurchaseItem(m, "bar")
-    if dbusErr != nil {
-        t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
+    if dbusErr == nil {
+        t.Errorf("PurchaseItem not yet implemented, but no dbus error.")
     }
 
     if !timer.stopCalled {

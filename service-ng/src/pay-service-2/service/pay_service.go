@@ -25,12 +25,13 @@ import (
     "net/http"
     "os"
     "path"
+    "reflect"
 )
 
 
 const (
-    // PayBaseUrl is the default base URL for the REST API.
-    PayBaseUrl = "https://myapps.developer.ubuntu.com"
+    // payBaseUrl is the default base URL for the REST API.
+    payBaseUrl = "https://myapps.developer.ubuntu.com"
 )
 
 type ItemDetails map[string]dbus.Variant
@@ -60,31 +61,80 @@ func NewPayService(dbusConnection DbusWrapper,
     return payiface, nil
 }
 
-func (iface *PayService) AcknowledgeItem(message dbus.Message, itemName string) (map[string]dbus.Variant, *dbus.Error) {
+func (iface *PayService) AcknowledgeItem(message dbus.Message, itemName string) (ItemDetails, *dbus.Error) {
     iface.pauseTimer()
+    defer iface.resetTimer()
     packageName := packageNameFromPath(message)
 
     fmt.Println("DEBUG - AcknowledgeItem called for package:", packageName)
 
-    // Acknowledge the item and return the item info and status.
-    item := make(map[string]dbus.Variant)
+    // Fail if calling AcknowledgeItem for click-scope
+    if packageName == "click-scope" {
+        return nil, dbus.NewError(
+            "Unsupported: AcknowledgeITem not supported for packages.", nil)
+    }
 
-    // Reset the timeout
-    iface.resetTimer()
-    return item, nil
+
+    purchases, err := iface.GetPurchasedItems(message)
+    if err != nil {
+        return nil, dbus.NewError(
+            fmt.Sprintf("Unable to find item '%s': %s", packageName, err), nil)
+    }
+
+    for x := range purchases {
+        sku := purchases[x]["sku"].Value().(string)
+        if sku == itemName {
+            // BUG: golang json is parsing all numberas as floats :(
+            id := int64(purchases[x]["id"].Value().(float64))
+            idString := fmt.Sprintf("%d", id)
+
+            // To set any extra headers we need (signature, accept, etc)
+            headers := make(http.Header)
+
+            url := getPayInventoryUrl()
+            url += "/" + packageName + "/items/" + idString + "/"
+
+            body := `{"state": "acknowledged"}`
+            headers.Set("Content-Type", "application/json")
+
+            data, err := iface.getDataForUrl(url, "PUT", headers, body)
+            if err != nil {
+                return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
+            }
+
+            item := parseItemMap(data.(map[string]interface{}))
+            return item, nil
+        }
+    }
+
+    return nil, dbus.NewError(
+        fmt.Sprintf("Unable to find item '%s'", packageName), nil)
 }
 
-func (iface *PayService) GetItem(message dbus.Message, itemName string) (map[string]dbus.Variant, *dbus.Error) {
+func (iface *PayService) GetItem(message dbus.Message, itemName string) (ItemDetails, *dbus.Error) {
     iface.pauseTimer()
+    defer iface.resetTimer()
     packageName := packageNameFromPath(message)
 
     fmt.Println("DEBUG - GetItem called for package:", packageName)
 
-    // Get the item and return its info.
-    item := make(map[string]dbus.Variant)
+    // To set any extra headers we need (signature, accept, etc)
+    headers := make(http.Header)
 
-    // Reset the timeout
-    iface.resetTimer()
+    url := ""
+    if packageName == "click-scope" {
+        url = getPayClickUrl()
+        url += "/purchases/" + itemName + "/"
+    } else {
+        url = getPayInventoryUrl()
+        url += "/" + packageName + "/items/by-sku/" + itemName + "/"
+    }
+    data, err := iface.getDataForUrl(url, "GET", headers, "")
+    if err != nil {
+        return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
+    }
+
+    item := parseItemMap(data.(map[string]interface{}))
     return item, nil
 }
 
@@ -100,20 +150,17 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
     purchasedItems := make([]ItemDetails, 0)
 
     // To set any extra headers we need (signature, accept, etc)
-    var headers http.Header
+    headers := make(http.Header)
 
+    // TODO: When cache is available abstract this away to avoid extraneous
+    // network activity. For now we must always hit network.
     if packageName == "click-scope" {
         url := getPayClickUrl()
         url += "/purchases/"
 
-        result, err := iface.client.Call(url, "GET", headers, "")
+        data, err := iface.getDataForUrl(url, "GET", headers, "")
         if err != nil {
-            return nil, dbus.NewError(fmt.Sprintf("RequestError: %s", err), nil)
-        }
-        var data interface{}
-        err = json.Unmarshal([]byte(result), &data)
-        if err != nil {
-            return nil, dbus.NewError(fmt.Sprintf("ParseError: %s", err), nil)
+            return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
         }
 
         m := data.([]interface{})
@@ -130,9 +177,13 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
                         details[k] = dbus.MakeVariant(vv)
                     }
                 }
-                case bool, int:
+                case bool, int64:
                     details[k] = dbus.MakeVariant(vv)
                 case nil:
+                    // For refundable_until, set the value to 0
+                    if k == "refundable_until" {
+                        details[k] = dbus.MakeVariant(int64(0))
+                    }
                     // Just ignore nulls in the JSON
                 default:
                     fmt.Println("WARNING - Unable to parse purchase key:", k)
@@ -143,18 +194,12 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
 
         return purchasedItems, nil
     } else {
-        url := getPayIventoryUrl()
+        url := getPayInventoryUrl()
         url += "/" + packageName + "/purchases/"
 
-        result, err := iface.client.Call(url, "GET", headers, "")
+        data, err := iface.getDataForUrl(url, "GET", headers, "")
         if err != nil {
-            return nil, dbus.NewError(fmt.Sprintf("RequestError: %s", err), nil)
-        }
-
-        var data interface{}
-        err = json.Unmarshal([]byte(result), &data)
-        if err != nil {
-            return nil, dbus.NewError(fmt.Sprintf("ParseError: %s", err), nil)
+            return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
         }
 
         m := data.(map[string]interface{})["_embedded"].(map[string]interface{})
@@ -164,20 +209,11 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
             itemList := purchaseMap["_embedded"].(
                 map[string]interface{})["items"].([]interface{})
             for index := range itemList {
-                details := make(ItemDetails)
                 itemMap := itemList[index].(map[string]interface{})
-                for k, v := range itemMap {
-                    switch vv := v.(type) {
-                    case string, bool, int:
-                        details[k] = dbus.MakeVariant(vv)
-                    case nil:
-                        // Just ignore nulls in the JSON
-                    default:
-                        fmt.Println("WARNING - Unable to parse purchase key:", k)
-                    }
-                }
-                details["requeted_device"] = dbus.MakeVariant(
+                details := parseItemMap(itemMap)
+                details["requested_device"] = dbus.MakeVariant(
                     purchaseMap["requested_device"])
+
                 // FIXME: parse timestamps and add them here too
                 purchasedItems = append(purchasedItems, details)
             }
@@ -190,21 +226,26 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
     return nil, dbus.NewError(fmt.Sprintf("InvalidPackage: %s", packageName), nil)
 }
 
-func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (map[string]dbus.Variant, *dbus.Error) {
+func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (ItemDetails, *dbus.Error) {
     iface.pauseTimer()
+    defer iface.resetTimer()
     packageName := packageNameFromPath(message)
 
     fmt.Println("DEBUG - PurchaseItem called for package:", packageName)
 
     // Purchase the item and return the item info and status.
-    item := make(map[string]dbus.Variant)
+    purchaseUrl := "purchase://"
+    if packageName != "click-scope" {
+        purchaseUrl += packageName + "/"
+    }
+    purchaseUrl += itemName
 
-    // Reset the timeout
-    iface.resetTimer()
-    return item, nil
+    fmt.Println("DEBUG - Unhandled purchase URL:", purchaseUrl)
+
+    return nil, dbus.NewError("NotYetImplemented", nil)
 }
 
-func (iface *PayService) RefundItem(message dbus.Message, itemName string) (map[string]dbus.Variant, *dbus.Error) {
+func (iface *PayService) RefundItem(message dbus.Message, itemName string) (ItemDetails, *dbus.Error) {
     iface.pauseTimer()
     defer iface.resetTimer()
 
@@ -217,27 +258,23 @@ func (iface *PayService) RefundItem(message dbus.Message, itemName string) (map[
             "Unsupported: Refunds only supported for packages.", nil)
     }
 
-    // Refund the item and return the item info and status.
-    item := make(map[string]dbus.Variant)
-
     // To set any extra headers we need (signature, accept, etc)
-    var headers http.Header
+    headers := make(http.Header)
 
     url := getPayClickUrl() + "/refunds/"
     body := `{"name": "` + packageName + `"}`
-    result, err := iface.client.Call(url, "POST", headers, body)
+    headers.Set("Content-Type", "application/json")
+
+    data, err := iface.getDataForUrl(url, "POST", headers, body)
     if err != nil {
-        return nil, dbus.NewError(fmt.Sprintf("RequestError: %s", err), nil)
+        return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
     }
 
-    var data interface{}
-    err = json.Unmarshal([]byte(result), &data)
-    if err != nil {
-        return nil, dbus.NewError(fmt.Sprintf("ParseError: %s", err), nil)
-    }
+    // Refund the item and return the item info and status.
+    item := make(map[string]dbus.Variant)
 
     m := data.(map[string]interface{})
-    item["success"] = dbus.MakeVariant(m["success"])
+    item["success"] = dbus.MakeVariant(m["success"].(bool))
 
     return item, nil
 }
@@ -248,6 +285,37 @@ func (iface *PayService) pauseTimer() bool {
 
 func (iface *PayService) resetTimer() bool {
     return iface.shutdownTimer.Reset(ShutdownTimeout)
+}
+
+/* Make the call to the URL and return either the data or an error
+ */
+func (iface *PayService) getDataForUrl(iri string, method string, headers http.Header, body string) (interface{}, error) {
+    result, err := iface.client.Call(iri, method, headers, body)
+    if err != nil {
+        return nil, fmt.Errorf("RequestError: %s", err)
+    }
+    var data interface{}
+    err = json.Unmarshal([]byte(result), &data)
+    if err != nil {
+        return nil, fmt.Errorf("ParseError: %s", err)
+    }
+    return data, nil
+}
+
+func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
+    details := make(ItemDetails)
+    for k, v := range itemMap {
+        // BUG: Unfortunately golang's json parses all numbers as float64
+        switch vv := v.(type) {
+        case string, bool, int64, float64:
+            details[k] = dbus.MakeVariant(vv)
+        case nil:
+            // Just ignore nulls in the JSON
+        default:
+            fmt.Printf("WARNING - Unable to parse item key '%s' of type '%s'.\n", k, reflect.TypeOf(vv))
+        }
+    }
+    return details
 }
 
 /* Get the decoded packageName from a path
@@ -263,23 +331,27 @@ func packageNameFromPath(message dbus.Message) (string) {
     return packageName
 }
 
-/* Get the full URL for an API path
+/* Get the base URL for the API server
  */
 func getPayBaseUrl() string {
     baseUrl := os.Getenv("PAY_BASE_URL")
     if baseUrl == "" {
-        baseUrl = PayBaseUrl
+        baseUrl = payBaseUrl
     }
     return baseUrl
 }
 
+/* Get the base URL for the Click Purchases API
+ */
 func getPayClickUrl() string {
     url := getPayBaseUrl()
     url += "/api/2.0/click"
     return url
 }
 
-func getPayIventoryUrl() string {
+/* Get the base URL for the In App Purchaes API
+ */
+func getPayInventoryUrl() string {
     url := getPayBaseUrl()
     url += "/packages"
     return url

@@ -22,6 +22,7 @@ import (
     "fmt"
     "io/ioutil"
     "net/http"
+    "strings"
 )
 
 
@@ -39,8 +40,9 @@ func NewWebClient() *WebClient {
 func (client *WebClient) Call(iri string, method string,
     headers http.Header, data string) (string, error) {
 
-    // FIXME: Need io.ReadCloser for body, not nil
-    request, err := http.NewRequest(method, iri, nil)
+    // Create a reader for the data string
+    reader := strings.NewReader(data)
+    request, err := http.NewRequest(method, iri, reader)
     if err != nil {
         return "", fmt.Errorf("Error creating request: %s", err)
     }
