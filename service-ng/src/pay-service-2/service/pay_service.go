@@ -134,7 +134,6 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
             }
             purchasedItems = append(purchasedItems, details)
         }
-        fmt.Println("Returning details: %s", purchasedItems)
 
         return purchasedItems, nil
     } else {
