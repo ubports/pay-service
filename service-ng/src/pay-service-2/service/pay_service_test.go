@@ -42,13 +42,9 @@ func TestAcknowledgeItemConsumable(t *testing.T) {
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
     m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
-    reply, dbusErr := payiface.AcknowledgeItem(m, "bar")
+    _, dbusErr := payiface.AcknowledgeItem(m, "bar")
     if dbusErr != nil {
         t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
-    }
-
-    if len(reply) == 0 {
-        t.Errorf("Expected values in map, got none instead.")
     }
 
     if !timer.stopCalled {
@@ -78,13 +74,9 @@ func TestAcknowledgeItemUnlockable(t *testing.T) {
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
     m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
-    reply, dbusErr := payiface.AcknowledgeItem(m, "bar")
+    _, dbusErr := payiface.AcknowledgeItem(m, "bar")
     if dbusErr != nil {
         t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
-    }
-
-    if len(reply) == 0 {
-        t.Errorf("Expected values in map, got none instead.")
     }
 
     if !timer.stopCalled {
@@ -114,13 +106,9 @@ func TestGetItem(t *testing.T) {
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
     m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
-    reply, dbusErr := payiface.GetItem(m, "bar")
+    _, dbusErr := payiface.GetItem(m, "bar")
     if dbusErr != nil {
         t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
-    }
-
-    if len(reply) == 0 {
-        t.Errorf("Expected values in map, got none instead.")
     }
 
     if !timer.stopCalled {
@@ -168,6 +156,42 @@ func TestGetPurchasedItemsClickScope(t *testing.T) {
     }
 }
 
+func TestGetPurchasedItemsInAppPurchase(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    reply, dbusErr := payiface.GetPurchasedItems(m)
+    if dbusErr != nil {
+        t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
+    }
+
+    if len(reply) != 1 {
+        t.Errorf("Expected 1 item in list, got %d instead.", len(reply))
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
+}
+
 func TestPurchaseItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
@@ -186,13 +210,9 @@ func TestPurchaseItem(t *testing.T) {
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
     m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
-    reply, dbusErr := payiface.PurchaseItem(m, "bar")
+    _, dbusErr := payiface.PurchaseItem(m, "bar")
     if dbusErr != nil {
         t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
-    }
-
-    if len(reply) == 0 {
-        t.Errorf("Expected 0 values in map, got none instead.")
     }
 
     if !timer.stopCalled {
@@ -221,14 +241,18 @@ func TestRefundItem(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
-    reply, dbusErr := payiface.RefundItem(m, "bar")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    reply, dbusErr := payiface.RefundItem(m, "bar.example")
     if dbusErr != nil {
-        t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
+        t.Errorf("Unexpected error refunding item: %s", dbusErr)
     }
 
     if len(reply) == 0 {
         t.Errorf("Expected values in map, got none instead.")
+    }
+
+    if reply["success"].Value() != true {
+        t.Errorf("Expected successful refund result.")
     }
 
     if !timer.stopCalled {

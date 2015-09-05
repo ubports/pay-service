@@ -68,7 +68,6 @@ func (iface *PayService) AcknowledgeItem(message dbus.Message, itemName string) 
 
     // Acknowledge the item and return the item info and status.
     item := make(map[string]dbus.Variant)
-    item["id"] = dbus.MakeVariant(itemName)
 
     // Reset the timeout
     iface.resetTimer()
@@ -83,7 +82,6 @@ func (iface *PayService) GetItem(message dbus.Message, itemName string) (map[str
 
     // Get the item and return its info.
     item := make(map[string]dbus.Variant)
-    item["id"] = dbus.MakeVariant(itemName)
 
     // Reset the timeout
     iface.resetTimer()
@@ -101,19 +99,23 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
     // Get the purchased items, and their properties, for the package.
     purchasedItems := make([]ItemDetails, 0)
 
+    // To set any extra headers we need (signature, accept, etc)
     var headers http.Header
+
     if packageName == "click-scope" {
         url := getPayClickUrl()
         url += "/purchases/"
 
         result, err := iface.client.Call(url, "GET", headers, "")
         if err != nil {
-            errs := make([]interface{}, 0)
-            errs = append(errs, err)
-            return nil, dbus.NewError("RequestError", errs)
+            return nil, dbus.NewError(fmt.Sprintf("RequestError: %s", err), nil)
         }
         var data interface{}
         err = json.Unmarshal([]byte(result), &data)
+        if err != nil {
+            return nil, dbus.NewError(fmt.Sprintf("ParseError: %s", err), nil)
+        }
+
         m := data.([]interface{})
         for index := range m {
             itemMap := m[index].(map[string]interface{})
@@ -130,6 +132,10 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
                 }
                 case bool, int:
                     details[k] = dbus.MakeVariant(vv)
+                case nil:
+                    // Just ignore nulls in the JSON
+                default:
+                    fmt.Println("WARNING - Unable to parse purchase key:", k)
                 }
             }
             purchasedItems = append(purchasedItems, details)
@@ -140,13 +146,48 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
         url := getPayIventoryUrl()
         url += "/" + packageName + "/purchases/"
 
+        result, err := iface.client.Call(url, "GET", headers, "")
+        if err != nil {
+            return nil, dbus.NewError(fmt.Sprintf("RequestError: %s", err), nil)
+        }
+
+        var data interface{}
+        err = json.Unmarshal([]byte(result), &data)
+        if err != nil {
+            return nil, dbus.NewError(fmt.Sprintf("ParseError: %s", err), nil)
+        }
+
+        m := data.(map[string]interface{})["_embedded"].(map[string]interface{})
+        q := m["purchases"].([]interface{})
+        for purchase := range q {
+            purchaseMap := q[purchase].(map[string]interface{})
+            itemList := purchaseMap["_embedded"].(
+                map[string]interface{})["items"].([]interface{})
+            for index := range itemList {
+                details := make(ItemDetails)
+                itemMap := itemList[index].(map[string]interface{})
+                for k, v := range itemMap {
+                    switch vv := v.(type) {
+                    case string, bool, int:
+                        details[k] = dbus.MakeVariant(vv)
+                    case nil:
+                        // Just ignore nulls in the JSON
+                    default:
+                        fmt.Println("WARNING - Unable to parse purchase key:", k)
+                    }
+                }
+                details["requeted_device"] = dbus.MakeVariant(
+                    purchaseMap["requested_device"])
+                // FIXME: parse timestamps and add them here too
+                purchasedItems = append(purchasedItems, details)
+            }
+        }
+
         return purchasedItems, nil
     }
-    errs := make([]interface{}, 0)
-    errs = append(errs,
-        fmt.Errorf("Failed to find get purchases for package: %s",
-            packageName))
-    return nil, dbus.NewError("InvalidPackage", errs)
+
+    // Invalid package, so return an error.
+    return nil, dbus.NewError(fmt.Sprintf("InvalidPackage: %s", packageName), nil)
 }
 
 func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (map[string]dbus.Variant, *dbus.Error) {
@@ -157,7 +198,6 @@ func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (ma
 
     // Purchase the item and return the item info and status.
     item := make(map[string]dbus.Variant)
-    item["id"] = dbus.MakeVariant(itemName)
 
     // Reset the timeout
     iface.resetTimer()
@@ -166,16 +206,39 @@ func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (ma
 
 func (iface *PayService) RefundItem(message dbus.Message, itemName string) (map[string]dbus.Variant, *dbus.Error) {
     iface.pauseTimer()
+    defer iface.resetTimer()
+
     packageName := packageNameFromPath(message)
 
     fmt.Println("DEBUG - RefundItem called for package:", packageName)
 
+    if packageName != "click-scope" {
+        return nil, dbus.NewError(
+            "Unsupported: Refunds only supported for packages.", nil)
+    }
+
     // Refund the item and return the item info and status.
     item := make(map[string]dbus.Variant)
-    item["id"] = dbus.MakeVariant(itemName)
 
-    // Reset the timeout
-    iface.resetTimer()
+    // To set any extra headers we need (signature, accept, etc)
+    var headers http.Header
+
+    url := getPayClickUrl() + "/refunds/"
+    body := `{"name": "` + packageName + `"}`
+    result, err := iface.client.Call(url, "POST", headers, body)
+    if err != nil {
+        return nil, dbus.NewError(fmt.Sprintf("RequestError: %s", err), nil)
+    }
+
+    var data interface{}
+    err = json.Unmarshal([]byte(result), &data)
+    if err != nil {
+        return nil, dbus.NewError(fmt.Sprintf("ParseError: %s", err), nil)
+    }
+
+    m := data.(map[string]interface{})
+    item["success"] = dbus.MakeVariant(m["success"])
+
     return item, nil
 }
 

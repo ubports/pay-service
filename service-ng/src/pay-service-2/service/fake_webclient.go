@@ -22,7 +22,6 @@ import (
     "fmt"
     "net/http"
     "net/url"
-    "strings"
 )
 
 
@@ -38,21 +37,67 @@ func (client *FakeWebClient) Call(iri string, method string,
         return "", fmt.Errorf("Error parsing URL '%s': %s", iri, err)
     }
 
-    if strings.HasSuffix(parsed.Path, "/click/purchases/") {
+    if parsed.Path == "/api/2.0/click/purchases/" {
         return `[
             {
                 "open_id": "https://login.ubuntu.com/+id/open_id",
-                "package_name": "foobar.example",
+                "package_name": "foo.example",
                 "refundable_until": null,
                 "state": "Complete"
             },
             {
                 "open_id": "https://login.ubuntu.com/+id/open_id",
-                "package_name": "bazbar.example",
+                "package_name": "bar.example",
                 "refundable_until": "2099-12-31T23:59:59Z",
                 "state": "Complete"
             }
         ]`, nil
+    }
+
+    if parsed.Path == "/packages/foo.example/purchases/" {
+        return `
+        {
+            "_links": {
+                "self": {"href": "/packages/app.example/purchases"},
+                "package": {"href": "/packages/app.example"}
+            },
+            "_embedded": {
+                "purchases": [
+                    {
+                        "id": 1,
+                        "requested_timestamp": "2015-03-12T14:33:23.000Z",
+                        "requested_device": "device123",
+                        "user_id": "user1",
+                        "status": "successful",
+                        "completed_timestamp": "2015-03-12T14:38:11.000Z",
+                        "_links": {
+                            "self": {"href": "/packages/app.example/purchases/1"},
+                            "package": {"href": "/packages/app.example"}
+                        },
+                        "_embedded": {
+                            "items": [
+                                {
+                                    "id": 1,
+                                    "sku": "sku1",
+                                    "title": "Item 1 Title",
+                                    "description": "Item 1 Description",
+                                    "icon": "http://example.com/icons/item1.png",
+                                    "type": "consumable",
+                                    "state": "purchased",
+                                    "_links": {
+                                        "self": {"href": "/packages/app.example/items/1"}
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }`, nil
+    }
+
+    if parsed.Path == "/api/2.0/click/refunds/" && method == "POST" {
+        return `{"success": true}`, nil
     }
 
     return "", nil
