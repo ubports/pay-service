@@ -28,10 +28,14 @@ import (
 
 type WebClient struct {
     client *http.Client
+    auth    AuthIface
 }
 
-func NewWebClient() *WebClient {
+func NewWebClient(auth AuthIface) *WebClient {
     client := new(WebClient)
+    client.auth = auth
+
+    // FIXME: Need to add redirect handler to re-sign new URLs
     client.client = http.DefaultClient
 
     return client
@@ -48,9 +52,9 @@ func (client *WebClient) Call(iri string, method string,
     }
     request.Header = headers
 
-    // FIXME: Sign the URL and set Authorization header
-    // FIXME: Will also need to add redirect handler to re-sign new URLs
-    // request.Header.Set("Authorization", signature)
+    // Sign the request
+    signature := client.auth.signUrl(iri)
+    request.Header.Set("Authorization", signature)
 
     // Run the request
     response, err := client.client.Do(request)
