@@ -1,3 +1,21 @@
+pay-service (2.0.0+15.04.20150914-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Charles Kerr ]
+  * Fix usage of warnings flags and the warnings resulting. Use -fPIC
+    instead of -fPIE where appropriate.
+
+  [ Rodney Dawes ]
+  * Fix usage of warnings flags and the warnings resulting. Use -fPIC
+    instead of -fPIE where appropriate.
+
+  [ Ted Gould ]
+  * Use libubuntu-app-launch >= 0.5 for trusted session helper code.
+
+ -- Rodney Dawes <ci-train-bot@canonical.com>  Mon, 14 Sep 2015 17:11:01 +0000
+
 pay-service (2.0.0+15.04.20150721-0ubuntu1) vivid; urgency=medium
 
   [ Andreas Pokorny ]
