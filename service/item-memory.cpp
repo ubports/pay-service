@@ -31,8 +31,8 @@ namespace Item
 class MemoryItem : public Item
 {
 public:
-    MemoryItem (std::string& in_app,
-                std::string& in_id,
+    MemoryItem (const std::string& in_app,
+                const std::string& in_id,
                 Verification::Factory::Ptr& in_vfactory,
                 Refund::Factory::Ptr& in_rfactory,
                 Purchase::Factory::Ptr& in_pfactory) :
@@ -40,22 +40,18 @@ public:
         id(in_id),
         vfactory(in_vfactory),
         rfactory(in_rfactory),
-        pfactory(in_pfactory),
-        vitem(nullptr),
-        pitem(nullptr),
-        status(Item::Status::UNKNOWN),
-        refund_timeout(0)
+        pfactory(in_pfactory)
     {
         /* We init into the unknown state and then wait for someone
            to ask us to do something about it. */
     }
 
-    std::string& getApp (void)
+    const std::string& getApp (void)
     {
         return app;
     }
 
-    std::string& getId (void) override
+    const std::string& getId (void) override
     {
         return id;
     }
@@ -170,7 +166,7 @@ public:
                 return false;
             }
 
-            pitem->purchaseComplete.connect([this](Purchase::Item::Status status)
+            pitem->purchaseComplete.connect([this](Purchase::Item::Status /*status*/)
             {
                 /* Verifying on each time the purchase UI runs right now because
                    we're not getting reliable status back from them. */
@@ -216,10 +212,10 @@ private:
     }
 
     /***** Only set at init *********/
-    /* Item ID */
-    std::string id;
     /* Application ID */
     std::string app;
+    /* Item ID */
+    std::string id;
     Verification::Factory::Ptr vfactory;
     Refund::Factory::Ptr rfactory;
     Purchase::Factory::Ptr pfactory;
@@ -234,11 +230,11 @@ private:
 
     /****** status is protected with it's own mutex *******/
     std::mutex status_mutex;
-    Item::Status status;
+    Item::Status status = Item::Status::UNKNOWN;
 
     /****** refund_timeout is protected with it's own mutex *******/
     std::mutex refund_mutex;
-    uint64_t refund_timeout;
+    uint64_t refund_timeout = 0;
 };
 
 std::list<std::string>
@@ -258,7 +254,7 @@ MemoryStore::listApplications (void)
 }
 
 std::shared_ptr<std::map<std::string, Item::Ptr>>
-MemoryStore::getItems (std::string& application)
+MemoryStore::getItems (const std::string& application)
 {
     auto app = data[application];
 
@@ -272,7 +268,7 @@ MemoryStore::getItems (std::string& application)
 }
 
 Item::Ptr
-MemoryStore::getItem (std::string& application, std::string& itemid)
+MemoryStore::getItem (const std::string& application, const std::string& itemid)
 {
     if (verificationFactory == nullptr)
     {

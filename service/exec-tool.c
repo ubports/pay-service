@@ -112,8 +112,6 @@ build_dir (const gchar * appid)
 int
 main (int argc, char * argv[])
 {
-    GError * error = NULL;
-
     /* Build up our exec */
     const gchar * appid = g_getenv("APP_ID");
     if (appid == NULL) {

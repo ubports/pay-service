@@ -33,26 +33,20 @@ public:
     Item::Store::Ptr items;
     std::thread t;
     core::Signal<> connectionReady;
-    GQuark errorQuark;
+    const GQuark errorQuark = g_quark_from_static_string("dbus-interface-impl");
 
     /* Allocated on thread, and cleaned up there */
-    GMainLoop* loop;
-    proxyPay* serviceProxy;
-    proxyPayPackage* packageProxy;
-    GDBusConnection* bus;
-    GCancellable* cancel;
-    guint subtree_registration;
+    GMainLoop* loop = nullptr;
+    proxyPay* serviceProxy = nullptr;
+    proxyPayPackage* packageProxy = nullptr;
+    GDBusConnection* bus = nullptr;
+    GCancellable* cancel = nullptr;
+    guint subtree_registration = 0;
 
     /* Allocates a thread to do dbus work */
-    DBusInterfaceImpl (const Item::Store::Ptr& in_items) :
+    explicit DBusInterfaceImpl (const Item::Store::Ptr& in_items) :
         items(in_items),
-        cancel(g_cancellable_new()),
-        loop(nullptr),
-        bus(nullptr),
-        serviceProxy(nullptr),
-        packageProxy(nullptr),
-        errorQuark(g_quark_from_static_string("dbus-interface-impl")),
-        subtree_registration(0)
+        cancel(g_cancellable_new())
     { }
 
     void run ()
@@ -74,9 +68,7 @@ public:
                     return;
                 }
 
-                std::string encodedpkg = DBusInterface::encodePath(pkg);
-                std::string path("/com/canonical/pay/");
-                path += encodedpkg;
+                const auto path = getPathFromPackage(pkg);
 
                 auto mitem = items->getItem(pkg, item);
                 const char* strstatus = Item::Item::statusString(status);
@@ -147,6 +139,24 @@ public:
         }
     }
 
+    static constexpr char const * baseObjectPath{"/com/canonical/pay"};
+
+    static std::string getPathFromPackage(const std::string& pkg)
+    {
+        std::string path = baseObjectPath;
+        path += '/';
+        path += DBusInterface::encodePath(pkg);
+        return path;
+    }
+
+    static std::string getPackageFromPath(const std::string& path)
+    {
+        std::string pkg = path;
+        pkg.erase(0, strlen(baseObjectPath) + 1/*strlen("/")*/);
+        pkg = DBusInterface::decodePath(pkg);
+        return pkg;
+    }
+
     void busAcquired (GDBusConnection* bus);
 
     /* Signal up that we're ready on the interface side of things */
@@ -171,14 +181,10 @@ public:
         g_variant_builder_init(&builder, G_VARIANT_TYPE_TUPLE);
         g_variant_builder_open(&builder, G_VARIANT_TYPE("ao"));
 
-        for (auto package : packages)
+        for (const auto& pkg : packages)
         {
-            std::string prefix("/com/canonical/pay/");
-            std::string encoded = DBusInterface::encodePath(package);
-
-            prefix += encoded;
-
-            g_variant_builder_add_value(&builder, g_variant_new_object_path(prefix.c_str()));
+            const auto path = getPathFromPackage(pkg);
+            g_variant_builder_add_value(&builder, g_variant_new_object_path(path.c_str()));
         }
 
         g_variant_builder_close(&builder); // tuple
@@ -189,7 +195,7 @@ public:
     /**************************************
      * Subtree Functions
      **************************************/
-    gchar** subtreeEnumerate (const gchar* path)
+    gchar** subtreeEnumerate (const gchar* /*path*/)
     {
         GArray* nodes = g_array_new(TRUE, FALSE, sizeof(gchar*));
         auto packages = items->listApplications();
@@ -203,7 +209,7 @@ public:
         return reinterpret_cast<gchar**>(g_array_free(nodes, FALSE));
     }
 
-    GDBusInterfaceInfo** subtreeIntrospect (const gchar* path, const gchar* node)
+    GDBusInterfaceInfo** subtreeIntrospect (const gchar* /*path*/, const gchar* /*node*/)
     {
         GDBusInterfaceInfo* skelInfo = nullptr;
 
@@ -218,8 +224,7 @@ public:
     void packageCall(const gchar* sender, const gchar* path, const gchar* method, GVariant* params,
                      GDBusMethodInvocation* invocation)
     {
-        const gchar* encoded_package = path + std::strlen("/com/canonical/pay/");
-        std::string package = DBusInterface::decodePath(std::string(encoded_package));
+        const auto package = getPackageFromPath(path);
 
         auto params_str = g_variant_print(params, true);
         g_debug("%s sender(%s) path(%s) method(%s) package(%s) params(%s)",
@@ -300,41 +305,41 @@ public:
     /**************************************
      * Static Helpers, C language binding
      **************************************/
-    static void busAcquired_staticHelper (GDBusConnection* inbus, const gchar* name, gpointer user_data)
+    static void busAcquired_staticHelper (GDBusConnection* inbus, const gchar* /*name*/, gpointer user_data)
     {
-        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        auto notthis = static_cast<DBusInterfaceImpl*>(user_data);
         notthis->busAcquired(inbus);
     }
 
-    static void nameAcquired_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
+    static void nameAcquired_staticHelper (GDBusConnection* /*bus*/, const gchar* /*name*/, gpointer user_data)
     {
-        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        auto notthis = static_cast<DBusInterfaceImpl*>(user_data);
         notthis->nameAcquired();
     }
 
-    static void nameLost_staticHelper (GDBusConnection* bus, const gchar* name, gpointer user_data)
+    static void nameLost_staticHelper (GDBusConnection* /*bus*/, const gchar* /*name*/, gpointer user_data)
     {
-        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        auto notthis = static_cast<DBusInterfaceImpl*>(user_data);
         notthis->nameLost();
     }
 
-    static gboolean listPackages_staticHelper (proxyPay* proxy, GDBusMethodInvocation* invocation, gpointer user_data)
+    static gboolean listPackages_staticHelper (proxyPay* /*proxy*/, GDBusMethodInvocation* invocation, gpointer user_data)
     {
-        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        auto notthis = static_cast<DBusInterfaceImpl*>(user_data);
         return notthis->listPackages(invocation);
     }
 
-    static gchar** subtreeEnumerate_staticHelper (GDBusConnection* bus, const gchar* sender, const gchar* object_path,
+    static gchar** subtreeEnumerate_staticHelper (GDBusConnection* /*bus*/, const gchar* /*sender*/, const gchar* object_path,
                                                   gpointer user_data)
     {
-        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        auto notthis = static_cast<DBusInterfaceImpl*>(user_data);
         return notthis->subtreeEnumerate(object_path);
     }
 
-    static GDBusInterfaceInfo** subtreeIntrospect_staticHelper (GDBusConnection* bus, const gchar* sender,
+    static GDBusInterfaceInfo** subtreeIntrospect_staticHelper (GDBusConnection* /*bus*/, const gchar* /*sender*/,
                                                                 const gchar* object_path, const gchar* node, gpointer user_data)
     {
-        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        auto notthis = static_cast<DBusInterfaceImpl*>(user_data);
         return notthis->subtreeIntrospect(object_path, node);
     }
 
@@ -346,19 +351,19 @@ public:
                                                                      gpointer* out_user_data,
                                                                      gpointer user_data);
 
-    static void packageCall_staticHelper (GDBusConnection* connection, const gchar* sender, const gchar* path,
-                                          const gchar* interface, const gchar* method, GVariant* params, GDBusMethodInvocation* invocation, gpointer user_data)
+    static void packageCall_staticHelper (GDBusConnection* /*connection*/, const gchar* sender, const gchar* path,
+                                          const gchar* /*interface*/, const gchar* method, GVariant* params, GDBusMethodInvocation* invocation, gpointer user_data)
     {
-        DBusInterfaceImpl* notthis = static_cast<DBusInterfaceImpl*>(user_data);
+        auto notthis = static_cast<DBusInterfaceImpl*>(user_data);
         return notthis->packageCall(sender, path, method, params, invocation);
     }
 };
 
 static const GDBusSubtreeVTable subtreeVtable =
 {
-    .enumerate = DBusInterfaceImpl::subtreeEnumerate_staticHelper,
-    .introspect = DBusInterfaceImpl::subtreeIntrospect_staticHelper,
-    .dispatch= DBusInterfaceImpl::subtreeDispatch_staticHelper
+    DBusInterfaceImpl::subtreeEnumerate_staticHelper,
+    DBusInterfaceImpl::subtreeIntrospect_staticHelper,
+    DBusInterfaceImpl::subtreeDispatch_staticHelper
 };
 
 /* Export objects into the bus before we get a name */
@@ -381,11 +386,11 @@ void DBusInterfaceImpl::busAcquired (GDBusConnection* inbus)
 
     g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(serviceProxy),
                                      bus,
-                                     "/com/canonical/pay",
+                                     baseObjectPath,
                                      NULL);
 
     subtree_registration = g_dbus_connection_register_subtree(bus,
-                                                              "/com/canonical/pay",
+                                                              baseObjectPath,
                                                               &subtreeVtable,
                                                               G_DBUS_SUBTREE_FLAGS_DISPATCH_TO_UNENUMERATED_NODES,
                                                               this,
@@ -395,16 +400,16 @@ void DBusInterfaceImpl::busAcquired (GDBusConnection* inbus)
 
 static const GDBusInterfaceVTable packageVtable =
 {
-    .method_call = DBusInterfaceImpl::packageCall_staticHelper,
-    .get_property = nullptr,
-    .set_property = nullptr
+    DBusInterfaceImpl::packageCall_staticHelper,
+    nullptr,
+    nullptr
 };
 
-const GDBusInterfaceVTable* DBusInterfaceImpl::subtreeDispatch_staticHelper (GDBusConnection* bus,
-                                                                             const gchar* sender,
-                                                                             const gchar* path,
+const GDBusInterfaceVTable* DBusInterfaceImpl::subtreeDispatch_staticHelper (GDBusConnection* /*bus*/,
+                                                                             const gchar* /*sender*/,
+                                                                             const gchar* /*path*/,
                                                                              const gchar* interface,
-                                                                             const gchar* node,
+                                                                             const gchar* /*node*/,
                                                                              gpointer* out_user_data,
                                                                              gpointer user_data)
 {
@@ -421,21 +426,15 @@ const GDBusInterfaceVTable* DBusInterfaceImpl::subtreeDispatch_staticHelper (GDB
 
 
 
-DBusInterface::DBusInterface (const Item::Store::Ptr& in_items)
+DBusInterface::DBusInterface (const Item::Store::Ptr& in_items):
+    impl(std::make_shared<DBusInterfaceImpl>(in_items))
 {
-    impl = std::make_shared<DBusInterfaceImpl>(in_items);
     impl->connectionReady.connect([this]()
     {
         connectionReady();
     });
 
     impl->run();
-}
-
-bool
-DBusInterface::busStatus ()
-{
-    return true;
 }
 
 std::string
@@ -475,7 +474,7 @@ DBusInterface::decodePath (const std::string& input)
 
     try
     {
-        for (int i = 0; i < input.size(); i++)
+        for (unsigned i = 0; i < input.size(); i++)
         {
             if (input[i] == '_')
             {

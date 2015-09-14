@@ -26,8 +26,8 @@ namespace Item
 
 class TestItem : public Item
 {
-    std::string _id;
-    std::string _app;
+    const std::string _id;
+    const std::string _app;
     uint64_t refund_timeout;
     Status status = Status::UNKNOWN;
     bool verifyResult = false;
@@ -35,18 +35,18 @@ class TestItem : public Item
     bool purchaseResult = false;
 
 public:
-    TestItem (std::string& app, std::string& id) :
+    TestItem (const std::string& app, const std::string& id) :
         _id(id),
         _app(app)
     {
     }
 
-    std::string& getId (void) override
+    const std::string& getId (void) override
     {
         return _id;
     }
 
-    std::string& getApp (void)
+    const std::string& getApp (void)
     {
         return _app;
     }
@@ -92,7 +92,7 @@ class TestStore : public Store
 {
     std::map<std::string, std::shared_ptr<std::map<std::string, Item::Ptr>>> data;
 public:
-    std::list<std::string> listApplications (void)
+    std::list<std::string> listApplications (void) override
     {
         std::list<std::string> apps;
 
@@ -107,7 +107,7 @@ public:
         return apps;
     }
 
-    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (std::string& application)
+    std::shared_ptr<std::map<std::string, Item::Ptr>> getItems (const std::string& application) override
     {
         auto app = data[application];
 
@@ -120,7 +120,7 @@ public:
         return app;
     }
 
-    Item::Ptr getItem (std::string& application, std::string& itemid)
+    Item::Ptr getItem (const std::string& application, const std::string& itemid) override
     {
         auto app = getItems(application);
         Item::Ptr item = (*app)[itemid];
