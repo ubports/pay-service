@@ -28,6 +28,7 @@ Build-Depends: click-dev,
                qt5-default,
                qtbase5-dev,
                qtdeclarative5-dev,
+               sysvinit-utils,
 Standards-Version: 3.9.5
 Homepage: http://launchpad.net/pay-service
 # If you aren't a member of ~indicator-applet-developers but need to upload
