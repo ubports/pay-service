@@ -42,6 +42,7 @@ Architecture: any
 Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
+         sysvinit-utils,
 Recommends: libglib2.0-bin,
             ubuntu-push-client,
             upstart-bin,
