@@ -19,29 +19,83 @@
 package service
 
 import (
+    "errors"
     "testing"
 )
 
-// Test that Pidof works for as expected.
-func TestPidof(t *testing.T) {
-    pids, err := Pidof("init")
+func pidofTest_fakeCommandRunner_singleResult(executable string, args ...string) ([]byte, error) {
+    return []byte("42"), nil
+}
+
+func pidofTest_fakeCommandRunner_multipleResults(executable string, args ...string) ([]byte, error) {
+    return []byte("42 43"), nil
+}
+
+func pidofTest_fakeCommandRunner_invalidResults(executable string, args ...string) ([]byte, error) {
+    return []byte("hello"), nil // Cannot be converted to int
+}
+
+func pidofTest_fakeCommandRunner_error(executable string, args ...string) ([]byte, error) {
+    return nil, errors.New("Failed at user request")
+}
+
+// Test that Pidof works for as expected for single results
+func TestPidof_singleResult(t *testing.T) {
+    pidofCommandRunner = pidofTest_fakeCommandRunner_singleResult
+
+    pids, err := Pidof("foo")
     if err != nil {
-        t.Errorf(`Unexpected error getting PID of "init": %s`, err)
+        t.Errorf(`Unexpected error getting PID of "foobar": %s`, err)
     }
 
     if len(pids) != 1 {
         t.Fatalf("Got %d PIDs, expected only 1", len(pids))
     }
 
-    if pids[0] != 1 {
-        t.Errorf("Got PID %d, expected 1", pids[0])
+    if pids[0] != 42 {
+        t.Errorf("Got PID %d, expected 42", pids[0])
     }
 }
 
-// Test that Pidof fails when given a non-running process name
-func TestPidof_invalidName(t *testing.T) {
-    _, err := Pidof("non-existent-process-name")
+// Test that Pidof works for as expected for multiple results
+func TestPidof_multipleResults(t *testing.T) {
+    pidofCommandRunner = pidofTest_fakeCommandRunner_multipleResults
+
+    pids, err := Pidof("foo")
+    if err != nil {
+        t.Errorf(`Unexpected error getting PID of "foobar": %s`, err)
+    }
+
+    if len(pids) != 2 {
+        t.Fatalf("Got %d PIDs, expected 2", len(pids))
+    }
+
+    if pids[0] != 42 {
+        t.Errorf("Got PID %d, expected 42", pids[0])
+    }
+
+    if pids[1] != 43 {
+        t.Errorf("Got PID %d, expected 43", pids[1])
+    }
+}
+
+// Test that Pidof works for as expected for invalid results
+func TestPidof_invalidResults(t *testing.T) {
+    pidofCommandRunner = pidofTest_fakeCommandRunner_invalidResults
+
+    _, err := Pidof("foo")
     if err == nil {
-        t.Error("Expected an error due to no such process existing")
+        t.Error("Expected an error due to invalid PID")
+    }
+}
+
+// Test that Pidof fails when pidof doesn't find any PIDs (i.e. process isn't
+// running)
+func TestPidof_invalidName(t *testing.T) {
+    pidofCommandRunner = pidofTest_fakeCommandRunner_error
+
+    _, err := Pidof("foo")
+    if err == nil {
+        t.Error("Expected an error due to pidof failure")
     }
 }

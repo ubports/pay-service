@@ -25,14 +25,24 @@ import (
     "os/exec"
 )
 
+type Outputer interface {
+    Output() ([]byte, error)
+}
+
 const (
-    pidofExecutable = "/bin/pidof"
+    pidofExecutable = "pidof"
 )
+
+var pidofCommandRunner = pidofRunCommand
+
+func pidofRunCommand(executable string, args ...string) ([]byte, error) {
+    return exec.Command(executable, args...).Output()
+}
 
 // Pidof does the same as directly calling `pidof`, and returns a list of the
 // PIDs with a given process name.
 func Pidof(processName string) ([]int, error) {
-    output, err := exec.Command(pidofExecutable, processName).Output()
+    output, err := pidofCommandRunner(pidofExecutable, processName)
     if err != nil {
         return nil, fmt.Errorf(`Unable to get PID for process "%s": %s`,
                                processName, err)
