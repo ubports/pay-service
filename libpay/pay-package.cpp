@@ -278,7 +278,7 @@ public:
         auto ok = startBase<&proxy_pay_package_call_verify_item,
                             &proxy_pay_package_call_verify_item_finish> (itemid);
 
-        g_debug("%s returning %d", G_STRFUNC, (int)ok);
+        g_debug("%s returning %d", G_STRFUNC, int(ok));
         return ok;
     }
 
@@ -289,7 +289,7 @@ public:
         auto ok = startBase<&proxy_pay_package_call_purchase_item,
                             &proxy_pay_package_call_purchase_item_finish> (itemid);
 
-        g_debug("%s returning %d", G_STRFUNC, (int)ok);
+        g_debug("%s returning %d", G_STRFUNC, int(ok));
         return ok;
     }
 
@@ -300,7 +300,7 @@ public:
         auto ok = startBase<&proxy_pay_package_call_refund_item,
                             &proxy_pay_package_call_refund_item_finish> (itemid);
 
-        g_debug("%s returning %d", G_STRFUNC, (int)ok);
+        g_debug("%s returning %d", G_STRFUNC, int(ok));
         return ok;
     }
 
