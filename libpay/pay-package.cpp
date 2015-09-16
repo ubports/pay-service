@@ -101,7 +101,7 @@ public:
         thread.quit();
     }
 
-    static void proxySignal (proxyPayPackage* proxy,
+    static void proxySignal (proxyPayPackage* /*proxy*/,
                              const gchar* itemid,
                              const gchar* statusstr,
                              guint64 refundable_until,
@@ -201,7 +201,7 @@ public:
         itemObservers.emplace(std::make_pair(observer, user_data), itemChanged.connect([this, observer, user_data] (
             std::string itemid,
             PayPackageItemStatus status,
-            uint64_t refund)
+            uint64_t /*refund*/)
         {
             observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
         }));
