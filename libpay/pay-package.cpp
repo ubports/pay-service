@@ -24,8 +24,10 @@
 #include <gio/gio.h>
 #include <mutex>
 
-#include "proxy-package.h"
-#include "glib-thread.h"
+#include <common/glib-thread.h>
+#include <common/bus-utils.h>
+
+#include <libpay/proxy-package.h>
 
 namespace Pay
 {
@@ -51,7 +53,7 @@ public:
         , thread([] {}, [this] {proxy.reset();})
     {
         path = std::string("/com/canonical/pay/");
-        path += encodePath(id);
+        path += BusUtils::encodePathElement(id);
 
         /* Keeps item cache up-to-data as we get signals about it */
         itemChanged.connect([this](std::string itemid,
@@ -302,35 +304,6 @@ public:
         return ok;
     }
 
-    std::string
-    encodePath (const std::string& input)
-    {
-        std::string output = "";
-        bool first = true;
-
-        for (unsigned char c : input)
-        {
-            std::string retval;
-
-            if ((c >= 'a' && c <= 'z') ||
-                    (c >= 'A' && c <= 'Z') ||
-                    (c >= '0' && c <= '9' && !first))
-            {
-                retval = std::string((char*)&c, 1);
-            }
-            else
-            {
-                char buffer[5] = {0};
-                std::snprintf(buffer, 4, "_%2X", c);
-                retval = std::string(buffer);
-            }
-
-            output += retval;
-            first = false;
-        }
-
-        return output;
-    }
 };
 
 

@@ -19,6 +19,8 @@
 
 #include "dbus-interface.h"
 
+#include "bus-utils.h"
+
 #include <gio/gio.h>
 #include <thread>
 #include <cstring>
@@ -145,7 +147,7 @@ public:
     {
         std::string path = baseObjectPath;
         path += '/';
-        path += DBusInterface::encodePath(pkg);
+        path += BusUtils::encodePathElement(pkg);
         return path;
     }
 
@@ -153,7 +155,7 @@ public:
     {
         std::string pkg = path;
         pkg.erase(0, strlen(baseObjectPath) + 1/*strlen("/")*/);
-        pkg = DBusInterface::decodePath(pkg);
+        pkg = BusUtils::decodePathElement(pkg);
         return pkg;
     }
 
@@ -201,7 +203,7 @@ public:
         auto packages = items->listApplications();
         for (auto package : packages)
         {
-            std::string encoded = DBusInterface::encodePath(package);
+            std::string encoded = BusUtils::encodePathElement(package);
             gchar* val = g_strdup(encoded.c_str());
             g_array_append_val(nodes, val);
         }
@@ -436,68 +438,3 @@ DBusInterface::DBusInterface (const Item::Store::Ptr& in_items):
 
     impl->run();
 }
-
-std::string
-DBusInterface::encodePath (const std::string& input)
-{
-    std::string output = "";
-    bool first = true;
-
-    for (unsigned char c : input)
-    {
-        std::string retval;
-
-        if ((c >= 'a' && c <= 'z') ||
-                (c >= 'A' && c <= 'Z') ||
-                (c >= '0' && c <= '9' && !first))
-        {
-            retval = std::string((char*)&c, 1);
-        }
-        else
-        {
-            char buffer[5] = {0};
-            std::snprintf(buffer, 4, "_%2X", c);
-            retval = std::string(buffer);
-        }
-
-        output += retval;
-        first = false;
-    }
-
-    return output;
-}
-
-std::string
-DBusInterface::decodePath (const std::string& input)
-{
-    std::string output;
-
-    try
-    {
-        for (unsigned i = 0; i < input.size(); i++)
-        {
-            if (input[i] == '_')
-            {
-                char buffer[3] = {0};
-                buffer[0] = input[i + 1];
-                buffer[1] = input[i + 2];
-
-                unsigned char value = std::stoi(buffer, nullptr, 16);
-                output += value;
-                i += 2;
-            }
-            else
-            {
-                output += input[i];
-            }
-        }
-    }
-    catch (...)
-    {
-        /* We can get out of bounds on the parsing if the
-           string is invalid. Just return what we have. */
-    }
-
-    return output;
-}
-

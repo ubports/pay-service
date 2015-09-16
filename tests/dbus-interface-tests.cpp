@@ -21,6 +21,8 @@
 #include <service/proxy-service.h>
 #include <service/proxy-package.h>
 
+#include <common/bus-utils.h>
+
 #include <core/posix/signal.h>
 
 #include <core/testing/fork_and_run.h>
@@ -300,22 +302,22 @@ TEST_F(DbusInterfaceTests, ItemSignalTests)
 TEST_F(DbusInterfaceTests, encodeDecode)
 {
     /* Pass through */
-    EXPECT_EQ("fine", DBusInterface::encodePath(std::string("fine")));
-    EXPECT_EQ("fine", DBusInterface::decodePath(std::string("fine")));
+    EXPECT_EQ("fine", BusUtils::encodePathElement(std::string("fine")));
+    EXPECT_EQ("fine", BusUtils::decodePathElement(std::string("fine")));
 
     /* Number as first characeter */
-    EXPECT_EQ("_331337", DBusInterface::encodePath(std::string("31337")));
-    EXPECT_EQ("31337", DBusInterface::decodePath(std::string("_331337")));
+    EXPECT_EQ("_331337", BusUtils::encodePathElement(std::string("31337")));
+    EXPECT_EQ("31337", BusUtils::decodePathElement(std::string("_331337")));
 
     /* Underscore test */
-    EXPECT_EQ("this_5Fis_5Fc_5Fstyle_5Fnamespacing", DBusInterface::encodePath(std::string("this_is_c_style_namespacing")));
-    EXPECT_EQ("this_is_c_style_namespacing", DBusInterface::decodePath(std::string("this_5Fis_5Fc_5Fstyle_5Fnamespacing")));
+    EXPECT_EQ("this_5Fis_5Fc_5Fstyle_5Fnamespacing", BusUtils::encodePathElement(std::string("this_is_c_style_namespacing")));
+    EXPECT_EQ("this_is_c_style_namespacing", BusUtils::decodePathElement(std::string("this_5Fis_5Fc_5Fstyle_5Fnamespacing")));
 
     /* Hyphen test */
-    EXPECT_EQ("typical_2Dapplication", DBusInterface::encodePath(std::string("typical-application")));
-    EXPECT_EQ("typical-application", DBusInterface::decodePath(std::string("typical_2Dapplication")));
+    EXPECT_EQ("typical_2Dapplication", BusUtils::encodePathElement(std::string("typical-application")));
+    EXPECT_EQ("typical-application", BusUtils::decodePathElement(std::string("typical_2Dapplication")));
 
     /* Japanese test */
-    EXPECT_EQ("_E6_97_A5_E6_9C_AC_E8_AA_9E", DBusInterface::encodePath(std::string("日本語")));
-    EXPECT_EQ("日本語", DBusInterface::decodePath(std::string("_E6_97_A5_E6_9C_AC_E8_AA_9E")));
+    EXPECT_EQ("_E6_97_A5_E6_9C_AC_E8_AA_9E", BusUtils::encodePathElement(std::string("日本語")));
+    EXPECT_EQ("日本語", BusUtils::decodePathElement(std::string("_E6_97_A5_E6_9C_AC_E8_AA_9E")));
 }

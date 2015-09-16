@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -17,29 +17,18 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include "item-interface.h"
-#include <memory>
-#include <core/signal.h>
+#ifndef PAY_BUS_UTILS_H
+#define PAY_BUS_UTILS_H
 
-#ifndef DBUS_INTERFACE_HPP__
-#define DBUS_INTERFACE_HPP__ 1
+#include <string>
 
-class DBusInterfaceImpl;
-
-class DBusInterface
+class BusUtils
 {
 public:
-    explicit DBusInterface (const Item::Store::Ptr& in_items);
-    ~DBusInterface () { };
 
+    static std::string encodePathElement(const std::string&);
 
-    core::Signal<> connectionReady;
-
-    typedef std::shared_ptr<DBusInterface> Ptr;
-
-private:
-    std::shared_ptr<DBusInterfaceImpl> impl;
+    static std::string decodePathElement(const std::string&);
 };
 
-
-#endif // DBUS_INTERFACE_HPP__
+#endif // PAY_BUS_UTILS_H
