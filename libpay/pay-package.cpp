@@ -34,7 +34,6 @@ namespace Pay
 class Package
 {
     std::string id;
-    std::string path;
 
     std::map <std::pair<PayPackageItemObserver, void*>, core::ScopedConnection> itemObservers;
     std::map <std::pair<PayPackageRefundObserver, void*>, core::ScopedConnection> refundObservers;
@@ -52,9 +51,6 @@ public:
         : id(packageid)
         , thread([] {}, [this] {proxy.reset();})
     {
-        path = std::string("/com/canonical/pay/");
-        path += BusUtils::encodePathElement(id);
-
         /* Keeps item cache up-to-data as we get signals about it */
         itemChanged.connect([this](std::string itemid,
                                    PayPackageItemStatus status,
@@ -65,30 +61,37 @@ public:
             itemStatusCache[itemid] = std::make_pair(status, refundable_until);
         });
 
-        /* Connect in the proxy now that we've got all the signals setup, let the fun begin! */
-        proxy = thread.executeOnThread<std::shared_ptr<proxyPayPackage>>([this]()
+
+        /* Fire up a glib thread to create the proxy.
+           Block on it here so that it's ready before this ctor returns */
+        const auto errorStr = thread.executeOnThread<std::string>([this]()
         {
+            // create the pay-service proxy...
             GError* error = nullptr;
-            auto proxy = std::shared_ptr<proxyPayPackage>(proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
-                                                                                                   G_DBUS_PROXY_FLAGS_NONE,
-                                                                                                   "com.canonical.pay",
-                                                                                                   path.c_str(),
-                                                                                                   thread.getCancellable().get(),
-                                                                                                   &error),
-                                                          [](proxyPayPackage * proxy) -> void
-            {
-                g_clear_object(&proxy);
-            });
-
-            if (error != nullptr)
-            {
-                throw std::runtime_error(error->message);
+            const std::string path = "/com/canonical/pay/" + BusUtils::encodePathElement(id);
+            proxy = std::shared_ptr<proxyPayPackage>(
+                proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                    G_DBUS_PROXY_FLAGS_NONE,
+                    "com.canonical.pay",
+                    path.c_str(),
+                    thread.getCancellable().get(),
+                    &error),
+                [](proxyPayPackage* prx){g_clear_object(&prx);}
+            );
+            if (error != nullptr) {
+                const std::string tmp { error->message };
+                g_clear_error(&error);
+                return tmp;
             }
-
             g_signal_connect(proxy.get(), "item-status-changed", G_CALLBACK(proxySignal), this);
 
-            return proxy;
+            return std::string(); // no error
         });
+
+        if (!errorStr.empty())
+        {
+            throw std::runtime_error(errorStr);
+        }
 
         if (!proxy)
         {
