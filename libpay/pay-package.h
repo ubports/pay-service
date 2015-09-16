@@ -41,7 +41,7 @@ typedef enum
     PAY_PACKAGE_ITEM_STATUS_PURCHASING,    /*< nick=purchasing */
     PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, /*< nick=not-purchased */
     PAY_PACKAGE_ITEM_STATUS_REFUNDING,     /*< nick=refunding */
-    PAY_PACKAGE_ITEM_STATUS_APPROVED,      /*< nick=approved */
+    PAY_PACKAGE_ITEM_STATUS_APPROVED       /*< nick=approved */
 } PayPackageItemStatus;
 
 /**
