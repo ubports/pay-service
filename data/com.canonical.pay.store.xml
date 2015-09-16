@@ -8,15 +8,15 @@
              acknowledged: boolean
              acknowledged_time: a uint64 unix timestamp if 'acknowledged' is true
              description: string
-             id: string
              price: string
              purchased_time: a uint64 unix timestamp if 'status' is 'purchased'
+             sku: string, a short identifier, unique to the application.
              status: string, one of 'purchased' or 'not purchased'
              title: string
              type: string, one of 'unlockable' or 'consumable'
          -->
         <method name="GetItem">
-            <arg direction="in" type="s" name="item_id" />
+            <arg direction="in" type="s" name="sku" />
             <arg direction="out" type="a{sv}" name="item_properties" />
         </method>
 
@@ -31,7 +31,7 @@
              Returns an Item Properties Dictionary for the specified item.
         -->
         <method name="PurchaseItem">
-            <arg direction="in" type="s" name="item_id" />
+            <arg direction="in" type="s" name="sku" />
             <arg direction="out" type="a{sv}" name="item_properties" />
         </method>
 
@@ -42,7 +42,7 @@
              it available for future repurchase.
         -->
         <method name="AcknowledgeItem">
-            <arg direction="in" type="s" name="item_id" />
+            <arg direction="in" type="s" name="sku" />
             <arg direction="out" type="a{sv}" name="item_properties" />
         </method>
 
@@ -50,7 +50,7 @@
              and yields an Item Properties Dictionary for the specified item.
         -->
         <method name="RefundItem">
-            <arg direction="in" type="s" name="item_id" />
+            <arg direction="in" type="s" name="sku" />
             <arg direction="out" type="a{sv}" name="item_properties" />
         </method>
 

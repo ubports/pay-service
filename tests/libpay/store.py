@@ -51,17 +51,17 @@ class Item:
         'acknowledged': dbus.Boolean(False),
         'acknowledged_time': dbus.UInt64(0.0),
         'description': dbus.String('The is a default item'),
-        'id': dbus.String('default_item'),
         'price': dbus.String('$1'),
         'purchased_time': dbus.UInt64(0.0),
+        'sku': dbus.String('default_item'),
         'status': dbus.String('not purchased'),
         'type': dbus.String('unlockable'),
         'title': dbus.String('Default Item')
     }
 
-    def __init__(self, id):
+    def __init__(self, sku):
         self.bus_properties = Item.__default_bus_properties.copy()
-        self.bus_properties['id'] = id
+        self.bus_properties['sku'] = sku
 
     def serialize(self):
         return dbus.Dictionary(self.bus_properties)
@@ -77,91 +77,91 @@ class Item:
 @dbus.service.method(STORE_IFACE, in_signature='a{sv}')
 def StoreAddItem(store, properties):
 
-    if 'id' not in properties:
+    if 'sku' not in properties:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'item has no id property')
+            'item has no sku property')
 
-    if properties['id'] in store.items:
+    sku = properties['sku']
+    if sku in store.items:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} already has item {1}'.format(store.name, properties.id))
+            'store {0} already has item {1}'.format(store.name, sku))
 
-    id = properties['id']
-    item = Item(id)
-    store.items[id] = item
-    store.StoreSetItem(id, properties)
+    item = Item(sku)
+    store.items[sku] = item
+    store.StoreSetItem(sku, properties)
 
 
 @dbus.service.method(STORE_IFACE, in_signature='sa{sv}', out_signature='')
-def StoreSetItem(store, id, properties):
+def StoreSetItem(store, sku, properties):
 
     try:
-        item = store.items[id]
+        item = store.items[sku]
         for key, value in properties.items():
             item.set_property(key, value)
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, id))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 
 @dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
-def GetItem(store, id):
+def GetItem(store, sku):
     try:
-        return store.items[id].serialize()
+        return store.items[sku].serialize()
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, id))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 
 @dbus.service.method(STORE_IFACE, in_signature='', out_signature='aa{sv}')
 def GetPurchasedItems(store):
     items = []
-    for id, item in store.items.items():
+    for sku, item in store.items.items():
         if item.bus_properties['status'] == 'purchased':
             items.append(item.serialize())
     return dbus.Array(items, signature='a{sv}', variant_level=1)
 
 
 @dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
-def PurchaseItem(store, id):
+def PurchaseItem(store, sku):
     try:
-        item = store.items[id]
+        item = store.items[sku]
         item.set_property('status', 'purchased')
         item.set_property('purchased_time', dbus.UInt64(time.time()))
         return item.serialize()
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, id))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 
 @dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
-def RefundItem(store, id):
+def RefundItem(store, sku):
     try:
-        item = store.items[id]
+        item = store.items[sku]
         item.set_property('status', 'not purchased')
         item.set_property('purchased_time', dbus.UInt64(0))
         return item.serialize()
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, id))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 
 @dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
-def AcknowledgeItem(store, id):
+def AcknowledgeItem(store, sku):
     try:
-        item = store.items[id]
+        item = store.items[sku]
         item.set_property('acknowledged', dbus.Boolean(True))
         item.set_property('acknowledged_time', dbus.UInt64(time.time()))
         return item.serialize()
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, id))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 #
 #  Main 'Storemock' Obj
