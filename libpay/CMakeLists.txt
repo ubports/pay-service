@@ -7,6 +7,8 @@ set(libpay-sources
 set(api-version 2)
 set(abi-version 2)
 
+add_subdirectory(internal)
+ 
 ######################
 # DBus Proxies
 ######################
