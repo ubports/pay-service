@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 3 as
@@ -13,7 +13,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Authored by: Ted Gould <ted@canonical.com>
+ * Authors:
+ *   Ted Gould <ted@canonical.com>
+ *   Charles Kerr <charles.kerr@canonical.com>
  */
 
 #pragma once
