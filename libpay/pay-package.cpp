@@ -180,9 +180,9 @@ public:
             return PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED;
         }
 
-        const auto now = std::time(nullptr);
+        const auto now = uint64_t(std::time(nullptr));
 
-        if (refundtime < (now + 10 /* seconds */)) // Honestly, they can't refund this quickly anyway
+        if (refundtime < (now + 10u /* seconds */)) // Honestly, they can't refund this quickly anyway
         {
             return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
         }
