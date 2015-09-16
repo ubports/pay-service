@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node>
+    <interface name="com.canonical.pay.store">
+
+        <!-- If a match is not found, a DBus error is returned.
+
+             Otherwise an Item Properties Dictionary is returned. IPDs include:
+             acknowledged: boolean
+             acknowledged_time: a uint64 unix timestamp if 'acknowledged' is true
+             description: string
+             id: string
+             price: string
+             purchased_time: a uint64 unix timestamp if 'status' is 'purchased'
+             status: string, one of 'purchased' or 'not purchased'
+             title: string
+             type: string, one of 'unlockable' or 'consumable'
+         -->
+        <method name="GetItem">
+            <arg direction="in" type="s" name="item_id" />
+            <arg direction="out" type="a{sv}" name="item_properties" />
+        </method>
+
+        <!-- Yields an array of Item Properties Dictionaries for each 
+             purchased item, both unlockable or consumable.
+        -->
+        <method name="GetPurchasedItems">
+            <arg direction="out" type="aa{sv}" name="items" />
+        </method>
+
+        <!-- Launches the purchase flow for an item.
+             Returns an Item Properties Dictionary for the specified item.
+        -->
+        <method name="PurchaseItem">
+            <arg direction="in" type="s" name="item_id" />
+            <arg direction="out" type="a{sv}" name="item_properties" />
+        </method>
+
+        <!-- Acknowledges that the client has finished performing all
+             necessary reactions to the purchase and yields an Item
+             Properties Dictionary for the specified item.
+             For consumable items, this also consumes the item and makes
+             it available for future repurchase.
+        -->
+        <method name="AcknowledgeItem">
+            <arg direction="in" type="s" name="item_id" />
+            <arg direction="out" type="a{sv}" name="item_properties" />
+        </method>
+
+        <!-- Requests a refund for an item. Only valid for click/snap store
+             and yields an Item Properties Dictionary for the specified item.
+        -->
+        <method name="RefundItem">
+            <arg direction="in" type="s" name="item_id" />
+            <arg direction="out" type="a{sv}" name="item_properties" />
+        </method>
+
+    </interface>
+</node>
+
