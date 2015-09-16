@@ -22,6 +22,7 @@
 
 #include <libpay/pay-package.h>
 #include <libpay/proxy-package.h>
+#include <libpay/proxy-store.h>
 
 #include <common/glib-thread.h>
 
@@ -52,6 +53,7 @@ class Package
 
     GLib::ContextThread thread;
     std::shared_ptr<proxyPayPackage> pkgProxy;
+    std::shared_ptr<proxyPayStore> storeProxy;
 
     constexpr static uint64_t expiretime{60}; // 60 seconds prior status is "expiring"
 

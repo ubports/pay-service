@@ -32,7 +32,7 @@ namespace Internal
 
 Package::Package (const std::string& packageid)
     : id(packageid)
-    , thread([]{}, [this]{pkgProxy.reset();})
+    , thread([]{}, [this]{pkgProxy.reset(); storeProxy.reset();})
 {
     // when item statuses change, update our internal cache
     statusChanged.connect([this](std::string itemid,
@@ -69,6 +69,23 @@ Package::Package (const std::string& packageid)
         }
         g_signal_connect(pkgProxy.get(), "item-status-changed", G_CALLBACK(pkgProxySignal), this);
 
+        // create the pay-service-ng proxy...
+        path = "/com/canonical/pay/store/" + encoded_id;
+        storeProxy = std::shared_ptr<proxyPayStore>(
+            proxy_pay_store_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                G_DBUS_PROXY_FLAGS_NONE,
+                "com.canonical.payments",
+                path.c_str(),
+                thread.getCancellable().get(),
+                &error),
+            [](proxyPayStore * store){g_clear_object(&store);}
+        );
+        if (error != nullptr) {
+            const std::string tmp { error->message };
+            g_clear_error(&error);
+            return tmp;
+        }
+
         return std::string(); // no error
     });
 
@@ -77,7 +94,7 @@ Package::Package (const std::string& packageid)
         throw std::runtime_error(errorStr);
     }
 
-    if (!pkgProxy)
+    if (!pkgProxy || !storeProxy)
     {
         throw std::runtime_error("Unable to build proxy for pay-service");
     }
