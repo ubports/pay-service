@@ -86,7 +86,7 @@ public:
         }
     }
 
-    virtual bool run (void)
+    virtual bool run (void) override
     {
         stopThread();
         transferBuffer.clear();
