@@ -64,7 +64,7 @@ add_custom_target (dist
                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_custom_target (cppcheck COMMAND cppcheck --enable=all -q --error-exitcode=2 --inline-suppr
-                   ${CMAKE_SOURCE_DIR}/src
+                   ${CMAKE_SOURCE_DIR}/libpay
                    ${CMAKE_SOURCE_DIR}/tests)
 
 ##
@@ -72,7 +72,15 @@ add_custom_target (cppcheck COMMAND cppcheck --enable=all -q --error-exitcode=2 
 ##
 
 set (CC_WARNING_ARGS " -Wall -Wshadow -Wextra -Wunused -Wformat=2 -Wno-missing-field-initializers")
-set (CXX_WARNING_ARGS " -Wall -Wextra -pedantic -Wno-missing-field-initializers")
+# those GActionEntry structs tickle -Wmissing-field-initializers
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set (CXX_WARNING_ARGS "${CXX_WARNING_ARGS} -Weverything -Wno-c++98-compat -Wno-documentation -Wno-padded")
+else()
+  set (CXX_WARNING_ARGS "${CXX_WARNING_ARGS} -Wall -Wextra -Wpedantic -Wunused -Wformat=2 ")
+endif()
+# service/dbus-interface.cpp gives unavoidable warnings in glib code unless we turn this warning off
+set (CXX_WARNING_ARGS "${CXX_WARNING_ARGS} -Wno-missing-field-initializers")
+
 
 ##
 ##  Subdirectories

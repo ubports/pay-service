@@ -24,6 +24,9 @@ include_directories(SYSTEM ${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_library(libpay SHARED ${libpay-sources} ${libpay-generated})
+set_property(SOURCE ${libpay-sources}
+             APPEND_STRING PROPERTY COMPILE_FLAGS " ${CXX_WARNING_ARGS}")
+
 set_target_properties(libpay PROPERTIES
   VERSION ${api-version}.0.0
   SOVESRION ${abi-version}
