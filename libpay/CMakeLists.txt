@@ -1,8 +1,10 @@
 
 set(libpay-headers
-    pay-package.h)
+    pay-package.h
+    pay-item.h)
 set(libpay-sources
-    pay-package.cpp)
+    pay-package.cpp
+    pay-item.cpp)
 
 set(api-version 2)
 set(abi-version 2)

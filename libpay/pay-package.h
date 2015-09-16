@@ -96,7 +96,7 @@ PayPackage* pay_package_new (const char* package_name);
  * pay_package_delete:
  * @package: package object to free
  *
- * Frees the resources associtated with the package object, should be
+ * Frees the resources associated with the package object, should be
  * done when the application is finished with them.
  */
 void pay_package_delete (PayPackage* package);
@@ -243,10 +243,10 @@ int pay_package_item_start_purchase (PayPackage* package,
 int pay_package_item_start_refund (PayPackage* package,
                                    const char* itemid);
 
-#pragma GCC visibility pop
-
 #ifdef __cplusplus
 }
 #endif
+
+#pragma GCC visibility pop
 
 #endif /* PAY_PACKAGE_H */
