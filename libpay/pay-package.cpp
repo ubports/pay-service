@@ -234,7 +234,8 @@ public:
         return true;
     }
 
-    template <void (*startFunc)(proxyPayPackage*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer), gboolean (*finishFunc) (proxyPayPackage*, GAsyncResult*, GError**)>
+    template <void (*startFunc)(proxyPayPackage*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
+              gboolean (*finishFunc) (proxyPayPackage*, GAsyncResult*, GError**)>
     bool startBase (const char* itemid) noexcept
     {
         std::promise<bool> promise;
@@ -245,23 +246,16 @@ public:
             thread.getCancellable().get(), /* cancellable */
             [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
             {
-                auto promise = reinterpret_cast<std::promise<bool> *>(user_data);
+                auto prom = static_cast<std::promise<bool>*>(user_data);
                 GError* error = nullptr;
 
                 finishFunc(PROXY_PAY_PACKAGE(obj), res, &error);
-
-                if (error != nullptr)
+                if ((error != nullptr) && !g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
                 {
-                    if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-                    {
-                        std::cerr << "Error from service: " << error->message << std::endl;
-                    }
-                    g_clear_error(&error);
-                    promise->set_value(false);
+                    std::cerr << "Error from service: " << error->message << std::endl;
                 }
-                else {
-                    promise->set_value(true);
-                }
+                prom->set_value(error == nullptr);
+                g_clear_error(&error);
             },
             &promise);
         });
