@@ -20,9 +20,12 @@
 
 #pragma once
 
+#include <libpay/pay-item.h>
 #include <libpay/pay-package.h>
 #include <libpay/proxy-package.h>
 #include <libpay/proxy-store.h>
+
+#include <libpay/internal/item.h>
 
 #include <common/glib-thread.h>
 
@@ -71,6 +74,11 @@ class Package
               gboolean (*finishFunc)(BusProxy*, GAsyncResult*, GError**)>
     bool startBase (const std::shared_ptr<BusProxy>& bus_proxy, const std::string& item_id) noexcept;
 
+    template<typename BusProxy,
+             void (*startFunc)(proxyPayStore*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
+             gboolean (*finishFunc)(proxyPayStore*, GVariant**, GAsyncResult*, GError**)>
+    bool startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy, const std::string& item_id) noexcept;
+
 public:
     explicit Package (const std::string& packageid);
     ~Package();
@@ -89,6 +97,14 @@ public:
     bool startVerification    (const std::string& itemid) noexcept;
     bool startPurchase        (const std::string& itemid) noexcept;
     bool startRefund          (const std::string& itemid) noexcept;
+
+    bool startItemAcknowledge (const std::string& itemid) noexcept;
+    bool startItemPurchase    (const std::string& itemid) noexcept;
+    bool startItemRefund      (const std::string& itemid) noexcept;
+
+    std::shared_ptr<PayItem> getItem(const std::string& itemid) noexcept;
+
+    std::vector<std::shared_ptr<PayItem>> getPurchasedItems() noexcept;
 };
 
 } // namespace Internal
