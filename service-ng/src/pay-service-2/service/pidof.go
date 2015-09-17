@@ -41,7 +41,7 @@ func pidofRunCommand(executable string, args ...string) ([]byte, error) {
 
 // Pidof does the same as directly calling `pidof`, and returns a list of the
 // PIDs with a given process name.
-func Pidof(processName string) ([]int, error) {
+func Pidof(processName string) ([]uint32, error) {
     output, err := pidofCommandRunner(pidofExecutable, processName)
     if err != nil {
         return nil, fmt.Errorf(`Unable to get PID for process "%s": %s`,
@@ -55,13 +55,15 @@ func Pidof(processName string) ([]int, error) {
     pidStrings := strings.Split(stringOutput, " ")
 
     // Convert the string-form PIDs into ints
-    pids := make([]int, len(pidStrings))
+    pids := make([]uint32, len(pidStrings))
     for index, pid := range pidStrings {
-        pids[index], err = strconv.Atoi(pid)
+        pidInt, err := strconv.ParseInt(pid, 10, 32)
         if err != nil {
             return nil, fmt.Errorf(`Unable to convert "%s" into a valid PID`,
                                    pid)
         }
+
+        pids[index] = uint32(pidInt)
     }
 
     return pids, nil
