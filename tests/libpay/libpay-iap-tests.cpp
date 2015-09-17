@@ -249,43 +249,6 @@ TEST_F(IapTests, PurchaseItem)
     pay_package_delete(package);
 }
 
-TEST_F(IapTests, RefundItem)
-{
-    AddGame();
-
-    auto package = pay_package_new(GAME_NAME);
-    const char* sku = "magic_sword";
-    const auto expected_status = PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED;
-
-    // install a status observer
-    StatusObserverData data;
-    InstallStatusObserver(package, data);
-
-    // start the refund
-    auto start_result = pay_item_start_refund(package, sku);
-    EXPECT_TRUE(start_result);
-
-    // wait for the status observer to be called
-    while (!data.triggered)
-        g_usleep(G_USEC_PER_SEC/10);
-
-    // confirm that the item's status changed
-    EXPECT_TRUE(data.triggered);
-    EXPECT_EQ(package, data.package);
-    EXPECT_EQ(sku, data.sku);
-    EXPECT_EQ(expected_status, data.status);
-
-    // now get the PayItem and test it
-    auto item = pay_package_get_item(package, sku);
-    EXPECT_EQ(expected_status, pay_item_get_status(item));
-    EXPECT_STREQ(sku, pay_item_get_sku(item));
-    EXPECT_EQ(0, pay_item_get_purchased_time(item));
-    g_clear_pointer(&item, pay_item_unref);
-
-    // cleanup
-    pay_package_delete(package);
-}
-
 TEST_F(IapTests, AcknowledgeItem)
 {
     AddGame();
