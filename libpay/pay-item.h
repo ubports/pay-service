@@ -83,13 +83,6 @@ PayItem** pay_package_get_purchased_items (PayPackage* package);
 PayItem*  pay_package_get_item            (PayPackage* package,
                                            const char* sku);
 
-/***
-**** Actions
-***/
-                                          
-int pay_item_start_purchase    (PayPackage* package,
-                                const char* sku);
-
 #ifdef __cplusplus
 }
 #endif

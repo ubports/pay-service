@@ -225,7 +225,7 @@ TEST_F(IapTests, PurchaseItem)
     InstallStatusObserver(package, data);
 
     // start the purchase
-    auto start_result = pay_item_start_purchase(package, sku);
+    auto start_result = pay_package_item_start_purchase(package, sku);
     EXPECT_TRUE(start_result);
 
     // wait for the purchase to complete

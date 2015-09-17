@@ -441,16 +441,6 @@ Package::getPurchasedItems() noexcept
 }
 
 bool
-Package::startItemPurchase (const std::string& sku) noexcept
-{
-    g_debug("%s %s", G_STRFUNC, sku.c_str());
-
-    return startStoreAction<proxyPayStore,
-                            &proxy_pay_store_call_purchase_item,
-                            &proxy_pay_store_call_purchase_item_finish>(storeProxy, sku);
-}
-
-bool
 Package::startAcknowledge (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
@@ -529,9 +519,9 @@ Package::startPurchase (const std::string& itemid) noexcept
 {
     g_debug("%s %s", G_STRFUNC, itemid.c_str());
 
-    auto ok = startBase<proxyPayPackage,
-                        &proxy_pay_package_call_purchase_item,
-                        &proxy_pay_package_call_purchase_item_finish> (pkgProxy, itemid);
+    auto ok = startStoreAction<proxyPayStore,
+                               &proxy_pay_store_call_purchase_item,
+                               &proxy_pay_store_call_purchase_item_finish>(storeProxy, itemid);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;

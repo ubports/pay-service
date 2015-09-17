@@ -152,18 +152,3 @@ pay_package_get_item (PayPackage* package,
     }
     return ret; 
 }
-
-/***
-**** Actions
-***/
-
-int
-pay_item_start_purchase (PayPackage* package,
-                         const char* sku)
-{
-    g_return_val_if_fail (package != nullptr, 0);
-    g_return_val_if_fail (sku != nullptr, 0);
-    g_return_val_if_fail (*sku != '\0', 0);
-
-    return package->startItemPurchase(sku) ? 1 : 0;
-}
