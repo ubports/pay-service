@@ -1,7 +1,8 @@
 
 set(libpay-headers
     pay-package.h
-    pay-item.h)
+    pay-item.h
+    pay-types.h)
 set(libpay-sources
     pay-package.cpp
     pay-item.cpp)

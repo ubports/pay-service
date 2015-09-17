@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2014-2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 3 as
@@ -19,66 +19,14 @@
 #ifndef PAY_PACKAGE_H
 #define PAY_PACKAGE_H 1
 
+#include <libpay/pay-types.h>
+
 #pragma GCC visibility push(default)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct PayPackage_ PayPackage;
-
-/**
- * PayPackageItemStatus:
- *
- * The states that an purchased item can be in.
- */
-typedef enum
-{
-    /*< prefix=PAY_PACKAGE_ITEM_STATUS */
-    PAY_PACKAGE_ITEM_STATUS_UNKNOWN,       /*< nick=unknown */
-    PAY_PACKAGE_ITEM_STATUS_VERIFYING,     /*< nick=verifying */
-    PAY_PACKAGE_ITEM_STATUS_PURCHASED,     /*< nick=purchased */
-    PAY_PACKAGE_ITEM_STATUS_PURCHASING,    /*< nick=purchasing */
-    PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, /*< nick=not-purchased */
-    PAY_PACKAGE_ITEM_STATUS_REFUNDING,     /*< nick=refunding */
-    PAY_PACKAGE_ITEM_STATUS_APPROVED       /*< nick=approved */
-} PayPackageItemStatus;
-
-/**
- * PayPackageItemObserver:
- *
- * Function to call when an item changes state for the
- * package it's registered for.
- */
-typedef void (*PayPackageItemObserver) (PayPackage* package,
-                                        const char* itemid,
-                                        PayPackageItemStatus status,
-                                        void* user_data);
-
-/**
- * PayPackageRefundStatus:
- *
- * The states of refundable an item  an be in.
- */
-typedef enum
-{
-    /*< prefix=PAY_PACKAGE_REFUND_STATUS */
-    PAY_PACKAGE_REFUND_STATUS_REFUNDABLE,      /*< nick=refundable */
-    PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE,  /*< nick=not-refundable */
-    PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED,   /*< nick=not-purchased */
-    PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING  /*< nick=window-expiring */
-} PayPackageRefundStatus;
-
-/**
- * PayPackageItemRefundableObserver:
- *
- * Function to call when an item changes whether it is
- * refundable or not.
- */
-typedef void (*PayPackageRefundObserver) (PayPackage* package,
-                                          const char* itemid,
-                                          PayPackageRefundStatus status,
-                                          void* user_data);
 
 /**
  * pay_package_new:

@@ -18,7 +18,7 @@
 #ifndef LIBPAY_ITEM_H
 #define LIBPAY_ITEM_H 1
 
-#include <libpay/pay-package.h> /* PayPackageItemStatus */
+#include <libpay/pay-types.h>
 
 #include <time.h> /* time_t */
 
@@ -28,36 +28,32 @@
 extern "C" {
 #endif
 
-typedef struct PayItem_ PayItem;
-
-/**
- * PayItemType:
- *
- * The type of the product.
- */
-typedef enum
-{
-    /*< prefix=PAY_PRODUCT_TYPE */
-    PAY_ITEM_TYPE_UNKNOWN = -1,   /*< nick=unknown */
-    PAY_ITEM_TYPE_CONSUMABLE = 0, /*< nick=consumable */
-    PAY_ITEM_TYPE_UNLOCKABLE = 1  /*< nick=unlockable */
-} PayItemType;
-
 /***
-****  Properties
+****  PayItem Accessors
 ***/
 
 void                 pay_item_ref                   (PayItem*);
+
 void                 pay_item_unref                 (PayItem*);
+
 bool                 pay_item_get_acknowledged      (const PayItem* item);
+
 time_t               pay_item_get_acknowledged_time (const PayItem* item);
+
 const char*          pay_item_get_description       (const PayItem* item);
+
 const char*          pay_item_get_price             (const PayItem* item);
+
 time_t               pay_item_get_purchased_time    (const PayItem* item);
+
 const char*          pay_item_get_sku               (const PayItem* item);
+
 PayPackageItemStatus pay_item_get_status            (const PayItem* item);
+
 const char*          pay_item_get_title             (const PayItem* item);
+
 PayItemType          pay_item_get_type              (const PayItem* item);
+
 
 /***
 **** Item Enumerators
