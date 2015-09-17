@@ -181,7 +181,7 @@ Package::addStatusObserver (PayPackageItemObserver observer, void* user_data) no
        object in the map so that we can remove it later, or it'll get disconnected
        when the whole object gets destroyed */
     statusObservers.emplace(std::make_pair(observer, user_data), statusChanged.connect([this, observer, user_data] (
-        std::string sku,
+        const std::string& sku,
         PayPackageItemStatus status,
         uint64_t /*refund*/)
     {
@@ -200,7 +200,7 @@ bool
 Package::addRefundObserver (PayPackageRefundObserver observer, void* user_data) noexcept
 {
     refundObservers.emplace(std::make_pair(observer, user_data), statusChanged.connect([this, observer, user_data] (
-        std::string sku,
+        const std::string& sku,
         PayPackageItemStatus status,
         uint64_t refund)
     {
