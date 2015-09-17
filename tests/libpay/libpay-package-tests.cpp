@@ -57,13 +57,13 @@ TEST_F(LibpayPackageTests, ItemLifecycle)
     /* Install a status observer */
     std::vector<std::pair<std::string, PayPackageItemStatus>> statusList;
     auto statusfunc = [](PayPackage * pkg,
-                         const char * itemid,
+                         const char * sku,
                          PayPackageItemStatus status,
                          void * user_data)
     {
-        std::cout << "Status changed: " << itemid << " to: " << status << std::endl;
+        std::cout << "Status changed: " << sku << " to: " << status << std::endl;
         auto list = reinterpret_cast<std::vector<std::pair<std::string, PayPackageItemStatus>> *>(user_data);
-        std::pair<std::string, PayPackageItemStatus> pair(std::string(itemid), status);
+        std::pair<std::string, PayPackageItemStatus> pair(std::string(sku), status);
         list->push_back(pair);
     };
     EXPECT_TRUE(pay_package_item_observer_install(package, statusfunc, &statusList));
@@ -71,13 +71,13 @@ TEST_F(LibpayPackageTests, ItemLifecycle)
     /* Install a refund observer */
     std::vector<std::pair<std::string, PayPackageRefundStatus>> refundList;
     auto refundfunc = [](PayPackage * pkg,
-                         const char * itemid,
+                         const char * sku,
                          PayPackageRefundStatus status,
                          void * user_data)
     {
-        std::cout << "        refund: " << itemid << " to: " << status << std::endl;
+        std::cout << "        refund: " << sku << " to: " << status << std::endl;
         auto list = reinterpret_cast<std::vector<std::pair<std::string, PayPackageRefundStatus>> *>(user_data);
-        std::pair<std::string, PayPackageRefundStatus> pair(std::string(itemid), status);
+        std::pair<std::string, PayPackageRefundStatus> pair(std::string(sku), status);
         list->push_back(pair);
     };
     EXPECT_TRUE(pay_package_refund_observer_install(package, refundfunc, &refundList));

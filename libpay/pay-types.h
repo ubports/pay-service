@@ -85,7 +85,7 @@ typedef enum
  * package it's registered for.
  */
 typedef void (*PayPackageItemObserver) (PayPackage* package,
-                                        const char* itemid,
+                                        const char* sku,
                                         PayPackageItemStatus status,
                                         void* user_data);
 
@@ -96,7 +96,7 @@ typedef void (*PayPackageItemObserver) (PayPackage* package,
  * refundable or not.
  */
 typedef void (*PayPackageRefundObserver) (PayPackage* package,
-                                          const char* itemid,
+                                          const char* sku,
                                           PayPackageRefundStatus status,
                                           void* user_data);
 

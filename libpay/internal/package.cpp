@@ -35,13 +35,13 @@ Package::Package (const std::string& packageid)
     , thread([]{}, [this]{pkgProxy.reset(); storeProxy.reset();})
 {
     // when item statuses change, update our internal cache
-    statusChanged.connect([this](std::string itemid,
-                               PayPackageItemStatus status,
-                               uint64_t refundable_until)
+    statusChanged.connect([this](const std::string& sku,
+                                 PayPackageItemStatus status,
+                                 uint64_t refundable_until)
     {
         g_debug("Updating itemStatusCache for '%s', timeout is: %lld",
-                itemid.c_str(), refundable_until);
-        itemStatusCache[itemid] = std::make_pair(status, refundable_until);
+                sku.c_str(), refundable_until);
+        itemStatusCache[sku] = std::make_pair(status, refundable_until);
     });
 
     /* Fire up a glib thread to create the proxies.
@@ -106,11 +106,11 @@ Package::~Package ()
 }
 
 PayPackageItemStatus
-Package::itemStatus (const std::string& itemid) noexcept
+Package::itemStatus (const std::string& sku) noexcept
 {
     try
     {
-        return itemStatusCache[itemid].first;
+        return itemStatusCache[sku].first;
     }
     catch (std::out_of_range& /*range*/)
     {
@@ -119,11 +119,11 @@ Package::itemStatus (const std::string& itemid) noexcept
 }
 
 PayPackageRefundStatus
-Package::refundStatus (const std::string& itemid) noexcept
+Package::refundStatus (const std::string& sku) noexcept
 {
     try
     {
-        auto entry = itemStatusCache[itemid];
+        auto entry = itemStatusCache[sku];
         return calcRefundStatus(entry.first, entry.second);
     }
     catch (std::out_of_range& /*range*/)
@@ -181,11 +181,11 @@ Package::addStatusObserver (PayPackageItemObserver observer, void* user_data) no
        object in the map so that we can remove it later, or it'll get disconnected
        when the whole object gets destroyed */
     statusObservers.emplace(std::make_pair(observer, user_data), statusChanged.connect([this, observer, user_data] (
-        std::string itemid,
+        std::string sku,
         PayPackageItemStatus status,
         uint64_t /*refund*/)
     {
-        observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), status, user_data);
+        observer(reinterpret_cast<PayPackage*>(this), sku.c_str(), status, user_data);
     }));
     return true;
 }
@@ -200,11 +200,11 @@ bool
 Package::addRefundObserver (PayPackageRefundObserver observer, void* user_data) noexcept
 {
     refundObservers.emplace(std::make_pair(observer, user_data), statusChanged.connect([this, observer, user_data] (
-        std::string itemid,
+        std::string sku,
         PayPackageItemStatus status,
         uint64_t refund)
     {
-        observer(reinterpret_cast<PayPackage*>(this), itemid.c_str(), calcRefundStatus(status, refund), user_data);
+        observer(reinterpret_cast<PayPackage*>(this), sku.c_str(), calcRefundStatus(status, refund), user_data);
     }));
     return true;
 }
@@ -492,39 +492,39 @@ bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy, const
 ***/
 
 bool
-Package::startVerification (const std::string& itemid) noexcept
+Package::startVerification (const std::string& sku) noexcept
 {
-    g_debug("%s %s", G_STRFUNC, itemid.c_str());
+    g_debug("%s %s", G_STRFUNC, sku.c_str());
 
     auto ok = startBase<proxyPayPackage,
                         &proxy_pay_package_call_verify_item,
-                        &proxy_pay_package_call_verify_item_finish> (pkgProxy, itemid);
+                        &proxy_pay_package_call_verify_item_finish> (pkgProxy, sku);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
 }
 
 bool
-Package::startPurchase (const std::string& itemid) noexcept
+Package::startPurchase (const std::string& sku) noexcept
 {
-    g_debug("%s %s", G_STRFUNC, itemid.c_str());
+    g_debug("%s %s", G_STRFUNC, sku.c_str());
 
     auto ok = startStoreAction<proxyPayStore,
                                &proxy_pay_store_call_purchase_item,
-                               &proxy_pay_store_call_purchase_item_finish>(storeProxy, itemid);
+                               &proxy_pay_store_call_purchase_item_finish>(storeProxy, sku);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
 }
 
 bool
-Package::startRefund (const std::string& itemid) noexcept
+Package::startRefund (const std::string& sku) noexcept
 {
-    g_debug("%s %s", G_STRFUNC, itemid.c_str());
+    g_debug("%s %s", G_STRFUNC, sku.c_str());
 
     auto ok = startStoreAction<proxyPayStore,
                                &proxy_pay_store_call_refund_item,
-                               &proxy_pay_store_call_refund_item_finish>(storeProxy, itemid);
+                               &proxy_pay_store_call_refund_item_finish>(storeProxy, sku);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
@@ -545,13 +545,13 @@ Package::startAcknowledge (const std::string& sku) noexcept
 
 void
 Package::pkgProxySignal (proxyPayPackage* /*proxy*/,
-                         const gchar* itemid,
+                         const gchar* sku,
                          const gchar* statusstr,
                          guint64 refundable_until,
                          gpointer user_data)
 {
     auto notthis = static_cast<Package*>(user_data);
-    notthis->statusChanged(itemid,
+    notthis->statusChanged(sku,
                            status_from_string(statusstr),
                            refundable_until);
 }
@@ -559,7 +559,7 @@ Package::pkgProxySignal (proxyPayPackage* /*proxy*/,
 template <typename BusProxy,
           void (*startFunc)(BusProxy*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
           gboolean (*finishFunc)(BusProxy*, GAsyncResult*, GError**)>
-bool Package::startBase (const std::shared_ptr<BusProxy>& bus_proxy, const std::string& item_id) noexcept
+bool Package::startBase (const std::shared_ptr<BusProxy>& bus_proxy, const std::string& sku) noexcept
 {
     auto async_ready = [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
     {
@@ -575,10 +575,10 @@ bool Package::startBase (const std::shared_ptr<BusProxy>& bus_proxy, const std::
     };
 
     std::promise<bool> promise;
-    thread.executeOnThread([this, bus_proxy, item_id, &async_ready, &promise]()
+    thread.executeOnThread([this, bus_proxy, sku, &async_ready, &promise]()
     {
         startFunc(bus_proxy.get(),
-        item_id.c_str(),
+        sku.c_str(),
         thread.getCancellable().get(), // GCancellable
         async_ready,
         &promise);

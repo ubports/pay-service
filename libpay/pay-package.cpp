@@ -43,29 +43,29 @@ void pay_package_delete (PayPackage* package)
 }
 
 PayPackageItemStatus pay_package_item_status (PayPackage* package,
-                                              const char* itemid)
+                                              const char* sku)
 {
     g_return_val_if_fail(package != nullptr, PAY_PACKAGE_ITEM_STATUS_UNKNOWN);
-    g_return_val_if_fail(itemid != nullptr, PAY_PACKAGE_ITEM_STATUS_UNKNOWN);
+    g_return_val_if_fail(sku != nullptr, PAY_PACKAGE_ITEM_STATUS_UNKNOWN);
 
-    return package->itemStatus(itemid);
+    return package->itemStatus(sku);
 }
 
 int pay_package_item_is_refundable (PayPackage* package,
-                                    const char* itemid)
+                                    const char* sku)
 {
-    const auto status = pay_package_refund_status(package, itemid);
+    const auto status = pay_package_refund_status(package, sku);
     return (status == PAY_PACKAGE_REFUND_STATUS_REFUNDABLE ||
             status == PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING);
 }
 
 PayPackageRefundStatus pay_package_refund_status (PayPackage* package,
-                                                  const char* itemid)
+                                                  const char* sku)
 {
     g_return_val_if_fail(package != nullptr, PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE);
-    g_return_val_if_fail(itemid != nullptr, PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE);
+    g_return_val_if_fail(sku != nullptr, PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE);
 
-    return package->refundStatus(itemid);
+    return package->refundStatus(sku);
 }
 
 int pay_package_item_observer_install (PayPackage* package,
@@ -109,33 +109,33 @@ int pay_package_refund_observer_uninstall (PayPackage* package,
 }
 
 int pay_package_item_start_verification (PayPackage* package,
-                                         const char* itemid)
+                                         const char* sku)
 {
     g_return_val_if_fail(package != nullptr, 0);
-    g_return_val_if_fail(itemid != nullptr, 0);
-    g_return_val_if_fail(*itemid != '\0', 0);
+    g_return_val_if_fail(sku != nullptr, 0);
+    g_return_val_if_fail(*sku != '\0', 0);
 
-    return package->startVerification(itemid);
+    return package->startVerification(sku);
 }
 
 int pay_package_item_start_purchase (PayPackage* package,
-                                     const char* itemid)
+                                     const char* sku)
 {
     g_return_val_if_fail(package != nullptr, 0);
-    g_return_val_if_fail(itemid != nullptr, 0);
-    g_return_val_if_fail(*itemid != '\0', 0);
+    g_return_val_if_fail(sku != nullptr, 0);
+    g_return_val_if_fail(*sku != '\0', 0);
 
-    return package->startPurchase(itemid);
+    return package->startPurchase(sku);
 }
 
 int pay_package_item_start_refund (PayPackage* package,
-                                   const char* itemid)
+                                   const char* sku)
 {
     g_return_val_if_fail(package != nullptr, 0);
-    g_return_val_if_fail(itemid != nullptr, 0);
-    g_return_val_if_fail(*itemid != '\0', 0);
+    g_return_val_if_fail(sku != nullptr, 0);
+    g_return_val_if_fail(*sku != '\0', 0);
 
-    return package->startRefund(itemid);
+    return package->startRefund(sku);
 }
 
 int pay_package_item_start_acknowledge (PayPackage* package,

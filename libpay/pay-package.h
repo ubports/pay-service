@@ -52,19 +52,19 @@ void pay_package_delete (PayPackage* package);
 /**
  * pay_package_item_status:
  * @package: Package the item is related to
- * @itemid: ID of the item
+ * @sku: short string that uniquely identifies the item to use
  *
  * Checks the status of an individual item.
  *
  * Return value: The status of the item on the local pay service
  */
 PayPackageItemStatus pay_package_item_status (PayPackage* package,
-                                              const char* itemid);
+                                              const char* sku);
 
 /**
  * pay_package_item_is_refundable:
  * @package: Package the item is related to
- * @itemid: ID of the item
+ * @sku: short string that uniquely identifies the item to use
  *
  * Checks whether it is refundable. Check with the status
  * and makes sure it is REFUNDABLE.
@@ -72,19 +72,19 @@ PayPackageItemStatus pay_package_item_status (PayPackage* package,
  * Return value: Non-zero if the item is refundable
  */
 int pay_package_item_is_refundable (PayPackage* package,
-                                    const char* itemid);
+                                    const char* sku);
 
 /**
  * pay_package_refund_status:
  * @package: Package the item is related to
- * @itemid: ID of the item
+ * @sku: short string that uniquely identifies the item to use
  *
  * Checks the refund status of an individual item.
  *
  * Return value: The refund status of the item
  */
 PayPackageRefundStatus pay_package_refund_status (PayPackage* package,
-                                                  const char* itemid);
+                                                  const char* sku);
 
 /**
  * pay_package_item_observer_install:
@@ -148,7 +148,7 @@ int pay_package_refund_observer_uninstall (PayPackage* package,
 /**
  * pay_package_item_start_verification:
  * @package: package to verify item for
- * @itemid: ID of the item to verify
+ * @sku: short string that uniquely identifies the item to use
  *
  * Asks the pay service to ask the server to verify
  * the status of an item. It will go on the network and
@@ -159,15 +159,15 @@ int pay_package_refund_observer_uninstall (PayPackage* package,
  * Return value: zero when unable to make request to pay service
  */
 int pay_package_item_start_verification (PayPackage* package,
-                                         const char* itemid);
+                                         const char* sku);
 
 /**
  * pay_package_item_start_purchase:
  * @package: package to purchase item for
- * @itemid: ID of the item to purchase
+ * @sku: short string that uniquely identifies the item to use
  *
  * Requests that the pay-service start the process of purchasing
- * the item specified by @itemid. This requires launching UI elements
+ * the item specified by @sku. This requires launching UI elements
  * that will cover the application requesting the payment. When
  * the UI determines that the purchase is complete, or the user
  * terminates the pay action the UI will be dismissed and the status
@@ -176,20 +176,20 @@ int pay_package_item_start_verification (PayPackage* package,
  * Return value: zero when unable to make request to pay service
  */
 int pay_package_item_start_purchase (PayPackage* package,
-                                     const char* itemid);
+                                     const char* sku);
 
 /**
  * pay_package_item_start_refund:
  * @package: package the item was purchased for
- * @itemid: ID of the item to refund
+ * @sku: short string that uniquely identifies the item to use
  *
  * Requests that the pay-service start the process of refunding
- * the item specified by @itemid.
+ * the item specified by @sku.
  *
  * Return value: zero when unable to make request to pay service
  */
 int pay_package_item_start_refund (PayPackage* package,
-                                   const char* itemid);
+                                   const char* sku);
 
 /**
  * pay_package_item_start_acknowledge:
