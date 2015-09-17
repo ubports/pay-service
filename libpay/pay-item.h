@@ -87,9 +87,6 @@ PayItem*  pay_package_get_item            (PayPackage* package,
 **** Actions
 ***/
                                           
-int pay_item_start_acknowledge (PayPackage* package,
-                                const char* sku);
-
 int pay_item_start_purchase    (PayPackage* package,
                                 const char* sku);
 

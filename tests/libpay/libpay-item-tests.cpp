@@ -298,7 +298,7 @@ TEST_F(LibpayItemTests, AcknowledgeItem)
     InstallStatusObserver(package, data);
 
     // start the purchase
-    auto start_result = pay_item_start_acknowledge(package, sku);
+    auto start_result = pay_package_item_start_acknowledge(package, sku);
     EXPECT_TRUE(start_result);
 
     // wait for the status observer to be called

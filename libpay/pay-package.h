@@ -191,6 +191,20 @@ int pay_package_item_start_purchase (PayPackage* package,
 int pay_package_item_start_refund (PayPackage* package,
                                    const char* itemid);
 
+/**
+ * pay_package_item_start_acknowledge:
+ * @package: package the item was purchased for
+ * @sku: SKU of the in-app purchase to acknowledge
+ *
+ * Requests that the pay-service initiate acknowledgement
+ * of the in-app purchase specified by @sku.
+ *
+ * Return value: zero when unable to make request to pay service
+ */
+int pay_package_item_start_acknowledge (PayPackage* package,
+                                        const char* sku);
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -158,17 +158,6 @@ pay_package_get_item (PayPackage* package,
 ***/
 
 int
-pay_item_start_acknowledge (PayPackage* package,
-                            const char* sku)
-{
-    g_return_val_if_fail (package != nullptr, 0);
-    g_return_val_if_fail (sku != nullptr, 0);
-    g_return_val_if_fail (*sku != '\0', 0);
-
-    return package->startItemAcknowledge(sku) ? 1 : 0;
-}
-
-int
 pay_item_start_purchase (PayPackage* package,
                          const char* sku)
 {

@@ -9,7 +9,6 @@ libpay.so.2.0.0 libpay2 #MINVER#
  pay_item_get_title@Base 0.1
  pay_item_get_type@Base 0.1
  pay_item_ref@Base 0.1
- pay_item_start_acknowledge@Base 0.1
  pay_item_start_purchase@Base 0.1
  pay_item_start_refund@Base 0.1
  pay_item_unref@Base 0.1
@@ -19,6 +18,7 @@ libpay.so.2.0.0 libpay2 #MINVER#
  pay_package_item_is_refundable@Base 2.0.0+15.04.20150701.2
  pay_package_item_observer_install@Base 0.1
  pay_package_item_observer_uninstall@Base 0.1
+ pay_package_item_start_acknowledge@Base 0.1
  pay_package_item_start_purchase@Base 0.1
  pay_package_item_start_refund@Base 2.0.0+15.04.20150701.2
  pay_package_item_start_verification@Base 0.1

@@ -137,3 +137,15 @@ int pay_package_item_start_refund (PayPackage* package,
 
     return package->startRefund(itemid);
 }
+
+int pay_package_item_start_acknowledge (PayPackage* package,
+                                        const char* sku)
+{
+    g_return_val_if_fail (package != nullptr, 0);
+    g_return_val_if_fail (sku != nullptr, 0);
+    g_return_val_if_fail (*sku != '\0', 0);
+
+    return package->startAcknowledge(sku) ? 1 : 0;
+}
+
+

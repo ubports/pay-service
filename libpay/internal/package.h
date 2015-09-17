@@ -97,8 +97,8 @@ public:
     bool startVerification    (const std::string& itemid) noexcept;
     bool startPurchase        (const std::string& itemid) noexcept;
     bool startRefund          (const std::string& itemid) noexcept;
+    bool startAcknowledge     (const std::string& sku) noexcept;
 
-    bool startItemAcknowledge (const std::string& itemid) noexcept;
     bool startItemPurchase    (const std::string& itemid) noexcept;
     bool startItemRefund      (const std::string& itemid) noexcept;
 

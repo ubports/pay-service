@@ -461,7 +461,7 @@ Package::startItemRefund (const std::string& sku) noexcept
 }
 
 bool
-Package::startItemAcknowledge (const std::string& sku) noexcept
+Package::startAcknowledge (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
 
