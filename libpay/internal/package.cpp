@@ -440,16 +440,6 @@ Package::getPurchasedItems() noexcept
     return items;
 }
 
-bool
-Package::startAcknowledge (const std::string& sku) noexcept
-{
-    g_debug("%s %s", G_STRFUNC, sku.c_str());
-
-    return startStoreAction<proxyPayStore,
-                            &proxy_pay_store_call_acknowledge_item,
-                            &proxy_pay_store_call_acknowledge_item_finish>(storeProxy, sku);
-}
-
 /**
  * We call com.canonical.pay.store's Purchase, Refund, and Acknowledge
  * items in nearly identical ways: make the call asynchronously, and
@@ -532,15 +522,22 @@ Package::startRefund (const std::string& itemid) noexcept
 {
     g_debug("%s %s", G_STRFUNC, itemid.c_str());
 
-#if 1 // service-ng
     auto ok = startStoreAction<proxyPayStore,
                                &proxy_pay_store_call_refund_item,
                                &proxy_pay_store_call_refund_item_finish>(storeProxy, itemid);
-#else
-    auto ok = startBase<proxyPayPackage,
-                        &proxy_pay_package_call_refund_item,
-                        &proxy_pay_package_call_refund_item_finish> (pkgProxy, itemid);
-#endif
+
+    g_debug("%s returning %d", G_STRFUNC, int(ok));
+    return ok;
+}
+
+bool
+Package::startAcknowledge (const std::string& sku) noexcept
+{
+    g_debug("%s %s", G_STRFUNC, sku.c_str());
+
+    auto ok = startStoreAction<proxyPayStore,
+                               &proxy_pay_store_call_acknowledge_item,
+                               &proxy_pay_store_call_acknowledge_item_finish>(storeProxy, sku);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
