@@ -100,7 +100,6 @@ public:
     bool startAcknowledge     (const std::string& sku) noexcept;
 
     bool startItemPurchase    (const std::string& itemid) noexcept;
-    bool startItemRefund      (const std::string& itemid) noexcept;
 
     std::shared_ptr<PayItem> getItem(const std::string& itemid) noexcept;
 
