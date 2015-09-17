@@ -55,34 +55,6 @@ const char*          pay_item_get_title             (const PayItem* item);
 PayItemType          pay_item_get_type              (const PayItem* item);
 
 
-/***
-**** Item Enumerators
-***/
-
-/**
- * pay_package_get_purchased_items:
- * @package: Package whose purchased items are to be retrieved
- *
- * When done, the caller should unref each PayItem
- * with pay_item_unref() and free the array with free().
- *
- * Return value: a NULL-terminated array of PayItems
- */
-PayItem** pay_package_get_purchased_items (PayPackage* package);
-
-/**
- * pay_package_get_item:
- * @package: Package whose item is to be retrieved
- * @sku: The item's sku
- *
- * If a match is found, then when done the caller should
- * unref it with pay_item_unref().
- *
- * Return value: a reffed PayItem, or NULL if no match was found
- */
-PayItem*  pay_package_get_item            (PayPackage* package,
-                                           const char* sku);
-
 #ifdef __cplusplus
 }
 #endif

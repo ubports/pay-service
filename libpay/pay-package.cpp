@@ -148,4 +148,43 @@ int pay_package_item_start_acknowledge (PayPackage* package,
     return package->startAcknowledge(sku) ? 1 : 0;
 }
 
+/**
+***  PayItem accessors
+**/
 
+
+/***
+**** Item Enumerators
+***/
+
+PayItem** pay_package_get_purchased_items (PayPackage* package)
+{
+    g_return_val_if_fail (package != nullptr, static_cast<PayItem**>(calloc(1,sizeof(PayItem*))));
+
+    auto items = package->getPurchasedItems();
+    const auto n = items.size();
+    auto ret = static_cast<PayItem**>(calloc(n+1, sizeof(PayItem*))); // +1 to null terminate the array
+    for (size_t i=0; i<n; i++)
+    {
+        auto& item = items[i];
+        item->ref(); // caller must unref
+        ret[i] = item.get();
+    }
+    return ret;
+}
+
+PayItem* pay_package_get_item (PayPackage* package,
+                      const char* sku)
+{
+    g_return_val_if_fail (package != nullptr, nullptr);
+    g_return_val_if_fail (sku != nullptr, nullptr);
+    g_return_val_if_fail (*sku != '\0', nullptr);
+
+    PayItem* ret {};
+    auto item = package->getItem(sku);
+    if (item) {
+        item->ref(); // caller must unref
+        ret = item.get();
+    }
+    return ret;
+}
