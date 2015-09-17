@@ -45,21 +45,26 @@ public:
 
     /** life cycle **/
 
-    explicit Item (const std::string& sku);
-    void ref ();
-    void unref ();
+    explicit Item (const std::string& sku): m_sku(sku) {}
+    ~Item() =default;
+
+    void ref() {++m_ref_count;}
+    void unref() {
+        if (!--m_ref_count)
+            delete this;
+    }
 
     /** accessors **/
 
-    bool acknowledged() const;
-    time_t acknowledged_time() const;
-    const std::string& description() const;
-    const std::string& sku() const;
-    const std::string& price() const;
-    time_t purchased_time() const;
-    PayPackageItemStatus status() const;
-    const std::string& title() const;
-    PayItemType type() const;
+    bool acknowledged() const {return m_acknowledged;}
+    time_t acknowledged_time() const {return m_acknowledged_time;}
+    const std::string& description() const {return m_description;}
+    const std::string& sku() const {return m_sku;}
+    const std::string& price() const {return m_price;}
+    time_t purchased_time() const {return m_purchased_time;}
+    PayPackageItemStatus status() const {return m_status;}
+    const std::string& title() const {return m_title;}
+    PayItemType type() const {return m_type;}
 
     /** setters **/
 

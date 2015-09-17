@@ -1,5 +1,4 @@
 set(SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/item.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/package.cpp
 )
 
