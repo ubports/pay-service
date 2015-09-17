@@ -109,6 +109,6 @@ if (NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
 endif()
 ENABLE_COVERAGE_REPORT(
   TARGETS libpay pay-service-lib pay-service
-  TESTS dbus-interface-tests item-memory-tests webclient-curl-tests verification-http-tests refund-http-tests purchase-ual-tests libpay-item-tests libpay-package-tests
+  TESTS dbus-interface-tests item-memory-tests webclient-curl-tests verification-http-tests refund-http-tests purchase-ual-tests libpay-iap-tests libpay-package-tests
   FILTER ${filter-list}
 )

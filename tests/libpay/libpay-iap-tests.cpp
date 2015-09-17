@@ -25,7 +25,7 @@
 static constexpr char const * BUS_NAME {"com.canonical.payments"};
 static constexpr char const * GAME_NAME {"SwordsAndStacktraces"};
 
-struct LibpayItemTests: public DBusFixture
+struct IapTests: public DBusFixture
 {
     void wait_for_store_service()
     {
@@ -159,11 +159,11 @@ protected:
 };
 
 
-TEST_F(LibpayItemTests, HarnessOwnsName)
+TEST_F(IapTests, HarnessOwnsName)
 {
 }
 
-TEST_F(LibpayItemTests, GetItem)
+TEST_F(IapTests, GetItem)
 {
     AddGame();
 
@@ -184,7 +184,7 @@ TEST_F(LibpayItemTests, GetItem)
     pay_package_delete(package);
 }
 
-TEST_F(LibpayItemTests, GetPurchasedItems)
+TEST_F(IapTests, GetPurchasedItems)
 {
     AddGame();
 
@@ -212,7 +212,7 @@ TEST_F(LibpayItemTests, GetPurchasedItems)
     pay_package_delete(package);
 }
 
-TEST_F(LibpayItemTests, PurchaseItem)
+TEST_F(IapTests, PurchaseItem)
 {
     AddGame();
 
@@ -249,7 +249,7 @@ TEST_F(LibpayItemTests, PurchaseItem)
     pay_package_delete(package);
 }
 
-TEST_F(LibpayItemTests, RefundItem)
+TEST_F(IapTests, RefundItem)
 {
     AddGame();
 
@@ -286,7 +286,7 @@ TEST_F(LibpayItemTests, RefundItem)
     pay_package_delete(package);
 }
 
-TEST_F(LibpayItemTests, AcknowledgeItem)
+TEST_F(IapTests, AcknowledgeItem)
 {
     AddGame();
 
