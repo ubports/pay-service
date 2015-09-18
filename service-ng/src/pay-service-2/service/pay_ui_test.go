@@ -141,26 +141,6 @@ func TestGetPayUiAppId(t *testing.T) {
     }
 }
 
-// Test typical buildPurchaseUrl usage
-func TestBuildPurchaseUrl(t *testing.T) {
-    testCases := []struct {
-        appId       string
-        itemId      string
-        expectedUrl string
-    }{
-        {"foo", "bar", "purchase://foo/bar"},
-        {"click-scope", "baz", "purchase://baz"},
-    }
-
-    for _, test := range testCases {
-        purchaseUrl := buildPurchaseUrl(test.appId, test.itemId)
-        if purchaseUrl.String() != test.expectedUrl {
-            t.Errorf(`URL was "%s", expected "%s"`, purchaseUrl,
-                     test.expectedUrl)
-        }
-    }
-}
-
 // Test typical getAppPid usage.
 func TestGetAppPid(t *testing.T) {
     called := false

@@ -25,7 +25,6 @@ import (
     "fmt"
     "path"
     "path/filepath"
-    "net/url"
 
     "github.com/ziutek/glib"
     "launchpad.net/go-mir/mir"
@@ -49,15 +48,15 @@ type PayUiFeedback struct {
 }
 
 // LaunchPayUi launches Pay UI in a Mir trusted session, handing it the provided
-// appId and itemId. This is done asynchronously; this function returns
+// appId and purchase URL. This is done asynchronously; this function returns
 // immediately, and provides a PayUiFeedback handle that can be used to track
 // the status of the launched Pay UI instance.
-func LaunchPayUi(appId string, itemId string) PayUiFeedback {
+func LaunchPayUi(appId string, purchaseUrl string) PayUiFeedback {
     feedback := PayUiFeedback{
         Finished: make(chan struct{}),
         Error: make(chan error, 1),
     }
-    go launchPayUiAndWait(appId, itemId, feedback)
+    go launchPayUiAndWait(appId, purchaseUrl, feedback)
 
     return feedback
 }
@@ -65,7 +64,7 @@ func LaunchPayUi(appId string, itemId string) PayUiFeedback {
 // launchPayUiAndWait is the synchronous worker function that actually
 // launches Pay UI via Ubuntu App Launch (UAL) and provides the associated
 // feedback.
-func launchPayUiAndWait(appId string, itemId string, feedback PayUiFeedback) {
+func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback) {
     // Fire up glib (it's how UAL handles events)
     glibMainLoop := glib.NewMainLoop(nil)
     glibDone := make(chan struct{})
@@ -143,12 +142,9 @@ func launchPayUiAndWait(appId string, itemId string, feedback PayUiFeedback) {
     }
     defer ual.ObserverDeleteHelperStop(observerId)
 
-    // Get the purchase URL for this specific item
-    purchaseUrl := buildPurchaseUrl(appId, itemId)
-
     // Finally, start the helper with that purchase URL
     instanceId = ual.StartSessionHelper(helperName, session, uiAppId,
-                                        []string{purchaseUrl.String()})
+                                        []string{purchaseUrl})
     if instanceId == "" {
         feedback.Error <- fmt.Errorf(`Failed to start helper "%s"`, uiAppId)
         return
@@ -214,18 +210,6 @@ func getPayUiAppId() (string, error) {
     }
 
     return "", fmt.Errorf(`Failed to find .desktop file in "%s"`, directory)
-}
-
-// buildPurchaseUrl returns a purchase:// URL for the given appId and itemId.
-func buildPurchaseUrl(appId string, itemId string) *url.URL {
-    purchaseUrl := &url.URL{Scheme:"purchase"}
-
-    if appId != "click-scope" {
-        purchaseUrl.Host = appId
-    }
-
-    purchaseUrl.Path = itemId
-    return purchaseUrl
 }
 
 // getAppPid attempts to obtain the PID of the given appId. Note that the only
