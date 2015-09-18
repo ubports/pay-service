@@ -96,8 +96,8 @@ func (iface *PayService) AcknowledgeItem(message dbus.Message, itemName string) 
             // To set any extra headers we need (signature, accept, etc)
             headers := make(http.Header)
 
-            url := getPayInventoryUrl() + "/" + packageName + "/items/" +
-                idString + "/"
+            url := getPayInventoryUrl() + "/" + packageName +
+                "/items/" + idString
 
             body := `{"state": "acknowledged"}`
             headers.Set("Content-Type", "application/json")
@@ -130,8 +130,8 @@ func (iface *PayService) GetItem(message dbus.Message, itemName string) (ItemDet
     if packageName == "click-scope" {
         url = getPayClickUrl() + "/purchases/" + itemName + "/"
     } else {
-        url = getPayInventoryUrl() + "/" + packageName + "/items/by-sku/" +
-            itemName + "/"
+        url = getPayInventoryUrl() + "/" + packageName +
+            "/items/by-sku/" + itemName
     }
     data, err := iface.getDataForUrl(url, "GET", headers, "")
     if err != nil {
@@ -197,7 +197,7 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
 
         return purchasedItems, nil
     } else {
-        url := getPayInventoryUrl() + "/" + packageName + "/purchases/"
+        url := getPayInventoryUrl() + "/" + packageName + "/purchases"
 
         data, err := iface.getDataForUrl(url, "GET", headers, "")
         if err != nil {
@@ -370,6 +370,6 @@ func getPayClickUrl() string {
 /* Get the base URL for the In App Purchases API
  */
 func getPayInventoryUrl() string {
-    url := getPayBaseUrl() + "/packages"
+    url := getPayBaseUrl() + "/inventory/api/v1/packages"
     return url
 }
