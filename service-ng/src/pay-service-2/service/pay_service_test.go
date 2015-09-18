@@ -1,4 +1,4 @@
-/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */ 
+/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright © 2015 Canonical Ltd.
  *
@@ -19,6 +19,7 @@
 package service
 
 import (
+    "fmt"
     "github.com/godbus/dbus"
     "testing"
 )
@@ -246,12 +247,27 @@ func TestPurchaseItem(t *testing.T) {
         t.Fatalf("Pay service not created.")
     }
 
+    launchCalled := false
+    payiface.launchPayUiFunction = func(appId string, purchaseUrl string) PayUiFeedback {
+        launchCalled = true
+        feedback := PayUiFeedback{
+            Finished: make(chan struct{}),
+            Error: make(chan error, 1),
+        }
+
+        // Finished
+        close(feedback.Error)
+        close(feedback.Finished)
+
+        return feedback
+    }
+
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo")
-    _, dbusErr := payiface.PurchaseItem(m, "bar")
-    if dbusErr == nil {
-        t.Errorf("PurchaseItem not yet implemented, but no dbus error.")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    _, dbusErr := payiface.PurchaseItem(m, "consumable")
+    if dbusErr != nil {
+        t.Errorf("Unexpected error when purchasing item: %s", dbusErr)
     }
 
     if !timer.stopCalled {
@@ -260,6 +276,64 @@ func TestPurchaseItem(t *testing.T) {
 
     if !timer.resetCalled {
         t.Errorf("Timer was not reset.")
+    }
+
+    if !launchCalled {
+        t.Error("Expected LaunchPayUi() to be called.")
+    }
+}
+
+func TestPurchaseItem_payUiError(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    launchCalled := false
+    payiface.launchPayUiFunction = func(appId string, purchaseUrl string) PayUiFeedback {
+        launchCalled = true
+        feedback := PayUiFeedback{
+            Finished: make(chan struct{}),
+            Error: make(chan error, 1),
+        }
+
+        // Failure
+        feedback.Error <- fmt.Errorf("Failed at user request")
+
+        // Finished
+        close(feedback.Error)
+        close(feedback.Finished)
+
+        return feedback
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    _, dbusErr := payiface.PurchaseItem(m, "consumable")
+    if dbusErr == nil {
+        t.Error("Expected an error due to Pay UI error")
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
+
+    if !launchCalled {
+        t.Error("Expected LaunchPayUi() to be called.")
     }
 }
 

@@ -35,12 +35,15 @@ const (
 )
 
 type ItemDetails map[string]dbus.Variant
+type LaunchPayUiFunction func(appId string, purchaseUrl string) PayUiFeedback
 
 type PayService struct {
     dbusConnection DbusWrapper
     baseObjectPath dbus.ObjectPath
     shutdownTimer  Timer
     client         WebClientIface
+
+    launchPayUiFunction LaunchPayUiFunction
 }
 
 func NewPayService(dbusConnection DbusWrapper,
@@ -57,6 +60,8 @@ func NewPayService(dbusConnection DbusWrapper,
     }
 
     payiface.baseObjectPath = baseObjectPath
+
+    payiface.launchPayUiFunction = LaunchPayUi
 
     return payiface, nil
 }
@@ -237,9 +242,26 @@ func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (It
     }
     purchaseUrl += itemName
 
-    fmt.Println("DEBUG - Unhandled purchase URL:", purchaseUrl)
+    // Launch the Pay UI to handle this purchase (e.g. get credit card info,
+    // etc.)
+    feedback := iface.launchPayUiFunction(packageName, purchaseUrl)
 
-    return nil, dbus.NewError("NotYetImplemented", nil)
+    // Sit here and wait for Pay UI to close. The feedback consists of two
+    // channels-- Finished and Error. Finished is always closed, so we'll
+    // wait for that before we check for errors (the errors are buffered).
+    <-feedback.Finished
+
+    // Now check to see if any errors occured
+    err := <-feedback.Error
+    if err != nil {
+        return nil, dbus.NewError("org.freedesktop.DBus.Error.Failed",
+            []interface{}{err.Error()})
+    }
+
+    // Pay UI has been closed without error, but we don't know if the user
+    // actually made the purchase or just canceled, so we'll verify with
+    // GetItem():
+    return iface.GetItem(message, itemName)
 }
 
 func (iface *PayService) RefundItem(message dbus.Message, itemName string) (ItemDetails, *dbus.Error) {
