@@ -79,6 +79,7 @@ func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback
         // Ask glib mainloop to quit and wait for it
         glibMainLoop.Quit()
         <-glibDone
+        close(feedback.Error)
         close(feedback.Finished)
     }()
 
