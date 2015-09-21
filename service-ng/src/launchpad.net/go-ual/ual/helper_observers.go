@@ -31,15 +31,6 @@ import (
 
 var helperStopObservers ObserversCollection
 
-//export callHelperStopObserver
-func callHelperStopObserver(appId *C.char, instanceId *C.char, helperType *C.char, observerPointer unsafe.Pointer) {
-	// Extract the real observer out of the user data
-	observer := *(*Observer)(observerPointer)
-
-	// Call the observer
-	observer(C.GoString(appId), C.GoString(instanceId), C.GoString(helperType))
-}
-
 // ObserverAddHelperStop sets up a callback to be called each time a specific
 // type of helper stops.
 func ObserverAddHelperStop(helperType string, observer Observer) (ObserverId, error) {
