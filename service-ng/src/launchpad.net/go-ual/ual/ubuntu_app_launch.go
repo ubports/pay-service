@@ -63,7 +63,8 @@ func GetPrimaryPid(appId string) uint32 {
 // environment variable will be set appropriately so that the helper will draw
 // on the correct surfaces. This function returns the generated instance ID
 // or an empty string upon error.
-func StartSessionHelper(helperType string, session *mir.PromptSession, appId string, uris []string) string {
+func StartSessionHelper(helperType string, session mir.PromptSession,
+	appId string, uris []string) string {
 	helperTypeCstring := (*C.gchar)(C.CString(helperType))
 	defer C.free(unsafe.Pointer(helperTypeCstring))
 
@@ -79,7 +80,7 @@ func StartSessionHelper(helperType string, session *mir.PromptSession, appId str
 
 	return C.GoString((*C.char)(C.ubuntu_app_launch_start_session_helper(
 		helperTypeCstring,
-		(*C.struct_MirPromptSession)(session.ToMirPromptSession()),
+		(*C.MirPromptSession)(session.ToMirPromptSession()),
 		appIdCstring,
 		gcharArray)))
 }

@@ -24,25 +24,33 @@ import "C"
 
 import (
 	"fmt"
+	"unsafe"
 )
 
 // PromptSession represents a Mir prompt session.
-type PromptSession struct {
-	promptSession *C.MirPromptSession
+type PromptSession interface {
+	Release()
+	ToMirPromptSession() unsafe.Pointer
+}
+
+// promptSession satisfies the PromptSession interface as a Mir prompt session.
+type promptSession struct {
+	mirPromptSession *C.MirPromptSession
 }
 
 // NewPromptSession creates and starts a new prompt session on the given
 // connection, started by the given application PID.  Note that it's up to the
 // caller to explicitly Release() this session.
-func NewPromptSession(connection *Connection, applicationPid uint32) (*PromptSession, error) {
+func NewPromptSession(connection Connection, applicationPid uint32) (PromptSession, error) {
 	pid := C.pid_t(applicationPid)
 
-	session := &PromptSession{}
-	session.promptSession =
-		C.mir_connection_create_prompt_session_sync(connection.connection,
+	session := &promptSession{}
+	session.mirPromptSession =
+		C.mir_connection_create_prompt_session_sync(
+			(*C.MirConnection)(connection.ToMirConnection()),
 			pid, nil, nil)
 
-	if session.promptSession == nil {
+	if session.mirPromptSession == nil {
 		return nil, fmt.Errorf("Failed to create Mir prompt session")
 	}
 
@@ -50,12 +58,12 @@ func NewPromptSession(connection *Connection, applicationPid uint32) (*PromptSes
 }
 
 // Release stops and releases the prompt session.
-func (session *PromptSession) Release() {
-	C.mir_prompt_session_release_sync(session.promptSession)
+func (session *promptSession) Release() {
+	C.mir_prompt_session_release_sync(session.mirPromptSession)
 }
 
 // ToMirPromptSession returns the raw MirPromptSession (in case other bindings
 // require it).
-func (session *PromptSession) ToMirPromptSession() *C.MirPromptSession {
-	return session.promptSession
+func (session *promptSession) ToMirPromptSession() unsafe.Pointer {
+	return unsafe.Pointer(session.mirPromptSession)
 }

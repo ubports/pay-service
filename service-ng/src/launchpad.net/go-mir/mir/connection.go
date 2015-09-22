@@ -28,37 +28,44 @@ import (
 )
 
 // Connection represents a connection to the Mir server.
-type Connection struct {
-	connection *C.MirConnection
+type Connection interface {
+	Release()
+	ToMirConnection() unsafe.Pointer
+}
+
+// connection satisfies the Connection interface as a connection to the Mir
+// server.
+type connection struct {
+	mirConnection *C.MirConnection
 }
 
 // NewConnection request (and waits for) a connection to the Mir server. Note
 // that it's up to the caller to explicitly Release() this connection.
-func NewConnection(serverFilePath string, clientName string) (*Connection, error) {
+func NewConnection(serverFilePath string, clientName string) (Connection, error) {
 	serverFilePathCstring := C.CString(serverFilePath)
 	defer C.free(unsafe.Pointer(serverFilePathCstring))
 
 	clientNameCstring := C.CString(clientName)
 	defer C.free(unsafe.Pointer(clientNameCstring))
 
-	connection := &Connection{}
-	connection.connection = C.mir_connect_sync(serverFilePathCstring,
+	newConnection := &connection{}
+	newConnection.mirConnection = C.mir_connect_sync(serverFilePathCstring,
 		clientNameCstring)
 
-	if connection.connection == nil {
+	if newConnection.mirConnection == nil {
 		return nil, fmt.Errorf("Failed to connect to Mir Trusted Session")
 	}
 
-	return connection, nil
+	return newConnection, nil
 }
 
 // Release releases the connection to the Mir server.
-func (connection *Connection) Release() {
-	C.mir_connection_release(connection.connection)
+func (thisConnection *connection) Release() {
+	C.mir_connection_release(thisConnection.mirConnection)
 }
 
 // ToMirConnection returns the raw MirConnection (in case other bindings require
 // it).
-func (connection *Connection) ToMirConnection() *C.MirConnection {
-	return connection.connection
+func (thisConnection *connection) ToMirConnection() unsafe.Pointer {
+	return unsafe.Pointer(thisConnection.mirConnection)
 }
