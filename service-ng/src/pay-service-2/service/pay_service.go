@@ -342,10 +342,12 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
 func packageNameFromPath(message dbus.Message) (string) {
     // Get the package ID
     calledPath := DecodeDbusPath(message.Headers[dbus.FieldPath].String())
-    if calledPath[0] == '"' && calledPath[len(calledPath) - 1] == '"' {
-        calledPath = calledPath[1:len(calledPath) - 1]
-    }
     packageName := path.Base(calledPath)
+
+    // Strip the ending " which godbus leaves us here
+    if packageName[len(packageName) - 1] == '"' {
+        packageName = packageName[:len(packageName) - 1]
+    }
 
     return packageName
 }

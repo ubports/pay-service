@@ -376,3 +376,17 @@ func TestRefundItem(t *testing.T) {
         t.Errorf("Timer was not reset.")
     }
 }
+
+func TestPackageNameFromPath(t *testing.T) {
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    objPath := dbus.ObjectPath("/com/canonical/pay/store/click_2Dscope")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant(objPath)
+
+    expected := "click-scope"
+    endPath := packageNameFromPath(m)
+    if endPath != expected {
+        t.Errorf("Unexpected package name `%s`, expected `%s`.",
+            endPath, expected)
+    }
+}
