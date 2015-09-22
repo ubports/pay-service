@@ -39,6 +39,9 @@ const (
 
 var (
     payUiGetPrimaryPidFunction = ual.GetPrimaryPid
+    payUiNewMirConnectionFunction = mir.NewConnection
+    payUiNewMirPromptSessionFunction = mir.NewPromptSession
+    payUiStartSessionHelperFunction = ual.StartSessionHelper
 )
 
 // PayUiFeedback allows the LaunchPayUi caller to keep track of Pay UI's status.
@@ -66,19 +69,17 @@ func LaunchPayUi(appId string, purchaseUrl string) PayUiFeedback {
 // feedback.
 func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback) {
     // Fire up glib (it's how UAL handles events)
-    glibMainLoop := glib.NewMainLoop(nil)
-    glibDone := make(chan struct{})
-    go func() {
-        glibMainLoop.Run()
-        close(glibDone)
-    }()
+    glibStop := make(chan struct{})
+    glibFinished := make(chan struct{})
+    go runGlib(glibStop, glibFinished)
 
     // When this function ends Pay UI will have been closed, so make sure the
     // glib mainloop quits and we send the correct feedback.
     defer func() {
-        // Ask glib mainloop to quit and wait for it
-        glibMainLoop.Quit()
-        <-glibDone
+        // Ask glib to quit and wait for it
+        close(glibStop)
+        <-glibFinished
+
         close(feedback.Error)
         close(feedback.Finished)
     }()
@@ -92,9 +93,10 @@ func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback
     }
 
     // Connect to Mir trusted session
-    connection, err := mir.NewConnection(path.Join(runtimeDirectory,
-                                                   mirTrustedSocketName),
-                                         serviceName)
+    connection, err :=
+        payUiNewMirConnectionFunction(path.Join(runtimeDirectory,
+                                                mirTrustedSocketName),
+                                      serviceName)
     if err != nil {
         feedback.Error <- fmt.Errorf("Unable to create Mir connection: %s", err)
         return
@@ -118,7 +120,7 @@ func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback
     }
 
     // Now start the Mir prompt session, asking to overlay on that specific PID.
-    session, err := mir.NewPromptSession(connection, pidToOverlay)
+    session, err := payUiNewMirPromptSessionFunction(connection, pidToOverlay)
     if err != nil {
         feedback.Error <- fmt.Errorf(
             `Unable launch prompt session for "%s": %s`, appId, err)
@@ -144,7 +146,7 @@ func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback
     defer ual.ObserverDeleteHelperStop(observerId)
 
     // Finally, start the helper with that purchase URL
-    instanceId = ual.StartSessionHelper(helperName, session, uiAppId,
+    instanceId = payUiStartSessionHelperFunction(helperName, session, uiAppId,
                                         []string{purchaseUrl})
     if instanceId == "" {
         feedback.Error <- fmt.Errorf(`Failed to start helper "%s"`, uiAppId)
@@ -152,6 +154,20 @@ func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback
     }
 
     <-helperDone // Wait for helper to stop
+}
+
+func runGlib(stop chan struct{}, finished chan struct{}) {
+    context := glib.DefaultMainContext()
+
+    for {
+        select {
+            case <-stop:
+                close(finished)
+                return
+            default:
+                context.Iteration(false)
+        }
+    }
 }
 
 // getUserRuntimeDirectory uses the $XDG_RUNTIME_DIR environment variable to
