@@ -37,9 +37,18 @@ ERR_INVAL = ERR_PREFIX + '.InvalidArgs'
 # Util
 #
 
+def encode_path_element(element):
+    encoded = []
+    first = True
+    for ch in element:
+        if (ch.isalpha() or (ch.isdigit() and not first)):
+            encoded.append(ch)
+        else:
+            encoded.append('_{:02X}'.format(ord(ch)))
+    return ''.join(encoded)
 
 def build_store_path(package_name):
-    return STORE_PATH_PREFIX + '/' + package_name
+    return STORE_PATH_PREFIX + '/' + encode_path_element(package_name)
 
 #
 #  Store
