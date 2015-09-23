@@ -446,9 +446,11 @@ Package::getPurchasedItems() noexcept
  * This method folds together the common code for these actions.
  */
 template<typename BusProxy,
-         void (*start_func)(proxyPayStore*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
-         gboolean (*finish_func)(proxyPayStore*, GVariant**, GAsyncResult*, GError**)>
-bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy, const std::string& sku) noexcept
+         gboolean (*finish_func)(BusProxy*, GVariant**, GAsyncResult*, GError**)>
+bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
+                               const gchar* function_name,
+                               GVariant* params,
+                               gint timeout_msec) noexcept
 {
     auto on_async_ready = [](GObject* o, GAsyncResult* res, gpointer gself)
     {
@@ -473,13 +475,17 @@ bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy, const
         g_clear_pointer(&v, g_variant_unref);
     };
 
-    thread.executeOnThread([this, bus_proxy, sku, &on_async_ready]()
+    thread.executeOnThread([this, bus_proxy, function_name, params,
+                            timeout_msec, &on_async_ready]()
     {
-        start_func(bus_proxy.get(),
-                   sku.c_str(),
-                   thread.getCancellable().get(), // GCancellable
-                   on_async_ready,
-                   this);
+        g_dbus_proxy_call(G_DBUS_PROXY(bus_proxy.get()),
+                          function_name,
+                          params,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          timeout_msec,
+                          thread.getCancellable().get(), // GCancellable
+                          on_async_ready,
+                          this);
     });
 
     return true;
@@ -507,9 +513,11 @@ Package::startPurchase (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
 
-    auto ok = startStoreAction<proxyPayStore,
-                               &proxy_pay_store_call_purchase_item,
-                               &proxy_pay_store_call_purchase_item_finish>(storeProxy, sku);
+    auto ok = startStoreAction<proxyPayStore, &proxy_pay_store_call_purchase_item_finish>(
+        storeProxy,
+        "PurchaseItem",
+        g_variant_new("(s)", sku.c_str()),
+        -1);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
@@ -520,9 +528,11 @@ Package::startRefund (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
 
-    auto ok = startStoreAction<proxyPayStore,
-                               &proxy_pay_store_call_refund_item,
-                               &proxy_pay_store_call_refund_item_finish>(storeProxy, sku);
+    auto ok = startStoreAction<proxyPayStore, &proxy_pay_store_call_refund_item_finish>(
+        storeProxy,
+        "RefundItem",
+        g_variant_new("(s)", sku.c_str()),
+        -1);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
@@ -533,9 +543,11 @@ Package::startAcknowledge (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
 
-    auto ok = startStoreAction<proxyPayStore,
-                               &proxy_pay_store_call_acknowledge_item,
-                               &proxy_pay_store_call_acknowledge_item_finish>(storeProxy, sku);
+    auto ok = startStoreAction<proxyPayStore, &proxy_pay_store_call_acknowledge_item_finish>(
+        storeProxy,
+        "AcknowledgeItem",
+        g_variant_new("(s)", sku.c_str()),
+        -1);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;

@@ -75,9 +75,12 @@ class Package
     bool startBase (const std::shared_ptr<BusProxy>& bus_proxy, const std::string& sku) noexcept;
 
     template<typename BusProxy,
-             void (*startFunc)(proxyPayStore*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
-             gboolean (*finishFunc)(proxyPayStore*, GVariant**, GAsyncResult*, GError**)>
-    bool startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy, const std::string& sku) noexcept;
+             gboolean (*finish_func)(BusProxy*, GVariant**, GAsyncResult*, GError**)>
+    bool startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
+                          const gchar* function_name,
+                          GVariant* params,
+                          gint timeout_msec) noexcept;
+
 
 public:
     explicit Package (const std::string& packageid);
