@@ -7,7 +7,7 @@ export G_MESSAGES_DEBUG=all
 include /usr/share/dpkg/default.mk
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pay-service -DCMAKE_INSTALL_INCLUDEDIR=/usr/include/$(DEB_HOST_MULTIARCH)/
+	dh_auto_configure -- -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pay-service
 
 %:
 	dh $@ --fail-missing --with click
