@@ -517,7 +517,7 @@ Package::startPurchase (const std::string& sku) noexcept
         storeProxy,
         "PurchaseItem",
         g_variant_new("(s)", sku.c_str()),
-        -1);
+        300 * G_USEC_PER_SEC);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
