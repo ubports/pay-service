@@ -41,6 +41,6 @@ func (timer *FakeTimer) Reset(duration time.Duration) bool {
 }
 
 func (timer *FakeTimer) Stop() bool {
-    timer.stopCalled = timer.timer.Stop()
-    return timer.stopCalled
+    timer.stopCalled = true
+    return timer.timer.Stop()
 }

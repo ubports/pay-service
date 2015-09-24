@@ -299,11 +299,7 @@ func (iface *PayService) RefundItem(message dbus.Message, itemName string) (Item
 }
 
 func (iface *PayService) pauseTimer() bool {
-    if iface.shutdownTimer.Stop() {
-        return true
-    }
-    fmt.Println("ERROR - Unable to stop timer. Will exit prematurely.")
-    return false
+    return iface.shutdownTimer.Stop()
 }
 
 func (iface *PayService) resetTimer() bool {
