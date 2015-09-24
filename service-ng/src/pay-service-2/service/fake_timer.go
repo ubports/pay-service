@@ -30,22 +30,22 @@ type FakeTimer struct {
 }
 
 func (timer *FakeTimer) Reset(duration time.Duration) bool {
-    timer.resetCalled = true
     retval := true
 
-    if timer.duration == 0 {
+    if timer.duration == time.Duration(0) {
         retval = false
     }
     timer.duration = duration
+    timer.resetCalled = retval
     return retval
 }
 
 func (timer *FakeTimer) Stop() bool {
-    timer.stopCalled = true
-
-    if timer.duration == 0 {
+    if timer.duration == time.Duration(0) {
+        timer.stopCalled = false
         return false
     }
-    timer.duration = 0
+    timer.stopCalled = true
+    timer.duration = time.Duration(0)
     return true
 }

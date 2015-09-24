@@ -299,11 +299,19 @@ func (iface *PayService) RefundItem(message dbus.Message, itemName string) (Item
 }
 
 func (iface *PayService) pauseTimer() bool {
-    return iface.shutdownTimer.Stop()
+    if iface.shutdownTimer.Stop() {
+        return true
+    }
+    fmt.Println("ERROR - Unable to stop timer. Will exit prematurely.")
+    return false
 }
 
 func (iface *PayService) resetTimer() bool {
-    return iface.shutdownTimer.Reset(ShutdownTimeout)
+    if iface.shutdownTimer.Reset(ShutdownTimeout) {
+        return true
+    }
+    fmt.Println("ERROR - Unable to reset timer. May hang around forever.")
+    return false
 }
 
 /* Make the call to the URL and return either the data or an error
