@@ -24,28 +24,23 @@ import (
 
 
 type FakeTimer struct {
-    duration time.Duration
     resetCalled bool
     stopCalled bool
+    timer *time.Timer
+}
+
+func NewFakeTimer(duration time.Duration) *FakeTimer {
+    timer := &FakeTimer{}
+    timer.timer = time.NewTimer(duration)
+    return timer
 }
 
 func (timer *FakeTimer) Reset(duration time.Duration) bool {
-    retval := true
-
-    if timer.duration == time.Duration(0) {
-        retval = false
-    }
-    timer.duration = duration
-    timer.resetCalled = retval
-    return retval
+    timer.resetCalled = true
+    return timer.timer.Reset(duration)
 }
 
 func (timer *FakeTimer) Stop() bool {
-    if timer.duration == time.Duration(0) {
-        timer.stopCalled = false
-        return false
-    }
-    timer.stopCalled = true
-    timer.duration = time.Duration(0)
-    return true
+    timer.stopCalled = timer.timer.Stop()
+    return timer.stopCalled
 }

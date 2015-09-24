@@ -34,9 +34,14 @@ func main() {
     signals := make(chan os.Signal, 1)
     signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
+    shutdown := func() {
+        close(signals)
+    }
+
+    timer := time.AfterFunc(service.ShutdownTimeout, shutdown)
     auth := new(service.UbuntuOneAuth)
     client := service.NewWebClient(auth)
-    daemon, err := service.New(client)
+    daemon, err := service.New(client, timer)
     if err != nil {
         log.Fatalf("Unable to create daemon: %s", err)
     }
@@ -45,11 +50,6 @@ func main() {
     if err != nil {
         log.Fatalf("Unable to run daemon: %s", err)
     }
-
-    shutdown := func() {
-        close(signals)
-    }
-    daemon.ShutdownTimer = time.AfterFunc(service.ShutdownTimeout, shutdown)
 
     <-signals // Block so the daemon can run
     err = daemon.Shutdown()

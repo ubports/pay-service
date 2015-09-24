@@ -28,7 +28,7 @@ import (
 func TestAcknowledgeItemConsumable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-    timer := new(FakeTimer)
+    timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
     payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
@@ -64,7 +64,7 @@ func TestAcknowledgeItemConsumable(t *testing.T) {
 func TestAcknowledgeItemUnlockable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-    timer := new(FakeTimer)
+    timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
     payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
@@ -99,7 +99,7 @@ func TestAcknowledgeItemUnlockable(t *testing.T) {
 func TestGetItemConsumable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-    timer := new(FakeTimer)
+    timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
     payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
@@ -131,7 +131,7 @@ func TestGetItemConsumable(t *testing.T) {
 func TestGetItemClickScope(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-    timer := new(FakeTimer)
+    timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
     payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
@@ -163,7 +163,7 @@ func TestGetItemClickScope(t *testing.T) {
 func TestGetPurchasedItemsClickScope(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-    timer := new(FakeTimer)
+    timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
     payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
@@ -199,7 +199,7 @@ func TestGetPurchasedItemsClickScope(t *testing.T) {
 func TestGetPurchasedItemsInAppPurchase(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-    timer := new(FakeTimer)
+    timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
     payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
@@ -235,7 +235,7 @@ func TestGetPurchasedItemsInAppPurchase(t *testing.T) {
 func TestPurchaseItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-    timer := new(FakeTimer)
+    timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
     payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
@@ -286,7 +286,7 @@ func TestPurchaseItem(t *testing.T) {
 func TestPurchaseItem_payUiError(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-    timer := new(FakeTimer)
+    timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
     payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
@@ -340,7 +340,7 @@ func TestPurchaseItem_payUiError(t *testing.T) {
 func TestRefundItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
-    timer := new(FakeTimer)
+    timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
     payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)

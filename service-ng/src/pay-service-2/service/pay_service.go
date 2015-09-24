@@ -307,11 +307,7 @@ func (iface *PayService) pauseTimer() bool {
 }
 
 func (iface *PayService) resetTimer() bool {
-    if iface.shutdownTimer.Reset(ShutdownTimeout) {
-        return true
-    }
-    fmt.Println("ERROR - Unable to reset timer. May hang around forever.")
-    return false
+    return iface.shutdownTimer.Reset(ShutdownTimeout)
 }
 
 /* Make the call to the URL and return either the data or an error
