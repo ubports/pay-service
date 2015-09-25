@@ -34,10 +34,12 @@ find_package (PkgConfig REQUIRED)
 find_package (Qt5Core REQUIRED)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
-                   dbustest-1
-                   gio-2.0
-                   gio-unix-2.0
-                   properties-cpp
+  click-0.4
+  dbustest-1
+  gio-2.0
+  gio-unix-2.0
+  properties-cpp
+  ubuntu-app-launch-2>=0.5
 )
 include_directories (SYSTEM ${SERVICE_DEPS_INCLUDE_DIRS})
 
@@ -82,6 +84,7 @@ set (CXX_WARNING_ARGS "${CXX_WARNING_ARGS} -Wno-missing-field-initializers")
 add_subdirectory(common)
 add_subdirectory(libpay)
 add_subdirectory(service-ng)
+add_subdirectory(ual-helper)
 add_subdirectory(data)
 if (${enable_tests})
   add_subdirectory(tests)
