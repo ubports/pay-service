@@ -39,6 +39,3 @@ fi
 
 echo "Restarting scope registry"
 /sbin/restart scope-registry
-
-echo "Restarting pay service"
-/sbin/restart pay-service

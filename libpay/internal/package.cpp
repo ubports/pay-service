@@ -32,7 +32,7 @@ namespace Internal
 
 Package::Package (const std::string& packageid)
     : id(packageid)
-    , thread([]{}, [this]{pkgProxy.reset(); storeProxy.reset();})
+    , thread([]{}, [this]{storeProxy.reset();})
 {
     // when item statuses change, update our internal cache
     statusChanged.connect([this](const std::string& sku,
@@ -50,27 +50,9 @@ Package::Package (const std::string& packageid)
     {
         const auto encoded_id = BusUtils::encodePathElement(id);
 
-        // create the pay-service proxy...
         GError* error = nullptr;
-        std::string path = "/com/canonical/pay/" + encoded_id;
-        pkgProxy = std::shared_ptr<proxyPayPackage>(
-            proxy_pay_package_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
-                G_DBUS_PROXY_FLAGS_NONE,
-                "com.canonical.pay",
-                path.c_str(),
-                thread.getCancellable().get(),
-                &error),
-            [](proxyPayPackage * proxy){g_clear_object(&proxy);}
-        );
-        if (error != nullptr) {
-            const std::string tmp { error->message };
-            g_clear_error(&error);
-            return tmp;
-        }
-        g_signal_connect(pkgProxy.get(), "item-status-changed", G_CALLBACK(pkgProxySignal), this);
-
         // create the pay-service-ng proxy...
-        path = "/com/canonical/pay/store/" + encoded_id;
+        std::string path = "/com/canonical/pay/store/" + encoded_id;
         storeProxy = std::shared_ptr<proxyPayStore>(
             proxy_pay_store_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
                 G_DBUS_PROXY_FLAGS_NONE,
@@ -94,7 +76,7 @@ Package::Package (const std::string& packageid)
         throw std::runtime_error(errorStr);
     }
 
-    if (!pkgProxy || !storeProxy)
+    if (!storeProxy)
     {
         throw std::runtime_error("Unable to build proxy for pay-service");
     }
@@ -222,29 +204,6 @@ Package::removeRefundObserver (PayPackageRefundObserver observer, void* user_dat
 namespace // helper functions
 {
 
-PayPackageItemStatus status_from_string(const std::string& str)
-{
-    if (str == "purchased")
-        return PAY_PACKAGE_ITEM_STATUS_PURCHASED;
-
-    if (str == "not purchased")
-        return PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED;
-
-    if (str == "verifying")
-        return PAY_PACKAGE_ITEM_STATUS_VERIFYING;
-
-    if (str == "purchasing")
-        return PAY_PACKAGE_ITEM_STATUS_PURCHASING;
-
-    if (str == "refunding")
-        return PAY_PACKAGE_ITEM_STATUS_REFUNDING;
-
-    if (str == "approved")
-        return PAY_PACKAGE_ITEM_STATUS_APPROVED;
-
-    return PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
-}
-
 PayItemType type_from_string(const std::string& str)
 {
     if (str == "consumable")
@@ -267,6 +226,10 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
     // make sure we've got a valid sku to construct the PayItem with
     const char* sku {};
     g_variant_lookup(item_properties, "sku", "&s", &sku);
+    if (sku == nullptr)
+    {
+        g_variant_lookup(item_properties, "package_name", "&s", &sku);
+    }
     g_return_val_if_fail(sku != nullptr, item);
     g_return_val_if_fail(*sku != '\0', item);
 
@@ -292,9 +255,9 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         {
             item->set_description(g_variant_get_string(value, nullptr));
         }
-        else if (!g_strcmp0(key, "sku"))
+        else if (!g_strcmp0(key, "sku") || !g_strcmp0(key, "package_name"))
         {
-            // no-op; we handled the id first
+            // no-op; we handled the sku/package_name first
         }
         else if (!g_strcmp0(key, "price"))
         {
@@ -304,9 +267,18 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         {
             item->set_purchased_time(g_variant_get_uint64(value));
         }
-        else if (!g_strcmp0(key, "status"))
+        else if (!g_strcmp0(key, "state"))
         {
-            item->set_status((PayPackageItemStatus)status_from_string(g_variant_get_string(value, nullptr)));
+            auto state = g_variant_get_string(value, nullptr);
+            if (!g_strcmp0(state, "purchased") || !g_strcmp0(state, "approved")
+                || !g_strcmp0(state, "Complete"))
+            {
+                item->set_status(PAY_PACKAGE_ITEM_STATUS_PURCHASED);
+            }
+            else
+            {
+                item->set_status(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED);
+            }
         }
         else if (!g_strcmp0(key, "type"))
         {
@@ -319,7 +291,7 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         else
         {
             auto valstr = g_variant_print(value, true);
-            g_warning("unhandled item item property '%s': '%s'", key, valstr);
+            g_warning("Unhandled item property '%s': '%s'", key, valstr);
             g_free(valstr);
         }
     }
@@ -464,12 +436,21 @@ bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
             {
                 const auto sku = item->sku();
                 const auto status = item->status();
-                static_cast<Package*>(gself)->statusChanged(sku, status, 0);
+                uint64_t refund_timeout{0};
+
+                auto rv = g_variant_lookup_value(v, "refund_timeout",
+                                                 G_VARIANT_TYPE_UINT64);
+                if (rv != nullptr)
+                {
+                    refund_timeout = (uint64_t)g_variant_get_uint64(rv);
+                    g_variant_unref(rv);
+                }
+                static_cast<Package*>(gself)->statusChanged(sku, status, refund_timeout);
             }
         }
         else if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
-           std::cerr << "Error acknowledging item: " << error->message << std::endl;
+           std::cerr << "Error calling method: " << error->message << std::endl;
         }
         g_clear_error(&error);
         g_clear_pointer(&v, g_variant_unref);
@@ -500,9 +481,12 @@ Package::startVerification (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
 
-    auto ok = startBase<proxyPayPackage,
-                        &proxy_pay_package_call_verify_item,
-                        &proxy_pay_package_call_verify_item_finish> (pkgProxy, sku);
+    auto ok = startStoreAction<proxyPayStore,
+                               &proxy_pay_store_call_get_item_finish> (
+        storeProxy,
+        "GetItem",
+        g_variant_new("(s)", sku.c_str()),
+        -1);
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
@@ -513,7 +497,8 @@ Package::startPurchase (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
 
-    auto ok = startStoreAction<proxyPayStore, &proxy_pay_store_call_purchase_item_finish>(
+    auto ok = startStoreAction<proxyPayStore,
+                               &proxy_pay_store_call_purchase_item_finish> (
         storeProxy,
         "PurchaseItem",
         g_variant_new("(s)", sku.c_str()),
@@ -528,7 +513,8 @@ Package::startRefund (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
 
-    auto ok = startStoreAction<proxyPayStore, &proxy_pay_store_call_refund_item_finish>(
+    auto ok = startStoreAction<proxyPayStore,
+                               &proxy_pay_store_call_refund_item_finish> (
         storeProxy,
         "RefundItem",
         g_variant_new("(s)", sku.c_str()),
@@ -543,7 +529,8 @@ Package::startAcknowledge (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
 
-    auto ok = startStoreAction<proxyPayStore, &proxy_pay_store_call_acknowledge_item_finish>(
+    auto ok = startStoreAction<proxyPayStore,
+                               &proxy_pay_store_call_acknowledge_item_finish> (
         storeProxy,
         "AcknowledgeItem",
         g_variant_new("(s)", sku.c_str()),
@@ -551,19 +538,6 @@ Package::startAcknowledge (const std::string& sku) noexcept
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
-}
-
-void
-Package::pkgProxySignal (proxyPayPackage* /*proxy*/,
-                         const gchar* sku,
-                         const gchar* statusstr,
-                         guint64 refundable_until,
-                         gpointer user_data)
-{
-    auto notthis = static_cast<Package*>(user_data);
-    notthis->statusChanged(sku,
-                           status_from_string(statusstr),
-                           refundable_until);
 }
 
 template <typename BusProxy,

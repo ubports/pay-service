@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 2.8.9)
 
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-set (PROJECT_VERSION "14.04.0")
+set (PACKAGE_VERSION "14.04.0")
 set (PACKAGE ${CMAKE_PROJECT_NAME})
 
 option (enable_tests "Build the package's automatic tests." ON)
@@ -34,18 +34,10 @@ find_package (PkgConfig REQUIRED)
 find_package (Qt5Core REQUIRED)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
-                   accounts-qt5
-                   libcurl
-                   jsoncpp
-                   ubuntu-app-launch-2>=0.5
                    dbustest-1
                    gio-2.0
                    gio-unix-2.0
-                   click-0.4
-                   mirclient
-                   process-cpp
-                   properties-cpp
-                   ubuntuoneauth-2.0)
+)
 include_directories (SYSTEM ${SERVICE_DEPS_INCLUDE_DIRS})
 
 ##
@@ -58,7 +50,7 @@ include (GdbusCodegen)
 ##  custom targets
 ##
 
-set (ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${PROJECT_VERSION})
+set (ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${PACKAGE_VERSION})
 add_custom_target (dist
                    COMMAND bzr export --root=${ARCHIVE_NAME} ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.gz
                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -88,7 +80,6 @@ set (CXX_WARNING_ARGS "${CXX_WARNING_ARGS} -Wno-missing-field-initializers")
 
 add_subdirectory(common)
 add_subdirectory(libpay)
-add_subdirectory(service)
 add_subdirectory(service-ng)
 add_subdirectory(data)
 if (${enable_tests})
@@ -108,7 +99,7 @@ if (NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
   list(APPEND filter-list "${CMAKE_BINARY_DIR}/*")
 endif()
 ENABLE_COVERAGE_REPORT(
-  TARGETS libpay pay-service-lib pay-service
-  TESTS dbus-interface-tests item-memory-tests webclient-curl-tests verification-http-tests refund-http-tests purchase-ual-tests libpay-iap-tests libpay-package-tests
+  TARGETS libpay
+  TESTS libpay-iap-tests libpay-package-tests
   FILTER ${filter-list}
 )

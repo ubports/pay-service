@@ -63,7 +63,7 @@ class Item:
         'price': dbus.String('$1'),
         'purchased_time': dbus.UInt64(0.0),
         'sku': dbus.String('default_item'),
-        'status': dbus.String('not purchased'),
+        'state': dbus.String('available'),
         'type': dbus.String('unlockable'),
         'title': dbus.String('Default Item')
     }
@@ -79,7 +79,7 @@ class Item:
         if key not in self.bus_properties:
             raise dbus.exceptions.DBusException(
                 ERR_INVAL,
-                'invalid item property {0}'.format(key))
+                'Invalid item property {0}'.format(key))
         self.bus_properties[key] = value
 
 
@@ -95,7 +95,7 @@ def StoreAddItem(store, properties):
     if sku in store.items:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} already has item {1}'.format(store.name, sku))
+            'store {0} already has item {1}'.format(store.store_name, sku))
 
     item = Item(sku)
     store.items[sku] = item
@@ -112,7 +112,7 @@ def StoreSetItem(store, sku, properties):
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, sku))
+            'store {0} has no such item {1}'.format(store.store_name, sku))
 
 
 @dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
@@ -120,48 +120,76 @@ def GetItem(store, sku):
     try:
         return store.items[sku].serialize()
     except KeyError:
-        raise dbus.exceptions.DBusException(
-            ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, sku))
+        if store.path.endswith("click_2Dscope"):
+            return dbus.Dictionary(
+                {
+                    'package_name': sku,
+                    'state': 'available'
+                })
+        else:
+            raise dbus.exceptions.DBusException(
+                ERR_INVAL,
+                'store {0} has no such item {1}'.format(store.store_name, sku))
 
 
 @dbus.service.method(STORE_IFACE, in_signature='', out_signature='aa{sv}')
 def GetPurchasedItems(store):
     items = []
     for sku, item in store.items.items():
-        if item.bus_properties['status'] == 'purchased':
+        if item.bus_properties['state'] in ('approved', 'purchased'):
             items.append(item.serialize())
     return dbus.Array(items, signature='a{sv}', variant_level=1)
 
 
 @dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
 def PurchaseItem(store, sku):
+    if store.path.endswith("click_2Dscope"):
+        item = Item(sku)
+        item.bus_properties = {
+            'state': 'Complete',
+            'refund_timeout': dbus.UInt64(time.time() + 15*60),
+            'package_name': sku,
+        }
+        store.items[sku] = item
+        return item.serialize()
+
     try:
         item = store.items[sku]
-        item.set_property('status', 'purchased')
+        item.set_property('state', 'approved')
         item.set_property('purchased_time', dbus.UInt64(time.time()))
         return item.serialize()
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, sku))
+            'store {0} has no such item {1}'.format(store.store_name, sku))
 
 
 @dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
 def RefundItem(store, sku):
-    try:
-        item = store.items[sku]
-        item.set_property('status', 'not purchased')
-        item.set_property('purchased_time', dbus.UInt64(0))
-        return item.serialize()
-    except KeyError:
+    if not store.path.endswith("click_2Dscope"):
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, sku))
+            'Refunds are only available for packages')
 
+    try:
+        item = store.items[sku]
+        if (item.bus_properties['state'] == 'Complete' and
+            item.bus_properties['refund_tiemout'] > dbus.UInt64(time.time())):
+            del store.items[sku]
+            return dbus.Dictionary({
+                'state': 'available',
+                'package_name': sku
+            })
+    except KeyError:
+        return dbus.Dictionary({'state': 'available', 'package_name': sku})
 
 @dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
 def AcknowledgeItem(store, sku):
+    if store.path.endswith("click_2Dscope"):
+        raise dbus.exceptions.DBusException(
+            ERR_INVAL,
+            'Only in-app purchase items can be acknowledged')
+
     try:
         item = store.items[sku]
         item.set_property('acknowledged', dbus.Boolean(True))
@@ -170,7 +198,7 @@ def AcknowledgeItem(store, sku):
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.name, sku))
+            'store {0} has no such item {1}'.format(store.store_name, sku))
 
 #
 #  Main 'Storemock' Obj

@@ -130,6 +130,12 @@ func (iface *PayService) GetItem(message dbus.Message, itemName string) (ItemDet
     }
     data, err := iface.getDataForUrl(url, "GET", headers, "")
     if err != nil {
+        if packageName == "click-scope" {
+            item := make(ItemDetails)
+            item["package_name"] = dbus.MakeVariant(itemName)
+            item["state"] = dbus.MakeVariant("available")
+            return item, nil
+        }
         return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
     }
 
@@ -262,18 +268,12 @@ func (iface *PayService) RefundItem(message dbus.Message, itemName string) (Item
     body := `{"name": "` + packageName + `"}`
     headers.Set("Content-Type", "application/json")
 
-    data, err := iface.getDataForUrl(url, "POST", headers, body)
+    _, err := iface.getDataForUrl(url, "POST", headers, body)
     if err != nil {
         return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
     }
 
-    // Refund the item and return the item info and status.
-    item := make(map[string]dbus.Variant)
-
-    m := data.(map[string]interface{})
-    item["success"] = dbus.MakeVariant(m["success"].(bool))
-
-    return item, nil
+    return iface.GetItem(message, itemName)
 }
 
 func (iface *PayService) pauseTimer() bool {

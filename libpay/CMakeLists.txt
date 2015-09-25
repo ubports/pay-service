@@ -17,7 +17,6 @@ add_subdirectory(internal)
 ######################
 
 set(libpay-generated)
-add_gdbus_codegen_with_namespace(libpay-generated proxy-package com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.package.xml)
 add_gdbus_codegen_with_namespace(libpay-generated proxy-store   com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.store.xml)
 
 ######################

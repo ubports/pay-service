@@ -21,154 +21,40 @@ include_directories(
   ${GTEST_INCLUDE_DIR}
 )
 
-add_subdirectory(libpay)
-
-#############################
-# DBus Interface
-#############################
-
-add_executable(
-  dbus-interface-tests
-  dbus-interface-tests.cpp
-  )
-
-target_link_libraries(
-  dbus-interface-tests
-
-  pay-service-lib
-
-  ${SERVICE_DEPS_LIBRARIES}
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${GMOCK_BOTH_LIBRARIES}
-)
-
-add_test(dbus-interface-tests ${CMAKE_CURRENT_BINARY_DIR}/dbus-interface-tests)
-
-#############################
-# Memory Item Store
-#############################
-
-add_executable(
-  item-memory-tests
-  item-memory-tests.cpp
-  )
-
-target_link_libraries(
-  item-memory-tests
-
-  pay-service-lib
-
-  ${SERVICE_DEPS_LIBRARIES}
-  ${GMOCK_BOTH_LIBRARIES}
-)
-
-add_test(item-memory-tests ${CMAKE_CURRENT_BINARY_DIR}/item-memory-tests)
-
-#############################
-# Webclient Curl Factory
-#############################
-
-add_executable(
-  webclient-curl-tests
-  webclient-curl-tests.cpp
-)
-
-target_link_libraries(
-  webclient-curl-tests
-
-  pay-service-lib
-
-  ${SERVICE_DEPS_LIBRARIES}
-  ${GMOCK_BOTH_LIBRARIES}
-)
-
-add_test(webclient-curl-tests ${CMAKE_CURRENT_BINARY_DIR}/webclient-curl-tests)
-
-#############################
-# Verification HTTP Factory
-#############################
-
-add_executable(
-  verification-http-tests
-  verification-http-tests.cpp
-  )
-
-set_target_properties(
-  verification-http-tests
-  PROPERTIES
-  COMPILE_DEFINITIONS "VERIFICATION_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints\"")
-
-target_link_libraries(
-  verification-http-tests
-
-  pay-service-lib
-
-  ${SERVICE_DEPS_LIBRARIES}
-  ${GMOCK_BOTH_LIBRARIES}
-)
-
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/packages/good/items/by-sku/simple.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/packages/good/items/by-sku/simple @ONLY)
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/packages/good/items/by-sku/device-id.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/packages/good/items/by-sku/device-id @ONLY)
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/verification-http-endpoints/api/2.0/click/purchases/package-name.in
-  ${CMAKE_CURRENT_BINARY_DIR}/verification-http-endpoints/api/2.0/click/purchases/package-name @ONLY)
-
-add_test(verification-http-tests ${CMAKE_CURRENT_BINARY_DIR}/verification-http-tests)
-
-#############################
-# Refund HTTP Factory
-#############################
-
-add_executable(
-  refund-http-tests
-  refund-http-tests.cpp
-  )
-
-set_target_properties(
-  refund-http-tests
-  PROPERTIES
-  COMPILE_DEFINITIONS "REFUND_CURL_ENDPOINTS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/refund-http-endpoints\"")
-
-target_link_libraries(
-  refund-http-tests
-
-  pay-service-lib
-
-  ${SERVICE_DEPS_LIBRARIES}
-  ${GMOCK_BOTH_LIBRARIES}
-)
-
-add_test(refund-http-tests ${CMAKE_CURRENT_BINARY_DIR}/refund-http-tests)
-
-#############################
-# Purchase UAL
-#############################
-
-add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-add_definitions(-DCMAKE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
-
-add_executable(
-  purchase-ual-tests
-  purchase-ual-tests.cpp
-  mir-mock.cpp
-  )
-
-target_link_libraries(
-  purchase-ual-tests
-
-  pay-service-lib
-  ${SERVICE_DEPS_LIBRARIES}
-  ${GMOCK_BOTH_LIBRARIES}
-)
-
-add_test(purchase-ual-tests ${CMAKE_CURRENT_BINARY_DIR}/purchase-ual-tests)
-
 #############################
 # staging script
 #############################
 
 install(PROGRAMS setup-staging.sh DESTINATION ${CMAKE_INSTALL_FULL_PKGLIBEXECDIR})
+
+#############################
+# dbusmock template
+#############################
+
+set(STORE_TEMPLATE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/com_canonical_pay_store.py")
+add_definitions(-DSTORE_TEMPLATE_PATH="${STORE_TEMPLATE_FILE}")
+
+# Get the python3 package directory
+execute_process (
+  COMMAND python3 -c "from distutils import sysconfig; print(sysconfig.get_python_lib())"
+  COMMAND sed -r -e "s|/usr/(local/)?||g"
+  OUTPUT_VARIABLE PYTHON_PACKAGE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+install(
+  FILES ${STORE_TEMPLATE_FILE}
+  DESTINATION "${PYTHON_PACKAGE_DIR}/dbusmock/templates/"
+)
+
+#############################
+# libpay tests
+#############################
+
+function(add_test_by_name name)
+  set(TEST_NAME ${name})
+  add_executable(${TEST_NAME} ${TEST_NAME}.cpp ${libpay-tests-generated})
+  target_link_libraries(${TEST_NAME} libpay ${GMOCK_BOTH_LIBRARIES})
+  add_test(${TEST_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME})
+endfunction()
+add_test_by_name(libpay-iap-tests)
+add_test_by_name(libpay-package-tests)

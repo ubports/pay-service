@@ -290,7 +290,7 @@ func TestRefundItem(t *testing.T) {
         t.Errorf("Expected values in map, got none instead.")
     }
 
-    if reply["success"].Value() != true {
+    if reply["state"].Value().(string) == "Complete" {
         t.Errorf("Expected successful refund result.")
     }
 

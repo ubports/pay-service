@@ -22,7 +22,6 @@
 
 #include <libpay/pay-item.h>
 #include <libpay/pay-package.h>
-#include <libpay/proxy-package.h>
 #include <libpay/proxy-store.h>
 
 #include <libpay/internal/item.h>
@@ -55,19 +54,12 @@ class Package
     void updateStatus(const std::string& sku, PayPackageItemStatus);
 
     GLib::ContextThread thread;
-    std::shared_ptr<proxyPayPackage> pkgProxy;
     std::shared_ptr<proxyPayStore> storeProxy;
 
     constexpr static uint64_t expiretime{60}; // 60 seconds prior status is "expiring"
 
     template<typename Collection>
     bool removeObserver(Collection& collection, const typename Collection::key_type& key);
-
-    static void pkgProxySignal (proxyPayPackage* /*proxy*/,
-                                const gchar* sku,
-                                const gchar* statusstr,
-                                guint64 refundable_until,
-                                gpointer user_data);
 
     template <typename BusProxy,
               void (*startFunc)(BusProxy*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),

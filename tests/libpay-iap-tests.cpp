@@ -23,7 +23,7 @@
 #include <libpay/pay-package.h>
 
 static constexpr char const * BUS_NAME {"com.canonical.payments"};
-static constexpr char const * GAME_NAME {"SwordsAndStacktraces"};
+static constexpr char const * GAME_NAME {"SwordsAndStacktraces.developer"};
 
 struct IapTests: public DBusFixture
 {
@@ -91,7 +91,7 @@ protected:
         g_variant_builder_add(&b, "{sv}", "price", g_variant_new_string("$1"));
         g_variant_builder_add(&b, "{sv}", "purchased_time", g_variant_new_uint64(now));
         g_variant_builder_add(&b, "{sv}", "sku", g_variant_new_string("magic_sword"));
-        g_variant_builder_add(&b, "{sv}", "status", g_variant_new_string("purchased"));
+        g_variant_builder_add(&b, "{sv}", "state", g_variant_new_string("approved"));
         g_variant_builder_add(&b, "{sv}", "title", g_variant_new_string("Magic Sword"));
         g_variant_builder_add(&b, "{sv}", "type", g_variant_new_string("unlockable"));
         auto sword_props = g_variant_builder_end(&b);
@@ -103,7 +103,7 @@ protected:
         g_variant_builder_add(&b, "{sv}", "price", g_variant_new_string("$1"));
         g_variant_builder_add(&b, "{sv}", "purchased_time", g_variant_new_uint64(0));
         g_variant_builder_add(&b, "{sv}", "sku", g_variant_new_string("magic_shield"));
-        g_variant_builder_add(&b, "{sv}", "status", g_variant_new_string("not purchased"));
+        g_variant_builder_add(&b, "{sv}", "state", g_variant_new_string("available"));
         g_variant_builder_add(&b, "{sv}", "title", g_variant_new_string("Magic Shield"));
         g_variant_builder_add(&b, "{sv}", "type", g_variant_new_string("unlockable"));
         auto shield_props = g_variant_builder_end(&b);
@@ -158,10 +158,6 @@ protected:
     }
 };
 
-
-TEST_F(IapTests, HarnessOwnsName)
-{
-}
 
 TEST_F(IapTests, GetItem)
 {
