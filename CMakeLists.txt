@@ -37,6 +37,7 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
                    dbustest-1
                    gio-2.0
                    gio-unix-2.0
+                   properties-cpp
 )
 include_directories (SYSTEM ${SERVICE_DEPS_INCLUDE_DIRS})
 
