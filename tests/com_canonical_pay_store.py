@@ -83,9 +83,7 @@ class Item:
         self.bus_properties[key] = value
 
 
-@dbus.service.method(STORE_IFACE, in_signature='a{sv}')
-def StoreAddItem(store, properties):
-
+def store_add_item(store, properties):
     if 'sku' not in properties:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
@@ -99,12 +97,10 @@ def StoreAddItem(store, properties):
 
     item = Item(sku)
     store.items[sku] = item
-    store.StoreSetItem(sku, properties)
+    store.set_item (store, sku, properties)
 
 
-@dbus.service.method(STORE_IFACE, in_signature='sa{sv}', out_signature='')
-def StoreSetItem(store, sku, properties):
-
+def store_set_item(store, sku, properties):
     try:
         item = store.items[sku]
         for key, value in properties.items():
@@ -115,8 +111,7 @@ def StoreSetItem(store, sku, properties):
             'store {0} has no such item {1}'.format(store.store_name, sku))
 
 
-@dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
-def GetItem(store, sku):
+def store_get_item(store, sku):
     try:
         return store.items[sku].serialize()
     except KeyError:
@@ -132,8 +127,7 @@ def GetItem(store, sku):
                 'store {0} has no such item {1}'.format(store.store_name, sku))
 
 
-@dbus.service.method(STORE_IFACE, in_signature='', out_signature='aa{sv}')
-def GetPurchasedItems(store):
+def store_get_purchased_items(store):
     items = []
     for sku, item in store.items.items():
         if item.bus_properties['state'] in ('approved', 'purchased'):
@@ -141,8 +135,7 @@ def GetPurchasedItems(store):
     return dbus.Array(items, signature='a{sv}', variant_level=1)
 
 
-@dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
-def PurchaseItem(store, sku):
+def store_purchase_item(store, sku):
     if store.path.endswith("click_2Dscope"):
         item = Item(sku)
         item.bus_properties = {
@@ -164,8 +157,7 @@ def PurchaseItem(store, sku):
             'store {0} has no such item {1}'.format(store.store_name, sku))
 
 
-@dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
-def RefundItem(store, sku):
+def store_refund_item(store, sku):
     if not store.path.endswith("click_2Dscope"):
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
@@ -183,8 +175,8 @@ def RefundItem(store, sku):
     except KeyError:
         return dbus.Dictionary({'state': 'available', 'package_name': sku})
 
-@dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
-def AcknowledgeItem(store, sku):
+
+def store_acknowledge_item(store, sku):
     if store.path.endswith("click_2Dscope"):
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
@@ -205,22 +197,35 @@ def AcknowledgeItem(store, sku):
 #
 
 
-@dbus.service.method(MAIN_IFACE, in_signature='saa{sv}', out_signature='')
-def AddStore(mock, package_name, items):
-
+def main_add_store(mock, package_name, items):
     path = build_store_path(package_name)
-    # mock.log('store {0} being added'.format(path))
     mock.AddObject(path, STORE_IFACE, {}, [])
-
     store = mockobject.objects[path]
-    store.store_name = package_name
+    store.name = package_name
     store.items = {}
+
+    store.add_item = store_add_item
+    store.set_item = store_set_item
+    store.get_item = store_get_item
+    store.get_purchased_items = store_get_purchased_items
+    store.purchase_item = store_purchase_item
+    store.refund_item = store_refund_item
+    store.acknowledge_item = store_acknowledge_item
+    store.AddMethods(STORE_IFACE, [
+                       ('AddItem', 'a{sv}', '', 'self.add_item(self, args[0])'),
+                       ('SetItem', 'a{sv}', '', 'self.set_item(self, args[0])'),
+                       ('GetItem', 's', 'a{sv}', 'ret = self.get_item(self, args[0])'),
+                       ('GetPurchasedItems', '', 'aa{sv}', 'ret = self.get_purchased_items(self)'),
+                       ('PurchaseItem', 's', 'a{sv}', 'ret = self.purchase_item(self, args[0])'),
+                       ('RefundItem', 's', 'a{sv}', 'ret = self.refund_item(self, args[0])'),
+                       ('AcknowledgeItem', 's', 'a{sv}', 'ret = self.acknowledge_item(self, args[0])'),
+                     ])
+
     for item in items:
-        mock.AddItem(package_name, item)
+        store.add_item(store, item);
 
 
-@dbus.service.method(MAIN_IFACE, in_signature='', out_signature='as')
-def GetStores(mock):
+def main_get_stores(mock):
     names = []
     for key, val in mockobject.objects.items():
         try:
@@ -230,8 +235,7 @@ def GetStores(mock):
     return dbus.Array(names, signature='s', variant_level=1)
 
 
-@dbus.service.method(MAIN_IFACE, in_signature='sa{sv}', out_signature='')
-def AddItem(mock, package_name, item):
+def main_add_item(mock, package_name, item):
     try:
         path = build_store_path(package_name)
         # mock.log('store {0} adding item {1}'.format(path, item))
@@ -242,16 +246,26 @@ def AddItem(mock, package_name, item):
             'no such package {0}'.format(package_name))
 
 
-@dbus.service.method(MAIN_IFACE, in_signature='sa{sv}', out_signature='')
-def SetItem(mock, package_name, item):
+def main_set_item(mock, package_name, item):
     try:
         path = build_store_path(package_name)
-        mockobject.objects[path].SetItem(item)
+        store = mock.objects[path]
+        store.set_item(store, item)
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'no such package {0}'.format(package_name))
+            'error adding item to package {0}'.format(package_name))
 
 
-def load(mock, parameters):
-    pass
+def load(main, parameters):
+
+    main.add_store = main_add_store
+    main.add_item = main_add_item
+    main.set_item = main_set_item
+    main.get_stores = main_get_stores
+    main.AddMethods(MAIN_IFACE, [
+        ('AddStore', 'saa{sv}', '', 'self.add_store(self, args[0], args[1])'),
+        ('AddItem', 'sa{sv}', '', 'self.add_item(self, args[0], args[1])'),
+        ('SetItem', 'a{sv}', '', 'self.set_item(self, args[0])'),
+        ('GetStores', '', 'as', 'ret = self.get_stores(self)'),
+    ])
