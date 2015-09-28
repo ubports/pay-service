@@ -146,13 +146,13 @@ def store_purchase_item(store, sku):
             }
             store.items[sku] = item
 
-        return GetItem(store, sku)
+        return store_get_item(store, sku)
     try:
         if sku != 'cancel':
             item = store.items[sku]
             item.set_property('state', 'approved')
             item.set_property('purchased_time', dbus.UInt64(time.time()))
-        return GetItem(store, sku)
+        return store_get_item(store, sku)
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
