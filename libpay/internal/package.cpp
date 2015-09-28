@@ -497,6 +497,8 @@ Package::startPurchase (const std::string& sku) noexcept
 {
     g_debug("%s %s", G_STRFUNC, sku.c_str());
 
+    statusChanged(sku, PAY_PACKAGE_ITEM_STATUS_PURCHASING, 0);
+
     auto ok = startStoreAction<proxyPayStore,
                                &proxy_pay_store_call_purchase_item_finish> (
         storeProxy,

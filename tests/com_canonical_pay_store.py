@@ -144,20 +144,22 @@ def GetPurchasedItems(store):
 @dbus.service.method(STORE_IFACE, in_signature='s', out_signature='a{sv}')
 def PurchaseItem(store, sku):
     if store.path.endswith("click_2Dscope"):
-        item = Item(sku)
-        item.bus_properties = {
-            'state': 'Complete',
-            'refund_timeout': dbus.UInt64(time.time() + 15*60),
-            'package_name': sku,
-        }
-        store.items[sku] = item
-        return item.serialize()
+        if sku != 'cancel':
+            item = Item(sku)
+            item.bus_properties = {
+                'state': 'Complete',
+                'refund_timeout': dbus.UInt64(time.time() + 15*60),
+                'package_name': sku,
+            }
+            store.items[sku] = item
 
+        return GetItem(store, sku)
     try:
-        item = store.items[sku]
-        item.set_property('state', 'approved')
-        item.set_property('purchased_time', dbus.UInt64(time.time()))
-        return item.serialize()
+        if sku != 'cancel':
+            item = store.items[sku]
+            item.set_property('state', 'approved')
+            item.set_property('purchased_time', dbus.UInt64(time.time()))
+        return GetItem(store, sku)
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,

@@ -105,7 +105,7 @@ protected:
         PayPackage* package;
         std::string sku;
         PayPackageItemStatus status = PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
-        bool triggered = false;
+        uint64_t num_calls = 0;
     };
 
     void InstallStatusObserver(PayPackage* package,
@@ -120,7 +120,7 @@ protected:
             data->package = package;
             data->sku = sku;
             data->status = status;
-            data->triggered = true;
+            data->num_calls++;
         };
         auto install_result = pay_package_item_observer_install (package, observer, &data);
         EXPECT_TRUE(install_result);
@@ -147,14 +147,43 @@ TEST_F(LibpayPackageTests, PurchaseItem)
     EXPECT_TRUE(pay_package_item_start_purchase(package, sku));
 
     // wait for the call to complete
-    while (!data.triggered)
+    while (data.num_calls < 2) {
         g_usleep(G_USEC_PER_SEC/10);
+    }
 
     // confirm that the item's status changed
-    EXPECT_TRUE(data.triggered);
+    EXPECT_EQ(2, data.num_calls);
     EXPECT_EQ(package, data.package);
     EXPECT_EQ(sku, data.sku);
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, data.status);
+
+    // cleanup
+    pay_package_delete(package);
+}
+
+TEST_F(LibpayPackageTests, PurchaseItemCancelled)
+{
+    GError* error = nullptr;
+    guint callcount = 0;
+    auto package = pay_package_new("click-scope");
+
+    // install a status observer
+    StatusObserverData data;
+    InstallStatusObserver(package, data);
+
+    const char* sku = "cancel";
+    EXPECT_TRUE(pay_package_item_start_purchase(package, sku));
+
+    // wait for the call to complete
+    while (data.num_calls < 2) {
+        g_usleep(G_USEC_PER_SEC/10);
+    }
+
+    // confirm that the item's status changed
+    EXPECT_EQ(2, data.num_calls);
+    EXPECT_EQ(package, data.package);
+    EXPECT_EQ(sku, data.sku);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, data.status);
 
     // cleanup
     pay_package_delete(package);
@@ -174,11 +203,12 @@ TEST_F(LibpayPackageTests, RefundItem)
     EXPECT_TRUE(pay_package_item_start_refund(package, sku));
 
     // wait for the call to complete
-    while (!data.triggered)
+    while (!data.num_calls) {
         g_usleep(G_USEC_PER_SEC/10);
+    }
 
     // confirm that the item's status changed
-    EXPECT_TRUE(data.triggered);
+    EXPECT_EQ(1, data.num_calls);
     EXPECT_EQ(package, data.package);
     EXPECT_EQ(sku, data.sku);
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, data.status);
@@ -201,11 +231,12 @@ TEST_F(LibpayPackageTests, VerifyItem)
     EXPECT_TRUE(pay_package_item_start_verification(package, sku));
 
     // wait for the call to complete
-    while (!data.triggered)
+    while (!data.num_calls) {
         g_usleep(G_USEC_PER_SEC/10);
+    }
 
     // confirm that the item's status changed
-    EXPECT_TRUE(data.triggered);
+    EXPECT_EQ(1, data.num_calls);
     EXPECT_EQ(package, data.package);
     EXPECT_EQ(sku, data.sku);
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, data.status);

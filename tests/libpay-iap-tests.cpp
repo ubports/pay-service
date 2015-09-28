@@ -136,7 +136,7 @@ protected:
         PayPackage* package;
         std::string sku;
         PayPackageItemStatus status = PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
-        bool triggered = false;
+        uint64_t num_calls = 0;
     };
 
     void InstallStatusObserver(PayPackage* package,
@@ -151,7 +151,7 @@ protected:
             data->package = package;
             data->sku = sku;
             data->status = status;
-            data->triggered = true;
+            data->num_calls++;
         };
         auto install_result = pay_package_item_observer_install (package, observer, &data);
         EXPECT_TRUE(install_result);
@@ -189,8 +189,10 @@ TEST_F(IapTests, GetPurchasedItems)
 
     // test the results
     size_t n = 0;
-    while (items && items[n])
+    while (items && items[n]) {
         ++n;
+    }
+
     ASSERT_EQ(1, n);
     auto item = items[0];
     EXPECT_FALSE(pay_item_get_acknowledged(item));
@@ -202,8 +204,10 @@ TEST_F(IapTests, GetPurchasedItems)
     EXPECT_EQ(PAY_ITEM_TYPE_UNLOCKABLE, pay_item_get_type(item));
 
     // cleanup
-    for (size_t i=0; i<n; ++i)
+    for (size_t i=0; i<n; ++i) {
         pay_item_unref(items[i]);
+    }
+
     free(items);
     pay_package_delete(package);
 }
@@ -225,11 +229,12 @@ TEST_F(IapTests, PurchaseItem)
     EXPECT_TRUE(start_result);
 
     // wait for the purchase to complete
-    while (!data.triggered)
+    while (data.num_calls < 2) {
         g_usleep(G_USEC_PER_SEC/10);
+    }
 
     // confirm that the item's status changed
-    EXPECT_TRUE(data.triggered);
+    EXPECT_EQ(2, data.num_calls);
     EXPECT_EQ(package, data.package);
     EXPECT_EQ(sku, data.sku);
     EXPECT_EQ(expected_status, data.status);
@@ -261,11 +266,12 @@ TEST_F(IapTests, AcknowledgeItem)
     EXPECT_TRUE(start_result);
 
     // wait for the status observer to be called
-    while (!data.triggered)
+    while (data.num_calls == 0) {
         g_usleep(G_USEC_PER_SEC/10);
+    }
 
     // confirm that the item's status changed
-    EXPECT_TRUE(data.triggered);
+    EXPECT_EQ(1, data.num_calls);
     EXPECT_EQ(package, data.package);
     EXPECT_EQ(sku, data.sku);
 
