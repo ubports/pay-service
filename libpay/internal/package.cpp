@@ -438,7 +438,7 @@ bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
                 const auto status = item->status();
                 uint64_t refund_timeout{0};
 
-                auto rv = g_variant_lookup_value(v, "refund_timeout",
+                auto rv = g_variant_lookup_value(v, "refundable_until",
                                                  G_VARIANT_TYPE_UINT64);
                 if (rv != nullptr)
                 {

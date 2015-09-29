@@ -26,6 +26,7 @@ import (
     "os"
     "path"
     "reflect"
+    "time"
 )
 
 
@@ -134,17 +135,13 @@ func (iface *PayService) GetItem(message dbus.Message, itemName string) (ItemDet
             item := make(ItemDetails)
             item["package_name"] = dbus.MakeVariant(itemName)
             item["state"] = dbus.MakeVariant("available")
+            item["refundable_until"] = dbus.MakeVariant(uint64(0))
             return item, nil
         }
         return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
     }
 
     item := parseItemMap(data.(map[string]interface{}))
-
-    // Normalize the state for apps to "purchased" instead of "Complete"
-    if item["state"].Value().(string) == "Complete" {
-        item["state"] = dbus.MakeVariant("purchased")
-    }
 
     return item, nil
 }
@@ -175,30 +172,7 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
 
         m := data.([]interface{})
         for index := range m {
-            itemMap := m[index].(map[string]interface{})
-            details := make(ItemDetails)
-            for k, v := range itemMap {
-                switch vv := v.(type) {
-                case string: {
-                    switch k {
-                    case "refundable_until":
-                        // TODO: Parse the time to an int64
-                    default:
-                        details[k] = dbus.MakeVariant(vv)
-                    }
-                }
-                case bool, int64:
-                    details[k] = dbus.MakeVariant(vv)
-                case nil:
-                    // For refundable_until, set the value to 0
-                    if k == "refundable_until" {
-                        details[k] = dbus.MakeVariant(int64(0))
-                    }
-                    // Just ignore nulls in the JSON
-                default:
-                    fmt.Println("WARNING - Unable to parse purchase key:", k)
-                }
-            }
+            details := parseItemMap(m[index].(map[string]interface{}))
             purchasedItems = append(purchasedItems, details)
         }
 
@@ -218,10 +192,11 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
             itemList := purchaseMap["_embedded"].(
                 map[string]interface{})["items"].([]interface{})
             for index := range itemList {
-                itemMap := itemList[index].(map[string]interface{})
-                details := parseItemMap(itemMap)
+                details := parseItemMap(itemList[index].(map[string]interface{}))
                 details["requested_device"] = dbus.MakeVariant(
                     purchaseMap["requested_device"])
+                details["purchased_id"] = dbus.MakeVariant(
+                    uint64(purchaseMap["id"].(float64)))
 
                 // FIXME: parse timestamps and add them here too
                 purchasedItems = append(purchasedItems, details)
@@ -313,11 +288,46 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
         case string, bool, int64, float64:
             details[k] = dbus.MakeVariant(vv)
         case nil:
-            // Just ignore nulls in the JSON
+            // If refundable_until is null, set it to empty string instead
+            if k == "refundable_until" {
+                details[k] = dbus.MakeVariant("")
+            }
         default:
             fmt.Printf("WARNING - Unable to parse item key '%s' of type '%s'.\n", k, reflect.TypeOf(vv))
         }
     }
+
+    // Normalize the state for apps to "purchased" instead of "Complete"
+    itemState, stateOk := details["state"]
+    if stateOk && itemState.Value().(string) == "Complete" {
+        details["state"] = dbus.MakeVariant("purchased")
+    }
+
+    // Normalize the package_name for apps to the "sku" key
+    pkgName, pkgOk := details["package_name"]
+    if pkgOk {
+        details["sku"] = pkgName
+        delete(details, "package_name")
+    }
+
+    // Parse the refundable_until string to a unix timestamp
+    refundableUntil, refundOk := details["refundable_until"]
+    if refundOk {
+        if refundableUntil.Value().(string) == "" {
+            details["refundable_until"] = dbus.MakeVariant(uint64(0))
+        } else {
+            refundableTime, err := time.Parse(time.RFC3339,
+                refundableUntil.Value().(string))
+            if err != nil {
+                fmt.Printf("ERROR - Unable to parse refund timeout '%s': %s\n",
+                    refundableUntil, err)
+            } else {
+                details["refundable_until"] = dbus.MakeVariant(
+                    uint64(refundableTime.Unix()))
+            }
+        }
+    }
+
     return details
 }
 

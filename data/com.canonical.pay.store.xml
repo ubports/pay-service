@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <node>
     <interface name="com.canonical.pay.store">
-        <!-- Methods return a dictionary of properties. Some methods may
-             return only a subset of the following properties:
+        <!-- Methods return a dictionary of properties. Some methods may only
+             return some of the properties.
+             Some properties are valid for both App and In-app purchases:
 
-             acknowledged: boolean, whether the item has been acknowledged
-             acknowledged_time: uint64, unix timestamp of acknowledged time
+             sku: string, the unique string identifier of the item
+             state: string, one of ['available', 'approved', 'purchased']
+
+
+             Some properties are only valid for App purchases:
+
+             open_id: string, OpenID URL identifier for the user
+             refundable_until: uint64, unix timestamp when refunding expires
+
+
+             Some properties are only valid for In-app purchases:
+
+             acknowledged_timestamp: uint64, unix timestamp of acknowledged time
+             completed_timestamp: uint64, unix timestamp of purchased time
              description: string, description of the item
              id: int, numeric identifier of the item
              price: string, the locale/currency encoded price
-             purchased_time: uint64,  unix timestamp of purchased time
-             sku: string, a short identifier, unique to the application.
-             state: string, one of ['available', 'approved', 'purchased']
+             purchase_id: int, numeric identifier of the purchase
              title: string, the title of the item
              type: string, one of '[unlockable', 'consumable']
         -->

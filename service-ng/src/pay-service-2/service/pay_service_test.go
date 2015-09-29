@@ -127,7 +127,7 @@ func TestGetItemConsumable(t *testing.T) {
     }
 }
 
-func TestGetItemClickScope(t *testing.T) {
+func TestGetItemAppNotRefundable(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := new(FakeTimer)
@@ -145,9 +145,66 @@ func TestGetItemClickScope(t *testing.T) {
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
     m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
-    _, dbusErr := payiface.GetItem(m, "foo.example")
+    item, dbusErr := payiface.GetItem(m, "foo.example")
     if dbusErr != nil {
         t.Errorf("Unexpected error geting item details: %s", dbusErr)
+    }
+
+    _, skuOk := item["sku"]
+    if !skuOk {
+        t.Errorf("Package name not normalized to 'sku' key.")
+    }
+
+    refundableUntil, ok := item["refundable_until"]
+    if !ok {
+        t.Errorf("Value for 'refundable_until' not included in map.")
+    }
+
+    if refundableUntil.Value().(uint64) != 0 {
+        t.Errorf("Excpected refundable_until of '0', got '%d' instead.",
+            refundableUntil)
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
+}
+
+func TestGetItemAppRefundable(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    item, dbusErr := payiface.GetItem(m, "bar.example")
+    if dbusErr != nil {
+        t.Errorf("Unexpected error geting item details: %s", dbusErr)
+    }
+
+    refundableUntil, ok := item["refundable_until"]
+    if !ok {
+        t.Errorf("Value for 'refundable_until' not included in map.")
+    }
+
+    if refundableUntil.Value().(uint64) != 4102444799 {
+        t.Errorf("Excpected refundable_until in the future, got '%d' instead.",
+            refundableUntil.Value().(uint64))
     }
 
     if !timer.stopCalled {

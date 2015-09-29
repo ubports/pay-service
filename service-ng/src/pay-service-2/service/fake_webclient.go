@@ -54,12 +54,25 @@ func (client *FakeWebClient) Call(iri string, method string,
         ]`, nil
     }
 
+    // A non-refundable app purchase
     if parsed.Path == "/api/2.0/click/purchases/foo.example/" {
         return `
             {
                 "open_id": "https://login.ubuntu.com/+id/open_id",
                 "package_name": "foo.example",
                 "refundable_until": null,
+                "state": "Complete"
+            }
+        `, nil
+    }
+
+    // A refundable app purchase
+    if parsed.Path == "/api/2.0/click/purchases/bar.example/" {
+        return `
+            {
+                "open_id": "https://login.ubuntu.com/+id/open_id",
+                "package_name": "bar.example",
+                "refundable_until": "2099-12-31T23:59:59Z",
                 "state": "Complete"
             }
         `, nil

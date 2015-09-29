@@ -141,7 +141,7 @@ def store_purchase_item(store, sku):
             item = Item(sku)
             item.bus_properties = {
                 'state': 'purchased',
-                'refund_timeout': dbus.UInt64(time.time() + 15*60),
+                'refundable_until': dbus.UInt64(time.time() + 15*60),
                 'package_name': sku,
             }
             store.items[sku] = item
