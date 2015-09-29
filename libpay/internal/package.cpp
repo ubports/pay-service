@@ -270,8 +270,8 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         else if (!g_strcmp0(key, "state"))
         {
             auto state = g_variant_get_string(value, nullptr);
-            if (!g_strcmp0(state, "purchased") || !g_strcmp0(state, "approved")
-                || !g_strcmp0(state, "Complete"))
+            if (!g_strcmp0(state, "purchased") ||
+                !g_strcmp0(state, "approved"))
             {
                 item->set_status(PAY_PACKAGE_ITEM_STATUS_PURCHASED);
             }
@@ -442,7 +442,7 @@ bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
                                                  G_VARIANT_TYPE_UINT64);
                 if (rv != nullptr)
                 {
-                    refund_timeout = (uint64_t)g_variant_get_uint64(rv);
+                    refund_timeout = g_variant_get_uint64(rv);
                     g_variant_unref(rv);
                 }
                 static_cast<Package*>(gself)->statusChanged(sku, status, refund_timeout);
