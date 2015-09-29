@@ -188,7 +188,7 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
                 details := parseItemMap(itemList[index].(map[string]interface{}))
                 details["requested_device"] = dbus.MakeVariant(
                     purchaseMap["requested_device"])
-                details["purchased_id"] = dbus.MakeVariant(
+                details["purchase_id"] = dbus.MakeVariant(
                     uint64(purchaseMap["id"].(float64)))
 
                 // FIXME: parse timestamps and add them here too
