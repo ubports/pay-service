@@ -174,6 +174,23 @@ func (client *FakeWebClient) Call(iri string, method string,
         }`, nil
     }
 
+    // Details for the unlockable item
+    if parsed.Path == "/packages/foo.example/items/by-sku/unlockable/" {
+        return `
+        {
+            "id": 2,
+            "sku": "unlockable",
+            "title": "Item 2",
+            "description": "Item 2 Description",
+            "icon": "http://example.com/icons/item2.png",
+            "type": "unlockable",
+            "state": "approved",
+            "_links": {
+                "self": {"href": "/packages/app.example/items/1"}
+            }
+        }`, nil
+    }
+
     // Acknowledge the consumable item
     if parsed.Path == "/packages/foo.example/items/1/" && method == "PUT" {
         return `

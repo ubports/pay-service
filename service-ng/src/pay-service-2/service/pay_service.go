@@ -76,40 +76,33 @@ func (iface *PayService) AcknowledgeItem(message dbus.Message, itemName string) 
     }
 
 
-    purchases, err := iface.GetPurchasedItems(message)
+    item, err := iface.GetItem(message, itemName)
     if err != nil {
         return nil, dbus.NewError(
-            fmt.Sprintf("Unable to find item '%s': %s", packageName, err), nil)
+            fmt.Sprintf("Unable to find item '%s' for package '%s': %s",
+                itemName, packageName, err), nil)
     }
 
-    for x := range purchases {
-        sku := purchases[x]["sku"].Value().(string)
-        if sku == itemName {
-            // BUG: golang json is parsing all numberas as floats :(
-            id := int64(purchases[x]["id"].Value().(float64))
-            idString := fmt.Sprintf("%d", id)
+    // BUG: golang json is parsing all numberas as floats :(
+    id := int64(item["id"].Value().(float64))
+    idString := fmt.Sprintf("%d", id)
 
-            // To set any extra headers we need (signature, accept, etc)
-            headers := make(http.Header)
+    // To set any extra headers we need (signature, accept, etc)
+    headers := make(http.Header)
 
-            url := getPayInventoryUrl() + "/" + packageName + "/items/" +
-                idString + "/"
+    url := getPayInventoryUrl() + "/" + packageName + "/items/" +
+        idString + "/"
 
-            body := `{"state": "acknowledged"}`
-            headers.Set("Content-Type", "application/json")
+    body := `{"state": "acknowledged"}`
+    headers.Set("Content-Type", "application/json")
 
-            data, err := iface.getDataForUrl(url, "PUT", headers, body)
-            if err != nil {
-                return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
-            }
-
-            item := parseItemMap(data.(map[string]interface{}))
-            return item, nil
-        }
+    data, neterr := iface.getDataForUrl(url, "PUT", headers, body)
+    if neterr != nil {
+        return nil, dbus.NewError(fmt.Sprintf("%s", neterr), nil)
     }
 
-    return nil, dbus.NewError(
-        fmt.Sprintf("Unable to find item '%s'", packageName), nil)
+    details := parseItemMap(data.(map[string]interface{}))
+    return details, nil
 }
 
 func (iface *PayService) GetItem(message dbus.Message, itemName string) (ItemDetails, *dbus.Error) {
