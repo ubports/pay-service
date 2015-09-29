@@ -442,7 +442,7 @@ bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
                                                  G_VARIANT_TYPE_UINT64);
                 if (rv != nullptr)
                 {
-                    refund_timeout = (uint64_t)g_variant_get_uint64(rv);
+                    refund_timeout = g_variant_get_uint64(rv);
                     g_variant_unref(rv);
                 }
                 static_cast<Package*>(gself)->statusChanged(sku, status, refund_timeout);
