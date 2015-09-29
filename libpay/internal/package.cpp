@@ -270,8 +270,8 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         else if (!g_strcmp0(key, "state"))
         {
             auto state = g_variant_get_string(value, nullptr);
-            if (!g_strcmp0(state, "purchased") || !g_strcmp0(state, "approved")
-                || !g_strcmp0(state, "Complete"))
+            if (!g_strcmp0(state, "purchased") ||
+                !g_strcmp0(state, "approved"))
             {
                 item->set_status(PAY_PACKAGE_ITEM_STATUS_PURCHASED);
             }

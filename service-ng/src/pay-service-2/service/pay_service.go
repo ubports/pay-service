@@ -140,6 +140,12 @@ func (iface *PayService) GetItem(message dbus.Message, itemName string) (ItemDet
     }
 
     item := parseItemMap(data.(map[string]interface{}))
+
+    // Normalize the state for apps to "purchased" instead of "Complete"
+    if item["state"].Value().(string) == "Complete" {
+        item["state"] = dbus.MakeVariant("purchased")
+    }
+
     return item, nil
 }
 
