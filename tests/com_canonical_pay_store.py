@@ -215,7 +215,7 @@ def main_add_store(mock, package_name, items):
     store.acknowledge_item = store_acknowledge_item
     store.AddMethods(STORE_IFACE, [
                        ('AddItem', 'a{sv}', '', 'self.add_item(self, args[0])'),
-                       ('SetItem', 'a{sv}', '', 'self.set_item(self, args[0])'),
+                       ('SetItem', 'sa{sv}', '', 'self.set_item(self, args[0], args[1])'),
                        ('GetItem', 's', 'a{sv}', 'ret = self.get_item(self, args[0])'),
                        ('GetPurchasedItems', '', 'aa{sv}', 'ret = self.get_purchased_items(self)'),
                        ('PurchaseItem', 's', 'a{sv}', 'ret = self.purchase_item(self, args[0])'),
@@ -268,6 +268,6 @@ def load(main, parameters):
     main.AddMethods(MAIN_IFACE, [
         ('AddStore', 'saa{sv}', '', 'self.add_store(self, args[0], args[1])'),
         ('AddItem', 'sa{sv}', '', 'self.add_item(self, args[0], args[1])'),
-        ('SetItem', 'a{sv}', '', 'self.set_item(self, args[0])'),
+        ('SetItem', 'sa{sv}', '', 'self.set_item(self, args[0], args[1])'),
         ('GetStores', '', 'as', 'ret = self.get_stores(self)'),
     ])
