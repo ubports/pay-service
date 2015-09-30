@@ -243,7 +243,7 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
     g_variant_iter_init(&iter, item_properties);
     while (g_variant_iter_loop(&iter, "{sv}", &key, &value))
     {
-        if (!g_strcmp0(key, "acknowledged_time"))
+        if (!g_strcmp0(key, "acknowledged_timestamp"))
         {
             item->set_acknowledged_time(g_variant_get_uint64(value));
         }
@@ -259,7 +259,7 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         {
             item->set_price(g_variant_get_string(value, nullptr));
         }
-        else if (!g_strcmp0(key, "purchased_time"))
+        else if (!g_strcmp0(key, "purchased_time") || !g_strcmp0(key, "completed_timestamp"))
         {
             item->set_purchased_time(g_variant_get_uint64(value));
         }
