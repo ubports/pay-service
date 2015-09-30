@@ -61,7 +61,6 @@ class Item:
         'completed_timestamp': dbus.UInt64(0.0),
         'description': dbus.String('The is a default item'),
         'price': dbus.String('$1'),
-        'purchased_time': dbus.UInt64(0.0),
         'sku': dbus.String('default_item'),
         'state': dbus.String('available'),
         'type': dbus.String('unlockable'),

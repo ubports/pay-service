@@ -22,6 +22,8 @@
 #include <libpay/pay-item.h>
 #include <libpay/pay-package.h>
 
+#include <map>
+
 static constexpr char const * BUS_NAME {"com.canonical.payments"};
 static constexpr char const * GAME_NAME {"SwordsAndStacktraces.developer"};
 
@@ -79,39 +81,79 @@ protected:
         g_clear_object(&m_test_bus);
     }
 
+    struct IAP {
+        uint64_t completed_timestamp;
+        uint64_t acknowledged_timestamp;
+        int64_t purchase_id;
+        const char* state;
+
+        const char* price;
+        PayItemType type;
+
+        const char* sku;
+        const char* title;
+        const char* description;
+    };
+
+    void CompareItemToIAP(const IAP& expected, const PayItem* item)
+    {
+        EXPECT_TRUE(item != nullptr);
+        EXPECT_EQ(expected.acknowledged_timestamp, pay_item_get_acknowledged_time(item));
+        EXPECT_EQ(expected.completed_timestamp, pay_item_get_purchased_time(item));
+        EXPECT_STREQ(expected.description, pay_item_get_description(item));
+        EXPECT_STREQ(expected.price, pay_item_get_price(item));
+        EXPECT_STREQ(expected.sku, pay_item_get_sku(item));
+        EXPECT_STREQ(expected.title, pay_item_get_title(item));
+        EXPECT_EQ(expected.type, pay_item_get_type(item));
+    }
+
+    std::map<std::string,IAP>& get_game_iaps()
+    {
+        static std::map<std::string,IAP> items;
+
+        if (items.empty())
+        {
+            const uint64_t now = time(nullptr);
+            const IAP tmp[] = {
+                {      0,     0,  -1, "available", "$1", PAY_ITEM_TYPE_UNLOCKABLE, "sword",  "Sword",  "A Sword." },
+                { now-10,     0, 100, "approved",  "$1", PAY_ITEM_TYPE_UNLOCKABLE, "shield", "Shield", "A Shield." },
+                { now-10, now-9, 101, "purchased", "$1", PAY_ITEM_TYPE_UNLOCKABLE, "amulet", "Amulet", "An Amulet." }
+            };
+            for (const auto& item : tmp)
+                items[item.sku] = item;
+        }
+
+        return items;
+    }
+
     void AddGame()
     {
-        const auto now = time(nullptr);
-
-        GVariantBuilder b;
-        g_variant_builder_init(&b, G_VARIANT_TYPE_VARDICT);
-        g_variant_builder_add(&b, "{sv}", "acknowledged", g_variant_new_boolean(false));
-        g_variant_builder_add(&b, "{sv}", "acknowledged_time", g_variant_new_uint64(0));
-        g_variant_builder_add(&b, "{sv}", "description", g_variant_new_string("A Magic Sword."));
-        g_variant_builder_add(&b, "{sv}", "price", g_variant_new_string("$1"));
-        g_variant_builder_add(&b, "{sv}", "purchased_time", g_variant_new_uint64(now));
-        g_variant_builder_add(&b, "{sv}", "sku", g_variant_new_string("magic_sword"));
-        g_variant_builder_add(&b, "{sv}", "state", g_variant_new_string("approved"));
-        g_variant_builder_add(&b, "{sv}", "title", g_variant_new_string("Magic Sword"));
-        g_variant_builder_add(&b, "{sv}", "type", g_variant_new_string("unlockable"));
-        auto sword_props = g_variant_builder_end(&b);
-
-        g_variant_builder_init(&b, G_VARIANT_TYPE_VARDICT);
-        g_variant_builder_add(&b, "{sv}", "acknowledged", g_variant_new_boolean(false));
-        g_variant_builder_add(&b, "{sv}", "acknowledged_time", g_variant_new_uint64(0));
-        g_variant_builder_add(&b, "{sv}", "description", g_variant_new_string("A Magic Shield."));
-        g_variant_builder_add(&b, "{sv}", "price", g_variant_new_string("$1"));
-        g_variant_builder_add(&b, "{sv}", "purchased_time", g_variant_new_uint64(0));
-        g_variant_builder_add(&b, "{sv}", "sku", g_variant_new_string("magic_shield"));
-        g_variant_builder_add(&b, "{sv}", "state", g_variant_new_string("available"));
-        g_variant_builder_add(&b, "{sv}", "title", g_variant_new_string("Magic Shield"));
-        g_variant_builder_add(&b, "{sv}", "type", g_variant_new_string("unlockable"));
-        auto shield_props = g_variant_builder_end(&b);
-
-        g_variant_builder_init(&b, G_VARIANT_TYPE("aa{sv}"));
-        g_variant_builder_add_value(&b, sword_props);
-        g_variant_builder_add_value(&b, shield_props);
-        auto props = g_variant_builder_end(&b);
+        GVariantBuilder bitems;
+        g_variant_builder_init(&bitems, G_VARIANT_TYPE("aa{sv}"));
+        for(const auto it : get_game_iaps()) {
+            const auto& item = it.second;
+            GVariantBuilder bitem;
+            g_variant_builder_init(&bitem, G_VARIANT_TYPE_VARDICT);
+            struct {
+                const char* key;
+                GVariant* value;
+            } entries[] = {
+                { "completed_timestamp", g_variant_new_uint64(item.completed_timestamp) },
+                { "completed_timestamp", g_variant_new_uint64(item.completed_timestamp) },
+                { "acknowledged_timestamp", g_variant_new_uint64(item.acknowledged_timestamp) },
+                { "description", g_variant_new_string(item.description) },
+                { "price", g_variant_new_string(item.price) },
+                // { "purchase_id", g_variant_new_uint64(item.purchase_id) },
+                { "sku", g_variant_new_string(item.sku) },
+                { "state", g_variant_new_string(item.state) },
+                { "title", g_variant_new_string(item.title) },
+                { "type", g_variant_new_string(item.type==PAY_ITEM_TYPE_UNLOCKABLE ? "unlockable" : "consumable") }
+            };
+            for (const auto& entry : entries)
+                g_variant_builder_add(&bitem, "{sv}", entry.key, entry.value);
+            g_variant_builder_add_value(&bitems, g_variant_builder_end(&bitem));
+        }
+        auto props = g_variant_builder_end(&bitems);
 
         GVariant* args[] = { g_variant_new_string(GAME_NAME), props };
 
@@ -165,18 +207,15 @@ TEST_F(IapTests, GetItem)
 
     auto package = pay_package_new(GAME_NAME);
 
-    auto item = pay_package_get_item(package, "magic_sword");
-    EXPECT_TRUE(item != nullptr);
-    EXPECT_FALSE(pay_item_get_acknowledged(item));
-    EXPECT_STREQ("A Magic Sword.", pay_item_get_description(item));
-    EXPECT_STREQ("magic_sword", pay_item_get_sku(item));
-    EXPECT_STREQ("$1", pay_item_get_price(item));
-    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, pay_item_get_status(item));
-    EXPECT_STREQ("Magic Sword", pay_item_get_title(item));
-    EXPECT_EQ(PAY_ITEM_TYPE_UNLOCKABLE, pay_item_get_type(item));
+    for(const auto it : get_game_iaps())
+    {
+        const auto& iap = it.second;
+        auto item = pay_package_get_item(package, iap.sku);
+        EXPECT_TRUE(item != nullptr);
+        CompareItemToIAP(iap, item);
+        pay_item_unref(item);
+    }
 
-    // cleanup
-    pay_item_unref(item);
     pay_package_delete(package);
 }
 
@@ -184,29 +223,29 @@ TEST_F(IapTests, GetPurchasedItems)
 {
     AddGame();
 
+    // calculate what we expect
+    std::map<std::string,IAP> purchased;
+    for(const auto it : get_game_iaps()) {
+        const auto& iap = it.second;
+        if (!g_strcmp0(iap.state,"approved") || !g_strcmp0(iap.state,"purchased"))
+            purchased[iap.sku] = iap;
+    }
+
     auto package = pay_package_new(GAME_NAME);
     auto items = pay_package_get_purchased_items(package);
 
     // test the results
-    size_t n = 0;
-    while (items && items[n]) {
-        ++n;
+    size_t i = 0;
+    while (items && items[i]) {
+        auto& item = items[i];
+        auto it = purchased.find(pay_item_get_sku(item));
+        ASSERT_NE(it, purchased.end());
+        CompareItemToIAP(it->second, item);
+        purchased.erase(it);
+        pay_item_unref(item);
+        ++i;
     }
-
-    ASSERT_EQ(1, n);
-    auto item = items[0];
-    EXPECT_FALSE(pay_item_get_acknowledged(item));
-    EXPECT_STREQ("A Magic Sword.", pay_item_get_description(item));
-    EXPECT_STREQ("magic_sword", pay_item_get_sku(item));
-    EXPECT_STREQ("$1", pay_item_get_price(item));
-    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, pay_item_get_status(item));
-    EXPECT_STREQ("Magic Sword", pay_item_get_title(item));
-    EXPECT_EQ(PAY_ITEM_TYPE_UNLOCKABLE, pay_item_get_type(item));
-
-    // cleanup
-    for (size_t i=0; i<n; ++i) {
-        pay_item_unref(items[i]);
-    }
+    EXPECT_TRUE(purchased.empty());
 
     free(items);
     pay_package_delete(package);
@@ -217,7 +256,9 @@ TEST_F(IapTests, PurchaseItem)
     AddGame();
 
     auto package = pay_package_new(GAME_NAME);
-    const char* sku = "magic_shield";
+    const char* sku = "sword";
+    // precondition: confirm the item being tested isn't purchased yet
+    ASSERT_STREQ("available", get_game_iaps()[sku].state);
     const auto expected_status = PAY_PACKAGE_ITEM_STATUS_PURCHASED;
 
     // install a status observer
@@ -255,7 +296,9 @@ TEST_F(IapTests, AcknowledgeItem)
     AddGame();
 
     auto package = pay_package_new(GAME_NAME);
-    const char* sku = "magic_sword";
+    const char* sku = "shield";
+    // precondition: confirm the item being tested is approved but not acked
+    ASSERT_STREQ("approved", get_game_iaps()[sku].state);
 
     // install a status observer
     StatusObserverData data;
@@ -278,7 +321,7 @@ TEST_F(IapTests, AcknowledgeItem)
     // now get the PayItem and test it
     auto item = pay_package_get_item(package, sku);
     EXPECT_STREQ(sku, pay_item_get_sku(item));
-    EXPECT_TRUE(pay_item_get_acknowledged(item));
+    EXPECT_NE(0, pay_item_get_acknowledged_time(item));
     g_clear_pointer(&item, pay_item_unref);
 
     // cleanup
