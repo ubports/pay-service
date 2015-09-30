@@ -93,7 +93,7 @@ def store_add_item(store, properties):
     if sku in store.items:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} already has item {1}'.format(store.store_name, sku))
+            'store {0} already has item {1}'.format(store.name, sku))
 
     item = Item(sku)
     store.items[sku] = item
@@ -108,7 +108,7 @@ def store_set_item(store, sku, properties):
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.store_name, sku))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 
 def store_get_item(store, sku):
@@ -124,7 +124,7 @@ def store_get_item(store, sku):
         else:
             raise dbus.exceptions.DBusException(
                 ERR_INVAL,
-                'store {0} has no such item {1}'.format(store.store_name, sku))
+                'store {0} has no such item {1}'.format(store.name, sku))
 
 
 def store_get_purchased_items(store):
@@ -158,7 +158,7 @@ def store_purchase_item(store, sku):
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.store_name, sku))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 
 def store_refund_item(store, sku):
@@ -193,7 +193,7 @@ def store_acknowledge_item(store, sku):
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.store_name, sku))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 #
 #  Main 'Storemock' Obj
@@ -233,7 +233,7 @@ def main_get_stores(mock):
     names = []
     for key, val in mockobject.objects.items():
         try:
-            names.append(val.store_name)
+            names.append(val.name)
         except AttributeError:
             pass
     return dbus.Array(names, signature='s', variant_level=1)
