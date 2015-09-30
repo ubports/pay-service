@@ -44,11 +44,11 @@ pay_item_unref (PayItem* item)
 ***/
 
 time_t
-pay_item_get_acknowledged_time (const PayItem* item)
+pay_item_get_acknowledged_timestamp (const PayItem* item)
 {
     g_return_val_if_fail(item != nullptr, 0);
 
-    return item->acknowledged_time();
+    return item->acknowledged_timestamp();
 }
 
 const char*
@@ -76,11 +76,11 @@ pay_item_get_price (const PayItem* item)
 }
 
 time_t
-pay_item_get_purchased_time (const PayItem* item)
+pay_item_get_completed_timestamp (const PayItem* item)
 {
     g_return_val_if_fail(item != nullptr, 0);
 
-    return item->purchased_time();
+    return item->completed_timestamp();
 }
 
 PayPackageItemStatus

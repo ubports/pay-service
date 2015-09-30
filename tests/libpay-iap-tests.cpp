@@ -98,8 +98,8 @@ protected:
     void CompareItemToIAP(const IAP& expected, const PayItem* item)
     {
         EXPECT_TRUE(item != nullptr);
-        EXPECT_EQ(expected.acknowledged_timestamp, pay_item_get_acknowledged_time(item));
-        EXPECT_EQ(expected.completed_timestamp, pay_item_get_purchased_time(item));
+        EXPECT_EQ(expected.acknowledged_timestamp, pay_item_get_acknowledged_timestamp(item));
+        EXPECT_EQ(expected.completed_timestamp, pay_item_get_completed_timestamp(item));
         EXPECT_STREQ(expected.description, pay_item_get_description(item));
         EXPECT_STREQ(expected.price, pay_item_get_price(item));
         EXPECT_STREQ(expected.sku, pay_item_get_sku(item));
@@ -285,7 +285,7 @@ TEST_F(IapTests, PurchaseItem)
     auto item = pay_package_get_item(package, sku);
     EXPECT_STREQ(sku, pay_item_get_sku(item));
     EXPECT_EQ(expected_status, pay_item_get_status(item));
-    EXPECT_NE(0, pay_item_get_purchased_time(item));
+    EXPECT_NE(0, pay_item_get_completed_timestamp(item));
     ASSERT_NE(0, pay_item_get_purchase_id(item));
     g_clear_pointer(&item, pay_item_unref);
 
@@ -323,7 +323,7 @@ TEST_F(IapTests, AcknowledgeItem)
     // now get the PayItem and test it
     auto item = pay_package_get_item(package, sku);
     EXPECT_STREQ(sku, pay_item_get_sku(item));
-    EXPECT_NE(0, pay_item_get_acknowledged_time(item));
+    EXPECT_NE(0, pay_item_get_acknowledged_timestamp(item));
     ASSERT_NE(0, pay_item_get_purchase_id(item));
     g_clear_pointer(&item, pay_item_unref);
 
