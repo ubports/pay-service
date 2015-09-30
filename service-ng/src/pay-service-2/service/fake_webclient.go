@@ -166,6 +166,10 @@ func (client *FakeWebClient) Call(iri string, method string,
             "title": "Item 1 Title",
             "description": "Item 1 Description",
             "icon": "http://example.com/icons/item1.png",
+            "prices": {
+                "USD": "1.99",
+                "GBP": "0.99"
+            },
             "type": "consumable",
             "state": "available",
             "_links": {

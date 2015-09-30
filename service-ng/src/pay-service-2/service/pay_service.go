@@ -83,8 +83,7 @@ func (iface *PayService) AcknowledgeItem(message dbus.Message, itemName string) 
                 itemName, packageName, err), nil)
     }
 
-    // BUG: golang json is parsing all numbers as floats :(
-    id := int64(item["id"].Value().(float64))
+    id := item["id"].Value().(int64)
     idString := fmt.Sprintf("%d", id)
 
     // To set any extra headers we need (signature, accept, etc)
@@ -276,10 +275,18 @@ func (iface *PayService) getDataForUrl(iri string, method string, headers http.H
 func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
     details := make(ItemDetails)
     for k, v := range itemMap {
-        // BUG: Unfortunately golang's json parses all numbers as float64
         switch vv := v.(type) {
-        case string, bool, int64, float64:
+        case string, bool, int64:
             details[k] = dbus.MakeVariant(vv)
+        case float64:
+            // BUG: golang's json module parses all numbers as float64
+            if k == "id" {
+                details[k] = dbus.MakeVariant(int64(vv))
+            } else {
+                details[k] = dbus.MakeVariant(vv)
+            }
+        case map[string]interface{}:
+            details[k] = dbus.MakeVariant(parseItemMap(vv))
         case nil:
             // If refundable_until is null, set it to empty string instead
             if k == "refundable_until" {
@@ -301,6 +308,42 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
     if pkgOk {
         details["sku"] = pkgName
         delete(details, "package_name")
+    }
+
+    // Parse the acknowledged_timestamp string to a unix timestamp
+    acknowledged, ackOk := details["acknowledged_timestamp"]
+    if ackOk {
+        if acknowledged.Value().(string) == "" {
+            details["acknowledged_timestamp"] = dbus.MakeVariant(uint64(0))
+        } else {
+            acknowledgedTime, ackerr := time.Parse(time.RFC3339,
+                acknowledged.Value().(string))
+            if ackerr != nil {
+                fmt.Printf("ERROR - Unable to parse acknowledged time '%s': %s\n",
+                    acknowledged, ackerr)
+            } else {
+                details["acknowledged_timestamp"] = dbus.MakeVariant(
+                    uint64(acknowledgedTime.Unix()))
+            }
+        }
+    }
+
+    // Parse the completed_timestamp string to a unix timestamp
+    completed, compOk := details["completed_timestamp"]
+    if compOk {
+        if completed.Value().(string) == "" {
+            details["completed_timestamp"] = dbus.MakeVariant(uint64(0))
+        } else {
+            completedTime, compErr := time.Parse(time.RFC3339,
+                completed.Value().(string))
+            if compErr != nil {
+                fmt.Printf("ERROR - Unable to parse completed time '%s': %s\n",
+                    completed, compErr)
+            } else {
+                details["completed_timestamp"] = dbus.MakeVariant(
+                    uint64(completedTime.Unix()))
+            }
+        }
     }
 
     // Parse the refundable_until string to a unix timestamp

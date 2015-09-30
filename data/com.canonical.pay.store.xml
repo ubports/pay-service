@@ -22,6 +22,7 @@
              description: string, description of the item
              id: int64, numeric identifier of the item
              price: string, the locale/currency encoded price
+             prices: dictionary of {string: float64}, currency code and price
              purchase_id: uint64, numeric identifier of the purchase
              title: string, the title of the item
              type: string, one of '[unlockable', 'consumable']
