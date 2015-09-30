@@ -37,7 +37,6 @@ class Item
     PayItemType m_type = PAY_ITEM_TYPE_UNKNOWN;
     PayPackageItemStatus m_status = PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
     int m_ref_count = 1;
-    bool m_acknowledged = false;
     time_t m_acknowledged_time = 0;
     time_t m_purchased_time = 0;
 
@@ -56,7 +55,6 @@ public:
 
     /** accessors **/
 
-    bool acknowledged() const {return m_acknowledged;}
     time_t acknowledged_time() const {return m_acknowledged_time;}
     const std::string& description() const {return m_description;}
     const std::string& sku() const {return m_sku;}
@@ -68,7 +66,6 @@ public:
 
     /** setters **/
 
-    void set_acknowledged(bool val) {m_acknowledged = val;}
     void set_acknowledged_time(time_t val) {m_acknowledged_time = val;}
     void set_description(const std::string& val) {m_description = val;}
     void set_price(const std::string& val) {m_price = val;}

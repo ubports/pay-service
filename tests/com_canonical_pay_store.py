@@ -57,7 +57,6 @@ def build_store_path(package_name):
 
 class Item:
     __default_bus_properties = {
-        'acknowledged': dbus.Boolean(False),
         'acknowledged_time': dbus.UInt64(0.0),
         'description': dbus.String('The is a default item'),
         'price': dbus.String('$1'),
@@ -186,7 +185,6 @@ def store_acknowledge_item(store, sku):
 
     try:
         item = store.items[sku]
-        item.set_property('acknowledged', dbus.Boolean(True))
         item.set_property('acknowledged_time', dbus.UInt64(time.time()))
         return item.serialize()
     except KeyError:

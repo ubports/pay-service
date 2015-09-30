@@ -43,14 +43,6 @@ pay_item_unref (PayItem* item)
 ****  Properties
 ***/
 
-bool
-pay_item_get_acknowledged (const PayItem* item)
-{
-    g_return_val_if_fail(item != nullptr, false);
-
-    return item->acknowledged();
-}
-
 time_t
 pay_item_get_acknowledged_time (const PayItem* item)
 {

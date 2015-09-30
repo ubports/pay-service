@@ -36,8 +36,6 @@ void                 pay_item_ref                   (PayItem*);
 
 void                 pay_item_unref                 (PayItem*);
 
-bool                 pay_item_get_acknowledged      (const PayItem* item);
-
 time_t               pay_item_get_acknowledged_time (const PayItem* item);
 
 const char*          pay_item_get_description       (const PayItem* item);
