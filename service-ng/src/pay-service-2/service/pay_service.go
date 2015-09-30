@@ -83,7 +83,7 @@ func (iface *PayService) AcknowledgeItem(message dbus.Message, itemName string) 
                 itemName, packageName, err), nil)
     }
 
-    // BUG: golang json is parsing all numberas as floats :(
+    // BUG: golang json is parsing all numbers as floats :(
     id := int64(item["id"].Value().(float64))
     idString := fmt.Sprintf("%d", id)
 

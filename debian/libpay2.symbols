@@ -1,9 +1,9 @@
 libpay.so.2.0.0 libpay2 #MINVER#
- pay_item_get_acknowledged@Base 0replaceme
- pay_item_get_acknowledged_time@Base 0replaceme
+ pay_item_get_purchase_id@Base 0replaceme
+ pay_item_get_acknowledged_timestamp@Base 0replaceme
  pay_item_get_description@Base 0replaceme
  pay_item_get_price@Base 0replaceme
- pay_item_get_purchased_time@Base 0replaceme
+ pay_item_get_completed_timestamp@Base 0replaceme
  pay_item_get_sku@Base 0replaceme
  pay_item_get_status@Base 0replaceme
  pay_item_get_title@Base 0replaceme

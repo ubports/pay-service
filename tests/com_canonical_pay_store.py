@@ -57,11 +57,11 @@ def build_store_path(package_name):
 
 class Item:
     __default_bus_properties = {
-        'acknowledged': dbus.Boolean(False),
-        'acknowledged_time': dbus.UInt64(0.0),
+        'acknowledged_timestamp': dbus.UInt64(0.0),
+        'completed_timestamp': dbus.UInt64(0.0),
         'description': dbus.String('The is a default item'),
         'price': dbus.String('$1'),
-        'purchased_time': dbus.UInt64(0.0),
+        'purchase_id': dbus.UInt64(0.0),
         'sku': dbus.String('default_item'),
         'state': dbus.String('available'),
         'type': dbus.String('unlockable'),
@@ -93,7 +93,7 @@ def store_add_item(store, properties):
     if sku in store.items:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} already has item {1}'.format(store.store_name, sku))
+            'store {0} already has item {1}'.format(store.name, sku))
 
     item = Item(sku)
     store.items[sku] = item
@@ -108,7 +108,7 @@ def store_set_item(store, sku, properties):
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.store_name, sku))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 
 def store_get_item(store, sku):
@@ -124,7 +124,7 @@ def store_get_item(store, sku):
         else:
             raise dbus.exceptions.DBusException(
                 ERR_INVAL,
-                'store {0} has no such item {1}'.format(store.store_name, sku))
+                'store {0} has no such item {1}'.format(store.name, sku))
 
 
 def store_get_purchased_items(store):
@@ -151,12 +151,14 @@ def store_purchase_item(store, sku):
         if sku != 'cancel':
             item = store.items[sku]
             item.set_property('state', 'approved')
-            item.set_property('purchased_time', dbus.UInt64(time.time()))
+            item.set_property('purchase_id', dbus.UInt64(store.next_purchase_id))
+            item.set_property('completed_timestamp', dbus.UInt64(time.time()))
+            store.next_purchase_id += 1
         return store_get_item(store, sku)
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.store_name, sku))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 
 def store_refund_item(store, sku):
@@ -186,13 +188,12 @@ def store_acknowledge_item(store, sku):
 
     try:
         item = store.items[sku]
-        item.set_property('acknowledged', dbus.Boolean(True))
-        item.set_property('acknowledged_time', dbus.UInt64(time.time()))
+        item.set_property('acknowledged_timestamp', dbus.UInt64(time.time()))
         return item.serialize()
     except KeyError:
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
-            'store {0} has no such item {1}'.format(store.store_name, sku))
+            'store {0} has no such item {1}'.format(store.name, sku))
 
 #
 #  Main 'Storemock' Obj
@@ -205,6 +206,7 @@ def main_add_store(mock, package_name, items):
     store = mockobject.objects[path]
     store.name = package_name
     store.items = {}
+    store.next_purchase_id = 1
 
     store.add_item = store_add_item
     store.set_item = store_set_item
@@ -231,7 +233,7 @@ def main_get_stores(mock):
     names = []
     for key, val in mockobject.objects.items():
         try:
-            names.append(val.store_name)
+            names.append(val.name)
         except AttributeError:
             pass
     return dbus.Array(names, signature='s', variant_level=1)
