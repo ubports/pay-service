@@ -20,6 +20,7 @@
 
 #include <libpay/pay-types.h>
 
+#include <stdint.h> /* uint64_t */
 #include <time.h> /* time_t */
 
 #pragma GCC visibility push(default)
@@ -51,6 +52,8 @@ PayPackageItemStatus pay_item_get_status            (const PayItem* item);
 const char*          pay_item_get_title             (const PayItem* item);
 
 PayItemType          pay_item_get_type              (const PayItem* item);
+
+uint64_t             pay_item_get_purchase_id       (const PayItem* item);
 
 
 #ifdef __cplusplus

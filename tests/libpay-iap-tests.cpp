@@ -84,7 +84,7 @@ protected:
     struct IAP {
         uint64_t completed_timestamp;
         uint64_t acknowledged_timestamp;
-        int64_t purchase_id;
+        uint64_t purchase_id;
         const char* state;
 
         const char* price;
@@ -115,7 +115,7 @@ protected:
         {
             const uint64_t now = time(nullptr);
             const IAP tmp[] = {
-                {      0,     0,  -1, "available", "$1", PAY_ITEM_TYPE_UNLOCKABLE, "sword",  "Sword",  "A Sword." },
+                {      0,     0,   0, "available", "$1", PAY_ITEM_TYPE_UNLOCKABLE, "sword",  "Sword",  "A Sword." },
                 { now-10,     0, 100, "approved",  "$1", PAY_ITEM_TYPE_UNLOCKABLE, "shield", "Shield", "A Shield." },
                 { now-10, now-9, 101, "purchased", "$1", PAY_ITEM_TYPE_UNLOCKABLE, "amulet", "Amulet", "An Amulet." }
             };
@@ -143,7 +143,7 @@ protected:
                 { "acknowledged_timestamp", g_variant_new_uint64(item.acknowledged_timestamp) },
                 { "description", g_variant_new_string(item.description) },
                 { "price", g_variant_new_string(item.price) },
-                // { "purchase_id", g_variant_new_uint64(item.purchase_id) },
+                { "purchase_id", g_variant_new_uint64(item.purchase_id) },
                 { "sku", g_variant_new_string(item.sku) },
                 { "state", g_variant_new_string(item.state) },
                 { "title", g_variant_new_string(item.title) },
@@ -240,6 +240,7 @@ TEST_F(IapTests, GetPurchasedItems)
         auto& item = items[i];
         auto it = purchased.find(pay_item_get_sku(item));
         ASSERT_NE(it, purchased.end());
+        ASSERT_NE(0, pay_item_get_purchase_id(item));
         CompareItemToIAP(it->second, item);
         purchased.erase(it);
         pay_item_unref(item);
@@ -285,6 +286,7 @@ TEST_F(IapTests, PurchaseItem)
     EXPECT_STREQ(sku, pay_item_get_sku(item));
     EXPECT_EQ(expected_status, pay_item_get_status(item));
     EXPECT_NE(0, pay_item_get_purchased_time(item));
+    ASSERT_NE(0, pay_item_get_purchase_id(item));
     g_clear_pointer(&item, pay_item_unref);
 
     // cleanup
@@ -322,6 +324,7 @@ TEST_F(IapTests, AcknowledgeItem)
     auto item = pay_package_get_item(package, sku);
     EXPECT_STREQ(sku, pay_item_get_sku(item));
     EXPECT_NE(0, pay_item_get_acknowledged_time(item));
+    ASSERT_NE(0, pay_item_get_purchase_id(item));
     g_clear_pointer(&item, pay_item_unref);
 
     // cleanup

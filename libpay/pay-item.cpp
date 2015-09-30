@@ -107,3 +107,11 @@ pay_item_get_type (const PayItem* item)
     return item->type();
 }
 
+uint64_t
+pay_item_get_purchase_id (const PayItem* item)
+{
+    g_return_val_if_fail(item != nullptr, 0);
+
+    return item->purchase_id();
+}
+

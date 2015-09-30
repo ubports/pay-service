@@ -61,6 +61,7 @@ class Item:
         'completed_timestamp': dbus.UInt64(0.0),
         'description': dbus.String('The is a default item'),
         'price': dbus.String('$1'),
+        'purchase_id': dbus.UInt64(0.0),
         'sku': dbus.String('default_item'),
         'state': dbus.String('available'),
         'type': dbus.String('unlockable'),
@@ -150,7 +151,9 @@ def store_purchase_item(store, sku):
         if sku != 'cancel':
             item = store.items[sku]
             item.set_property('state', 'approved')
+            item.set_property('purchase_id', dbus.UInt64(store.next_purchase_id))
             item.set_property('completed_timestamp', dbus.UInt64(time.time()))
+            store.next_purchase_id += 1
         return store_get_item(store, sku)
     except KeyError:
         raise dbus.exceptions.DBusException(
@@ -203,6 +206,7 @@ def main_add_store(mock, package_name, items):
     store = mockobject.objects[path]
     store.name = package_name
     store.items = {}
+    store.next_purchase_id = 1
 
     store.add_item = store_add_item
     store.set_item = store_set_item

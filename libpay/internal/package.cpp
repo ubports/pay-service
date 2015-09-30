@@ -263,6 +263,10 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         {
             item->set_purchased_time(g_variant_get_uint64(value));
         }
+        else if (!g_strcmp0(key, "purchase_id"))
+        {
+            item->set_purchase_id(g_variant_get_uint64(value));
+        }
         else if (!g_strcmp0(key, "state"))
         {
             auto state = g_variant_get_string(value, nullptr);
