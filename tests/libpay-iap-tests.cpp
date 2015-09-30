@@ -260,7 +260,7 @@ TEST_F(IapTests, PurchaseItem)
     const char* sku = "sword";
     // precondition: confirm the item being tested isn't purchased yet
     ASSERT_STREQ("available", get_game_iaps()[sku].state);
-    const auto expected_status = PAY_PACKAGE_ITEM_STATUS_PURCHASED;
+    const auto expected_status = PAY_PACKAGE_ITEM_STATUS_APPROVED;
 
     // install a status observer
     StatusObserverData data;
