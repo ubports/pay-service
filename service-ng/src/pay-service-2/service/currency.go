@@ -25,8 +25,23 @@ package service
 import "C"
 
 import (
+    "os"
     "unsafe"
 )
+
+const (
+    defaultCurrency = "USD"
+)
+
+
+var currencySymbolMap = map[string]string {
+    "CNY": "RMB",
+    "EUR": "€",
+    "GBP": "₤",
+    "HKD": "HK$",
+    "TWD": "TW$",
+    "USD": "US$",
+}
 
 
 func CurrencyString(price float64, symbol string) (string) {
@@ -34,5 +49,42 @@ func CurrencyString(price float64, symbol string) (string) {
     defer C.free(unsafe.Pointer(symbolCstring))
 
     result := C.toCurrencyString(C.double(price), symbolCstring)
+    defer C.free(unsafe.Pointer(result))
+
     return C.GoString(result)
+}
+
+func IsSupportedCurrency(currencyCode string) (bool) {
+    _, symbolOk := currencySymbolMap[currencyCode]
+    return symbolOk
+}
+
+func SymbolForCurrency(currencyCode string) (string) {
+    if IsSupportedCurrency(currencyCode) {
+        return currencySymbolMap[currencyCode]
+    }
+    return currencyCode
+}
+
+func currencyInValidCurrencies(currency string, currencies []string) (bool) {
+    for _, b := range currencies {
+        if b == currency {
+            return true
+        }
+    }
+    return false
+}
+
+func PreferredCurrencyCode(suggestedCurrency string, validCurrencies []string) (string) {
+    preferredCurrency := os.Getenv("U1_SEARCH_CURRENCY")
+    if preferredCurrency == "" {
+        if currencyInValidCurrencies(suggestedCurrency, validCurrencies) {
+            return suggestedCurrency
+        }
+        return defaultCurrency
+    }
+    if currencyInValidCurrencies(preferredCurrency, validCurrencies) {
+        return preferredCurrency
+    }
+    return defaultCurrency
 }
