@@ -58,6 +58,39 @@ func GetPrimaryPid(appId string) uint32 {
 	return uint32(C.ubuntu_app_launch_get_primary_pid(appIdCstring))
 }
 
+// TripletToAppId constructs an application ID from package, app, and version
+// triplet. Wildcards are allowed for the appName and version parameters.
+//
+// For the appName parameters, the wildcards are "first-listed-app",
+// "last-listed-app", and "only-listed-app." An empty string will default to
+// the first listed app.
+//
+// For the version parameter, the only wildcard is "current-user-version." An
+// empty string will default to current user version.
+func TripletToAppId(packageName string, appName string, version string) string {
+	packageNameCstring := (*C.gchar)(nil)
+	appNameCstring := (*C.gchar)(nil)
+	versionCstring := (*C.gchar)(nil)
+
+	if packageName != "" {
+		packageNameCstring = (*C.gchar)(C.CString(packageName))
+		defer C.free(unsafe.Pointer(packageNameCstring))
+	}
+
+	if appName != "" {
+		appNameCstring = (*C.gchar)(C.CString(appName))
+		defer C.free(unsafe.Pointer(appNameCstring))
+	}
+
+	if version != "" {
+		versionCstring = (*C.gchar)(C.CString(version))
+		defer C.free(unsafe.Pointer(versionCstring))
+	}
+
+	return C.GoString((*C.char)(C.ubuntu_app_launch_triplet_to_app_id(
+		packageNameCstring, appNameCstring, versionCstring)))
+}
+
 // StartSessionHelper starts an untrusted helper for a specific type of a given
 // appid running under a Mir Trusted Prompt Session. The helper's MIR_SOCKET
 // environment variable will be set appropriately so that the helper will draw
