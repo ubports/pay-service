@@ -33,6 +33,6 @@ func CurrencyString(price float64, symbol string) (string) {
     symbolCstring := C.CString(symbol)
     defer C.free(unsafe.Pointer(symbolCstring))
 
-    result := C.toCurrencyString(price, symbolCstring)
+    result := C.toCurrencyString(C.double(price), symbolCstring)
     return C.GoString(result)
 }

@@ -15,6 +15,8 @@
  *
  */
 
+#include "currency.h"
+
 #include <QLocale>
 
 char* toCurrencyString(double price, const char* symbol) {
