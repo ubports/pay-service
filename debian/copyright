@@ -26,6 +26,10 @@ Files: service-ng/src/launchpad.net/go-mir/*
 Copyright: 2015 Canonical, Ltd.
 License: LGPL-3
 
+Files: service-ng/src/launchpad.net/go-trust-store/*
+Copyright: 2015 Canonical, Ltd.
+License: LGPL-3
+
 Files: service-ng/src/launchpad.net/go-ual/*
 Copyright: 2015 Canonical, Ltd.
 License: LGPL-3
