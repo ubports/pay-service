@@ -18,6 +18,10 @@ Files: service-ng/src/github.com/ziutek/glib/*
 Copyright: 2010 Michal Derkacz
 License: BSD-3-clause
 
+Files: service-ng/src/launchpad.net/go-apparmor/*
+Copyright: 2015 Canonical, Ltd.
+License: LGPL-3
+
 Files: service-ng/src/launchpad.net/go-mir/*
 Copyright: 2015 Canonical, Ltd.
 License: LGPL-3
