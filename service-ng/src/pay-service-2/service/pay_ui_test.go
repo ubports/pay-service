@@ -82,6 +82,13 @@ func launchFakePayUi(
     payUiNewMirPromptSessionFunction = newMirPromptSessionFunction
     payUiGetPrimaryPidFunction = getPrimaryPidFunction
 
+    payUiGetAppIdFunction = func(pkg string, app string, vers string) string {
+        if app != "" && vers != "" {
+            return pkg + "_" + app + "_" + vers
+        }
+        return pkg + "_app_0.1"
+    }
+
     started := make(chan struct{})
     payUiStartSessionHelperFunction = func(a string, b mir.PromptSession,
                                            c string, d []string) string {
@@ -403,7 +410,7 @@ func TestGetAppPid(t *testing.T) {
     called := false
     payUiGetPrimaryPidFunction = func(appId string) uint32 {
         called = true
-        if appId != "foo" {
+        if appId != "foo_app_0.1" {
             t.Errorf(`appId was "%s", expected "foo"`, appId)
         }
 

@@ -39,6 +39,7 @@ const (
 
 var (
     payUiGetPrimaryPidFunction = ual.GetPrimaryPid
+    payUiGetAppIdFunction = ual.TripletToAppId
     payUiNewMirConnectionFunction = mir.NewConnection
     payUiNewMirPromptSessionFunction = mir.NewPromptSession
     payUiStartSessionHelperFunction = ual.StartSessionHelper
@@ -231,11 +232,11 @@ func getPayUiAppId() (string, error) {
 
 // getAppPid attempts to obtain the PID of the given appId. Note that the only
 // scope that is supported is the click scope.
-func getAppPid(appId string) (uint32, error) {
+func getAppPid(packageName string) (uint32, error) {
     // This has the same FIXME as pay-service: Before other scopes can use pay,
     // we'll need to figure out how to detect that they're actually scopes.
     // For now we'll only support the click-scope.
-    if appId == "click-scope" {
+    if packageName == "click-scope" {
         pids, err := Pidof("unity8-dash")
         if err != nil {
             return 0, fmt.Errorf(`Unable to get PID of "unity8-dash": %s`, err)
@@ -249,6 +250,7 @@ func getAppPid(appId string) (uint32, error) {
         // more than one)
         return pids[0], nil
     } else {
+        appId := payUiGetAppIdFunction(packageName, "", "")
         pid := payUiGetPrimaryPidFunction(appId)
         if pid == 0 {
             return 0, fmt.Errorf(
