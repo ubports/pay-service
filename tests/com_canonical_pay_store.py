@@ -189,6 +189,7 @@ def store_acknowledge_item(store, sku):
     try:
         item = store.items[sku]
         item.set_property('acknowledged_timestamp', dbus.UInt64(time.time()))
+        item.set_property('state', dbus.String('purchased'))
         return item.serialize()
     except KeyError:
         raise dbus.exceptions.DBusException(
