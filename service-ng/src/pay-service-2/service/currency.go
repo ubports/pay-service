@@ -30,6 +30,7 @@ import (
 )
 
 const (
+    SearchCurrencyEnvVar = "U1_SEARCH_CURRENCY"
     defaultCurrency = "USD"
 )
 
@@ -49,7 +50,6 @@ func CurrencyString(price float64, symbol string) (string) {
     defer C.free(unsafe.Pointer(symbolCstring))
 
     result := C.toCurrencyString(C.double(price), symbolCstring)
-    defer C.free(unsafe.Pointer(result))
 
     return C.GoString(result)
 }
@@ -66,24 +66,26 @@ func SymbolForCurrency(currencyCode string) (string) {
     return currencyCode
 }
 
-func currencyInValidCurrencies(currency string, currencies []string) (bool) {
-    for _, b := range currencies {
-        if b == currency {
+func currencyInValidCurrencies(currency string, currencies ItemDetails) (bool) {
+    for k, _ := range currencies {
+        if k == currency {
             return true
         }
     }
     return false
 }
 
-func PreferredCurrencyCode(suggestedCurrency string, validCurrencies []string) (string) {
-    preferredCurrency := os.Getenv("U1_SEARCH_CURRENCY")
+func PreferredCurrencyCode(suggestedCurrency string, validCurrencies ItemDetails) (string) {
+    preferredCurrency := os.Getenv(SearchCurrencyEnvVar)
     if preferredCurrency == "" {
-        if currencyInValidCurrencies(suggestedCurrency, validCurrencies) {
+        if (IsSupportedCurrency(suggestedCurrency) &&
+            currencyInValidCurrencies(suggestedCurrency, validCurrencies)) {
             return suggestedCurrency
         }
         return defaultCurrency
     }
-    if currencyInValidCurrencies(preferredCurrency, validCurrencies) {
+    if (IsSupportedCurrency(preferredCurrency) &&
+        currencyInValidCurrencies(preferredCurrency, validCurrencies)) {
         return preferredCurrency
     }
     return defaultCurrency

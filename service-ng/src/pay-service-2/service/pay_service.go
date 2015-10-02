@@ -26,6 +26,7 @@ import (
     "os"
     "path"
     "reflect"
+    "strconv"
     "time"
 )
 
@@ -287,6 +288,23 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
             }
         case map[string]interface{}:
             details[k] = dbus.MakeVariant(parseItemMap(vv))
+            // Get and set the "price" key too.
+            if k == "prices" {
+                // FIXME: Need to get a suggested currency from server.
+                priceMap := details[k].Value().(ItemDetails)
+                currencyCode := PreferredCurrencyCode(defaultCurrency,
+                    priceMap)
+                currencySymbol := SymbolForCurrency(currencyCode)
+                priceString := priceMap[currencyCode].Value().(string)
+                price, parseErr := strconv.ParseFloat(priceString, 32)
+                if parseErr != nil {
+                    fmt.Println("ERROR - Failed to parse price:",
+                        priceString, parseErr)
+                } else {
+                    details["price"] = dbus.MakeVariant(
+                        CurrencyString(price, currencySymbol))
+                }
+            }
         case nil:
             // If refundable_until is null, set it to empty string instead
             if k == "refundable_until" {
