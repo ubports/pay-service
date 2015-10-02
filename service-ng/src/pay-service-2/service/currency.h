@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -13,24 +13,19 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Authors:
- *   Ted Gould <ted.gould@canonical.com>
  */
 
-#ifndef TOKEN_GRABBER_NULL_HPP__
-#define TOKEN_GRABBER_NULL_HPP__ 1
+#ifndef GO_SERVICE_CURRENCY_H
+#define GO_SERVICE_CURRENCY_H
 
-#include "service/token-grabber.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class TokenGrabberNull : public TokenGrabber
-{
-public: 
-    virtual std::string signUrl (std::string url, std::string type)
-    {
-        std::string retval;
-        return retval;
-    }
-};
+char* toCurrencyString(double price, const char* symbol);
 
-#endif /* TOKEN_GRABBER_NULL_HPP__ */
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
+#endif // GO_SERVICE_CURRENCY_H

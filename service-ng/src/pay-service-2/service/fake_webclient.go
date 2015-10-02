@@ -54,6 +54,7 @@ func (client *FakeWebClient) Call(iri string, method string,
         ]`, nil
     }
 
+    // A non-refundable app purchase
     if parsed.Path == "/api/2.0/click/purchases/foo.example/" {
         return `
             {
@@ -63,6 +64,23 @@ func (client *FakeWebClient) Call(iri string, method string,
                 "state": "Complete"
             }
         `, nil
+    }
+
+    // A refundable app purchase
+    if parsed.Path == "/api/2.0/click/purchases/bar.example/" {
+        return `
+            {
+                "open_id": "https://login.ubuntu.com/+id/open_id",
+                "package_name": "bar.example",
+                "refundable_until": "2099-12-31T23:59:59Z",
+                "state": "Complete"
+            }
+        `, nil
+    }
+
+    // The refunded item should be returned as a 404
+    if parsed.Path == "/api/2.0/click/purchases/foo.example/" {
+        return "", fmt.Errorf("404 Not Found")
     }
 
     if parsed.Path == "/api/2.0/click/refunds/" && method == "POST" {
@@ -148,8 +166,29 @@ func (client *FakeWebClient) Call(iri string, method string,
             "title": "Item 1 Title",
             "description": "Item 1 Description",
             "icon": "http://example.com/icons/item1.png",
+            "prices": {
+                "USD": "1.99",
+                "GBP": "0.99"
+            },
             "type": "consumable",
             "state": "available",
+            "_links": {
+                "self": {"href": "/packages/app.example/items/1"}
+            }
+        }`, nil
+    }
+
+    // Details for the unlockable item
+    if parsed.Path == "/inventory/api/v1/packages/foo.example/items/by-sku/unlockable" {
+        return `
+        {
+            "id": 2,
+            "sku": "unlockable",
+            "title": "Item 2",
+            "description": "Item 2 Description",
+            "icon": "http://example.com/icons/item2.png",
+            "type": "unlockable",
+            "state": "approved",
             "_links": {
                 "self": {"href": "/packages/app.example/items/1"}
             }

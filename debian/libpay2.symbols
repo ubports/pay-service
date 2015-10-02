@@ -1,8 +1,22 @@
 libpay.so.2.0.0 libpay2 #MINVER#
+ pay_item_get_purchase_id@Base 0replaceme
+ pay_item_get_acknowledged_timestamp@Base 0replaceme
+ pay_item_get_description@Base 0replaceme
+ pay_item_get_price@Base 0replaceme
+ pay_item_get_completed_timestamp@Base 0replaceme
+ pay_item_get_sku@Base 0replaceme
+ pay_item_get_status@Base 0replaceme
+ pay_item_get_title@Base 0replaceme
+ pay_item_get_type@Base 0replaceme
+ pay_item_ref@Base 0replaceme
+ pay_item_unref@Base 0replaceme
  pay_package_delete@Base 0.1
+ pay_package_get_item@Base 0replaceme
+ pay_package_get_purchased_items@Base 0replaceme
  pay_package_item_is_refundable@Base 2.0.0+15.04.20150701.2
  pay_package_item_observer_install@Base 0.1
  pay_package_item_observer_uninstall@Base 0.1
+ pay_package_item_start_acknowledge@Base 0replaceme
  pay_package_item_start_purchase@Base 0.1
  pay_package_item_start_refund@Base 2.0.0+15.04.20150701.2
  pay_package_item_start_verification@Base 0.1

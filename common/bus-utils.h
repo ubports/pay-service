@@ -1,4 +1,3 @@
-/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright © 2015 Canonical Ltd.
  *
@@ -14,31 +13,22 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * Authors:
+ *   Ted Gould <ted.gould@canonical.com>
  */
 
-package service
+#ifndef PAY_BUS_UTILS_H
+#define PAY_BUS_UTILS_H
 
-import (
-    "time"
-)
+#include <string>
 
+class BusUtils
+{
+public:
 
-type FakeTimer struct {
-    resetCalled bool
-    stopCalled bool
-}
+    static std::string encodePathElement(const std::string&);
 
-func NewFakeTimer(duration time.Duration) *FakeTimer {
-    timer := &FakeTimer{}
-    return timer
-}
+    static std::string decodePathElement(const std::string&);
+};
 
-func (timer *FakeTimer) Reset(duration time.Duration) bool {
-    timer.resetCalled = true
-    return true
-}
-
-func (timer *FakeTimer) Stop() bool {
-    timer.stopCalled = true
-    return true
-}
+#endif // PAY_BUS_UTILS_H

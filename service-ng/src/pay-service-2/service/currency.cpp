@@ -1,4 +1,3 @@
-/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright © 2015 Canonical Ltd.
  *
@@ -16,29 +15,12 @@
  *
  */
 
-package service
+#include "currency.h"
 
-import (
-    "time"
-)
+#include <QLocale>
 
-
-type FakeTimer struct {
-    resetCalled bool
-    stopCalled bool
-}
-
-func NewFakeTimer(duration time.Duration) *FakeTimer {
-    timer := &FakeTimer{}
-    return timer
-}
-
-func (timer *FakeTimer) Reset(duration time.Duration) bool {
-    timer.resetCalled = true
-    return true
-}
-
-func (timer *FakeTimer) Stop() bool {
-    timer.stopCalled = true
-    return true
+char* toCurrencyString(double price, const char* symbol) {
+    QLocale locale;
+    QString result = locale.toCurrencyString(price, QString(symbol));
+    return result.toUtf8().data();
 }

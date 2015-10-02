@@ -13,29 +13,24 @@ Build-Depends: click-dev,
                golang-go.tools [amd64 armhf i386],
                google-mock,
                lcov,
-               libaccounts-qt5-dev,
                libclick-0.4-dev,
-               libcurl4-gnutls-dev,
                libdbustest1-dev,
                libglib2.0-dev,
                libgtest-dev,
                libmirclient-dev (>= 0.5),
-               libprocess-cpp-dev (>= 2.0.0),
+               libproperties-cpp-dev,
                libubuntu-app-launch2-dev (>= 0.5),
-               libubuntuoneauth-2.0-dev,
-               libjsoncpp-dev,
                python3-dbusmock,
                qt5-default,
                qtbase5-dev,
                qtdeclarative5-dev,
                sysvinit-utils,
 Standards-Version: 3.9.5
-Homepage: http://launchpad.net/pay-service
+Homepage: https://launchpad.net/pay-service
 # If you aren't a member of ~indicator-applet-developers but need to upload
 # packaging changes, just go ahead.  ~indicator-applet-developers will notice
 # and sync up the code again.
-Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/pay-service/trunk.14.04
-Vcs-Browser: http://bazaar.launchpad.net/~indicator-applet-developers/pay-service/trunk.14.04/files
+Vcs-Bzr: lp:pay-service
 
 Package: pay-service
 Architecture: any
@@ -45,7 +40,6 @@ Depends: ${misc:Depends},
          sysvinit-utils,
 Recommends: libglib2.0-bin,
             ubuntu-push-client,
-            upstart-bin,
 Description: service to allow requesting payment for an item
  Allows applications to request an item be paid for by the user.
  This requires interaction with the server backend to handle the
