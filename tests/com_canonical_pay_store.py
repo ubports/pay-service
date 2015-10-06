@@ -171,7 +171,7 @@ def store_refund_item(store, sku):
     try:
         item = store.items[sku]
         if (item.bus_properties['state'] == 'purchased' and
-            item.bus_properties['refund_tiemout'] > dbus.UInt64(time.time())):
+            item.bus_properties['refund_timeout'] > dbus.UInt64(time.time())):
             del store.items[sku]
             return dbus.Dictionary({
                 'state': 'available',
