@@ -34,16 +34,6 @@ Package::Package (const std::string& packageid)
     : id(packageid)
     , thread([]{}, [this]{storeProxy.reset();})
 {
-    // when item statuses change, update our internal cache
-    statusChanged.connect([this](const std::string& sku,
-                                 PayPackageItemStatus status,
-                                 uint64_t refundable_until)
-    {
-        g_debug("Updating itemStatusCache for '%s', timeout is: %lld",
-                sku.c_str(), refundable_until);
-        itemStatusCache[sku] = std::make_pair(status, refundable_until);
-    });
-
     /* Fire up a glib thread to create the proxies.
        Block on it here so the proxies are ready before this ctor returns */
     const auto errorStr = thread.executeOnThread<std::string>([this]()

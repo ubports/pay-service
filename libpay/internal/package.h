@@ -50,7 +50,6 @@ class Package
     std::map <std::pair<PayPackageRefundObserver, void*>, core::ScopedConnection> refundObservers;
 
     core::Signal<std::string, PayPackageItemStatus, uint64_t> statusChanged;
-    std::map <std::string, std::pair<PayPackageItemStatus, uint64_t>> itemStatusCache;
     void updateStatus(const std::string& sku, PayPackageItemStatus);
 
     GLib::ContextThread thread;
