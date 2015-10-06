@@ -256,6 +256,10 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         {
             item->set_completed_timestamp(g_variant_get_uint64(value));
         }
+        else if (!g_strcmp0(key, "refundable_until"))
+        {
+            item->set_refundable_until(g_variant_get_uint64(value));
+        }
         else if (!g_strcmp0(key, "purchase_id"))
         {
             item->set_purchase_id(g_variant_get_uint64(value));
