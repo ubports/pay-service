@@ -62,6 +62,7 @@ class Item:
         'description': dbus.String('The is a default item'),
         'price': dbus.String('$1'),
         'purchase_id': dbus.UInt64(0.0),
+        'refundable_until': dbus.UInt64(0.0),
         'sku': dbus.String('default_item'),
         'state': dbus.String('available'),
         'type': dbus.String('unlockable'),
