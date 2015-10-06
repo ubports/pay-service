@@ -533,40 +533,6 @@ Package::startAcknowledge (const std::string& sku) noexcept
     return ok;
 }
 
-template <typename BusProxy,
-          void (*startFunc)(BusProxy*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
-          gboolean (*finishFunc)(BusProxy*, GAsyncResult*, GError**)>
-bool Package::startBase (const std::shared_ptr<BusProxy>& bus_proxy, const std::string& sku) noexcept
-{
-    auto async_ready = [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
-    {
-        auto prom = static_cast<std::promise<bool>*>(user_data);
-        GError* error = nullptr;
-        finishFunc(reinterpret_cast<BusProxy*>(obj), res, &error);
-        if ((error != nullptr) && !g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-        {
-            std::cerr << "Error from service: " << error->message << std::endl;
-        }
-        prom->set_value(error == nullptr);
-        g_clear_error(&error);
-    };
-
-    std::promise<bool> promise;
-    thread.executeOnThread([this, bus_proxy, sku, &async_ready, &promise]()
-    {
-        startFunc(bus_proxy.get(),
-        sku.c_str(),
-        thread.getCancellable().get(), // GCancellable
-        async_ready,
-        &promise);
-    });
-
-    auto future = promise.get_future();
-    future.wait();
-    auto call_succeeded = future.get();
-    return call_succeeded;
-}
-
 } // namespace Internal
 
 } // namespace Pay

@@ -60,11 +60,6 @@ class Package
     template<typename Collection>
     bool removeObserver(Collection& collection, const typename Collection::key_type& key);
 
-    template <typename BusProxy,
-              void (*startFunc)(BusProxy*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
-              gboolean (*finishFunc)(BusProxy*, GAsyncResult*, GError**)>
-    bool startBase (const std::shared_ptr<BusProxy>& bus_proxy, const std::string& sku) noexcept;
-
     template<typename BusProxy,
              gboolean (*finish_func)(BusProxy*, GVariant**, GAsyncResult*, GError**)>
     bool startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
