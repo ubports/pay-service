@@ -258,3 +258,16 @@ TEST_F(LibpayPackageTests, RefundStatus)
     pay_package_delete(package);
 }
 
+TEST_F(LibpayPackageTests, ItemStatus)
+{
+    GError* error = nullptr;
+    guint callcount = 0;
+    auto package = pay_package_new("click-scope");
+
+    const char* sku = "item";
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, pay_package_item_status(package, sku));
+
+    // cleanup
+    pay_package_delete(package);
+}
+
