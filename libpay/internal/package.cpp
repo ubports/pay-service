@@ -90,28 +90,21 @@ Package::~Package ()
 PayPackageItemStatus
 Package::itemStatus (const std::string& sku) noexcept
 {
-    try
-    {
-        return itemStatusCache[sku].first;
-    }
-    catch (std::out_of_range& /*range*/)
-    {
-        return PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
-    }
+    const auto it = itemStatusCache.find(sku);
+
+    return it != itemStatusCache.end()
+        ? it->second.first
+        : PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
 }
 
 PayPackageRefundStatus
 Package::refundStatus (const std::string& sku) noexcept
 {
-    try
-    {
-        auto entry = itemStatusCache[sku];
-        return calcRefundStatus(entry.first, entry.second);
-    }
-    catch (std::out_of_range& /*range*/)
-    {
-        return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
-    }
+    const auto it = itemStatusCache.find(sku);
+
+    return it != itemStatusCache.end()
+        ? calcRefundStatus(it->second.first, it->second.second)
+        : PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
 }
 
 PayPackageRefundStatus
