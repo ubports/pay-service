@@ -270,23 +270,25 @@ TEST_F(LibpayPackageTests, VerifyItem)
     pay_package_delete(package);
 }
 
-TEST_F(LibpayPackageTests, ColdRefundStatus)
+TEST_F(LibpayPackageTests, ColdCacheStatus)
 {
     auto package = pay_package_new("click-scope");
 
-    const char* sku = "item";
-    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED, pay_package_refund_status(package, sku));
+    const struct {
+        const char * sku;
+        PayPackageItemStatus expected_item_status;
+        PayPackageRefundStatus expected_refund_status;
+    } tests[] = {
+        { "available_app",       PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED,  PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED },
+        { "approved_app",        PAY_PACKAGE_ITEM_STATUS_APPROVED,       PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED },
+        { "newly_purchased_app", PAY_PACKAGE_ITEM_STATUS_PURCHASED,      PAY_PACKAGE_REFUND_STATUS_REFUNDABLE },
+        { "old_purchased_app",   PAY_PACKAGE_ITEM_STATUS_PURCHASED,      PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE }
+    };
 
-    // cleanup
-    pay_package_delete(package);
-}
-
-TEST_F(LibpayPackageTests, ColdItemStatus)
-{
-    auto package = pay_package_new("click-scope");
-
-    const char* sku = "item";
-    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, pay_package_item_status(package, sku));
+    for (const auto& test : tests) {
+        EXPECT_EQ(test.expected_item_status, pay_package_item_status(package, test.sku));
+        EXPECT_EQ(test.expected_refund_status, pay_package_refund_status(package, test.sku));
+    }
 
     // cleanup
     pay_package_delete(package);
