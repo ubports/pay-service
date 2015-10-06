@@ -245,10 +245,8 @@ TEST_F(LibpayPackageTests, VerifyItem)
     pay_package_delete(package);
 }
 
-TEST_F(LibpayPackageTests, RefundStatus)
+TEST_F(LibpayPackageTests, ColdRefundStatus)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
 
     const char* sku = "item";
@@ -258,10 +256,8 @@ TEST_F(LibpayPackageTests, RefundStatus)
     pay_package_delete(package);
 }
 
-TEST_F(LibpayPackageTests, ItemStatus)
+TEST_F(LibpayPackageTests, ColdItemStatus)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
 
     const char* sku = "item";
