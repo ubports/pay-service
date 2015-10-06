@@ -90,10 +90,10 @@ Package::~Package ()
 PayPackageItemStatus
 Package::itemStatus (const std::string& sku) noexcept
 {
-    const auto it = itemStatusCache.find(sku);
+    const auto item = getItem(sku);
 
-    return it != itemStatusCache.end()
-        ? it->second.first
+    return item
+        ? item->status()
         : PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
 }
 
