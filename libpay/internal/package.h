@@ -50,7 +50,6 @@ class Package
     std::map <std::pair<PayPackageRefundObserver, void*>, core::ScopedConnection> refundObservers;
 
     core::Signal<std::string, PayPackageItemStatus, uint64_t> statusChanged;
-    std::map <std::string, std::pair<PayPackageItemStatus, uint64_t>> itemStatusCache;
     void updateStatus(const std::string& sku, PayPackageItemStatus);
 
     GLib::ContextThread thread;
@@ -60,11 +59,6 @@ class Package
 
     template<typename Collection>
     bool removeObserver(Collection& collection, const typename Collection::key_type& key);
-
-    template <typename BusProxy,
-              void (*startFunc)(BusProxy*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
-              gboolean (*finishFunc)(BusProxy*, GAsyncResult*, GError**)>
-    bool startBase (const std::shared_ptr<BusProxy>& bus_proxy, const std::string& sku) noexcept;
 
     template<typename BusProxy,
              gboolean (*finish_func)(BusProxy*, GVariant**, GAsyncResult*, GError**)>

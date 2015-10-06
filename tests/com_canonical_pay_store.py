@@ -62,6 +62,7 @@ class Item:
         'description': dbus.String('The is a default item'),
         'price': dbus.String('$1'),
         'purchase_id': dbus.UInt64(0.0),
+        'refundable_until': dbus.UInt64(0.0),
         'sku': dbus.String('default_item'),
         'state': dbus.String('available'),
         'type': dbus.String('unlockable'),
@@ -170,7 +171,7 @@ def store_refund_item(store, sku):
     try:
         item = store.items[sku]
         if (item.bus_properties['state'] == 'purchased' and
-            item.bus_properties['refund_tiemout'] > dbus.UInt64(time.time())):
+            item.bus_properties['refundable_until'] > dbus.UInt64(time.time())):
             del store.items[sku]
             return dbus.Dictionary({
                 'state': 'available',

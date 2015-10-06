@@ -69,8 +69,33 @@ protected:
 
         wait_for_store_service();
 
+        const guint64 now = time(nullptr);
+        const struct {
+            const char * sku;
+            const char * state;
+            guint64 refundable_until;
+        } prefab_apps[] = {
+            { "available_app",       "available", 0 },           // not purchased
+            { "newly_purchased_app", "purchased", now+(60*14) }, // purchased, refund window open
+            { "old_purchased_app",   "purchased", now-(60*30) }  // purchased, refund window closed
+        };
         GVariantBuilder b;
         g_variant_builder_init(&b, G_VARIANT_TYPE("aa{sv}"));
+        for (const auto& app : prefab_apps) {
+            GVariantBuilder app_props;
+            g_variant_builder_init(&app_props, G_VARIANT_TYPE_VARDICT);
+            const struct {
+                const char* key;
+                GVariant* value;
+            } entries[] = {
+                { "sku", g_variant_new_string(app.sku) },
+                { "state", g_variant_new_string(app.state) },
+                { "refundable_until", g_variant_new_uint64(app.refundable_until) }
+            };
+            for (const auto& entry : entries) 
+                g_variant_builder_add(&app_props, "{sv}", entry.key, entry.value);
+            g_variant_builder_add_value(&b, g_variant_builder_end(&app_props));
+        }
         auto props = g_variant_builder_end(&b);
 
         GVariant* args[] = { g_variant_new_string("click-scope"), props };
@@ -135,15 +160,17 @@ TEST_F(LibpayPackageTests, InitTest)
 
 TEST_F(LibpayPackageTests, PurchaseItem)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
+    const char* sku {"available_app"};
+
+    // pre-purchase tests
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, pay_package_item_status(package, sku));
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED, pay_package_refund_status(package, sku));
 
     // install a status observer
     StatusObserverData data;
     InstallStatusObserver(package, data);
 
-    const char* sku = "item";
     EXPECT_TRUE(pay_package_item_start_purchase(package, sku));
 
     // wait for the call to complete
@@ -156,6 +183,7 @@ TEST_F(LibpayPackageTests, PurchaseItem)
     EXPECT_EQ(package, data.package);
     EXPECT_EQ(sku, data.sku);
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, data.status);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, pay_package_item_status(package, sku));
 
     // cleanup
     pay_package_delete(package);
@@ -163,8 +191,6 @@ TEST_F(LibpayPackageTests, PurchaseItem)
 
 TEST_F(LibpayPackageTests, PurchaseItemCancelled)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
 
     // install a status observer
@@ -191,15 +217,17 @@ TEST_F(LibpayPackageTests, PurchaseItemCancelled)
 
 TEST_F(LibpayPackageTests, RefundItem)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
+    const char* sku {"newly_purchased_app"};
+
+    // pre-refund tests
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, pay_package_item_status(package, sku));
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_REFUNDABLE, pay_package_refund_status(package, sku));
 
     // install a status observer
     StatusObserverData data;
     InstallStatusObserver(package, data);
 
-    const char* sku = "item";
     EXPECT_TRUE(pay_package_item_start_refund(package, sku));
 
     // wait for the call to complete
@@ -212,6 +240,8 @@ TEST_F(LibpayPackageTests, RefundItem)
     EXPECT_EQ(package, data.package);
     EXPECT_EQ(sku, data.sku);
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, data.status);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, pay_package_item_status(package, sku));
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED, pay_package_refund_status(package, sku));
 
     // cleanup
     pay_package_delete(package);
@@ -219,8 +249,6 @@ TEST_F(LibpayPackageTests, RefundItem)
 
 TEST_F(LibpayPackageTests, VerifyItem)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
 
     // install a status observer
@@ -244,3 +272,27 @@ TEST_F(LibpayPackageTests, VerifyItem)
     // cleanup
     pay_package_delete(package);
 }
+
+TEST_F(LibpayPackageTests, ColdCacheStatus)
+{
+    auto package = pay_package_new("click-scope");
+
+    const struct {
+        const char * sku;
+        PayPackageItemStatus expected_item_status;
+        PayPackageRefundStatus expected_refund_status;
+    } tests[] = {
+        { "available_app",       PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED,  PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED },
+        { "newly_purchased_app", PAY_PACKAGE_ITEM_STATUS_PURCHASED,      PAY_PACKAGE_REFUND_STATUS_REFUNDABLE },
+        { "old_purchased_app",   PAY_PACKAGE_ITEM_STATUS_PURCHASED,      PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE }
+    };
+
+    for (const auto& test : tests) {
+        EXPECT_EQ(test.expected_item_status, pay_package_item_status(package, test.sku));
+        EXPECT_EQ(test.expected_refund_status, pay_package_refund_status(package, test.sku));
+    }
+
+    // cleanup
+    pay_package_delete(package);
+}
+

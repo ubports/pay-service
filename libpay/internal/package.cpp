@@ -34,16 +34,6 @@ Package::Package (const std::string& packageid)
     : id(packageid)
     , thread([]{}, [this]{storeProxy.reset();})
 {
-    // when item statuses change, update our internal cache
-    statusChanged.connect([this](const std::string& sku,
-                                 PayPackageItemStatus status,
-                                 uint64_t refundable_until)
-    {
-        g_debug("Updating itemStatusCache for '%s', timeout is: %lld",
-                sku.c_str(), refundable_until);
-        itemStatusCache[sku] = std::make_pair(status, refundable_until);
-    });
-
     /* Fire up a glib thread to create the proxies.
        Block on it here so the proxies are ready before this ctor returns */
     const auto errorStr = thread.executeOnThread<std::string>([this]()
@@ -90,28 +80,21 @@ Package::~Package ()
 PayPackageItemStatus
 Package::itemStatus (const std::string& sku) noexcept
 {
-    try
-    {
-        return itemStatusCache[sku].first;
-    }
-    catch (std::out_of_range& /*range*/)
-    {
-        return PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
-    }
+    const auto item = getItem(sku);
+
+    return item
+        ? item->status()
+        : PAY_PACKAGE_ITEM_STATUS_UNKNOWN;
 }
 
 PayPackageRefundStatus
 Package::refundStatus (const std::string& sku) noexcept
 {
-    try
-    {
-        auto entry = itemStatusCache[sku];
-        return calcRefundStatus(entry.first, entry.second);
-    }
-    catch (std::out_of_range& /*range*/)
-    {
-        return PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
-    }
+    const auto item = getItem(sku);
+
+    return item
+        ? calcRefundStatus(item->status(), item->refundable_until())
+        : PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
 }
 
 PayPackageRefundStatus
@@ -262,6 +245,10 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         else if (!g_strcmp0(key, "completed_timestamp"))
         {
             item->set_completed_timestamp(g_variant_get_uint64(value));
+        }
+        else if (!g_strcmp0(key, "refundable_until"))
+        {
+            item->set_refundable_until(g_variant_get_uint64(value));
         }
         else if (!g_strcmp0(key, "purchase_id"))
         {
@@ -544,40 +531,6 @@ Package::startAcknowledge (const std::string& sku) noexcept
 
     g_debug("%s returning %d", G_STRFUNC, int(ok));
     return ok;
-}
-
-template <typename BusProxy,
-          void (*startFunc)(BusProxy*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer),
-          gboolean (*finishFunc)(BusProxy*, GAsyncResult*, GError**)>
-bool Package::startBase (const std::shared_ptr<BusProxy>& bus_proxy, const std::string& sku) noexcept
-{
-    auto async_ready = [](GObject * obj, GAsyncResult * res, gpointer user_data) -> void
-    {
-        auto prom = static_cast<std::promise<bool>*>(user_data);
-        GError* error = nullptr;
-        finishFunc(reinterpret_cast<BusProxy*>(obj), res, &error);
-        if ((error != nullptr) && !g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-        {
-            std::cerr << "Error from service: " << error->message << std::endl;
-        }
-        prom->set_value(error == nullptr);
-        g_clear_error(&error);
-    };
-
-    std::promise<bool> promise;
-    thread.executeOnThread([this, bus_proxy, sku, &async_ready, &promise]()
-    {
-        startFunc(bus_proxy.get(),
-        sku.c_str(),
-        thread.getCancellable().get(), // GCancellable
-        async_ready,
-        &promise);
-    });
-
-    auto future = promise.get_future();
-    future.wait();
-    auto call_succeeded = future.get();
-    return call_succeeded;
 }
 
 } // namespace Internal

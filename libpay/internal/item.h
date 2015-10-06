@@ -40,6 +40,7 @@ class Item
     uint64_t m_purchase_id = 0;
     time_t m_completed_timestamp = 0;
     time_t m_acknowledged_timestamp = 0;
+    time_t m_refundable_until = 0;
 
 public:
 
@@ -63,6 +64,7 @@ public:
     PayPackageItemStatus status() const {return m_status;}
     time_t completed_timestamp() const {return m_completed_timestamp;}
     time_t acknowledged_timestamp() const {return m_acknowledged_timestamp;}
+    time_t refundable_until() const {return m_refundable_until;}
     const std::string& title() const {return m_title;}
     PayItemType type() const {return m_type;}
 
@@ -74,6 +76,7 @@ public:
     void set_status(PayPackageItemStatus val) {m_status = val;}
     void set_completed_timestamp(time_t val) {m_completed_timestamp = val;}
     void set_acknowledged_timestamp(time_t val) {m_acknowledged_timestamp = val;}
+    void set_refundable_until(time_t val) {m_refundable_until = val;}
     void set_title(const std::string& val) {m_title = val;}
     void set_type(PayItemType val) {m_type = val;}
 
