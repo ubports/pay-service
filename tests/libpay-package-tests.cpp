@@ -69,10 +69,35 @@ protected:
 
         wait_for_store_service();
 
+        const guint64 now = time(nullptr);
+        const struct {
+            const char * sku;
+            const char * state;
+            guint64 refundable_until;
+        } prefab_apps[] = {
+            { "available_app", "available", 0 },
+            { "approved_app", "approved", now+(60*14) },
+            { "newly_purchased_app", "purchased", now+(60*15) },
+            { "old_purchased_app", "purchased", now-(60*30) }
+        };
         GVariantBuilder b;
         g_variant_builder_init(&b, G_VARIANT_TYPE("aa{sv}"));
+        for (const auto& app : prefab_apps) {
+            GVariantBuilder app_props;
+            g_variant_builder_init(&app_props, G_VARIANT_TYPE_VARDICT);
+            const struct {
+                const char* key;
+                GVariant* value;
+            } entries[] = {
+                { "sku", g_variant_new_string(app.sku) },
+                { "state", g_variant_new_string(app.state) },
+                { "refundable_until", g_variant_new_uint64(app.refundable_until) }
+            };
+            for (const auto& entry : entries) 
+                g_variant_builder_add(&app_props, "{sv}", entry.key, entry.value);
+            g_variant_builder_add_value(&b, g_variant_builder_end(&app_props));
+        }
         auto props = g_variant_builder_end(&b);
-
         GVariant* args[] = { g_variant_new_string("click-scope"), props };
 
         GError *error {};
