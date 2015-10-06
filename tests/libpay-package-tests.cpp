@@ -218,12 +218,16 @@ TEST_F(LibpayPackageTests, PurchaseItemCancelled)
 TEST_F(LibpayPackageTests, RefundItem)
 {
     auto package = pay_package_new("click-scope");
+    const char* sku {"newly_purchased_app"};
+
+    // pre-purchase tests
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, pay_package_item_status(package, sku));
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_REFUNDABLE, pay_package_refund_status(package, sku));
 
     // install a status observer
     StatusObserverData data;
     InstallStatusObserver(package, data);
 
-    const char* sku = "item";
     EXPECT_TRUE(pay_package_item_start_refund(package, sku));
 
     // wait for the call to complete
@@ -236,6 +240,8 @@ TEST_F(LibpayPackageTests, RefundItem)
     EXPECT_EQ(package, data.package);
     EXPECT_EQ(sku, data.sku);
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, data.status);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, pay_package_item_status(package, sku));
+    EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED, pay_package_refund_status(package, sku));
 
     // cleanup
     pay_package_delete(package);
