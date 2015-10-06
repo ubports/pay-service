@@ -160,8 +160,6 @@ TEST_F(LibpayPackageTests, InitTest)
 
 TEST_F(LibpayPackageTests, PurchaseItem)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
 
     // install a status observer
@@ -188,8 +186,6 @@ TEST_F(LibpayPackageTests, PurchaseItem)
 
 TEST_F(LibpayPackageTests, PurchaseItemCancelled)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
 
     // install a status observer
@@ -216,8 +212,6 @@ TEST_F(LibpayPackageTests, PurchaseItemCancelled)
 
 TEST_F(LibpayPackageTests, RefundItem)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
 
     // install a status observer
@@ -244,8 +238,6 @@ TEST_F(LibpayPackageTests, RefundItem)
 
 TEST_F(LibpayPackageTests, VerifyItem)
 {
-    GError* error = nullptr;
-    guint callcount = 0;
     auto package = pay_package_new("click-scope");
 
     // install a status observer
