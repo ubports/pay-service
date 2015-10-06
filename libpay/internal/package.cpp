@@ -100,10 +100,10 @@ Package::itemStatus (const std::string& sku) noexcept
 PayPackageRefundStatus
 Package::refundStatus (const std::string& sku) noexcept
 {
-    const auto it = itemStatusCache.find(sku);
+    const auto item = getItem(sku);
 
-    return it != itemStatusCache.end()
-        ? calcRefundStatus(it->second.first, it->second.second)
+    return item
+        ? calcRefundStatus(item->status(), item->refundable_until())
         : PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE;
 }
 
