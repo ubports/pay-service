@@ -76,7 +76,6 @@ protected:
             guint64 refundable_until;
         } prefab_apps[] = {
             { "available_app",       "available", 0 },           // not purchased
-            { "approved_app",        "approved",  now+(60*15) }, // approved
             { "newly_purchased_app", "purchased", now+(60*14) }, // purchased, refund window open
             { "old_purchased_app",   "purchased", now-(60*30) }  // purchased, refund window closed
         };
@@ -284,7 +283,6 @@ TEST_F(LibpayPackageTests, ColdCacheStatus)
         PayPackageRefundStatus expected_refund_status;
     } tests[] = {
         { "available_app",       PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED,  PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED },
-        { "approved_app",        PAY_PACKAGE_ITEM_STATUS_APPROVED,       PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED },
         { "newly_purchased_app", PAY_PACKAGE_ITEM_STATUS_PURCHASED,      PAY_PACKAGE_REFUND_STATUS_REFUNDABLE },
         { "old_purchased_app",   PAY_PACKAGE_ITEM_STATUS_PURCHASED,      PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE }
     };
