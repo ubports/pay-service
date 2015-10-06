@@ -75,10 +75,10 @@ protected:
             const char * state;
             guint64 refundable_until;
         } prefab_apps[] = {
-            { "available_app", "available", 0 },
-            { "approved_app", "approved", now+(60*14) },
-            { "newly_purchased_app", "purchased", now+(60*15) },
-            { "old_purchased_app", "purchased", now-(60*30) }
+            { "available_app",       "available", 0 },           // not purchased
+            { "approved_app",        "approved",  now+(60*15) }, // approved
+            { "newly_purchased_app", "purchased", now+(60*14) }, // purchased, refund window open
+            { "old_purchased_app",   "purchased", now-(60*30) }  // purchased, refund window closed
         };
         GVariantBuilder b;
         g_variant_builder_init(&b, G_VARIANT_TYPE("aa{sv}"));
@@ -98,6 +98,7 @@ protected:
             g_variant_builder_add_value(&b, g_variant_builder_end(&app_props));
         }
         auto props = g_variant_builder_end(&b);
+
         GVariant* args[] = { g_variant_new_string("click-scope"), props };
 
         GError *error {};
@@ -220,7 +221,7 @@ TEST_F(LibpayPackageTests, RefundItem)
     auto package = pay_package_new("click-scope");
     const char* sku {"newly_purchased_app"};
 
-    // pre-purchase tests
+    // pre-refund tests
     EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_PURCHASED, pay_package_item_status(package, sku));
     EXPECT_EQ(PAY_PACKAGE_REFUND_STATUS_REFUNDABLE, pay_package_refund_status(package, sku));
 
