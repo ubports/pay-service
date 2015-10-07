@@ -287,6 +287,9 @@ func (iface *PayService) getDataForUrl(iri string, method string, headers http.H
     if err != nil {
         return nil, fmt.Errorf("RequestError: %s", err)
     }
+    // FIXME: Remove before flight.
+    fmt.Printf("DEBUG - Got result from server:\n%s\n", result)
+
     var data interface{}
     err = json.Unmarshal([]byte(result), &data)
     if err != nil {
