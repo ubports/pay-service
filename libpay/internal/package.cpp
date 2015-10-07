@@ -383,19 +383,22 @@ Package::getPurchasedItems() noexcept
     auto future = data.promise.get_future();
     future.wait();
 
-    auto v = data.v;
     std::vector<std::shared_ptr<PayItem>> items;
-    GVariantIter iter;
-    g_variant_iter_init(&iter, v);
-    GVariant* child;
-    while ((child = g_variant_iter_next_value(&iter)))
+    auto v = data.v;
+    if (v != nullptr)
     {
-        auto item = create_pay_item_from_variant(child);
-        if (item)
+        GVariantIter iter;
+        g_variant_iter_init(&iter, v);
+        GVariant* child;
+        while ((child = g_variant_iter_next_value(&iter)))
         {
-            items.push_back(item);
+            auto item = create_pay_item_from_variant(child);
+            if (item)
+            {
+                items.push_back(item);
+            }
+            g_variant_unref(child);
         }
-        g_variant_unref(child);
     }
 
     return items;
