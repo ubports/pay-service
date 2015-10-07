@@ -330,3 +330,19 @@ TEST_F(IapTests, AcknowledgeItem)
     // cleanup
     pay_package_delete(package);
 }
+
+TEST_F(IapTests, NoStore)
+{
+    auto package = pay_package_new(GAME_NAME);
+
+    auto items = pay_package_get_purchased_items (package);
+    ASSERT_TRUE(items != nullptr);
+    ASSERT_TRUE(items[0] == nullptr);
+
+    auto item = pay_package_get_item (package, "twizzle.twazzle.twozzle.twome");
+    ASSERT_TRUE(item == nullptr);
+
+    // cleanup
+    free(items);
+    pay_package_delete(package);
+}
