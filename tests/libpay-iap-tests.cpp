@@ -340,7 +340,7 @@ TEST_F(IapTests, NoStore)
     ASSERT_TRUE(items[0] == nullptr);
 
     auto item = pay_package_get_item (package, "twizzle.twazzle.twozzle.twome");
-    ASSERT_FALSE(item);
+    ASSERT_TRUE(item == nullptr);
 
     // cleanup
     free(items);
