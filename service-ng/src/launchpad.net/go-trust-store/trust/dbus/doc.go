@@ -18,6 +18,8 @@
  */
 
 /*
+Bindings for the trust store DBus agent.
+
 When initially designing a trusted helper, the author must decide whether to
 host the trust store in-process or out-of-process. This package implements the
 bindings for the trust store DBus agent, which is meant to communicate with a
