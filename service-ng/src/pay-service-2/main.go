@@ -1,4 +1,4 @@
-/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */ 
+/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright © 2015 Canonical Ltd.
  *
@@ -41,7 +41,7 @@ func main() {
     timer := time.AfterFunc(service.ShutdownTimeout, shutdown)
     auth := new(service.UbuntuOneAuth)
     client := service.NewWebClient(auth)
-    daemon, err := service.New(client, timer)
+    daemon, err := service.New(client, timer, true)
     if err != nil {
         log.Fatalf("Unable to create daemon: %s", err)
     }

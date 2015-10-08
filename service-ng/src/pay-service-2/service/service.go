@@ -29,7 +29,7 @@ const (
     // busName is the name to be requested from the DBus session bus.
     busName = "com.canonical.payments"
 
-    // baseObjectPath is the base object path 
+    // baseObjectPath is the base object path
     baseObjectPath = "/com/canonical/pay/store"
 
     // interfaceName is the name of the interface being implemented here.
@@ -60,14 +60,14 @@ type Service struct {
  * - New daemon
  * - Error (nil if none)
  */
-func New(webClient WebClientIface, timer Timer) (*Service, error) {
+func New(webClient WebClientIface, timer Timer, useTrustStore bool) (*Service, error) {
     service := new(Service)
 
     service.server = new(DbusServer)
 
     var err error
     service.payiface, err = NewPayService(service.server,
-        interfaceName, baseObjectPath, timer, webClient)
+        interfaceName, baseObjectPath, timer, webClient, useTrustStore)
     if err != nil {
         return nil, fmt.Errorf("Unable to create pay service interface: %s", err)
     }
