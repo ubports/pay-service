@@ -32,8 +32,8 @@ const (
 type UbuntuOneAuth struct {
 }
 
-func (auth *UbuntuOneAuth) signUrl(iri string) string {
-    result, err := exec.Command(signingHelper, iri).Output()
+func (auth *UbuntuOneAuth) signUrl(iri string, method string) string {
+    result, err := exec.Command(signingHelper, iri, method).Output()
     if err != nil {
         fmt.Println("ERROR - Signing URL failed. No token?")
         return ""

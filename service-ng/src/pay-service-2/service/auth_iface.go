@@ -20,5 +20,5 @@ package service
 
 
 type AuthIface interface {
-    signUrl(iri string) string
+    signUrl(iri string, method string) string
 }
