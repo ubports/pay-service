@@ -53,7 +53,7 @@ func (client *WebClient) Call(iri string, method string,
     request.Header = headers
 
     // Sign the request
-    signature := client.auth.signUrl(iri)
+    signature := client.auth.signUrl(iri, method)
     if signature != "" {
         request.Header.Set("Authorization", signature)
     }

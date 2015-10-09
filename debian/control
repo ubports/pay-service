@@ -37,7 +37,7 @@ Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
 Recommends: libglib2.0-bin,
-            ubuntu-push-client,
+            ubuntu-push-client (>= 0.68+15.04.20151009),
 Description: service to allow requesting payment for an item
  Allows applications to request an item be paid for by the user.
  This requires interaction with the server backend to handle the
