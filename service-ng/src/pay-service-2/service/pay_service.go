@@ -321,6 +321,12 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
         details["state"] = dbus.MakeVariant("purchased")
     }
 
+    // Normalize the state for apps to "available" instead of "Cancelled"
+    itemState, stateOk = details["state"]
+    if stateOk && itemState.Value().(string) == "Cancelled" {
+        details["state"] = dbus.MakeVariant("available")
+    }
+
     // Normalize the package_name for apps to the "sku" key
     pkgName, pkgOk := details["package_name"]
     if pkgOk {
