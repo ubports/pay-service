@@ -508,6 +508,38 @@ func TestRefundItem(t *testing.T) {
     }
 }
 
+func TestRefundItemInvalid(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := new(FakeTimer)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    _, dbusErr := payiface.RefundItem(m, "click-scope")
+    if dbusErr == nil {
+        t.Errorf("Expected error refunding item, received none.")
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
+}
+
 func TestPackageNameFromPath(t *testing.T) {
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)

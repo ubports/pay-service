@@ -261,8 +261,9 @@ func (iface *PayService) RefundItem(message dbus.Message, itemName string) (Item
     headers := make(http.Header)
 
     url := getPayClickUrl() + "/refunds/"
-    body := `{"name": "` + packageName + `"}`
+    body := `{"name": "` + itemName + `"}`
     headers.Set("Content-Type", "application/json")
+    headers.Set("Accept", "application/json")
 
     _, err := iface.getDataForUrl(url, "POST", headers, body)
     if err != nil {

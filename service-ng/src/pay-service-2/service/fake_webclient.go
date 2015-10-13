@@ -96,7 +96,10 @@ func (client *FakeWebClient) Call(iri string, method string,
     }
 
     if parsed.Path == "/api/2.0/click/refunds/" && method == "POST" {
-        return `{"success": true}`, nil
+        if data == `{"name": "bar.example"}`{
+            return `{"success": true}`, nil
+        }
+        return "", fmt.Errorf("400 Bad Request")
     }
 
     if parsed.Path == "/inventory/api/v1/packages/foo.example/purchases" {
