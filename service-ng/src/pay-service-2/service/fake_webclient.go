@@ -78,6 +78,18 @@ func (client *FakeWebClient) Call(iri string, method string,
         `, nil
     }
 
+    // A cancelled app purchase
+    if parsed.Path == "/api/2.0/click/purchases/cancelled.example/" {
+        return `
+            {
+                "open_id": "https://login.ubuntu.com/+id/open_id",
+                "package_name": "cancelled.example",
+                "refundable_until": null,
+                "state": "Cancelled"
+            }
+        `, nil
+    }
+
     // The refunded item should be returned as a 404
     if parsed.Path == "/api/2.0/click/purchases/foo.example/" {
         return "", fmt.Errorf("404 Not Found")
