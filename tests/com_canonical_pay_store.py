@@ -44,7 +44,7 @@ def encode_path_element(element):
         if (ch.isalpha() or (ch.isdigit() and not first)):
             encoded.append(ch)
         else:
-            encoded.append('_{:02X}'.format(ord(ch)))
+            encoded.append('_{:02x}'.format(ord(ch)))
     return ''.join(encoded)
 
 def build_store_path(package_name):
