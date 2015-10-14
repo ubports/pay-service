@@ -177,7 +177,7 @@ func TestGetItemAppNotRefundable(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2dscope")
     item, dbusErr := payiface.GetItem(m, "foo.example")
     if dbusErr != nil {
         t.Errorf("Unexpected error geting item details: %s", dbusErr)
@@ -224,7 +224,7 @@ func TestGetItemAppRefundable(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2dscope")
     item, dbusErr := payiface.GetItem(m, "bar.example")
     if dbusErr != nil {
         t.Errorf("Unexpected error geting item details: %s", dbusErr)
@@ -266,7 +266,7 @@ func TestGetItemAppCancelled(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2dscope")
     item, dbusErr := payiface.GetItem(m, "cancelled.example")
     if dbusErr != nil {
         t.Errorf("Unexpected error geting item details: %s", dbusErr)
@@ -308,7 +308,7 @@ func TestGetPurchasedItemsClickScope(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2dscope")
     reply, dbusErr := payiface.GetPurchasedItems(m)
     if dbusErr != nil {
         t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
@@ -485,7 +485,7 @@ func TestRefundItem(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2dscope")
     reply, dbusErr := payiface.RefundItem(m, "bar.example")
     if dbusErr != nil {
         t.Errorf("Unexpected error refunding item: %s", dbusErr)
@@ -525,7 +525,7 @@ func TestRefundItemInvalid(t *testing.T) {
 
     var m dbus.Message
     m.Headers = make(map[dbus.HeaderField]dbus.Variant)
-    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2dscope")
     _, dbusErr := payiface.RefundItem(m, "click-scope")
     if dbusErr == nil {
         t.Errorf("Expected error refunding item, received none.")

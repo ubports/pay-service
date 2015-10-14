@@ -53,7 +53,7 @@ func EncodeDbusPath(path string) string {
             (c >= '0' && c <= '9') || c == '/' || c == '_' {
             output += fmt.Sprintf("%c", c)
         } else {
-            output += fmt.Sprintf("_%2X", c)
+            output += fmt.Sprintf("_%2x", c)
         }
     }
     return output

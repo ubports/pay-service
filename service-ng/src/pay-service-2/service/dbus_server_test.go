@@ -180,7 +180,7 @@ func TestEmit_beforeConnect(t *testing.T) {
 // Test encoding a dbus path
 func TestEncodeDbusPath(t *testing.T) {
     testPath := "/foo/bar/foo-bar"
-    expectedPath := "/foo/bar/foo_2Dbar"
+    expectedPath := "/foo/bar/foo_2dbar"
     result := EncodeDbusPath(testPath)
     if result != expectedPath {
         t.Errorf(
@@ -191,7 +191,7 @@ func TestEncodeDbusPath(t *testing.T) {
 
 // Test decoding a dbus path
 func TestDecodeDbusPath(t *testing.T) {
-    testPath := "/foo/bar/foo_2Dbar"
+    testPath := "/foo/bar/foo_2dbar"
     expectedPath := "/foo/bar/foo-bar"
     result := DecodeDbusPath(testPath)
     if result != expectedPath {

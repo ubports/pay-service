@@ -44,7 +44,7 @@ def encode_path_element(element):
         if (ch.isalpha() or (ch.isdigit() and not first)):
             encoded.append(ch)
         else:
-            encoded.append('_{:02X}'.format(ord(ch)))
+            encoded.append('_{:02x}'.format(ord(ch)))
     return ''.join(encoded)
 
 def build_store_path(package_name):
@@ -116,7 +116,7 @@ def store_get_item(store, sku):
     try:
         return store.items[sku].serialize()
     except KeyError:
-        if store.path.endswith("click_2Dscope"):
+        if store.path.endswith(encode_path_element('click-scope')):
             return dbus.Dictionary(
                 {
                     'package_name': sku,
@@ -137,7 +137,7 @@ def store_get_purchased_items(store):
 
 
 def store_purchase_item(store, sku):
-    if store.path.endswith("click_2Dscope"):
+    if store.path.endswith(encode_path_element('click-scope')):
         if sku != 'cancel':
             item = Item(sku)
             item.bus_properties = {
@@ -163,7 +163,7 @@ def store_purchase_item(store, sku):
 
 
 def store_refund_item(store, sku):
-    if not store.path.endswith("click_2Dscope"):
+    if not store.path.endswith(encode_path_element('click-scope')):
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
             'Refunds are only available for packages')
@@ -182,7 +182,7 @@ def store_refund_item(store, sku):
 
 
 def store_acknowledge_item(store, sku):
-    if store.path.endswith("click_2Dscope"):
+    if store.path.endswith(encode_path_element('click-scope')):
         raise dbus.exceptions.DBusException(
             ERR_INVAL,
             'Only in-app purchase items can be acknowledged')
