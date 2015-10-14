@@ -38,7 +38,7 @@ BusUtils::encodePathElement(const std::string& input)
         else
         {
             char buffer[5] = {0};
-            std::snprintf(buffer, 4, "_%2X", c);
+            std::snprintf(buffer, 4, "_%2x", c);
             retval = std::string(buffer);
         }
 
