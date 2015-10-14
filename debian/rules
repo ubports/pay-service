@@ -10,4 +10,4 @@ override_dh_auto_configure:
 	dh_auto_configure -- -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pay-service
 
 %:
-	dh $@ --fail-missing --with click
+	dh $@ --parallel --fail-missing --with click
