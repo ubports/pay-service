@@ -18,7 +18,7 @@ set -x
 set -e
 
 GO_TEST_OPTIONS=""
-if [ "x${2}" = "xcoverage" ]; then
+if [ "x${2}" = "xcoverage" -a -z "`go version|grep gccgo`" ]; then
     GO_TEST_OPTIONS="-coverprofile=go.cover"
 fi
 
