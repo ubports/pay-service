@@ -202,88 +202,98 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
 {
     std::shared_ptr<PayItem> item;
 
-    // test the inputs
-    g_return_val_if_fail(item_properties != nullptr, item);
-    g_return_val_if_fail(g_variant_is_of_type(item_properties, G_VARIANT_TYPE_VARDICT), item);
-
-    // make sure we've got a valid sku to construct the PayItem with
-    const char* sku {};
-    g_variant_lookup(item_properties, "sku", "&s", &sku);
-    if (sku == nullptr)
+    if (item_properties == nullptr)
     {
-        g_variant_lookup(item_properties, "package_name", "&s", &sku);
+        g_warning("%s item_properties variant is NULL", G_STRLOC);
     }
-    g_return_val_if_fail(sku != nullptr, item);
-    g_return_val_if_fail(*sku != '\0', item);
-
-    auto pay_item_deleter = [](PayItem* p){p->unref();};
-    item.reset(new PayItem(sku), pay_item_deleter);
-
-    // now loop through the dict to build the PayItem's properties
-    GVariantIter iter;
-    gchar* key;
-    GVariant* value;
-    g_variant_iter_init(&iter, item_properties);
-    while (g_variant_iter_loop(&iter, "{sv}", &key, &value))
+    else if (!g_variant_is_of_type(item_properties, G_VARIANT_TYPE_VARDICT))
     {
-        if (!g_strcmp0(key, "acknowledged_timestamp"))
-        {
-            item->set_acknowledged_timestamp(g_variant_get_uint64(value));
-        }
-        else if (!g_strcmp0(key, "description"))
-        {
-            item->set_description(g_variant_get_string(value, nullptr));
-        }
-        else if (!g_strcmp0(key, "sku") || !g_strcmp0(key, "package_name"))
-        {
-            // no-op; we handled the sku/package_name first
-        }
-        else if (!g_strcmp0(key, "price"))
-        {
-            item->set_price(g_variant_get_string(value, nullptr));
-        }
-        else if (!g_strcmp0(key, "completed_timestamp"))
-        {
-            item->set_completed_timestamp(g_variant_get_uint64(value));
-        }
-        else if (!g_strcmp0(key, "refundable_until"))
-        {
-            item->set_refundable_until(g_variant_get_uint64(value));
-        }
-        else if (!g_strcmp0(key, "purchase_id"))
-        {
-            item->set_purchase_id(g_variant_get_uint64(value));
-        }
-        else if (!g_strcmp0(key, "state"))
-        {
-            auto state = g_variant_get_string(value, nullptr);
+        g_warning("%s item_properties variant is not a vardict", G_STRLOC);
+    }
+    else
+    {
+        // make sure we've got a valid sku to construct the PayItem with
+        const char* sku {};
+        g_variant_lookup(item_properties, "sku", "&s", &sku);
+        if (sku == nullptr)
+            g_variant_lookup(item_properties, "package_name", "&s", &sku);
 
-            if (!g_strcmp0(state, "purchased"))
-            {
-                item->set_status(PAY_PACKAGE_ITEM_STATUS_PURCHASED);
-            }
-            else if (!g_strcmp0(state, "approved"))
-            {
-                item->set_status(PAY_PACKAGE_ITEM_STATUS_APPROVED);
-            }
-            else
-            {
-                item->set_status(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED);
-            }
-        }
-        else if (!g_strcmp0(key, "type"))
+        if (!sku || !*sku)
         {
-            item->set_type(type_from_string(g_variant_get_string(value, nullptr)));
-        }
-        else if (!g_strcmp0(key, "title"))
-        {
-            item->set_title(g_variant_get_string(value, nullptr));
+            g_warning("%s item_properties variant has no sku or package_name entry", G_STRLOC);
         }
         else
         {
-            auto valstr = g_variant_print(value, true);
-            g_warning("Unhandled item property '%s': '%s'", key, valstr);
-            g_free(valstr);
+            auto pay_item_deleter = [](PayItem* p){p->unref();};
+            item.reset(new PayItem(sku), pay_item_deleter);
+
+            // now loop through the dict to build the PayItem's properties
+            GVariantIter iter;
+            gchar* key;
+            GVariant* value;
+            g_variant_iter_init(&iter, item_properties);
+            while (g_variant_iter_loop(&iter, "{sv}", &key, &value))
+            {
+                if (!g_strcmp0(key, "acknowledged_timestamp"))
+                {
+                    item->set_acknowledged_timestamp(g_variant_get_uint64(value));
+                }
+                else if (!g_strcmp0(key, "description"))
+                {
+                    item->set_description(g_variant_get_string(value, nullptr));
+                }
+                else if (!g_strcmp0(key, "sku") || !g_strcmp0(key, "package_name"))
+                {
+                    // no-op; we handled the sku/package_name first
+                }
+                else if (!g_strcmp0(key, "price"))
+                {
+                    item->set_price(g_variant_get_string(value, nullptr));
+                }
+                else if (!g_strcmp0(key, "completed_timestamp"))
+                {
+                    item->set_completed_timestamp(g_variant_get_uint64(value));
+                }
+                else if (!g_strcmp0(key, "refundable_until"))
+                {
+                    item->set_refundable_until(g_variant_get_uint64(value));
+                }
+                else if (!g_strcmp0(key, "purchase_id"))
+                {
+                    item->set_purchase_id(g_variant_get_uint64(value));
+                }
+                else if (!g_strcmp0(key, "state"))
+                {
+                    auto state = g_variant_get_string(value, nullptr);
+
+                    if (!g_strcmp0(state, "purchased"))
+                    {
+                        item->set_status(PAY_PACKAGE_ITEM_STATUS_PURCHASED);
+                    }
+                    else if (!g_strcmp0(state, "approved"))
+                    {
+                        item->set_status(PAY_PACKAGE_ITEM_STATUS_APPROVED);
+                    }
+                    else
+                    {
+                        item->set_status(PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED);
+                    }
+                }
+                else if (!g_strcmp0(key, "type"))
+                {
+                    item->set_type(type_from_string(g_variant_get_string(value, nullptr)));
+                }
+                else if (!g_strcmp0(key, "title"))
+                {
+                    item->set_title(g_variant_get_string(value, nullptr));
+                }
+                else
+                {
+                    auto valstr = g_variant_print(value, true);
+                    g_warning("Unhandled item property '%s': '%s'", key, valstr);
+                    g_free(valstr);
+                }
+            }
         }
     }
 
