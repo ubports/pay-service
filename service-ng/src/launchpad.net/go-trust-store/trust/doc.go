@@ -18,6 +18,8 @@
  */
 
 /*
+Bindings for the Ubuntu Trust Store.
+
 Some services on the Ubuntu Phone deal with resources and functionality that can
 be abused. As a result, the trust model requires that any access to them be
 specifically requested and granted by the user. The resulting user interaction

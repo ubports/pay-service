@@ -363,6 +363,78 @@ func TestGetPurchasedItemsInAppPurchase(t *testing.T) {
     }
 }
 
+func TestGetPurchasedItemsEmpty(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := NewFakeTimer(ShutdownTimeout)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/empty")
+    reply, dbusErr := payiface.GetPurchasedItems(m)
+    if dbusErr != nil {
+        t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
+    }
+
+    if len(reply) != 0 {
+        t.Errorf("Expected 0 items in list, got %d instead.", len(reply))
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
+}
+
+func TestGetPurchasedItemsEmptyInvalid(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := NewFakeTimer(ShutdownTimeout)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/empty_2einvalid")
+    reply, dbusErr := payiface.GetPurchasedItems(m)
+    if dbusErr != nil {
+        t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
+    }
+
+    if len(reply) != 0 {
+        t.Errorf("Expected 0 items in list, got %d instead.", len(reply))
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
+}
+
 func TestPurchaseItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()

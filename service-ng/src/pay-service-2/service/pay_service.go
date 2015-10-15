@@ -162,6 +162,7 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
     // network activity. For now we must always hit network.
     if packageName == "click-scope" {
         url := getPayClickUrl() + "/purchases/"
+        headers.Set("Accept", "application/json")
 
         data, err := iface.getDataForUrl(url, "GET", headers, "")
         if err != nil {
@@ -181,6 +182,12 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
         data, err := iface.getDataForUrl(url, "GET", headers, "")
         if err != nil {
             return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
+        }
+        headers.Set("Accept", "application/hal+json")
+
+        if reflect.ValueOf(data).Kind() != reflect.Map {
+            fmt.Println("ERROR - Invalid content:", reflect.ValueOf(data).String())
+            return purchasedItems, nil
         }
 
         m := data.(map[string]interface{})["_embedded"].(map[string]interface{})
