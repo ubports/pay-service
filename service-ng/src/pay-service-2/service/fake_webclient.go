@@ -69,6 +69,24 @@ func (client *FakeWebClient) Call(iri string, method string,
         return `{"success": true}`, nil
     }
 
+    if parsed.Path == "/inventory/api/v1/packages/empty.invalid/purchases" {
+        return "[]", nil
+    }
+
+    if parsed.Path == "/inventory/api/v1/packages/empty/purchases" {
+        return `
+        {
+            "_links": {
+                "self": {"href": "/packages/empty/purchases"},
+                "package": {"href": "/packages/empty"}
+            },
+            "_embedded": {
+                "purchases": [
+                ]
+            }
+        }`, nil
+    }
+
     if parsed.Path == "/inventory/api/v1/packages/foo.example/purchases" {
         return `
         {
