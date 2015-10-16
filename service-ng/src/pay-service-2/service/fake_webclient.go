@@ -211,7 +211,7 @@ func (client *FakeWebClient) Call(iri string, method string,
     }
 
     // Acknowledge the consumable item
-    if parsed.Path == "/packages/foo.example/items/1/" && method == "PUT" {
+    if parsed.Path == "/packages/foo.example/items/1/" && method == "POST" {
         return `
         {
             "id": 1,
@@ -228,7 +228,7 @@ func (client *FakeWebClient) Call(iri string, method string,
     }
 
     // Acknowledge the unlockable item
-    if parsed.Path == "/packages/foo.example/items/2/" && method == "PUT" {
+    if parsed.Path == "/packages/foo.example/items/2/" && method == "POST" {
         return `
         {
             "id": 2,

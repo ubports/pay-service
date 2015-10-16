@@ -96,7 +96,7 @@ func (iface *PayService) AcknowledgeItem(message dbus.Message, itemName string) 
     body := `{"state": "acknowledged"}`
     headers.Set("Content-Type", "application/json")
 
-    data, neterr := iface.getDataForUrl(url, "PUT", headers, body)
+    data, neterr := iface.getDataForUrl(url, "POST", headers, body)
     if neterr != nil {
         return nil, dbus.NewError(fmt.Sprintf("%s", neterr), nil)
     }
