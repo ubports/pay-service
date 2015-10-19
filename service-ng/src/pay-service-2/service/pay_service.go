@@ -162,7 +162,7 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
     // network activity. For now we must always hit network.
     if packageName == "click-scope" {
         url := getPayClickUrl() + "/purchases/"
-        headers.Set("Accept", "application/json")
+        headers.Set(AcceptHeader, "application/json")
 
         data, err := iface.getDataForUrl(url, "GET", headers, "")
         if err != nil {
@@ -183,7 +183,7 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
         if err != nil {
             return nil, dbus.NewError(fmt.Sprintf("%s", err), nil)
         }
-        headers.Set("Accept", "application/hal+json")
+        headers.Set(AcceptHeader, "application/hal+json")
 
         if reflect.ValueOf(data).Kind() != reflect.Map {
             fmt.Println("ERROR - Invalid content:", reflect.ValueOf(data).String())
@@ -269,8 +269,8 @@ func (iface *PayService) RefundItem(message dbus.Message, itemName string) (Item
 
     url := getPayClickUrl() + "/refunds/"
     body := `{"name": "` + itemName + `"}`
-    headers.Set("Content-Type", "application/json")
-    headers.Set("Accept", "application/json")
+    headers.Set(ContentTypeHeader, "application/json")
+    headers.Set(AcceptHeader, "application/json")
 
     _, err := iface.getDataForUrl(url, "POST", headers, body)
     if err != nil {
