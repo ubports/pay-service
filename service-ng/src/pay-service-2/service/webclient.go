@@ -89,8 +89,10 @@ func (client *WebClient) GetDeviceId() (string) {
     }
 
     var deviceId string
-    err = conn.BusObject().Call("com.ubuntu.WhoopsiePreferences.GetIdentifier",
-        0).Store(&deviceId)
+    err = conn.Object("com.ubuntu.Whoopsie.Preferences",
+        "/com/ubuntu/WhoopsiePreferences").Call(
+            "com.ubuntu.WhoopsiePreferences.GetIdentifier",
+            0).Store(&deviceId)
     if err != nil {
         fmt.Fprintln(os.Stderr, "ERROR - Failed to get device ID:", err)
         return ""
