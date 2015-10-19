@@ -89,7 +89,7 @@ func (client *WebClient) GetDeviceId() (string) {
     }
 
     var deviceId string
-    err = conn.Object("com.ubuntu.Whoopsie.Preferences",
+    err = conn.Object("com.ubuntu.WhoopsiePreferences",
         "/com/ubuntu/WhoopsiePreferences").Call(
             "com.ubuntu.WhoopsiePreferences.GetIdentifier",
             0).Store(&deviceId)
