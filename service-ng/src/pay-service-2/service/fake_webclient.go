@@ -210,3 +210,7 @@ func (client *FakeWebClient) Call(iri string, method string,
 
     return "", nil
 }
+
+func (client *FakeWebClient) GetDeviceId() (string) {
+    return "fake_device"
+}

@@ -22,6 +22,16 @@ import (
     "net/http"
 )
 
+const (
+    // HTTP header field names
+    AcceptHeader        = "Accept"
+    AuthorizationHeader = "Authorization"
+    ContentTypeHeader   = "Content-Type"
+    DeviceIdHeader      = "X-Device-Id"
+)
+
+
 type WebClientIface interface {
     Call(iri string, method string, headers http.Header, data string) (string, error)
+    GetDeviceId() (string)
 }
