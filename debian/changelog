@@ -6,6 +6,35 @@ pay-service (2.0.0) UNRELEASED; urgency=medium
 
  -- Rodney Dawes <rodney.dawes@canonical.com>  Wed, 07 Oct 2015 13:00:58 -0400
 
+pay-service (2.0.0+15.04.20150914-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Charles Kerr ]
+  * Fix usage of warnings flags and the warnings resulting. Use -fPIC
+    instead of -fPIE where appropriate.
+
+  [ Rodney Dawes ]
+  * Fix usage of warnings flags and the warnings resulting. Use -fPIC
+    instead of -fPIE where appropriate.
+
+  [ Ted Gould ]
+  * Use libubuntu-app-launch >= 0.5 for trusted session helper code.
+
+ -- Rodney Dawes <ci-train-bot@canonical.com>  Mon, 14 Sep 2015 17:11:01 +0000
+
+pay-service (2.0.0+15.04.20150721-0ubuntu1) vivid; urgency=medium
+
+  [ Andreas Pokorny ]
+  * rebuild for ABI changes in libmirclient9 - part of mir release
+    0.14.0
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 21 Jul 2015 16:53:49 +0000
+
 pay-service (2.0.0+15.04.20150706-0ubuntu1) vivid; urgency=medium
 
   [ Rodney Dawes ]
