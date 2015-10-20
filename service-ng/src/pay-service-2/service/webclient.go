@@ -86,5 +86,5 @@ func (client *WebClient) GetDeviceId() (string) {
         fmt.Fprintln(os.Stderr, "ERROR - Failed to get device ID:", err)
         return ""
     }
-    return string(deviceId)
+    return strings.TrimSpace(string(deviceId))
 }
