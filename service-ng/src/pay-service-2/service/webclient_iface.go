@@ -28,6 +28,9 @@ const (
     AuthorizationHeader = "Authorization"
     ContentTypeHeader   = "Content-Type"
     DeviceIdHeader      = "X-Device-Id"
+
+    // File path for whoopsie-id file
+    WhoopsieIdFile      = "/var/lib/whoopsie/whoopsie-id"
 )
 
 
