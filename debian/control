@@ -38,8 +38,10 @@ Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
          sysvinit-utils,
-Recommends: libglib2.0-bin,
-            ubuntu-push-client (>= 0.68+15.04.20151009),
+         ubuntu-push-client (>= 0.68+15.04.20151009),
+Recommends: gnupg,
+            libglib2.0-bin,
+            perl-base,
 Description: service to allow requesting payment for an item
  Allows applications to request an item be paid for by the user.
  This requires interaction with the server backend to handle the
