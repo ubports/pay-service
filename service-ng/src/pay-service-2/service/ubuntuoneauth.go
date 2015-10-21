@@ -20,6 +20,7 @@ package service
 
 import (
     "fmt"
+    "os"
     "os/exec"
     "strings"
 )
@@ -35,7 +36,7 @@ type UbuntuOneAuth struct {
 func (auth *UbuntuOneAuth) signUrl(iri string, method string) string {
     result, err := exec.Command(signingHelper, iri, method).Output()
     if err != nil {
-        fmt.Println("ERROR - Signing URL failed. No token?")
+        fmt.Fprintln(os.Stderr, "ERROR - Signing URL failed. No token?")
         return ""
     }
     return strings.TrimSpace(string(result))

@@ -68,8 +68,6 @@ func (iface *PayService) AcknowledgeItem(message dbus.Message, itemName string) 
     defer iface.resetTimer()
     packageName := packageNameFromPath(message)
 
-    fmt.Println("DEBUG - AcknowledgeItem called for package:", packageName)
-
     // Fail if calling AcknowledgeItem for click-scope
     if packageName == "click-scope" {
         return nil, dbus.NewError(
@@ -110,8 +108,6 @@ func (iface *PayService) GetItem(message dbus.Message, itemName string) (ItemDet
     defer iface.resetTimer()
     packageName := packageNameFromPath(message)
 
-    fmt.Println("DEBUG - GetItem called for package:", packageName)
-
     // To set any extra headers we need (signature, accept, etc)
     headers := make(http.Header)
 
@@ -144,8 +140,6 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
     defer iface.resetTimer()
 
     packageName := packageNameFromPath(message)
-
-    fmt.Println("DEBUG - GetPurchasedItems called for package:", packageName)
 
     // Get the purchased items, and their properties, for the package.
     purchasedItems := make([]ItemDetails, 0)
@@ -208,8 +202,6 @@ func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (It
     defer iface.resetTimer()
     packageName := packageNameFromPath(message)
 
-    fmt.Println("DEBUG - PurchaseItem called for package:", packageName)
-
     // Purchase the item and return the item info and status.
     purchaseUrl := "purchase://"
     if packageName != "click-scope" {
@@ -217,7 +209,7 @@ func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (It
     }
     purchaseUrl += itemName
 
-    fmt.Println("DEBUG - Unhandled purchase URL:", purchaseUrl)
+    fmt.Fprintln(os.Stderr, "WARNING - Unhandled purchase URL:", purchaseUrl)
 
     return nil, dbus.NewError("NotYetImplemented", nil)
 }
@@ -227,8 +219,6 @@ func (iface *PayService) RefundItem(message dbus.Message, itemName string) (Item
     defer iface.resetTimer()
 
     packageName := packageNameFromPath(message)
-
-    fmt.Println("DEBUG - RefundItem called for package:", packageName)
 
     if packageName != "click-scope" {
         return nil, dbus.NewError(
@@ -299,7 +289,8 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
                 priceString := priceMap[currencyCode].Value().(string)
                 price, parseErr := strconv.ParseFloat(priceString, 32)
                 if parseErr != nil {
-                    fmt.Println("ERROR - Failed to parse price:",
+                    fmt.Fprintf(os.Stderr,
+                        "ERROR - Failed to parse price '%s': %s",
                         priceString, parseErr)
                 } else {
                     details["price"] = dbus.MakeVariant(
@@ -312,7 +303,9 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
                 details[k] = dbus.MakeVariant("")
             }
         default:
-            fmt.Printf("WARNING - Unable to parse item key '%s' of type '%s'.\n", k, reflect.TypeOf(vv))
+            fmt.Fprintf(os.Stderr,
+                "WARNING - Unable to parse item key '%s' of type '%s'.\n",
+                k, reflect.ValueOf(vv).Kind().String())
         }
     }
 
@@ -344,7 +337,8 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
             acknowledgedTime, ackerr := time.Parse(time.RFC3339,
                 acknowledged.Value().(string))
             if ackerr != nil {
-                fmt.Printf("ERROR - Unable to parse acknowledged time '%s': %s\n",
+                fmt.Fprintf(os.Stderr,
+                    "ERROR - Unable to parse acknowledged time '%s': %s\n",
                     acknowledged, ackerr)
             } else {
                 details["acknowledged_timestamp"] = dbus.MakeVariant(
@@ -362,7 +356,8 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
             completedTime, compErr := time.Parse(time.RFC3339,
                 completed.Value().(string))
             if compErr != nil {
-                fmt.Printf("ERROR - Unable to parse completed time '%s': %s\n",
+                fmt.Fprintf(os.Stderr,
+                    "ERROR - Unable to parse completed time '%s': %s\n",
                     completed, compErr)
             } else {
                 details["completed_timestamp"] = dbus.MakeVariant(
@@ -380,7 +375,8 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
             refundableTime, err := time.Parse(time.RFC3339,
                 refundableUntil.Value().(string))
             if err != nil {
-                fmt.Printf("ERROR - Unable to parse refund timeout '%s': %s\n",
+                fmt.Fprintf(os.Stderr,
+                    "ERROR - Unable to parse refund timeout '%s': %s\n",
                     refundableUntil, err)
             } else {
                 details["refundable_until"] = dbus.MakeVariant(
