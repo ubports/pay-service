@@ -20,6 +20,7 @@ package service
 
 import (
     "fmt"
+    "github.com/godbus/dbus"
     "io/ioutil"
     "net/http"
     "os"
@@ -81,10 +82,20 @@ func (client *WebClient) Call(iri string, method string,
 }
 
 func (client *WebClient) GetDeviceId() (string) {
-    deviceId, err := ioutil.ReadFile(WhoopsieIdFile)
+    conn, err := dbus.SystemBus()
     if err != nil {
         fmt.Fprintln(os.Stderr, "ERROR - Failed to get device ID:", err)
         return ""
     }
-    return strings.TrimSpace(string(deviceId))
+
+    var deviceId string
+    err = conn.Object("com.ubuntu.WhoopsiePreferences",
+        "/com/ubuntu/WhoopsiePreferences").Call(
+            "com.ubuntu.WhoopsiePreferences.GetIdentifier",
+            0).Store(&deviceId)
+    if err != nil {
+        fmt.Fprintln(os.Stderr, "ERROR - Failed to get device ID:", err)
+        return ""
+    }
+    return deviceId
 }
