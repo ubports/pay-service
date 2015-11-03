@@ -119,8 +119,9 @@ def store_get_item(store, sku):
         if store.path.endswith(encode_path_element('click-scope')):
             return dbus.Dictionary(
                 {
-                    'package_name': sku,
-                    'state': 'available'
+                    'sku': sku,
+                    'state': 'available',
+                    'refundable_until': 0,
                 })
         else:
             raise dbus.exceptions.DBusException(
@@ -143,7 +144,7 @@ def store_purchase_item(store, sku):
             item.bus_properties = {
                 'state': 'purchased',
                 'refundable_until': dbus.UInt64(time.time() + 15*60),
-                'package_name': sku,
+                'sku': sku,
             }
             store.items[sku] = item
 
@@ -175,10 +176,18 @@ def store_refund_item(store, sku):
             del store.items[sku]
             return dbus.Dictionary({
                 'state': 'available',
-                'package_name': sku
+                'sku': sku,
+                'refundable_until': 0
+            })
+        else:
+            return dbus.Dictionary({
+                'state': 'purchased',
+                'sku': sku,
+                'refundable_until': 0
             })
     except KeyError:
-        return dbus.Dictionary({'state': 'available', 'package_name': sku})
+        return dbus.Dictionary({'state': 'available', 'sku': sku,
+                                'refundable_until': 0})
 
 
 def store_acknowledge_item(store, sku):

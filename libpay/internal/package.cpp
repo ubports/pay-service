@@ -215,12 +215,9 @@ std::shared_ptr<PayItem> create_pay_item_from_variant(GVariant* item_properties)
         // make sure we've got a valid sku to construct the PayItem with
         const char* sku {};
         g_variant_lookup(item_properties, "sku", "&s", &sku);
-        if (sku == nullptr)
-            g_variant_lookup(item_properties, "package_name", "&s", &sku);
-
         if (!sku || !*sku)
         {
-            g_warning("%s item_properties variant has no sku or package_name entry", G_STRLOC);
+            g_warning("%s item_properties variant has no sku entry", G_STRLOC);
         }
         else
         {
