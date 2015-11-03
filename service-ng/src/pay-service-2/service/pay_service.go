@@ -122,7 +122,7 @@ func (iface *PayService) GetItem(message dbus.Message, itemName string) (ItemDet
     if err != nil {
         if packageName == "click-scope" {
             item := make(ItemDetails)
-            item["package_name"] = dbus.MakeVariant(itemName)
+            item["sku"] = dbus.MakeVariant(itemName)
             item["state"] = dbus.MakeVariant("available")
             item["refundable_until"] = dbus.MakeVariant(uint64(0))
             return item, nil
@@ -131,6 +131,17 @@ func (iface *PayService) GetItem(message dbus.Message, itemName string) (ItemDet
     }
 
     item := parseItemMap(data.(map[string]interface{}))
+    // Need to special case click-scope here as server returns 404 and {}
+    // when the app is not purchased, but golang HTTP lib does not treat
+    // 404 as an error.
+    if packageName == "click-scope" {
+        _, skuOk := item["sku"]
+        if !skuOk {
+            item["sku"] = dbus.MakeVariant(itemName)
+            item["state"] = dbus.MakeVariant("available")
+            item["refundable_until"] = dbus.MakeVariant(uint64(0))
+        }
+    }
 
     return item, nil
 }

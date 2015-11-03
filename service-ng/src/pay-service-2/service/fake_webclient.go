@@ -90,9 +90,9 @@ func (client *FakeWebClient) Call(iri string, method string,
         `, nil
     }
 
-    // The refunded item should be returned as a 404
+    // Items which aren't purchased return a 404 with {}
     if parsed.Path == "/api/2.0/click/purchases/foo.example/" {
-        return "", fmt.Errorf("404 Not Found")
+        return "{}", nil
     }
 
     if parsed.Path == "/api/2.0/click/refunds/" && method == "POST" {
