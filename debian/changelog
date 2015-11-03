@@ -1,10 +1,15 @@
-pay-service (2.0.0) UNRELEASED; urgency=medium
+pay-service (2.0.0+15.04.20151103-0ubuntu1) vivid; urgency=medium
 
+  [ Rodney Dawes ]
   * Add support for in-app-purchases.
   * Make pay-service a dbus activated service. (LP: #1377866)
   * Make libpay2 depend on pay-service of the same version.
 
- -- Rodney Dawes <rodney.dawes@canonical.com>  Wed, 07 Oct 2015 13:00:58 -0400
+  [ CI Train Bot ]
+  * debian/libpay2.symbols: update to released version.
+  * New rebuild forced.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 03 Nov 2015 21:14:50 +0000
 
 pay-service (2.0.0+15.04.20150914-0ubuntu1) vivid; urgency=medium
 
