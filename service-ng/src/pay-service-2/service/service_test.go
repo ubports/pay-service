@@ -23,7 +23,9 @@ import (
 )
 
 func TestNew(t *testing.T) {
-    service, err := New()
+    client := new(FakeWebClient)
+    timer := NewFakeTimer(ShutdownTimeout)
+    service, err := New(client, timer)
     if err != nil {
         t.Fatalf("Unexpected error instantiating service: %s", err)
     }
@@ -34,7 +36,9 @@ func TestNew(t *testing.T) {
 }
 
 func TestServiceRunStop(t *testing.T) {
-    service, err := New()
+    client := new(FakeWebClient)
+    timer := NewFakeTimer(ShutdownTimeout)
+    service, err := New(client, timer)
     if err != nil {
         t.Fatalf("Unexpected error instantiating service: %s", err)
     }

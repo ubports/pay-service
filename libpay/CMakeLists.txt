@@ -1,18 +1,23 @@
 
 set(libpay-headers
-    pay-package.h)
+    pay-package.h
+    pay-item.h
+    pay-types.h)
 set(libpay-sources
-    pay-package.cpp)
+    pay-package.cpp
+    pay-item.cpp)
 
 set(api-version 2)
 set(abi-version 2)
 
+add_subdirectory(internal)
+ 
 ######################
 # DBus Proxies
 ######################
 
 set(libpay-generated)
-add_gdbus_codegen_with_namespace(libpay-generated proxy-package com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.package.xml)
+add_gdbus_codegen_with_namespace(libpay-generated proxy-store   com.canonical. proxy ${CMAKE_SOURCE_DIR}/data/com.canonical.pay.store.xml)
 
 ######################
 # Lib Building
@@ -20,9 +25,13 @@ add_gdbus_codegen_with_namespace(libpay-generated proxy-package com.canonical. p
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g ${GCOV_FLAGS} -fvisibility=hidden")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g ${GCOV_FLAGS} -fvisibility=hidden")
-include_directories(${CMAKE_CURRENT_BINARY_DIR} "${CMAKE_SOURCE_DIR}/common")
+include_directories(SYSTEM ${CMAKE_BINARY_DIR})
+include_directories(${CMAKE_SOURCE_DIR})
 
 add_library(libpay SHARED ${libpay-sources} ${libpay-generated})
+set_property(SOURCE ${libpay-sources}
+             APPEND_STRING PROPERTY COMPILE_FLAGS " ${CXX_WARNING_ARGS}")
+
 set_target_properties(libpay PROPERTIES
   VERSION ${api-version}.0.0
   SOVESRION ${abi-version}

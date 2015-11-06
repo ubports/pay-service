@@ -87,28 +87,29 @@ func (conn *Conn) searchHandlers(path ObjectPath) (map[string]exportWithMapping,
 	defer conn.handlersLck.RUnlock()
 
 	handlers, ok := conn.handlers[path]
+	if ok {
+		return handlers, ok
+	}
 
 	// If handlers weren't found for this exact path, look for a matching subtree
 	// registration
-	if !ok {
-		handlers = make(map[string]exportWithMapping)
-		path = path[:strings.LastIndex(string(path), "/")]
-		for len(path) > 0 {
-			var subtreeHandlers map[string]exportWithMapping
-			subtreeHandlers, ok = conn.handlers[path]
-			if ok {
-				for iface, handler := range subtreeHandlers {
-					// Only include this handler if it registered for the subtree
-					if handler.includeSubtree {
-						handlers[iface] = handler
-					}
+	handlers = make(map[string]exportWithMapping)
+	path = path[:strings.LastIndex(string(path), "/")]
+	for len(path) > 0 {
+		var subtreeHandlers map[string]exportWithMapping
+		subtreeHandlers, ok = conn.handlers[path]
+		if ok {
+			for iface, handler := range subtreeHandlers {
+				// Only include this handler if it registered for the subtree
+				if handler.includeSubtree {
+					handlers[iface] = handler
 				}
-
-				break
 			}
 
-			path = path[:strings.LastIndex(string(path), "/")]
+			break
 		}
+
+		path = path[:strings.LastIndex(string(path), "/")]
 	}
 
 	return handlers, ok

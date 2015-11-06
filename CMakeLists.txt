@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 2.8.9)
 
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-set (PROJECT_VERSION "14.04.0")
+set (PACKAGE_VERSION "14.04.0")
 set (PACKAGE ${CMAKE_PROJECT_NAME})
 
 option (enable_tests "Build the package's automatic tests." ON)
@@ -34,18 +34,14 @@ find_package (PkgConfig REQUIRED)
 find_package (Qt5Core REQUIRED)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
-                   accounts-qt5
-                   libcurl
-                   jsoncpp
-                   ubuntu-app-launch-2>=0.5
-                   dbustest-1
-                   gio-2.0
-                   gio-unix-2.0
-                   click-0.4
-                   mirclient
-                   process-cpp
-                   properties-cpp
-                   ubuntuoneauth-2.0)
+  Qt5Core
+  click-0.4
+  dbustest-1
+  gio-2.0
+  gio-unix-2.0
+  properties-cpp
+  ubuntu-app-launch-2>=0.5
+)
 include_directories (SYSTEM ${SERVICE_DEPS_INCLUDE_DIRS})
 
 ##
@@ -58,13 +54,13 @@ include (GdbusCodegen)
 ##  custom targets
 ##
 
-set (ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${PROJECT_VERSION})
+set (ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${PACKAGE_VERSION})
 add_custom_target (dist
                    COMMAND bzr export --root=${ARCHIVE_NAME} ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.gz
                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_custom_target (cppcheck COMMAND cppcheck --enable=all -q --error-exitcode=2 --inline-suppr
-                   ${CMAKE_SOURCE_DIR}/src
+                   ${CMAKE_SOURCE_DIR}/libpay
                    ${CMAKE_SOURCE_DIR}/tests)
 
 ##
@@ -72,7 +68,15 @@ add_custom_target (cppcheck COMMAND cppcheck --enable=all -q --error-exitcode=2 
 ##
 
 set (CC_WARNING_ARGS " -Wall -Wshadow -Wextra -Wunused -Wformat=2 -Wno-missing-field-initializers")
-set (CXX_WARNING_ARGS " -Wall -Wextra -pedantic -Wno-missing-field-initializers")
+# those GActionEntry structs tickle -Wmissing-field-initializers
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set (CXX_WARNING_ARGS "${CXX_WARNING_ARGS} -Weverything -Wno-c++98-compat -Wno-documentation -Wno-padded")
+else()
+  set (CXX_WARNING_ARGS "${CXX_WARNING_ARGS} -Wall -Wextra -Wpedantic -Wunused -Wformat=2 ")
+endif()
+# service/dbus-interface.cpp gives unavoidable warnings in glib code unless we turn this warning off
+set (CXX_WARNING_ARGS "${CXX_WARNING_ARGS} -Wno-missing-field-initializers")
+
 
 ##
 ##  Subdirectories
@@ -80,8 +84,8 @@ set (CXX_WARNING_ARGS " -Wall -Wextra -pedantic -Wno-missing-field-initializers"
 
 add_subdirectory(common)
 add_subdirectory(libpay)
-add_subdirectory(service)
 add_subdirectory(service-ng)
+add_subdirectory(ual-helper)
 add_subdirectory(data)
 if (${enable_tests})
   add_subdirectory(tests)
@@ -100,7 +104,7 @@ if (NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
   list(APPEND filter-list "${CMAKE_BINARY_DIR}/*")
 endif()
 ENABLE_COVERAGE_REPORT(
-  TARGETS libpay pay-service-lib pay-service
-  TESTS dbus-interface-tests item-memory-tests webclient-curl-tests verification-http-tests refund-http-tests purchase-ual-tests libpay-tests
+  TARGETS libpay
+  TESTS libpay-iap-tests libpay-package-tests
   FILTER ${filter-list}
 )
