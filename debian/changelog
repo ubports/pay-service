@@ -1,10 +1,16 @@
-pay-service (15.10) UNRELEASED; urgency=medium
+pay-service (15.10+16.04.20151124.2-0ubuntu1) xenial; urgency=medium
 
+  [ Rodney Dawes ]
   * Add support for in-app-purchases.
   * Make pay-service a dbus activated service. (LP: #1377866)
   * Make libpay2 depend on pay-service of the same version.
+  * Drop the perl-base recommends to resolve a lintian complaint.
+  * Force gccgo on ppc64el.
 
- -- Rodney Dawes <rodney.dawes@canonical.com>  Wed, 07 Oct 2015 13:00:58 -0400
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+ -- Timo Jyrinki <timo.jyrinki@canonical.com>  Tue, 24 Nov 2015 23:03:27 +0000
 
 pay-service (2.0.0+15.10.20150902-0ubuntu1) wily; urgency=medium
 
