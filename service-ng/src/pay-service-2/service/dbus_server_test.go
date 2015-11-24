@@ -176,3 +176,27 @@ func TestEmit_beforeConnect(t *testing.T) {
         t.Error("Expected an error due to emit before server was connected")
     }
 }
+
+// Test encoding a dbus path
+func TestEncodeDbusPath(t *testing.T) {
+    testPath := "/foo/bar/foo-bar"
+    expectedPath := "/foo/bar/foo_2dbar"
+    result := EncodeDbusPath(testPath)
+    if result != expectedPath {
+        t.Errorf(
+            "Encoding result did not match:\n\tActual: %s\n\tExpected: %s",
+            result, expectedPath)
+    }
+}
+
+// Test decoding a dbus path
+func TestDecodeDbusPath(t *testing.T) {
+    testPath := "/foo/bar/foo_2dbar"
+    expectedPath := "/foo/bar/foo-bar"
+    result := DecodeDbusPath(testPath)
+    if result != expectedPath {
+        t.Errorf(
+            "Decoding result did not match:\n\tActual: %s\n\tExpected: %s",
+            result, expectedPath)
+    }
+}

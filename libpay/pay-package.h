@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2014-2015 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 3 as
@@ -19,66 +19,14 @@
 #ifndef PAY_PACKAGE_H
 #define PAY_PACKAGE_H 1
 
+#include <libpay/pay-types.h>
+
 #pragma GCC visibility push(default)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct PayPackage_ PayPackage;
-
-/**
- * PayPackageItemStatus:
- *
- * The states that an purchased item can be in.
- */
-typedef enum
-{
-    /*< prefix=PAY_PACKAGE_ITEM_STATUS */
-    PAY_PACKAGE_ITEM_STATUS_UNKNOWN,       /*< nick=unknown */
-    PAY_PACKAGE_ITEM_STATUS_VERIFYING,     /*< nick=verifying */
-    PAY_PACKAGE_ITEM_STATUS_PURCHASED,     /*< nick=purchased */
-    PAY_PACKAGE_ITEM_STATUS_PURCHASING,    /*< nick=purchasing */
-    PAY_PACKAGE_ITEM_STATUS_NOT_PURCHASED, /*< nick=not-purchased */
-    PAY_PACKAGE_ITEM_STATUS_REFUNDING,     /*< nick=refunding */
-    PAY_PACKAGE_ITEM_STATUS_APPROVED,      /*< nick=approved */
-} PayPackageItemStatus;
-
-/**
- * PayPackageItemObserver:
- *
- * Function to call when an item changes state for the
- * package it's registered for.
- */
-typedef void (*PayPackageItemObserver) (PayPackage* package,
-                                        const char* itemid,
-                                        PayPackageItemStatus status,
-                                        void* user_data);
-
-/**
- * PayPackageRefundStatus:
- *
- * The states of refundable an item  an be in.
- */
-typedef enum
-{
-    /*< prefix=PAY_PACKAGE_REFUND_STATUS */
-    PAY_PACKAGE_REFUND_STATUS_REFUNDABLE,      /*< nick=refundable */
-    PAY_PACKAGE_REFUND_STATUS_NOT_REFUNDABLE,  /*< nick=not-refundable */
-    PAY_PACKAGE_REFUND_STATUS_NOT_PURCHASED,   /*< nick=not-purchased */
-    PAY_PACKAGE_REFUND_STATUS_WINDOW_EXPIRING  /*< nick=window-expiring */
-} PayPackageRefundStatus;
-
-/**
- * PayPackageItemRefundableObserver:
- *
- * Function to call when an item changes whether it is
- * refundable or not.
- */
-typedef void (*PayPackageRefundObserver) (PayPackage* package,
-                                          const char* itemid,
-                                          PayPackageRefundStatus status,
-                                          void* user_data);
 
 /**
  * pay_package_new:
@@ -96,7 +44,7 @@ PayPackage* pay_package_new (const char* package_name);
  * pay_package_delete:
  * @package: package object to free
  *
- * Frees the resources associtated with the package object, should be
+ * Frees the resources associated with the package object, should be
  * done when the application is finished with them.
  */
 void pay_package_delete (PayPackage* package);
@@ -104,19 +52,19 @@ void pay_package_delete (PayPackage* package);
 /**
  * pay_package_item_status:
  * @package: Package the item is related to
- * @itemid: ID of the item
+ * @sku: short string that uniquely identifies the item to use
  *
  * Checks the status of an individual item.
  *
  * Return value: The status of the item on the local pay service
  */
 PayPackageItemStatus pay_package_item_status (PayPackage* package,
-                                              const char* itemid);
+                                              const char* sku);
 
 /**
  * pay_package_item_is_refundable:
  * @package: Package the item is related to
- * @itemid: ID of the item
+ * @sku: short string that uniquely identifies the item to use
  *
  * Checks whether it is refundable. Check with the status
  * and makes sure it is REFUNDABLE.
@@ -124,19 +72,19 @@ PayPackageItemStatus pay_package_item_status (PayPackage* package,
  * Return value: Non-zero if the item is refundable
  */
 int pay_package_item_is_refundable (PayPackage* package,
-                                    const char* itemid);
+                                    const char* sku);
 
 /**
  * pay_package_refund_status:
  * @package: Package the item is related to
- * @itemid: ID of the item
+ * @sku: short string that uniquely identifies the item to use
  *
  * Checks the refund status of an individual item.
  *
  * Return value: The refund status of the item
  */
 PayPackageRefundStatus pay_package_refund_status (PayPackage* package,
-                                                  const char* itemid);
+                                                  const char* sku);
 
 /**
  * pay_package_item_observer_install:
@@ -200,7 +148,7 @@ int pay_package_refund_observer_uninstall (PayPackage* package,
 /**
  * pay_package_item_start_verification:
  * @package: package to verify item for
- * @itemid: ID of the item to verify
+ * @sku: short string that uniquely identifies the item to use
  *
  * Asks the pay service to ask the server to verify
  * the status of an item. It will go on the network and
@@ -211,15 +159,15 @@ int pay_package_refund_observer_uninstall (PayPackage* package,
  * Return value: zero when unable to make request to pay service
  */
 int pay_package_item_start_verification (PayPackage* package,
-                                         const char* itemid);
+                                         const char* sku);
 
 /**
  * pay_package_item_start_purchase:
  * @package: package to purchase item for
- * @itemid: ID of the item to purchase
+ * @sku: short string that uniquely identifies the item to use
  *
  * Requests that the pay-service start the process of purchasing
- * the item specified by @itemid. This requires launching UI elements
+ * the item specified by @sku. This requires launching UI elements
  * that will cover the application requesting the payment. When
  * the UI determines that the purchase is complete, or the user
  * terminates the pay action the UI will be dismissed and the status
@@ -228,25 +176,64 @@ int pay_package_item_start_verification (PayPackage* package,
  * Return value: zero when unable to make request to pay service
  */
 int pay_package_item_start_purchase (PayPackage* package,
-                                     const char* itemid);
+                                     const char* sku);
 
 /**
  * pay_package_item_start_refund:
  * @package: package the item was purchased for
- * @itemid: ID of the item to refund
+ * @sku: short string that uniquely identifies the item to use
  *
  * Requests that the pay-service start the process of refunding
- * the item specified by @itemid.
+ * the item specified by @sku.
  *
  * Return value: zero when unable to make request to pay service
  */
 int pay_package_item_start_refund (PayPackage* package,
-                                   const char* itemid);
+                                   const char* sku);
 
-#pragma GCC visibility pop
+/**
+ * pay_package_item_start_acknowledge:
+ * @package: package the item was purchased for
+ * @sku: SKU of the in-app purchase to acknowledge
+ *
+ * Requests that the pay-service initiate acknowledgement
+ * of the in-app purchase specified by @sku.
+ *
+ * Return value: zero when unable to make request to pay service
+ */
+int pay_package_item_start_acknowledge (PayPackage* package,
+                                        const char* sku);
+
+/**
+ * pay_package_get_purchased_items:
+ * @package: Package whose purchased items are to be retrieved
+ *
+ * When done, the caller should unref each PayItem
+ * with pay_item_unref() and free the array with free().
+ *
+ * Return value: a NULL-terminated array of PayItems
+ */
+PayItem** pay_package_get_purchased_items (PayPackage* package);
+
+/**
+ * pay_package_get_item:
+ * @package: Package whose item is to be retrieved
+ * @sku: The item's sku
+ *
+ * If a match is found, then when done the caller should
+ * unref it with pay_item_unref().
+ *
+ * Return value: a reffed PayItem, or NULL if no match was found
+ */
+PayItem* pay_package_get_item (PayPackage* package,
+                               const char* sku);
+
+
 
 #ifdef __cplusplus
 }
 #endif
+
+#pragma GCC visibility pop
 
 #endif /* PAY_PACKAGE_H */

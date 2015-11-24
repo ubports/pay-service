@@ -1,6 +1,4 @@
-usr/lib/*/pay-service/pay-service
 usr/lib/*/pay-service/pay-service-2
 usr/lib/*/pay-service/setup-staging.sh
 usr/lib/*/ubuntu-app-launch/pay-ui/*
 usr/share/dbus-1/services/*.service
-usr/share/upstart/sessions/*

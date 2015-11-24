@@ -31,6 +31,8 @@ for upstream in `cat vendor.cfg`; do
         rm -rf ${CODE_TMP}/${dirname}/.git
         rm -rf ${GIT_DIR}
     elif [ "x${HOST}" = "xlaunchpad.net" ]; then
+        echo "Fetching from launchpad..."
+        mkdir -p ${CODE_TMP}
         bzr export -d lp:${dirname} ${CODE_TMP}/${dirname}
     else
         echo "Unknown external source type: ${dirname}"

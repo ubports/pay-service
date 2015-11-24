@@ -40,5 +40,21 @@ fi
 echo "Restarting scope registry"
 /sbin/restart scope-registry
 
-echo "Restarting pay service"
-/sbin/restart pay-service
+STAGING_KEY_ID=9D7FAC7F5DEEC972
+STAGING_KEYRING_PATH=/usr/share/debsig/keyrings/${STAGING_KEY_ID}
+STAGING_POLICY_PATH=/etc/debsig/policies/${STAGING_KEY_ID}
+
+PROD_KEY_ID=608FF2D200A0A71F
+PROD_POLCIY_PATH=/etc/debsig/policies/${PROD_KEY_ID}
+
+if [ ! -d ${STAGING_KEYRING_PATH} ]; then
+    echo "Setting up staging GPG key"
+    sudo mkdir -p ${STAGING_KEYRING_PATH}
+    sudo gpg --no-default-keyring \
+        --keyring ${STAGING_KEYRING_PATH}/click-store.gpg \
+        --keyserver keyserver.ubuntu.com --recv-keys ${STAGING_KEY_ID}
+    sudo cp -rf ${PROD_POLICY_PATH} ${STAGING_POLICY_PATH}
+    sudo perl -p -i -e "s/${PROD_KEY_ID}/${STAGING_KEY_ID}/g" \
+        ${STAGING_POLICY_PATH}/generic.pol
+    echo "Finished importing staging GPG key"
+fi
