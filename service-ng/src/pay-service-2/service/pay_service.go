@@ -21,49 +21,79 @@ package service
 import (
     "encoding/json"
     "fmt"
-    "github.com/godbus/dbus"
     "net/http"
     "os"
     "path"
     "reflect"
     "strconv"
     "time"
+
+    "github.com/godbus/dbus"
+    "launchpad.net/go-ual/ual"
+    "launchpad.net/go-trust-store/trust"
+    trustdbus "launchpad.net/go-trust-store/trust/dbus"
 )
 
 
 const (
+    FeaturePurchaseItem trust.Feature = iota
+
     // payBaseUrl is the default base URL for the REST API.
     payBaseUrl = "https://myapps.developer.ubuntu.com"
 )
 
 type ItemDetails map[string]dbus.Variant
-type LaunchPayUiFunction func(appId string, purchaseUrl string) PayUiFeedback
+type LaunchPayUiFunction func(appId, purchaseUrl string) PayUiFeedback
+type TripletToAppIdFunction func(packageName, appName, version string) string
+type GetPrimaryPidFunction func(appId string) uint32
 
 type PayService struct {
-    dbusConnection DbusWrapper
-    baseObjectPath dbus.ObjectPath
-    shutdownTimer  Timer
-    client         WebClientIface
+    dbusConnection  DbusWrapper
+    baseObjectPath  dbus.ObjectPath
+    shutdownTimer   Timer
+    client          WebClientIface
+
+    // This is optional since there's a dbus-cpp bug preventing the trust store
+    // agent from being used multiple times in the same process (e.g. during
+    // testing).
+    useTrustStore   bool
+    trustStoreAgent trust.Agent
 
     launchPayUiFunction LaunchPayUiFunction
+    tripletToAppIdFunction TripletToAppIdFunction
+    getPrimaryPidFunction GetPrimaryPidFunction
 }
 
 func NewPayService(dbusConnection DbusWrapper,
     interfaceName string, baseObjectPath dbus.ObjectPath,
-    shutdownTimer Timer, client WebClientIface) (*PayService, error) {
+    shutdownTimer Timer, client WebClientIface,
+    useTrustStore bool) (*PayService, error) {
     payiface := &PayService{
         dbusConnection: dbusConnection,
         shutdownTimer: shutdownTimer,
         client: client,
+        useTrustStore: useTrustStore,
     }
 
     if !baseObjectPath.IsValid() {
         return nil, fmt.Errorf(`Invalid base object path: "%s"`, baseObjectPath)
     }
 
+    if useTrustStore {
+        var err error
+        payiface.trustStoreAgent, err =
+            trustdbus.CreateMultiUserAgentForBusConnection(
+		        trustdbus.WellKnownBusSession, "UbuntuPayService")
+	    if err != nil {
+	        return nil, fmt.Errorf("Unable to create trust store agent: %s", err)
+	    }
+    }
+
     payiface.baseObjectPath = baseObjectPath
 
     payiface.launchPayUiFunction = LaunchPayUi
+    payiface.tripletToAppIdFunction = ual.TripletToAppId
+    payiface.getPrimaryPidFunction = ual.GetPrimaryPid
 
     return payiface, nil
 }
@@ -225,6 +255,15 @@ func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (It
     defer iface.resetTimer()
     packageName := packageNameFromPath(message)
 
+    if iface.useTrustStore {
+        err := iface.authorizePurchaseItem(packageName)
+        if err != nil {
+            return nil, dbus.NewError(
+                "org.freedesktop.DBus.Error.AccessDenied",
+                []interface{}{err.Error()})
+        }
+    }
+
     // Purchase the item and return the item info and status.
     purchaseUrl := "purchase://"
     if packageName != "click-scope" {
@@ -287,6 +326,39 @@ func (iface *PayService) pauseTimer() bool {
 
 func (iface *PayService) resetTimer() bool {
     return iface.shutdownTimer.Reset(ShutdownTimeout)
+}
+
+func (iface *PayService) authorizePurchaseItem(packageName string) error {
+    appId := iface.tripletToAppIdFunction(packageName, "", "")
+    if appId == "" {
+        return fmt.Errorf(`Unable to obtain application ID for "%s"`,
+                          packageName)
+    }
+
+    appPid := iface.getPrimaryPidFunction(appId)
+    if appPid == 0 {
+        return fmt.Errorf(`Unable to obtain application PID for "%s"`, appId)
+    }
+
+    params := &trust.RequestParameters{
+	    Application: trust.Application{
+		    Uid: os.Getuid(),
+		    Pid: int(appPid),
+		    Id: appId,
+	    },
+	    Feature: FeaturePurchaseItem,
+	    Description: "Allow '%1%' to request purchases?",
+    }
+
+    // Ask the trust store if this app is allowed to request purchases. If
+    // the trust store doesn't know, it'll prompt the user and save the
+    // response.
+    answer := iface.trustStoreAgent.AuthenticateRequestWithParameters(params)
+    if answer == trust.AnswerGranted {
+        return nil // Purchase is authorized
+    }
+
+    return fmt.Errorf("Purchase request was denied by the user")
 }
 
 /* Make the call to the URL and return either the data or an error
