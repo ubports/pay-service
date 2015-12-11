@@ -91,7 +91,7 @@ if (${enable_tests})
   add_subdirectory(tests)
 endif ()
 add_subdirectory(pay-test-app)
-
+add_subdirectory(po)
 
 ##
 ##  Coverage Reports

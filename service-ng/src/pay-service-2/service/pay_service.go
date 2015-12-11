@@ -29,6 +29,7 @@ import (
     "time"
 
     "github.com/godbus/dbus"
+    "github.com/gosexy/gettext"
     "launchpad.net/go-ual/ual"
     "launchpad.net/go-trust-store/trust"
     trustdbus "launchpad.net/go-trust-store/trust/dbus"
@@ -83,7 +84,7 @@ func NewPayService(dbusConnection DbusWrapper,
         var err error
         payiface.trustStoreAgent, err =
             trustdbus.CreateMultiUserAgentForBusConnection(
-		        trustdbus.WellKnownBusSession, "UbuntuPayService")
+		        trustdbus.WellKnownBusSession, "InAppPurchases")
 	    if err != nil {
 	        return nil, fmt.Errorf("Unable to create trust store agent: %s", err)
 	    }
@@ -347,7 +348,8 @@ func (iface *PayService) authorizePurchaseItem(packageName string) error {
 		    Id: appId,
 	    },
 	    Feature: FeaturePurchaseItem,
-	    Description: "Allow '%1%' to request purchases?",
+        // TRANSLATORS: Do not translate '%1%' here, only adjust position.
+	    Description: gettext.Gettext("Allow '%1%' to request purchases?"),
     }
 
     // Ask the trust store if this app is allowed to request purchases. If
