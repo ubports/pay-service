@@ -2,7 +2,7 @@
 ##############################
 # Upstart Jobs
 ##############################
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pay-service-trust-stored.conf
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pay-service-trust-stored.conf
         DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/upstart/sessions/)
 
 
