@@ -114,7 +114,7 @@ func (client *FakeWebClient) Call(iri string, method string,
                 "package": {"href": "/packages/empty"}
             },
             "_embedded": {
-                "purchases": [
+                "purchase": [
                 ]
             }
         }`, nil
@@ -128,7 +128,7 @@ func (client *FakeWebClient) Call(iri string, method string,
                 "package": {"href": "/packages/app.example"}
             },
             "_embedded": {
-                "purchases": [
+                "purchase": [
                     {
                         "id": 1,
                         "requested_timestamp": "2015-03-12T14:33:23.000Z",
@@ -141,20 +141,18 @@ func (client *FakeWebClient) Call(iri string, method string,
                             "package": {"href": "/packages/app.example"}
                         },
                         "_embedded": {
-                            "items": [
-                                {
-                                    "id": 1,
-                                    "sku": "consumable",
-                                    "title": "Item 1 Title",
-                                    "description": "Item 1 Description",
-                                    "icon": "http://example.com/icons/item1.png",
-                                    "type": "consumable",
-                                    "state": "approved",
-                                    "_links": {
-                                        "self": {"href": "/packages/app.example/items/1"}
-                                    }
+                            "item": {
+                                "id": 1,
+                                "sku": "consumable",
+                                "title": "Item 1 Title",
+                                "description": "Item 1 Description",
+                                "icon": "http://example.com/icons/item1.png",
+                                "type": "consumable",
+                                "state": "approved",
+                                "_links": {
+                                    "self": {"href": "/packages/app.example/items/1"}
                                 }
-                            ]
+                            }
                         }
                     },
                     {
@@ -169,20 +167,18 @@ func (client *FakeWebClient) Call(iri string, method string,
                             "package": {"href": "/packages/app.example"}
                         },
                         "_embedded": {
-                            "items": [
-                                {
-                                    "id": 2,
-                                    "sku": "unlockable",
-                                    "title": "Item 2",
-                                    "description": "Item 2 Description",
-                                    "icon": "http://example.com/icons/item2.png",
-                                    "type": "unlockable",
-                                    "state": "approved",
-                                    "_links": {
-                                        "self": {"href": "/packages/app.example/items/2"}
-                                    }
+                            "item": {
+                                "id": 2,
+                                "sku": "unlockable",
+                                "title": "Item 2",
+                                "description": "Item 2 Description",
+                                "icon": "http://example.com/icons/item2.png",
+                                "type": "unlockable",
+                                "state": "approved",
+                                "_links": {
+                                    "self": {"href": "/packages/app.example/items/2"}
                                 }
-                            ]
+                            }
                         }
                     }
                 ]

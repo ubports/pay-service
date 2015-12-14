@@ -347,7 +347,7 @@ func TestGetPurchasedItemsInAppPurchase(t *testing.T) {
     m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
     reply, dbusErr := payiface.GetPurchasedItems(m)
     if dbusErr != nil {
-        t.Errorf("Unexpected error listing purchased items: %s", dbusErr)
+        t.Fatalf("Unexpected error listing purchased items: %s", dbusErr)
     }
 
     if len(reply) != 2 {

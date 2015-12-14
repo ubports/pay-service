@@ -192,25 +192,26 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
 
         if reflect.ValueOf(data).Kind() != reflect.Map {
             fmt.Println("ERROR - Invalid content:", reflect.ValueOf(data).String())
+            fmt.Println(data)
             return purchasedItems, nil
         }
 
         m := data.(map[string]interface{})["_embedded"].(map[string]interface{})
-        q := m["purchases"].([]interface{})
+        q := m["purchase"].([]interface{})
         for purchase := range q {
             purchaseMap := q[purchase].(map[string]interface{})
-            itemList := purchaseMap["_embedded"].(
-                map[string]interface{})["items"].([]interface{})
-            for index := range itemList {
-                details := parseItemMap(itemList[index].(map[string]interface{}))
-                details["requested_device"] = dbus.MakeVariant(
-                    purchaseMap["requested_device"])
-                details["purchase_id"] = dbus.MakeVariant(
-                    uint64(purchaseMap["id"].(float64)))
+            itemMap := purchaseMap["_embedded"].(
+                map[string]interface{})["item"].(map[string]interface{})
 
-                // FIXME: parse timestamps and add them here too
-                purchasedItems = append(purchasedItems, details)
-            }
+            details := parseItemMap(itemMap)
+
+            details["requested_device"] = dbus.MakeVariant(
+                purchaseMap["requested_device"])
+            details["purchase_id"] = dbus.MakeVariant(
+                uint64(purchaseMap["id"].(float64)))
+
+            // FIXME: parse timestamps and add them here too
+            purchasedItems = append(purchasedItems, details)
         }
 
         return purchasedItems, nil
