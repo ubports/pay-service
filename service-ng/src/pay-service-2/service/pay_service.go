@@ -339,6 +339,13 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
                         CurrencyString(price, currencySymbol))
                 }
             }
+        case []interface{}:
+            list := make([]dbus.Variant, len(vv))
+            for idx := range vv {
+                value := vv[idx].(map[string]interface{})
+                list = append(list, dbus.MakeVariant(parseItemMap(value)))
+            }
+            details[k] = dbus.MakeVariant(list)
         case nil:
             // If refundable_until is null, set it to empty string instead
             if k == "refundable_until" {
