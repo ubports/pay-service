@@ -340,7 +340,7 @@ func parseItemMap(itemMap map[string]interface{}) (ItemDetails) {
                 }
             }
         case []interface{}:
-            list := make([]dbus.Variant, len(vv))
+            var list []dbus.Variant
             for idx := range vv {
                 value := vv[idx].(map[string]interface{})
                 list = append(list, dbus.MakeVariant(parseItemMap(value)))

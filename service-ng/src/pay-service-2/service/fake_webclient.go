@@ -202,7 +202,11 @@ func (client *FakeWebClient) Call(iri string, method string,
             "type": "consumable",
             "state": "available",
             "_links": {
-                "self": {"href": "/packages/app.example/items/1"}
+                "self": {"href": "/packages/app.example/items/1"},
+                "package": {"href": "/packages/foo.example" },
+                "purchase": [
+                    {"href": "/packages/foo.example/purchases/1"}
+                ]
             }
         }`, nil
     }
@@ -219,7 +223,11 @@ func (client *FakeWebClient) Call(iri string, method string,
             "type": "unlockable",
             "state": "approved",
             "_links": {
-                "self": {"href": "/packages/app.example/items/1"}
+                "self": {"href": "/packages/app.example/items/1"},
+                "package": {"href": "/packages/foo.example" },
+                "purchase": [
+                    {"href": "/packages/foo.example/purchases/2"}
+                ]
             }
         }`, nil
     }
@@ -236,7 +244,11 @@ func (client *FakeWebClient) Call(iri string, method string,
             "type": "consumable",
             "state": "available",
             "_links": {
-                "self": {"href": "/packages/app.example/items/1"}
+                "self": {"href": "/packages/foo.example/items/1"},
+                "package": {"href": "/packages/foo.example"},
+                "purchase": [
+                    {"href": "/packages/foo.example/purchases/1"}
+                ]
             }
         }`, nil
     }
@@ -253,7 +265,11 @@ func (client *FakeWebClient) Call(iri string, method string,
             "type": "unlockable",
             "state": "purchased",
             "_links": {
-                "self": {"href": "/packages/app.example/items/2"}
+                "self": {"href": "/packages/foo.example/items/2"},
+                "package": {"href": "/packages/foo.example" },
+                "purchase": [
+                    {"href": "/packages/foo.example/purchases/2"}
+                ]
             }
         }`, nil
     }
