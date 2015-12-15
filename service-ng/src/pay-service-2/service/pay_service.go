@@ -192,7 +192,6 @@ func (iface *PayService) GetPurchasedItems(message dbus.Message) ([]ItemDetails,
 
         if reflect.ValueOf(data).Kind() != reflect.Map {
             fmt.Println("ERROR - Invalid content:", reflect.ValueOf(data).String())
-            fmt.Println(data)
             return purchasedItems, nil
         }
 
