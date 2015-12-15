@@ -33,6 +33,7 @@ ERR_PREFIX = 'org.freedesktop.DBus.Error'
 ERR_INVAL = ERR_PREFIX + '.InvalidArgs'
 ERR_ACCESS = ERR_PREFIX + '.AccessDenied'
 
+
 #
 # Util
 #
