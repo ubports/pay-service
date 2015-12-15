@@ -170,7 +170,7 @@ func TestGetItemAppNotRefundable(t *testing.T) {
     timer := new(FakeTimer)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -217,7 +217,7 @@ func TestGetItemAppRefundable(t *testing.T) {
     timer := new(FakeTimer)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -259,7 +259,7 @@ func TestGetItemAppCancelled(t *testing.T) {
     timer := new(FakeTimer)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -373,7 +373,7 @@ func TestGetPurchasedItemsEmpty(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -409,7 +409,7 @@ func TestGetPurchasedItemsEmptyInvalid(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -752,7 +752,7 @@ func TestRefundItemInvalid(t *testing.T) {
     timer := new(FakeTimer)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
