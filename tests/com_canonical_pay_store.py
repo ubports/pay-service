@@ -31,7 +31,7 @@ STORE_IFACE = 'com.canonical.pay.store'
 
 ERR_PREFIX = 'org.freedesktop.DBus.Error'
 ERR_INVAL = ERR_PREFIX + '.InvalidArgs'
-
+ERR_ACCESS = ERR_PREFIX + '.AccessDenied'
 
 #
 # Util
@@ -147,6 +147,10 @@ def store_purchase_item(store, sku):
                 'sku': sku,
             }
             store.items[sku] = item
+        if sku == 'denied':
+            raise dbus.exceptions.DBusException(
+                ERR_ACCESS,
+                'User denied access.')
 
         return store_get_item(store, sku)
     try:

@@ -215,6 +215,32 @@ TEST_F(LibpayPackageTests, PurchaseItemCancelled)
     pay_package_delete(package);
 }
 
+TEST_F(LibpayPackageTests, PurchaseItemError)
+{
+    auto package = pay_package_new("click-scope");
+
+    // install a status observer
+    StatusObserverData data;
+    InstallStatusObserver(package, data);
+
+    const char* sku = "denied";
+    EXPECT_TRUE(pay_package_item_start_purchase(package, sku));
+
+    // wait for the call to complete
+    while (data.num_calls < 2) {
+        g_usleep(G_USEC_PER_SEC/10);
+    }
+
+    // confirm that the item's status changed
+    EXPECT_EQ(2, data.num_calls);
+    EXPECT_EQ(package, data.package);
+    EXPECT_EQ(sku, data.sku);
+    EXPECT_EQ(PAY_PACKAGE_ITEM_STATUS_UNKNOWN, data.status);
+
+    // cleanup
+    pay_package_delete(package);
+}
+
 TEST_F(LibpayPackageTests, RefundItem)
 {
     auto package = pay_package_new("click-scope");
