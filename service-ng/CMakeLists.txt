@@ -31,7 +31,7 @@ if("${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "coverage")
 endif()
 
 add_custom_target(test-service-ng
-  COMMAND ${GO_ENV} dbus-test-runner -m 600 -t ${CMAKE_CURRENT_SOURCE_DIR}/test-service.sh -p ${SERVICE_NG_TARGET}/service -p ${TEST_TYPE}
+  COMMAND ${GO_ENV} dbus-test-runner -m 600 -t ${CMAKE_CURRENT_SOURCE_DIR}/test-service.sh -p ${SERVICE_NG_TARGET}/service -p ${TEST_TYPE} || true
   DEPENDS ${SERVICE_NG_TARGET}
 )
 
