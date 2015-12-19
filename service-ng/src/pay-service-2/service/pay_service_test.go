@@ -588,6 +588,64 @@ func TestPurchaseItem_payUiError(t *testing.T) {
     }
 }
 
+func TestPurchaseItem_trustClickScope(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := NewFakeTimer(ShutdownTimeout)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    // Setup fake trust store agent
+    fakeAgent := &fakes.Agent{GrantAuthentication: false}
+    payiface.trustStoreAgent = fakeAgent
+    payiface.useTrustStore = true
+
+    // Setup fake trust-store-related functions
+    payiface.tripletToAppIdFunction = func(string, string, string) string {
+        return "foo_bar_1.2.3"
+    }
+
+    payiface.getPrimaryPidFunction = func(string) uint32 {
+        return 42
+    }
+
+    // Setup fake pay-ui launcher
+    launchCalled := false
+    payiface.launchPayUiFunction = func(string, string) PayUiFeedback {
+        launchCalled = true
+        feedback := PayUiFeedback{
+            Finished: make(chan struct{}),
+            Error: make(chan error, 1),
+        }
+
+        // Finished
+        close(feedback.Error)
+        close(feedback.Finished)
+
+        return feedback
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    _, dbusErr := payiface.PurchaseItem(m, "app.foo")
+    if dbusErr != nil {
+        t.Errorf("Unexpected error for click-scope: %s", dbusErr)
+    }
+
+    if fakeAgent.AuthenticateRequestWithParametersCalled {
+        t.Error("Expected agent AuthenticateRequestWithParameters() to not be called.")
+    }
+}
+
 func TestPurchaseItem_accessDenied(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()

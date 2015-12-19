@@ -256,7 +256,7 @@ func (iface *PayService) PurchaseItem(message dbus.Message, itemName string) (It
     defer iface.resetTimer()
     packageName := packageNameFromPath(message)
 
-    if iface.useTrustStore {
+    if iface.useTrustStore && packageName != "click-scope"{
         err := iface.authorizePurchaseItem(packageName)
         if err != nil {
             return nil, dbus.NewError(
