@@ -83,7 +83,7 @@ func NewPayService(dbusConnection DbusWrapper,
     if useTrustStore {
         var err error
         payiface.trustStoreAgent, err =
-            trustdbus.CreateMultiUserAgentForBusConnection(
+            trustdbus.CreatePerUserAgentForBusConnection(
 		        trustdbus.WellKnownBusSession, "InAppPurchases")
 	    if err != nil {
 	        return nil, fmt.Errorf("Unable to create trust store agent: %s", err)
