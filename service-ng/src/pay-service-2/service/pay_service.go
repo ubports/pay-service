@@ -348,8 +348,7 @@ func (iface *PayService) authorizePurchaseItem(packageName string) error {
 		    Id: appId,
 	    },
 	    Feature: FeaturePurchaseItem,
-        // TRANSLATORS: Do not translate '%1%' here, only adjust position.
-	    Description: gettext.Gettext("Allow '%1%' to request purchases?"),
+	    Description: gettext.Gettext("Allow requesting in-app purchases?"),
     }
 
     // Ask the trust store if this app is allowed to request purchases. If

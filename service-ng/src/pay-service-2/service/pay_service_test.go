@@ -21,7 +21,6 @@ package service
 import (
     "fmt"
     "os"
-    "strings"
     "testing"
 
     "github.com/godbus/dbus"
@@ -527,10 +526,6 @@ func TestPurchaseItem(t *testing.T) {
     if parameters.Feature != FeaturePurchaseItem {
         t.Errorf("Authentication request feature was %d, expected %d",
                  parameters.Feature, FeaturePurchaseItem)
-    }
-
-    if !strings.Contains(parameters.Description, "%1%") {
-        t.Errorf("Authentication request description does not have a placeholder for the app name")
     }
 }
 

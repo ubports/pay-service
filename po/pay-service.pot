@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-11 14:46-0500\n"
+"POT-Creation-Date: 2016-01-12 14:49-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. TRANSLATORS: Do not translate '%1%' here, only adjust position.
-#: ../service-ng/src/pay-service-2/service/pay_service.go:352
-msgid "Allow '%1%' to request purchases?"
+#: ../service-ng/src/pay-service-2/service/pay_service.go:351
+msgid "Allow requesting in-app purchases?"
 msgstr ""
