@@ -57,6 +57,5 @@ if [ ! -d ${STAGING_KEYRING_PATH} -o ! -d ${STAGING_POLICY_PATH} ]; then
     sudo cp -rf ${PROD_POLICY_PATH} ${STAGING_POLICY_PATH}
     sudo perl -p -i -e "s/${PROD_KEY_ID}/${STAGING_KEY_ID}/g" \
         ${STAGING_POLICY_PATH}/generic.pol
-    sudo mount -o remount,ro /
     echo "Finished importing staging GPG key"
 fi
