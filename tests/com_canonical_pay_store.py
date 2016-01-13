@@ -148,14 +148,14 @@ def store_purchase_item(store, sku):
                 'sku': sku,
             }
             store.items[sku] = item
+
+        return store_get_item(store, sku)
+    try:
         if sku == 'denied':
             raise dbus.exceptions.DBusException(
                 ERR_ACCESS,
                 'User denied access.')
-
-        return store_get_item(store, sku)
-    try:
-        if sku != 'cancel':
+        elif sku != 'cancel':
             item = store.items[sku]
             item.set_property('state', 'approved')
             item.set_property('purchase_id', dbus.UInt64(store.next_purchase_id))

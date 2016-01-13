@@ -217,7 +217,7 @@ TEST_F(LibpayPackageTests, PurchaseItemCancelled)
 
 TEST_F(LibpayPackageTests, PurchaseItemError)
 {
-    auto package = pay_package_new("click-scope");
+    auto package = pay_package_new("org.foo.bar");
 
     // install a status observer
     StatusObserverData data;
