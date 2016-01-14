@@ -131,6 +131,38 @@ func TestGetItemConsumable(t *testing.T) {
     }
 }
 
+func TestGetItemHTTPError(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := NewFakeTimer(ShutdownTimeout)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    _, dbusErr := payiface.GetItem(m, "error")
+    if dbusErr == nil {
+        t.Errorf("Expected error and received none.")
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
+}
+
 func TestGetItemClickScope(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()

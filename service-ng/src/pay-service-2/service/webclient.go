@@ -73,6 +73,11 @@ func (client *WebClient) Call(iri string, method string,
     }
     defer response.Body.Close()
 
+    if response.StatusCode != 200 {
+        return "", fmt.Errorf("HTTP Error: %d: %s",
+            response.StatusCode, response.Status)
+    }
+
     body, err := ioutil.ReadAll(response.Body)
     if err != nil {
         return "", fmt.Errorf("Error reading response body: %s", err)
