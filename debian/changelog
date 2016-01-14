@@ -1,3 +1,18 @@
+pay-service (15.10+16.04.20160114-0ubuntu1) xenial; urgency=medium
+
+  * Add trust-store integration for requests to purchase items.
+    Introduce translations support, as trust-store had a displayed
+    string. (LP: #1524943)
+  * Call observer with status UNKNOWN and refund timeout of 0 on error.
+    (LP: #1526929)
+  * Fix typo in setup-staging.sh. Also include remounting / in setup-
+    staging.sh to enable writable for key. (LP: #1533242)
+  * Pull in the gettext package for golang.
+  * Update to handle purchase correctly after server has been fixed.
+    (LP: #1524941)
+
+ -- Rodney Dawes <ci-train-bot@canonical.com>  Thu, 14 Jan 2016 03:17:44 +0000
+
 pay-service (15.10+16.04.20151124.2-0ubuntu1) xenial; urgency=medium
 
   [ Rodney Dawes ]
