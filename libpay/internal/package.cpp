@@ -425,8 +425,23 @@ bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
                                GVariant* params,
                                gint timeout_msec) noexcept
 {
-    auto on_async_ready = [](GObject* o, GAsyncResult* res, gpointer gself)
+    struct CallbackData
     {
+        GVariant* v {};
+        Package* pkg;
+
+        ~CallbackData()
+        {
+            g_clear_pointer(&v, g_variant_unref);
+        }
+    };
+
+    auto data = new CallbackData;
+
+    auto on_async_ready = [](GObject* o, GAsyncResult* res, gpointer gdata)
+    {
+        auto data = static_cast<CallbackData*>(gdata);
+
         GError* error {};
         GVariant* v {};
         finish_func(reinterpret_cast<BusProxy*>(o), &v, res, &error);
@@ -446,18 +461,25 @@ bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
                     refund_timeout = g_variant_get_uint64(rv);
                     g_variant_unref(rv);
                 }
-                static_cast<Package*>(gself)->statusChanged(sku, status, refund_timeout);
+                data->pkg->statusChanged(sku, status, refund_timeout);
             }
         }
         else if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
            std::cerr << "Error calling method: " << error->message << std::endl;
+           auto param = g_variant_get_child_value(data->v, 0);
+           auto sku  = g_variant_get_string(param, NULL);
+           data->pkg->statusChanged(sku, PAY_PACKAGE_ITEM_STATUS_UNKNOWN, 0);
         }
         g_clear_error(&error);
         g_clear_pointer(&v, g_variant_unref);
+        delete data;
     };
 
-    thread.executeOnThread([this, bus_proxy, function_name, params,
+    data->v = g_variant_ref(params);
+    data->pkg = this;
+
+    thread.executeOnThread([this, bus_proxy, function_name, params, data,
                             timeout_msec, &on_async_ready]()
     {
         g_dbus_proxy_call(G_DBUS_PROXY(bus_proxy.get()),
@@ -467,7 +489,7 @@ bool Package::startStoreAction(const std::shared_ptr<BusProxy>& bus_proxy,
                           timeout_msec,
                           thread.getCancellable().get(), // GCancellable
                           on_async_ready,
-                          this);
+                          data);
     });
 
     return true;
