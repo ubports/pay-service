@@ -36,10 +36,12 @@ find_package (Qt5Core REQUIRED)
 pkg_check_modules (SERVICE_DEPS REQUIRED
   Qt5Core
   click-0.4
+  dbus-cpp
   dbustest-1
   gio-2.0
   gio-unix-2.0
   properties-cpp
+  trust-store
   ubuntu-app-launch-2>=0.5
 )
 include_directories (SYSTEM ${SERVICE_DEPS_INCLUDE_DIRS})
@@ -91,7 +93,7 @@ if (${enable_tests})
   add_subdirectory(tests)
 endif ()
 add_subdirectory(pay-test-app)
-
+add_subdirectory(po)
 
 ##
 ##  Coverage Reports

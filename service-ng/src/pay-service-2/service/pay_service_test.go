@@ -20,8 +20,11 @@ package service
 
 import (
     "fmt"
-    "github.com/godbus/dbus"
+    "os"
     "testing"
+
+    "github.com/godbus/dbus"
+    "launchpad.net/go-trust-store/trust/fakes"
 )
 
 
@@ -31,7 +34,7 @@ func TestAcknowledgeItemConsumable(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -67,7 +70,7 @@ func TestAcknowledgeItemUnlockable(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -102,7 +105,7 @@ func TestGetItemConsumable(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -128,13 +131,45 @@ func TestGetItemConsumable(t *testing.T) {
     }
 }
 
+func TestGetItemHTTPError(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := NewFakeTimer(ShutdownTimeout)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    _, dbusErr := payiface.GetItem(m, "error")
+    if dbusErr == nil {
+        t.Errorf("Expected error and received none.")
+    }
+
+    if !timer.stopCalled {
+        t.Errorf("Timer was not stopped.")
+    }
+
+    if !timer.resetCalled {
+        t.Errorf("Timer was not reset.")
+    }
+}
+
 func TestGetItemClickScope(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -166,7 +201,7 @@ func TestGetItemAppNotRefundable(t *testing.T) {
     timer := new(FakeTimer)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -213,7 +248,7 @@ func TestGetItemAppRefundable(t *testing.T) {
     timer := new(FakeTimer)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -255,7 +290,7 @@ func TestGetItemAppCancelled(t *testing.T) {
     timer := new(FakeTimer)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -297,7 +332,7 @@ func TestGetPurchasedItemsClickScope(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -333,7 +368,7 @@ func TestGetPurchasedItemsInAppPurchase(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -369,7 +404,7 @@ func TestGetPurchasedItemsEmpty(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -405,7 +440,7 @@ func TestGetPurchasedItemsEmptyInvalid(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -441,7 +476,7 @@ func TestPurchaseItem(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -450,8 +485,23 @@ func TestPurchaseItem(t *testing.T) {
         t.Fatalf("Pay service not created.")
     }
 
+    // Setup fake trust store agent
+    fakeAgent := &fakes.Agent{GrantAuthentication: true}
+    payiface.trustStoreAgent = fakeAgent
+    payiface.useTrustStore = true
+
+    // Setup fake trust-store-related functions
+    payiface.tripletToAppIdFunction = func(string, string, string) string {
+        return "foo_bar_1.2.3"
+    }
+
+    payiface.getPrimaryPidFunction = func(string) uint32 {
+        return 42
+    }
+
+    // Setup fake pay-ui launcher
     launchCalled := false
-    payiface.launchPayUiFunction = func(appId string, purchaseUrl string) PayUiFeedback {
+    payiface.launchPayUiFunction = func(string, string) PayUiFeedback {
         launchCalled = true
         feedback := PayUiFeedback{
             Finished: make(chan struct{}),
@@ -484,6 +534,31 @@ func TestPurchaseItem(t *testing.T) {
     if !launchCalled {
         t.Error("Expected LaunchPayUi() to be called.")
     }
+
+    if !fakeAgent.AuthenticateRequestWithParametersCalled {
+        t.Error("Expected agent AuthenticateRequestWithParameters() to be called.")
+    }
+
+    parameters := fakeAgent.AuthenticationRequestParameters
+    if parameters.Application.Uid != os.Getuid() {
+        t.Errorf("Authentication request uid was %d, expected %d",
+                 parameters.Application.Uid, os.Getuid())
+    }
+
+    if parameters.Application.Pid != 42 {
+        t.Errorf("Authentication request pid was %d, expected 42",
+                 parameters.Application.Pid)
+    }
+
+    if parameters.Application.Id != "foo_bar_1.2.3" {
+        t.Errorf(`Authentication request id was "%s", expected "foo_bar_1.2.3"`,
+                 parameters.Application.Id)
+    }
+
+    if parameters.Feature != FeaturePurchaseItem {
+        t.Errorf("Authentication request feature was %d, expected %d",
+                 parameters.Feature, FeaturePurchaseItem)
+    }
 }
 
 func TestPurchaseItem_payUiError(t *testing.T) {
@@ -492,7 +567,7 @@ func TestPurchaseItem_payUiError(t *testing.T) {
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -502,7 +577,7 @@ func TestPurchaseItem_payUiError(t *testing.T) {
     }
 
     launchCalled := false
-    payiface.launchPayUiFunction = func(appId string, purchaseUrl string) PayUiFeedback {
+    payiface.launchPayUiFunction = func(string, string) PayUiFeedback {
         launchCalled = true
         feedback := PayUiFeedback{
             Finished: make(chan struct{}),
@@ -540,13 +615,189 @@ func TestPurchaseItem_payUiError(t *testing.T) {
     }
 }
 
+func TestPurchaseItem_trustClickScope(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := NewFakeTimer(ShutdownTimeout)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    // Setup fake trust store agent
+    fakeAgent := &fakes.Agent{GrantAuthentication: false}
+    payiface.trustStoreAgent = fakeAgent
+    payiface.useTrustStore = true
+
+    // Setup fake trust-store-related functions
+    payiface.tripletToAppIdFunction = func(string, string, string) string {
+        return "foo_bar_1.2.3"
+    }
+
+    payiface.getPrimaryPidFunction = func(string) uint32 {
+        return 42
+    }
+
+    // Setup fake pay-ui launcher
+    launchCalled := false
+    payiface.launchPayUiFunction = func(string, string) PayUiFeedback {
+        launchCalled = true
+        feedback := PayUiFeedback{
+            Finished: make(chan struct{}),
+            Error: make(chan error, 1),
+        }
+
+        // Finished
+        close(feedback.Error)
+        close(feedback.Finished)
+
+        return feedback
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/click_2Dscope")
+    _, dbusErr := payiface.PurchaseItem(m, "app.foo")
+    if dbusErr != nil {
+        t.Errorf("Unexpected error for click-scope: %s", dbusErr)
+    }
+
+    if fakeAgent.AuthenticateRequestWithParametersCalled {
+        t.Error("Expected agent AuthenticateRequestWithParameters() to not be called.")
+    }
+}
+
+func TestPurchaseItem_accessDenied(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := NewFakeTimer(ShutdownTimeout)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    // Setup fake trust store agent
+    fakeAgent := &fakes.Agent{GrantAuthentication: false}
+    payiface.trustStoreAgent = fakeAgent
+    payiface.useTrustStore = true
+
+    // Setup fake trust-store-related functions
+    payiface.tripletToAppIdFunction = func(string, string, string) string {
+        return "foo_bar_1.2.3"
+    }
+
+    payiface.getPrimaryPidFunction = func(string) uint32 {
+        return 42
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    _, dbusErr := payiface.PurchaseItem(m, "consumable")
+    if dbusErr == nil {
+        t.Errorf("Expected an error due to purchase access being denied")
+    }
+
+    if !fakeAgent.AuthenticateRequestWithParametersCalled {
+        t.Error("Expected agent AuthenticateRequestWithParameters() to be called.")
+    }
+}
+
+func TestPurchaseItem_errorFindingAppId(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := NewFakeTimer(ShutdownTimeout)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    // Setup fake trust store agent
+    fakeAgent := &fakes.Agent{GrantAuthentication: true}
+    payiface.trustStoreAgent = fakeAgent
+    payiface.useTrustStore = true
+
+    // Setup fake trust-store-related functions
+    payiface.tripletToAppIdFunction = func(string, string, string) string {
+        return "" // This is an error
+    }
+
+    payiface.getPrimaryPidFunction = func(string) uint32 {
+        return 42
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    _, dbusErr := payiface.PurchaseItem(m, "consumable")
+    if dbusErr == nil {
+        t.Errorf("Expected an error due to inability to get application ID")
+    }
+}
+
+func TestPurchaseItem_errorFindingAppPid(t *testing.T) {
+    dbusServer := new(FakeDbusServer)
+    dbusServer.InitializeSignals()
+    timer := NewFakeTimer(ShutdownTimeout)
+    client := new(FakeWebClient)
+
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
+    if err != nil {
+        t.Fatalf("Unexpected error while creating pay service: %s", err)
+    }
+
+    if payiface == nil {
+        t.Fatalf("Pay service not created.")
+    }
+
+    // Setup fake trust store agent
+    fakeAgent := &fakes.Agent{GrantAuthentication: true}
+    payiface.trustStoreAgent = fakeAgent
+    payiface.useTrustStore = true
+
+    // Setup fake trust-store-related functions
+    payiface.tripletToAppIdFunction = func(string, string, string) string {
+        return "foo_bar_1.2.3"
+    }
+
+    payiface.getPrimaryPidFunction = func(string) uint32 {
+        return 0 // This is an error
+    }
+
+    var m dbus.Message
+    m.Headers = make(map[dbus.HeaderField]dbus.Variant)
+    m.Headers[dbus.FieldPath] = dbus.MakeVariant("/com/canonical/pay/store/foo_2Eexample")
+    _, dbusErr := payiface.PurchaseItem(m, "consumable")
+    if dbusErr == nil {
+        t.Errorf("Expected an error due to inability to get application PID")
+    }
+}
+
 func TestRefundItem(t *testing.T) {
     dbusServer := new(FakeDbusServer)
     dbusServer.InitializeSignals()
     timer := NewFakeTimer(ShutdownTimeout)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }
@@ -586,7 +837,7 @@ func TestRefundItemInvalid(t *testing.T) {
     timer := new(FakeTimer)
     client := new(FakeWebClient)
 
-    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client)
+    payiface, err := NewPayService(dbusServer, "foo", "/foo", timer, client, false)
     if err != nil {
         t.Fatalf("Unexpected error while creating pay service: %s", err)
     }

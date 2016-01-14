@@ -1,4 +1,4 @@
-/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */ 
+/* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright © 2015 Canonical Ltd.
  *
@@ -25,7 +25,7 @@ import (
 func TestNew(t *testing.T) {
     client := new(FakeWebClient)
     timer := NewFakeTimer(ShutdownTimeout)
-    service, err := New(client, timer)
+    service, err := New(client, timer, false)
     if err != nil {
         t.Fatalf("Unexpected error instantiating service: %s", err)
     }
@@ -38,7 +38,7 @@ func TestNew(t *testing.T) {
 func TestServiceRunStop(t *testing.T) {
     client := new(FakeWebClient)
     timer := NewFakeTimer(ShutdownTimeout)
-    service, err := New(client, timer)
+    service, err := New(client, timer, false)
     if err != nil {
         t.Fatalf("Unexpected error instantiating service: %s", err)
     }

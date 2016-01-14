@@ -262,6 +262,11 @@ func (client *FakeWebClient) Call(iri string, method string,
         }`, nil
     }
 
+    // An HTTP error condition
+    if parsed.Path == "/inventory/api/v1/packages/foo.example/items/by-sku/error" {
+        return "", fmt.Errorf("HTTP Error: 404: File Not Found")
+    }
+
     return "", nil
 }
 
