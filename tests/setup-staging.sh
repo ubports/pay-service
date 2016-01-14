@@ -45,10 +45,11 @@ STAGING_KEYRING_PATH=/usr/share/debsig/keyrings/${STAGING_KEY_ID}
 STAGING_POLICY_PATH=/etc/debsig/policies/${STAGING_KEY_ID}
 
 PROD_KEY_ID=608FF2D200A0A71F
-PROD_POLCIY_PATH=/etc/debsig/policies/${PROD_KEY_ID}
+PROD_POLICY_PATH=/etc/debsig/policies/${PROD_KEY_ID}
 
-if [ ! -d ${STAGING_KEYRING_PATH} ]; then
+if [ ! -d ${STAGING_KEYRING_PATH} -o ! -d ${STAGING_POLICY_PATH} ]; then
     echo "Setting up staging GPG key"
+    sudo mount -o remount,rw /
     sudo mkdir -p ${STAGING_KEYRING_PATH}
     sudo gpg --no-default-keyring \
         --keyring ${STAGING_KEYRING_PATH}/click-store.gpg \
