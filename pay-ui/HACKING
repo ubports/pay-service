@@ -1,0 +1,97 @@
+pay-ui hacking guide
+===============================
+
+Getting pay-ui
+-------------------------
+
+To get the main branch of pay-ui:
+
+    $ bzr branch lp:pay-ui
+
+
+Getting dependencies
+--------------------
+
+To succesfully build pay-ui extra packages are required, beyond the SDK:
+
+    $ sudo apt-get install libubuntuoneauth-2.0-dev
+
+
+Building pay-ui
+------------------
+
+This app is built using cmake. Here's an example on how to build it:
+
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    $ make -j 8
+
+
+Building a click package of pay-ui
+----------------------------------
+
+To build a package for the amd64 architecture, you can run the following
+command. Replace amd64 with i386 or armhf to build a package for those
+architectures instead. If you've already created a chroot for the framework
+and architecture, you can skip that command.
+
+    $ click chroot -f ubuntu-sdk-14.10 -a amd64 create
+    $ click-buddy --framework ubuntu-sdk-14.10 --arch amd64 \
+      --extra-deps libubuntuoneauth-2.0-dev
+
+Running the unit tests
+----------------------
+
+    $ make check
+
+
+Running the autopilot tests
+---------------------------
+
+To run the autopilot tests locally, you first need to build pay-ui.
+
+    $ make autopilot
+
+The autopilot tests can also be run against a built click package, under
+qemu. To do so, you will need some additional packages. Most importantly,
+you will need the latest version of the autopkgtest package. You can download
+it at https://launchpad.net/ubuntu/+source/autopkgtest by selecting the most
+recent build for the most recent version of Ubuntu. 
+
+    $ sudo dpkg -i autopkgtest*.deb
+    $ sudo apt-get install qemu
+
+After installing autopkgtest and qemu, you need to build an image for qemu
+to use. We use vivid here, as building an image to closely resemble the actual
+stable phone images is quite difficult. When this is easier in the future, we
+will switch to using stable phone images for this. The architecture argument
+should match the architecture of the click package you are trying to test.
+We output the image to ~/ rather than the current directory, so it will be in
+a safer place to avoid rebuilding images every time. You can store it in any
+directory you wish.
+
+    $ adt-buildvm-ubuntu-cloud -r vivid -a amd64 -o ~/
+
+Then the tests may be run using adt-run with the qemu virtualization host.
+The output directory option here can be wherever you like, and is where the
+test artifacts will be placed. The ordering of the arguments to adt-run is
+important so try to keep them in this order.
+
+    $ adt-run --click-source . \
+      --click ./com.canonical.payui_15.01.*_amd64.click \
+      -o /tmp/adt-payui-test \
+      --setup-commands "add-apt-repository \
+          ppa:ci-train-ppa-service/stable-phone-overlay" \
+      --apt-pocket proposed \
+      --setup-commands "apt-get update" \
+      --setup-commands ubuntu-touch-session \
+      --- qemu ~/adt-vivid-amd64-cloud.img
+
+To examine the test results, which are in subunit format, additional tools are
+required.
+
+    $ sudo add-apt-repository ppa:thomir/trv
+    $ sudo apt-get update
+    $ sudo apt-get install trv
+    $ trv /tmp/adt-payui-test/artifacts/autopilot.subunit

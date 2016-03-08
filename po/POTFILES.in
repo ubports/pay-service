@@ -1,1 +1,9 @@
+pay-ui/app/components/ConfirmDialog.qml
+pay-ui/app/components/PromptDialog.qml
+pay-ui/app/components/BeforeUnloadDialog.qml
+pay-ui/app/components/SecurityCertificatePopover.qml
+pay-ui/app/components/AlertDialog.qml
+pay-ui/app/ui/CheckoutPage.qml
+pay-ui/app/ui/ErrorDialog.qml
+pay-ui/app/payui.qml
 service-ng/src/pay-service-2/service/pay_service.go

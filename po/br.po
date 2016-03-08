@@ -1,0 +1,106 @@
+# Breton translation for pay-ui
+# Copyright (c) 2015 Rosetta Contributors and Canonical Ltd 2015
+# This file is distributed under the same license as the pay-ui package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pay-service\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2015-02-19 15:01-0500\n"
+"PO-Revision-Date: 2015-06-05 06:28+0000\n"
+"Last-Translator: Fohanno Thierry <thierry.fohanno@ofis-bzh.org>\n"
+"Language-Team: Breton <br@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2015-12-25 05:38+0000\n"
+"X-Generator: Launchpad (build 17865)\n"
+
+#: ../app/payui.qml:148
+msgid "Finish Purchase"
+msgstr "Echuiñ ar brenadenn"
+
+#: ../app/payui.qml:163
+msgid "Incorrect Password, please try again."
+msgstr "Ger-tremen direizh, esaeit en-dro, mar plij."
+
+#: ../app/payui.qml:276
+msgid "Purchase failed"
+msgstr "Prenadenn c'hwitet"
+
+#: ../app/payui.qml:277
+msgid "The purchase couldn't be completed."
+msgstr "N'eus ket bet gallet echuiñ ar brenadenn"
+
+#: ../app/payui.qml:292
+msgid "Error contacting the server"
+msgstr "Fazi o vont e darempred gant ar servijer"
+
+#: ../app/payui.qml:293 ../app/payui.qml:309
+msgid "Do you want to try again?"
+msgstr "Ha fellout a ra deoc'h esaeañ en-dro ?"
+
+#: ../app/payui.qml:308
+msgid "Adding Credit Card failed"
+msgstr "N'eus ket bet gallet ouzhpennañ ar gartenn-gred"
+
+#: ../app/payui.qml:327
+msgid "Processing Purchase"
+msgstr "Oc'h ober war-dro ar brenadenn"
+
+#: ../app/payui.qml:327
+msgid "Loading"
+msgstr "O kargañ"
+
+#: ../app/payui.qml:328
+msgid "Please wait…"
+msgstr "Gortozit, mar plij..."
+
+#: ../app/payui.qml:342 ../app/ui/CheckoutPage.qml:370
+msgid "Cancel"
+msgstr "Nullañ"
+
+#: ../app/payui.qml:401
+msgid "Add Payment"
+msgstr "Ouzhpennañ ur paeamant"
+
+#: ../app/ui/CheckoutPage.qml:27
+msgid "Payment"
+msgstr "Paeamant"
+
+#: ../app/ui/CheckoutPage.qml:228
+msgid "Enter your Ubuntu One password"
+msgstr "Skrivit ho ker-tremen Ubuntu One"
+
+#: ../app/ui/CheckoutPage.qml:271
+msgid "Type your verification code:"
+msgstr "Skrivit ho kof gwiriañ :"
+
+#: ../app/ui/CheckoutPage.qml:282
+msgid "2-factor device code"
+msgstr "Kod stignad gant 2 faktor"
+
+#: ../app/ui/CheckoutPage.qml:379
+msgid "Buy Now"
+msgstr "Prenañ bremañ"
+
+#: ../app/ui/CheckoutPage.qml:393
+msgid "Add credit/debit card"
+msgstr "Ouzhpennañ ur gartenn-gred/dle"
+
+#: ../app/ui/ErrorDialog.qml:45
+msgid "Retry"
+msgstr "Esaeañ en-dro"
+
+#: ../app/ui/ErrorDialog.qml:55
+msgid "Close"
+msgstr "Serriñ"
+
+#: payui_payui.desktop.in.in.h:1
+msgid "Pay UI"
+msgstr "Etrefas paeañ"
+
+#: payui_payui.desktop.in.in.h:2
+msgid "The application for completing a purchase."
+msgstr "An arload evit ober ur brenadenn."

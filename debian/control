@@ -32,6 +32,7 @@ Build-Depends: click-dev,
                qtbase5-dev,
                qtdeclarative5-dev,
                sysvinit-utils,
+               xvfb,
 Standards-Version: 3.9.5
 Homepage: https://launchpad.net/pay-service
 # If you aren't a member of ~indicator-applet-developers but need to upload
@@ -44,6 +45,7 @@ Architecture: any
 Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
+         pay-ui (= ${binary:Version}),
          sysvinit-utils,
          ubuntu-push-client (>= 0.68+15.04.20151009),
 Recommends: gnupg,
@@ -54,7 +56,20 @@ Description: service to allow requesting payment for an item
  payment provider and give that money to the developer. This service
  coordinates the payment interaction with the server on the device.
  .
- This package provides a service for the Pay Service
+ This package provides a service for the Pay Service.
+
+Package: pay-ui
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: service to allow requesting payment for an item - user interface
+ Allows applications to request an item be paid for by the user.
+ This requires interaction with the server backend to handle the
+ payment provider and give that money to the developer. This service
+ coordinates the payment interaction with the server on the device.
+ .
+ This package provides the user interface for the Pay Service.
 
 Package: libpay2
 Architecture: any

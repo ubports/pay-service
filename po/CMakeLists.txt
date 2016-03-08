@@ -15,7 +15,7 @@ add_custom_target(POTFILES ALL
 # Creates the .pot file containing the translations template
 set(INTLTOOL_ENV
     XGETTEXT="${GETTEXT_XGETTEXT_EXECUTABLE}"
-    XGETTEXT_ARGS="--keyword=Gettext;--keyword=NGettext:1,2"
+    XGETTEXT_ARGS="--keyword=Gettext;--keyword=NGettext:1,2;--keyword=tr;--keyword=tr:1,2;--keyword=N_"
     srcdir="${CMAKE_CURRENT_SOURCE_DIR}"
 )
 add_custom_target(${POT_FILE}

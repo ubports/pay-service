@@ -1,0 +1,5 @@
+pay-ui (14.04+14.04.20131219) utopic; urgency=low
+
+  * Initial packaging.
+
+ -- Rodney Dawes <rodney.dawes@ubuntu.com>  Thu, 19 Dec 2013 17:29:05 -0500

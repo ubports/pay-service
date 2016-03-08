@@ -1,0 +1,106 @@
+# Romanian translation for pay-ui
+# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
+# This file is distributed under the same license as the pay-ui package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pay-service\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2015-02-19 15:01-0500\n"
+"PO-Revision-Date: 2015-03-03 19:56+0000\n"
+"Last-Translator: Meriuță Cornel <meriutacornel@neacornel.eu>\n"
+"Language-Team: Romanian <ro@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2015-12-25 05:38+0000\n"
+"X-Generator: Launchpad (build 17865)\n"
+
+#: ../app/payui.qml:148
+msgid "Finish Purchase"
+msgstr "Termină cumpărăturile"
+
+#: ../app/payui.qml:163
+msgid "Incorrect Password, please try again."
+msgstr "Parolă greșită, încercați din nou."
+
+#: ../app/payui.qml:276
+msgid "Purchase failed"
+msgstr "Achiziția a eșuat"
+
+#: ../app/payui.qml:277
+msgid "The purchase couldn't be completed."
+msgstr "Achiziția nu poate fi dusă la bun sfârșit."
+
+#: ../app/payui.qml:292
+msgid "Error contacting the server"
+msgstr "Eroare la contactarea serverului"
+
+#: ../app/payui.qml:293 ../app/payui.qml:309
+msgid "Do you want to try again?"
+msgstr "Doriți să încercați din nou?"
+
+#: ../app/payui.qml:308
+msgid "Adding Credit Card failed"
+msgstr "Eșec la adăugarea cărții de credit"
+
+#: ../app/payui.qml:327
+msgid "Processing Purchase"
+msgstr "Procesare achiziție"
+
+#: ../app/payui.qml:327
+msgid "Loading"
+msgstr "Se încarcă"
+
+#: ../app/payui.qml:328
+msgid "Please wait…"
+msgstr "Vă rugăm așteptați..."
+
+#: ../app/payui.qml:342 ../app/ui/CheckoutPage.qml:370
+msgid "Cancel"
+msgstr "Anulează"
+
+#: ../app/payui.qml:401
+msgid "Add Payment"
+msgstr "Adăugare metodă de plată"
+
+#: ../app/ui/CheckoutPage.qml:27
+msgid "Payment"
+msgstr "Metodă de plată"
+
+#: ../app/ui/CheckoutPage.qml:228
+msgid "Enter your Ubuntu One password"
+msgstr "Introduceţi parola pentru contul Ubuntu One"
+
+#: ../app/ui/CheckoutPage.qml:271
+msgid "Type your verification code:"
+msgstr "Introduceți codul de verificare"
+
+#: ../app/ui/CheckoutPage.qml:282
+msgid "2-factor device code"
+msgstr "Cod dispozitiv cu 2 factori"
+
+#: ../app/ui/CheckoutPage.qml:379
+msgid "Buy Now"
+msgstr "Cumpărare acum"
+
+#: ../app/ui/CheckoutPage.qml:393
+msgid "Add credit/debit card"
+msgstr "Adăugare card de credit/debit"
+
+#: ../app/ui/ErrorDialog.qml:45
+msgid "Retry"
+msgstr "Reîncercați"
+
+#: ../app/ui/ErrorDialog.qml:55
+msgid "Close"
+msgstr "Închide"
+
+#: payui_payui.desktop.in.in.h:1
+msgid "Pay UI"
+msgstr "Pay UI"
+
+#: payui_payui.desktop.in.in.h:2
+msgid "The application for completing a purchase."
+msgstr "Aplicație pentru achiziții."

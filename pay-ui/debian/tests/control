@@ -1,0 +1,10 @@
+Tests: run-tests
+Restrictions: rw-build-tree build-needed allow-stderr
+Depends: @,
+ cmake,
+ debhelper (>= 9),
+ libubuntuoneauth-2.0-dev,
+ qtbase5-dev,
+ qtdeclarative5-dev,
+ qtdeclarative5-ubuntu-ui-toolkit-plugin,
+ xvfb
