@@ -2,8 +2,7 @@ Source: pay-service
 Section: gnome
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: click-dev,
-               cmake,
+Build-Depends: cmake,
                cmake-extras,
                dbus,
                dbus-test-runner,
@@ -15,7 +14,6 @@ Build-Depends: click-dev,
                google-mock,
                intltool,
                lcov,
-               libclick-0.4-dev,
                libdbus-1-dev,
                libdbus-cpp-dev,
                libdbustest1-dev,

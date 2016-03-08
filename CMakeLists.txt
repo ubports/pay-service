@@ -35,7 +35,6 @@ find_package (Qt5Core REQUIRED)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
   Qt5Core
-  click-0.4
   dbus-cpp
   dbustest-1
   gio-2.0
