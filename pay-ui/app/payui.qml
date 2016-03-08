@@ -38,7 +38,7 @@ MainView {
     objectName: "payui"
 
     // NOTE: Must match the gettext domain for translations.
-    applicationName: "com.canonical.payui"
+    applicationName: "pay-service"
 
     /*
      This property enables the application to change orientation
@@ -70,7 +70,7 @@ MainView {
 
     Setup {
         id: setup
-        applicationId: "com.canonical.payui"
+        applicationId: "pay-service"
         providerId: "ubuntuone"
 
         onFinished: {
