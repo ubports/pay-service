@@ -1,4 +1,0 @@
-Pattern: ${home}/.cache/pay-service/pay-ui/${id}.desktop
-Exec: /bin/true
-User-Level: yes
-Hook-Name: pay-ui
