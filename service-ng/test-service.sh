@@ -22,4 +22,4 @@ if [ "x${2}" = "xcoverage" -a -z "`go version|grep gccgo`" ]; then
     GO_TEST_OPTIONS="-coverprofile=go.cover"
 fi
 
-go test ${1} ${GO_TEST_OPTIONS}
+go test ${1} ${GO_TEST_OPTIONS} -v
