@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Canonical Ltd.
+/* Copyright (C) 2016 Canonical Ltd.
  *
  * This file is part of go-mir.
  *
@@ -15,35 +15,27 @@
  * along with go-mir. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fakes
+#include "_cgo_export.h"
+#include "mir_prompt_session_helper.h"
 
-// #cgo pkg-config: mirclient
-// #include <stdlib.h>
-// #include <mir_toolkit/mir_prompt_session.h>
-import "C"
+static void _fd_getter (MirPromptSession * session, size_t count,
+                 int const * fdsin, void * pfds)
+{
+    if (count != 1) {
+        g_warning("Didn't get the right number of FDs");
+        return;
+    }
 
-import (
-	"unsafe"
-)
-
-type fakePromptSession struct {
-	ReleaseCalled            bool
-	ToMirPromptSessionCalled bool
+    int * fds = (int *)pfds;
+    fds[0] = fdsin[0];
 }
 
-func NewPromptSession() *fakePromptSession {
-	return &fakePromptSession{}
-}
+int mir_prompt_session_get_fd(MirPromptSession * session)
+{
+    int fd = 0;
+    MirWaitHandle * wait = mir_prompt_session_new_fds_for_prompt_providers(session, 1, _fd_getter, &fd);
 
-func (fake *fakePromptSession) Release() {
-	fake.ReleaseCalled = true
-}
+    mir_wait_for(wait);
 
-func (fake *fakePromptSession) ToMirPromptSession() unsafe.Pointer {
-	fake.ToMirPromptSessionCalled = true
-	return nil
-}
-
-func (fake *fakePromptSession) GetSocketURI() (string, error) {
-	return "", nil
+    return fd;
 }
