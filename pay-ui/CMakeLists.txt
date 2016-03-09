@@ -1,8 +1,8 @@
 # Standard install paths
 set(APP_NAME payui)
 
-set(QT_IMPORTS_DIR "${CMAKE_INSTALL_LIBEXECDIR}/payui")
-set(PAYUI_DIR "${CMAKE_INSTALL_DATADIR}/payui/qml")
+set(QT_IMPORTS_DIR "${CMAKE_INSTALL_FULL_LIBEXECDIR}/payui")
+set(PAYUI_DIR "${CMAKE_INSTALL_FULL_DATADIR}/payui/qml")
 
 add_subdirectory(app)
 add_subdirectory(backend)
