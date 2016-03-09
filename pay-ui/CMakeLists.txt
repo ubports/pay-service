@@ -9,7 +9,7 @@ add_subdirectory(backend)
 
 configure_file(pay-ui.in pay-ui)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/pay-ui
-  DESTINATION ${QT_IMPORTS_DIR}
+  DESTINATION lib/payui
 )
 
 add_custom_target("autopilot"
