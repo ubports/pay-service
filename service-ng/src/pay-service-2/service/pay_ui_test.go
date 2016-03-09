@@ -36,13 +36,6 @@ func setupUserRuntimeDirectory(t *testing.T, directory string) {
     }
 }
 
-func setupUserCacheDirectory(t *testing.T, directory string) {
-    err := os.Setenv("XDG_CACHE_HOME", directory)
-    if err != nil {
-        t.Errorf("Unexpected error while setting $XDG_CACHE_HOME: %s", err)
-    }
-}
-
 func launchFakePayUi(
     t *testing.T,
     newMirConnectionFunction func(string, string) (mir.Connection, error),
@@ -53,6 +46,9 @@ func launchFakePayUi(
     payUiNewMirPromptSessionFunction = newMirPromptSessionFunction
     payUiGetPrimaryPidFunction = getPrimaryPidFunction
 
+    payUiExecFunction = func(purchaseUrl string) {
+    }
+
     payUiGetAppIdFunction = func(pkg string, app string, vers string) string {
         if app != "" && vers != "" {
             return pkg + "_" + app + "_" + vers
@@ -61,9 +57,6 @@ func launchFakePayUi(
     }
 
     setupUserRuntimeDirectory(t, "/foo")
-
-    // Prepare the user cache directory
-    setupUserCacheDirectory(t, "/bar")
 
     // Finally, launch the fake Pay UI
     feedback := LaunchPayUi("foo", "purchase://foo/bar")
@@ -220,47 +213,6 @@ func TestGetUserRuntimeDirectory_withoutXDG(t *testing.T) {
     _, err := getUserRuntimeDirectory()
     if err == nil {
         t.Error("Expected an error due to invalid XDG environment")
-    }
-}
-
-// Test that getUserCacheDirectory works with XDG environment variables
-func TestGetUserCacheDirectory(t *testing.T) {
-    expectedCacheDirectory := "/foo/bar"
-
-    setupUserCacheDirectory(t, expectedCacheDirectory)
-
-    directory, err := getUserCacheDirectory()
-    if err != nil {
-        t.Errorf("Unexpected error getting user cache directory: %s", err)
-    }
-
-    if directory != expectedCacheDirectory {
-        t.Errorf(`User cache directory was "%s", expected "%s"`, directory,
-                 expectedCacheDirectory)
-    }
-}
-
-// Test that getUserCacheDirectory uses fallback without XDG environment
-// variables
-func TestGetUserCacheDirectory_withoutXDG(t *testing.T) {
-    currentUser, err := user.Current()
-    if err != nil {
-        t.Errorf("Unable to get current user: %s", err)
-    }
-
-    expectedCacheDirectory := path.Join(currentUser.HomeDir, ".cache")
-
-    // Make sure XDG environment variable isn't set
-    setupUserCacheDirectory(t, "")
-
-    directory, err := getUserCacheDirectory()
-    if err != nil {
-        t.Errorf("Unexpected error getting user cache directory: %s", err)
-    }
-
-    if directory != expectedCacheDirectory {
-        t.Errorf(`User cache directory was "%s", expected "%s"`, directory,
-                 expectedCacheDirectory)
     }
 }
 
