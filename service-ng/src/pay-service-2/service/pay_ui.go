@@ -65,7 +65,10 @@ func LaunchPayUi(appId string, purchaseUrl string) PayUiFeedback {
 
 // execPayUiCommand is a replaceable call to do the actual running of pay-ui
 func execPayUiCommand(purchaseUrl string) {
-    exec.Command("/usr/lib/payui/pay-ui", purchaseUrl).Run()
+    cmd := exec.Command("/usr/lib/payui/pay-ui", purchaseUrl)
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    cmd.Run()
 }
 
 // launchPayUiAndWait is the synchronous worker function that actually
