@@ -23,7 +23,6 @@ import (
     "path"
     "os"
     "os/exec"
-    "os/user"
 
     "github.com/ziutek/glib"
     "launchpad.net/go-mir/mir"
