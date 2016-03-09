@@ -20,9 +20,7 @@ package service
 
 import (
     "os"
-    "os/user"
     "fmt"
-    "path"
     "testing"
 
     "launchpad.net/go-mir/mir"
