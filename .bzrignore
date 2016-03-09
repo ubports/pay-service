@@ -8,7 +8,7 @@ tests/gmock
 *.so.*
 *.mo
 *.service
-
+pay-ui/pay-ui
 
 build/
 builddir/
