@@ -10,5 +10,6 @@ tests/gmock
 *.service
 pay-ui/pay-ui
 
+__pycache__
 build/
 builddir/

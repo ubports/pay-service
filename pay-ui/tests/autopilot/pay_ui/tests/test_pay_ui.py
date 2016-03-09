@@ -35,6 +35,8 @@ class PayUITestCase(tests.BasePayUITestCase):
             self.mock_server.url() + '/' + self.id().split('.')[-1]))
         self.useFixture(fixtures.EnvironmentVariable(
             'U1_SEARCH_BASE_URL', self.mock_server.url('iteminfo/')))
+        self.useFixture(fixtures.EnvironmentVariable(
+            'SSO_AUTH_BASE_URL', self.mock_server.url('login/')))
         self.useFixture(fixtures.EnvironmentVariable('GET_CREDENTIALS', '0'))
         self.create_config_dir()
         self.addCleanup(self.clean_config_dir)
