@@ -270,12 +270,16 @@ void Network::onReply(QNetworkReply *reply)
         }
 
     } else if (httpStatus == 401 || httpStatus == 403) {
+        qWarning() << "Credentials no longer valid. Invalidating.";
         m_service.invalidateCredentials();
         Q_EMIT authenticationError();
     } else if (httpStatus == 404 && state->operation.contains(CHECK_PURCHASED)) {
         Q_EMIT itemNotPurchased();
     } else {
-        Q_EMIT error(QString::number(httpStatus));
+        QString msg(QString::number(httpStatus));
+        msg += ": ";
+        msg += reply->readAll().data();
+        Q_EMIT error(msg);
     }
     reply->deleteLater();
 }

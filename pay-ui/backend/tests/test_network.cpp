@@ -129,7 +129,7 @@ void TestNetwork::testNetworkGetPaymentTypesFail()
     // WTF DOES THIS HAPPEN TWICE
     QTRY_COMPARE(spy.count(), 2);
     QList<QVariant> arguments = spy.takeFirst();
-    QVERIFY(arguments.at(0).toString() == "404");
+    QVERIFY(arguments.at(0).toString().startsWith("404:"));
 }
 
 void TestNetwork::testNetworkBuyItem()

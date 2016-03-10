@@ -2,4 +2,4 @@
 
 set -e
 
-qmlscene -I @QT_IMPORTS_DIR@ @PAYUI_DIR@/payui.qml $@
+env QML2_IMPORT_PATH=${QML2_IMPORT_PATH}:@QT_IMPORTS_DIR@ qmlscene @PAYUI_DIR@/payui.qml $@
