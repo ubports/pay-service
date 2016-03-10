@@ -1,6 +1,6 @@
 /* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright © 2015 Canonical Ltd.
+ * Copyright © 2015-2016 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
