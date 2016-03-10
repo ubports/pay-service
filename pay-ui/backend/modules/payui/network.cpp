@@ -142,16 +142,16 @@ void Network::onReply(QNetworkReply *reply)
     QVariant statusAttr = reply->attribute(
                             QNetworkRequest::HttpStatusCodeAttribute);
     if (!statusAttr.isValid()) {
-        qDebug() << "Reply - Invalid status";
-        QString message("Invalid status");
+        QString message("Invalid reply status");
+        qWarning() << message;
         Q_EMIT error(message);
         return;
     }
 
     RequestObject* state = qobject_cast<RequestObject*>(reply->request().originatingObject());
     if (state->operation.isEmpty()) {
-        qDebug() << "Reply received for non valid state.";
         QString message("Reply received for non valid state.");
+        qWarning() << message;
         Q_EMIT error(message);
         return;
     }
@@ -264,8 +264,8 @@ void Network::onReply(QNetworkReply *reply)
                 Q_EMIT itemNotPurchased();
             }
         } else {
-            qDebug() << "Reply received for non valid state.";
             QString message("Reply received for non valid state.");
+            qWarning() << message;
             Q_EMIT error(message);
         }
 
@@ -276,10 +276,11 @@ void Network::onReply(QNetworkReply *reply)
     } else if (httpStatus == 404 && state->operation.contains(CHECK_PURCHASED)) {
         Q_EMIT itemNotPurchased();
     } else {
-        QString msg(QString::number(httpStatus));
-        msg += ": ";
-        msg += reply->readAll().data();
-        Q_EMIT error(msg);
+        QString message(QString::number(httpStatus));
+        message += ": ";
+        message += reply->readAll().data();
+        qWarning() << message;
+        Q_EMIT error(message);
     }
     reply->deleteLater();
 }

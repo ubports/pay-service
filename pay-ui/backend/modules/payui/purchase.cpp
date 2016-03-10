@@ -78,8 +78,7 @@ Purchase::Purchase(QObject *parent) :
             QUrl data(argument);
             m_appid = data.host();
             m_itemid = data.fileName();
-            qWarning() << m_appid;
-            qWarning() << m_itemid;
+            qDebug() << "Purchase requested for" << m_itemid << "by app" << m_appid;
             break;
         }
     }
@@ -115,7 +114,7 @@ QString Purchase::getAddPaymentUrl(QString currency)
 void Purchase::getItemDetails()
 {
     if (m_appid.isEmpty() && m_itemid.isEmpty()) {
-        qDebug() << "AppId or ItemId not provided";
+        qCritical() << "AppId or ItemId not provided";
         quitCancel();
     }
     qDebug() << "Getting Item Details";
