@@ -1,0 +1,106 @@
+# French translation for pay-ui
+# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
+# This file is distributed under the same license as the pay-ui package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pay-service\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2015-02-19 15:01-0500\n"
+"PO-Revision-Date: 2015-03-08 16:19+0000\n"
+"Last-Translator: Anne <anneonyme017@gmail.com>\n"
+"Language-Team: French <fr@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2015-12-25 05:38+0000\n"
+"X-Generator: Launchpad (build 17865)\n"
+
+#: ../app/payui.qml:148
+msgid "Finish Purchase"
+msgstr "Terminer l'achat"
+
+#: ../app/payui.qml:163
+msgid "Incorrect Password, please try again."
+msgstr "Mot de passe incorrect, veuillez réessayer."
+
+#: ../app/payui.qml:276
+msgid "Purchase failed"
+msgstr "Échec de l'achat"
+
+#: ../app/payui.qml:277
+msgid "The purchase couldn't be completed."
+msgstr "L'achat n'a pas pu être effectué."
+
+#: ../app/payui.qml:292
+msgid "Error contacting the server"
+msgstr "Erreur lors du contact avec le serveur"
+
+#: ../app/payui.qml:293 ../app/payui.qml:309
+msgid "Do you want to try again?"
+msgstr "Voulez-vous réessayer ?"
+
+#: ../app/payui.qml:308
+msgid "Adding Credit Card failed"
+msgstr "L'ajout de carte de crédit a échoué"
+
+#: ../app/payui.qml:327
+msgid "Processing Purchase"
+msgstr "Traitement de l'achat"
+
+#: ../app/payui.qml:327
+msgid "Loading"
+msgstr "Chargement"
+
+#: ../app/payui.qml:328
+msgid "Please wait…"
+msgstr "Veuillez patienter…"
+
+#: ../app/payui.qml:342 ../app/ui/CheckoutPage.qml:370
+msgid "Cancel"
+msgstr "Annuler"
+
+#: ../app/payui.qml:401
+msgid "Add Payment"
+msgstr "Ajouter un paiement"
+
+#: ../app/ui/CheckoutPage.qml:27
+msgid "Payment"
+msgstr "Paiement"
+
+#: ../app/ui/CheckoutPage.qml:228
+msgid "Enter your Ubuntu One password"
+msgstr "Saisissez votre mot de passe pour Ubuntu One"
+
+#: ../app/ui/CheckoutPage.qml:271
+msgid "Type your verification code:"
+msgstr "Saisissez votre code de vérification :"
+
+#: ../app/ui/CheckoutPage.qml:282
+msgid "2-factor device code"
+msgstr "Code de dispositif à 2 facteurs"
+
+#: ../app/ui/CheckoutPage.qml:379
+msgid "Buy Now"
+msgstr "Acheter maintenant"
+
+#: ../app/ui/CheckoutPage.qml:393
+msgid "Add credit/debit card"
+msgstr "Ajouter une carte de crédit/débit"
+
+#: ../app/ui/ErrorDialog.qml:45
+msgid "Retry"
+msgstr "Recommencer"
+
+#: ../app/ui/ErrorDialog.qml:55
+msgid "Close"
+msgstr "Fermer"
+
+#: payui_payui.desktop.in.in.h:1
+msgid "Pay UI"
+msgstr "Interface utilisateur de paiement"
+
+#: payui_payui.desktop.in.in.h:2
+msgid "The application for completing a purchase."
+msgstr "L'application pour effectuer un achat."

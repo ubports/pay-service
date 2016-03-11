@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Canonical Ltd.
+/* Copyright (C) 2015-2016 Canonical Ltd.
  *
  * This file is part of go-mir.
  *
@@ -18,6 +18,7 @@
 package mir
 
 // #cgo pkg-config: mirclient
+// #include "mir_prompt_session_helper.h"
 // #include <stdlib.h>
 // #include <mir_toolkit/mir_prompt_session.h>
 import "C"
@@ -31,6 +32,7 @@ import (
 type PromptSession interface {
 	Release()
 	ToMirPromptSession() unsafe.Pointer
+	GetSocketURI() (string, error)
 }
 
 // promptSession satisfies the PromptSession interface as a Mir prompt session.
@@ -66,4 +68,15 @@ func (session *promptSession) Release() {
 // require it).
 func (session *promptSession) ToMirPromptSession() unsafe.Pointer {
 	return unsafe.Pointer(session.mirPromptSession)
+}
+
+// GetSocketURI returns the MIR_SOCKET value to use for the prompt session.
+func (session *promptSession) GetSocketURI() (string, error) {
+	fd := C.mir_prompt_session_get_fd((*C.MirPromptSession)(session.ToMirPromptSession()))
+	if fd == 0 {
+		return "", fmt.Errorf("Unable to get FD for prompt session.")
+	}
+	sockPath := fmt.Sprintf("fd://%d", fd)
+
+	return sockPath, nil
 }

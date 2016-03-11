@@ -2,8 +2,7 @@ Source: pay-service
 Section: gnome
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: click-dev,
-               cmake,
+Build-Depends: cmake,
                cmake-extras,
                dbus,
                dbus-test-runner,
@@ -15,7 +14,6 @@ Build-Depends: click-dev,
                google-mock,
                intltool,
                lcov,
-               libclick-0.4-dev,
                libdbus-1-dev,
                libdbus-cpp-dev,
                libdbustest1-dev,
@@ -26,12 +24,15 @@ Build-Depends: click-dev,
                libproperties-cpp-dev,
                libtrust-store-dev,
                libubuntu-app-launch2-dev (>= 0.5),
+               libubuntuoneauth-2.0-dev,
                pkg-config,
                python3-dbusmock,
                qt5-default,
                qtbase5-dev,
                qtdeclarative5-dev,
+               qtdeclarative5-dev-tools,
                sysvinit-utils,
+               xvfb,
 Standards-Version: 3.9.5
 Homepage: https://launchpad.net/pay-service
 # If you aren't a member of ~indicator-applet-developers but need to upload
@@ -44,6 +45,7 @@ Architecture: any
 Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
+         pay-ui (= ${binary:Version}),
          sysvinit-utils,
          ubuntu-push-client (>= 0.68+15.04.20151009),
 Recommends: gnupg,
@@ -54,7 +56,23 @@ Description: service to allow requesting payment for an item
  payment provider and give that money to the developer. This service
  coordinates the payment interaction with the server on the device.
  .
- This package provides a service for the Pay Service
+ This package provides a service for the Pay Service.
+
+Package: pay-ui
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+ qtdeclarative5-ubuntu-web-plugin [amd64 armhf i386],
+ qtdeclarative5-online-accounts-client0.1,
+ qtdeclarative5-ubuntu-ui-toolkit-plugin,
+Description: service to allow requesting payment for an item - user interface
+ Allows applications to request an item be paid for by the user.
+ This requires interaction with the server backend to handle the
+ payment provider and give that money to the developer. This service
+ coordinates the payment interaction with the server on the device.
+ .
+ This package provides the user interface for the Pay Service.
 
 Package: libpay2
 Architecture: any

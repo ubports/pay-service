@@ -1,0 +1,106 @@
+# Asturian translation for pay-ui
+# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
+# This file is distributed under the same license as the pay-ui package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pay-service\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2015-02-19 15:01-0500\n"
+"PO-Revision-Date: 2015-06-09 15:40+0000\n"
+"Last-Translator: enolp <enolp@softastur.org>\n"
+"Language-Team: Asturian <ast@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2015-12-25 05:38+0000\n"
+"X-Generator: Launchpad (build 17865)\n"
+
+#: ../app/payui.qml:148
+msgid "Finish Purchase"
+msgstr "Acabar la compra"
+
+#: ../app/payui.qml:163
+msgid "Incorrect Password, please try again."
+msgstr "La contraseña ye incorreuta. Inténtalo de nueves."
+
+#: ../app/payui.qml:276
+msgid "Purchase failed"
+msgstr "Falló la compra"
+
+#: ../app/payui.qml:277
+msgid "The purchase couldn't be completed."
+msgstr "Nun pudo completase la compra"
+
+#: ../app/payui.qml:292
+msgid "Error contacting the server"
+msgstr "Fallu al contautar col sirvidor"
+
+#: ../app/payui.qml:293 ../app/payui.qml:309
+msgid "Do you want to try again?"
+msgstr "¿Quies intentalo otra vegada?"
+
+#: ../app/payui.qml:308
+msgid "Adding Credit Card failed"
+msgstr "Fallu al amestar tarxeta de creitu"
+
+#: ../app/payui.qml:327
+msgid "Processing Purchase"
+msgstr "Procesando la compra"
+
+#: ../app/payui.qml:327
+msgid "Loading"
+msgstr "Cargando"
+
+#: ../app/payui.qml:328
+msgid "Please wait…"
+msgstr "Espera, por favor..."
+
+#: ../app/payui.qml:342 ../app/ui/CheckoutPage.qml:370
+msgid "Cancel"
+msgstr "Encaboxar"
+
+#: ../app/payui.qml:401
+msgid "Add Payment"
+msgstr "Amestar pagu"
+
+#: ../app/ui/CheckoutPage.qml:27
+msgid "Payment"
+msgstr "Pagu"
+
+#: ../app/ui/CheckoutPage.qml:228
+msgid "Enter your Ubuntu One password"
+msgstr "Introduz la to contraseña d'Ubuntu One"
+
+#: ../app/ui/CheckoutPage.qml:271
+msgid "Type your verification code:"
+msgstr "Escribi'l códigu de comprobación:"
+
+#: ../app/ui/CheckoutPage.qml:282
+msgid "2-factor device code"
+msgstr "códigu de preséu 2-factor"
+
+#: ../app/ui/CheckoutPage.qml:379
+msgid "Buy Now"
+msgstr "Mercar Agora"
+
+#: ../app/ui/CheckoutPage.qml:393
+msgid "Add credit/debit card"
+msgstr "Amestar tarxeta de creitu o débitu"
+
+#: ../app/ui/ErrorDialog.qml:45
+msgid "Retry"
+msgstr "Reintentar"
+
+#: ../app/ui/ErrorDialog.qml:55
+msgid "Close"
+msgstr "Zarrar"
+
+#: payui_payui.desktop.in.in.h:1
+msgid "Pay UI"
+msgstr "Interfaz de pagos"
+
+#: payui_payui.desktop.in.in.h:2
+msgid "The application for completing a purchase."
+msgstr "L'aplicación pa completar una compra."

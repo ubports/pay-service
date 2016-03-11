@@ -35,7 +35,6 @@ find_package (Qt5Core REQUIRED)
 
 pkg_check_modules (SERVICE_DEPS REQUIRED
   Qt5Core
-  click-0.4
   dbus-cpp
   dbustest-1
   gio-2.0
@@ -87,12 +86,12 @@ set (CXX_WARNING_ARGS "${CXX_WARNING_ARGS} -Wno-missing-field-initializers")
 add_subdirectory(common)
 add_subdirectory(libpay)
 add_subdirectory(service-ng)
-add_subdirectory(ual-helper)
 add_subdirectory(data)
 if (${enable_tests})
   add_subdirectory(tests)
 endif ()
 add_subdirectory(pay-test-app)
+add_subdirectory(pay-ui)
 add_subdirectory(po)
 
 ##

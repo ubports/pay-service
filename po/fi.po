@@ -1,0 +1,106 @@
+# Finnish translation for pay-ui
+# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
+# This file is distributed under the same license as the pay-ui package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pay-service\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2015-02-19 15:01-0500\n"
+"PO-Revision-Date: 2015-02-25 17:02+0000\n"
+"Last-Translator: Jiri Grönroos <Unknown>\n"
+"Language-Team: Finnish <fi@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2015-12-25 05:38+0000\n"
+"X-Generator: Launchpad (build 17865)\n"
+
+#: ../app/payui.qml:148
+msgid "Finish Purchase"
+msgstr "Viimeistele ostos"
+
+#: ../app/payui.qml:163
+msgid "Incorrect Password, please try again."
+msgstr "Virheellinen salasana, yritä uudelleen."
+
+#: ../app/payui.qml:276
+msgid "Purchase failed"
+msgstr "Ostaminen epäonnistui"
+
+#: ../app/payui.qml:277
+msgid "The purchase couldn't be completed."
+msgstr "Ostosta ei voitu suorittaa loppuun."
+
+#: ../app/payui.qml:292
+msgid "Error contacting the server"
+msgstr "Virhe palvelimeen yhdistäessä"
+
+#: ../app/payui.qml:293 ../app/payui.qml:309
+msgid "Do you want to try again?"
+msgstr "Haluatko yrittää uudelleen?"
+
+#: ../app/payui.qml:308
+msgid "Adding Credit Card failed"
+msgstr "Luottokortin lisääminen epäonnistui"
+
+#: ../app/payui.qml:327
+msgid "Processing Purchase"
+msgstr "Käsitellään ostosta"
+
+#: ../app/payui.qml:327
+msgid "Loading"
+msgstr "Ladataan"
+
+#: ../app/payui.qml:328
+msgid "Please wait…"
+msgstr "Odota hetki…"
+
+#: ../app/payui.qml:342 ../app/ui/CheckoutPage.qml:370
+msgid "Cancel"
+msgstr "Peru"
+
+#: ../app/payui.qml:401
+msgid "Add Payment"
+msgstr "Lisää maksu"
+
+#: ../app/ui/CheckoutPage.qml:27
+msgid "Payment"
+msgstr "Maksu"
+
+#: ../app/ui/CheckoutPage.qml:228
+msgid "Enter your Ubuntu One password"
+msgstr "Anna Ubuntu One -salasanasi"
+
+#: ../app/ui/CheckoutPage.qml:271
+msgid "Type your verification code:"
+msgstr "Anna vahvistuskoodi:"
+
+#: ../app/ui/CheckoutPage.qml:282
+msgid "2-factor device code"
+msgstr "Kaksivaiheisen tunnistamisen laitekoodi"
+
+#: ../app/ui/CheckoutPage.qml:379
+msgid "Buy Now"
+msgstr "Osta nyt"
+
+#: ../app/ui/CheckoutPage.qml:393
+msgid "Add credit/debit card"
+msgstr "Lisää luotto- tai pankkikortti"
+
+#: ../app/ui/ErrorDialog.qml:45
+msgid "Retry"
+msgstr "Yritä uudelleen"
+
+#: ../app/ui/ErrorDialog.qml:55
+msgid "Close"
+msgstr "Sulje"
+
+#: payui_payui.desktop.in.in.h:1
+msgid "Pay UI"
+msgstr "Maksukäyttöliittymä"
+
+#: payui_payui.desktop.in.in.h:2
+msgid "The application for completing a purchase."
+msgstr "Sovellus ostosten käsittelyä varten."

@@ -1,6 +1,6 @@
 /* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright © 2015 Canonical Ltd.
+ * Copyright © 2015-2016 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -20,34 +20,12 @@ package service
 
 import (
     "os"
-    "os/user"
     "fmt"
-    "path"
-    "io/ioutil"
     "testing"
 
-    "github.com/godbus/dbus"
     "launchpad.net/go-mir/mir"
     "launchpad.net/go-mir/mir/fakes"
 )
-
-func setupPayUiAppIdDesktopFiles(t *testing.T) string {
-    // Create temporary directory for this test.
-    directory, err := ioutil.TempDir("", serviceName)
-    if err != nil {
-        t.Fatalf("Unexpected error when creating temporary directory: %s", err)
-    }
-
-    // Place a few non-.desktop files and a few .desktop files in the directory
-    fileNames := []string{"foo_bar_0.1", "baz_qux_1.2.3",
-                          "foo_bar_0.1.desktop", "baz_qux_1.2.3.desktop"}
-    for _, fileName := range fileNames {
-        file, _ := os.Create(path.Join(directory, fileName))
-        file.Close()
-    }
-
-    return directory
-}
 
 func setupUserRuntimeDirectory(t *testing.T, directory string) {
     err := os.Setenv("XDG_RUNTIME_DIR", directory)
@@ -56,31 +34,18 @@ func setupUserRuntimeDirectory(t *testing.T, directory string) {
     }
 }
 
-func setupUserCacheDirectory(t *testing.T, directory string) {
-    err := os.Setenv("XDG_CACHE_HOME", directory)
-    if err != nil {
-        t.Errorf("Unexpected error while setting $XDG_CACHE_HOME: %s", err)
-    }
-}
-
-func setupClickDirectory(t *testing.T, directory string) {
-    err := os.Setenv("PAY_SERVICE_CLICK_DIR", directory)
-    if err != nil {
-        t.Errorf("Unexpected error while setting $PAY_SERVICE_CLICK_DIR: %s",
-                 err)
-    }
-}
-
 func launchFakePayUi(
     t *testing.T,
     newMirConnectionFunction func(string, string) (mir.Connection, error),
     newMirPromptSessionFunction func(mir.Connection, uint32) (mir.PromptSession, error),
-    startSessionHelperFunction func(string, mir.PromptSession, string, []string) string,
     getPrimaryPidFunction func(string) uint32, failureExpectedMessage string) {
     // Redirect necessary functions to their fake versions
     payUiNewMirConnectionFunction = newMirConnectionFunction
     payUiNewMirPromptSessionFunction = newMirPromptSessionFunction
     payUiGetPrimaryPidFunction = getPrimaryPidFunction
+
+    payUiExecFunction = func(purchaseUrl string) {
+    }
 
     payUiGetAppIdFunction = func(pkg string, app string, vers string) string {
         if app != "" && vers != "" {
@@ -89,29 +54,7 @@ func launchFakePayUi(
         return pkg + "_app_0.1"
     }
 
-    started := make(chan struct{})
-    payUiStartSessionHelperFunction = func(a string, b mir.PromptSession,
-                                           c string, d []string) string {
-        close(started)
-        return startSessionHelperFunction(a, b, c, d)
-    }
-
     setupUserRuntimeDirectory(t, "/foo")
-
-    // Prepare the user cache directory
-    setupUserCacheDirectory(t, "/bar")
-
-    // Create temporary directory to obtain Pay UI appid (results in a Pay UI
-    // appid of "baz_qux_1.2.3")
-    directory := setupPayUiAppIdDesktopFiles(t)
-    defer func() {
-        err := os.RemoveAll(directory)
-        if err != nil {
-            t.Errorf("Unexpected error removing temporary directory: %s", err)
-        }
-    }()
-
-    setupClickDirectory(t, directory)
 
     // Finally, launch the fake Pay UI
     feedback := LaunchPayUi("foo", "purchase://foo/bar")
@@ -125,25 +68,6 @@ func launchFakePayUi(
     }
 
     failureExpected := (failureExpectedMessage != "")
-    if !failureExpected {
-        // Connect to the DBus session bus to emit a signal
-        dbusConnection, err := dbus.SessionBus()
-	    if err != nil {
-		    t.Fatalf("Unable to connect to DBus session bus: %s", err)
-	    }
-
-	    // Wait for the helper to be started before continuing
-	    <-started
-
-	    // Spoof an Upstart EventEmitted so UAL thinks pay-ui has stopped
-	    err = dbusConnection.Emit("/com/ubuntu/Upstart",
-		    "com.ubuntu.Upstart0_6.EventEmitted",
-		    "stopped", []string{"JOB=untrusted-helper", fmt.Sprintf("INSTANCE=%s:12345:baz_qux_1.2.3", helperName)})
-	    if err != nil {
-		    t.Errorf("Unexpected error emitting signal: %s", err)
-	    }
-	}
-
 	// Wait until the launcher is finished
 	<-feedback.Finished
 
@@ -180,17 +104,12 @@ func TestLaunchPayUi(t *testing.T) {
         return fakePromptSession, nil
     }
 
-    startSessionHelper := func(string, mir.PromptSession,
-                              string, []string) string {
-        return "12345"
-    }
-
     getPrimaryPid := func(appId string) uint32 {
         return 42
     }
 
     launchFakePayUi(t, newMirConnection, newMirPromptSession,
-                    startSessionHelper, getPrimaryPid, "")
+                    getPrimaryPid, "")
 }
 
 // Test that LaunchPayUi handles a Mir connection failure as expected.
@@ -208,17 +127,12 @@ func TestLaunchPayUi_mirConnectionFailure(t *testing.T) {
         return fakePromptSession, nil
     }
 
-    startSessionHelper := func(string, mir.PromptSession,
-                              string, []string) string {
-        return "12345"
-    }
-
     getPrimaryPid := func(appId string) uint32 {
         return 42
     }
 
     launchFakePayUi(t, newMirConnection, newMirPromptSession,
-                    startSessionHelper, getPrimaryPid,
+                    getPrimaryPid,
                     "Expected an error due to Mir connection failure")
 }
 
@@ -238,49 +152,13 @@ func TestLaunchPayUi_promptSessionFailure(t *testing.T) {
         return nil, fmt.Errorf("Failed at user request")
     }
 
-    startSessionHelper := func(string, mir.PromptSession,
-                              string, []string) string {
-        return "12345"
-    }
-
     getPrimaryPid := func(appId string) uint32 {
         return 42
     }
 
     launchFakePayUi(t, newMirConnection, newMirPromptSession,
-                    startSessionHelper, getPrimaryPid,
+                    getPrimaryPid,
                     "Expected an error due to Mir prompt session failure")
-}
-
-// Test that LaunchPayUi handles an failure to start the session helper as
-// expected.
-func TestLaunchPayUi_sessionHelperFailure(t *testing.T) {
-    fakeConnection := fakes.NewConnection()
-    fakePromptSession := fakes.NewPromptSession()
-
-    // Redirect necessary functions to their fake versions
-    newMirConnection := func(serverFilePath string,
-                            clientName string) (mir.Connection, error) {
-        return fakeConnection, nil
-    }
-
-    newMirPromptSession := func(connection mir.Connection,
-                               applicationPid uint32) (mir.PromptSession, error) {
-        return fakePromptSession, nil
-    }
-
-    startSessionHelper := func(string, mir.PromptSession,
-                              string, []string) string {
-        return "" // This is an error
-    }
-
-    getPrimaryPid := func(appId string) uint32 {
-        return 42
-    }
-
-    launchFakePayUi(t, newMirConnection, newMirPromptSession,
-                    startSessionHelper, getPrimaryPid,
-                    "Expected an error due to failure to start session helper")
 }
 
 // Test that LaunchPayUi handles an failure to get the primary PID as expected.
@@ -299,17 +177,12 @@ func TestLaunchPayUi_pidError(t *testing.T) {
         return fakePromptSession, nil
     }
 
-    startSessionHelper := func(string, mir.PromptSession,
-                              string, []string) string {
-        return "12345"
-    }
-
     getPrimaryPid := func(appId string) uint32 {
         return 0 // This is an error
     }
 
     launchFakePayUi(t, newMirConnection, newMirPromptSession,
-                    startSessionHelper, getPrimaryPid,
+                    getPrimaryPid,
                     "Expected an error due to failure to find primary PID")
 }
 
@@ -338,70 +211,6 @@ func TestGetUserRuntimeDirectory_withoutXDG(t *testing.T) {
     _, err := getUserRuntimeDirectory()
     if err == nil {
         t.Error("Expected an error due to invalid XDG environment")
-    }
-}
-
-// Test that getUserCacheDirectory works with XDG environment variables
-func TestGetUserCacheDirectory(t *testing.T) {
-    expectedCacheDirectory := "/foo/bar"
-
-    setupUserCacheDirectory(t, expectedCacheDirectory)
-
-    directory, err := getUserCacheDirectory()
-    if err != nil {
-        t.Errorf("Unexpected error getting user cache directory: %s", err)
-    }
-
-    if directory != expectedCacheDirectory {
-        t.Errorf(`User cache directory was "%s", expected "%s"`, directory,
-                 expectedCacheDirectory)
-    }
-}
-
-// Test that getUserCacheDirectory uses fallback without XDG environment
-// variables
-func TestGetUserCacheDirectory_withoutXDG(t *testing.T) {
-    currentUser, err := user.Current()
-    if err != nil {
-        t.Errorf("Unable to get current user: %s", err)
-    }
-
-    expectedCacheDirectory := path.Join(currentUser.HomeDir, ".cache")
-
-    // Make sure XDG environment variable isn't set
-    setupUserCacheDirectory(t, "")
-
-    directory, err := getUserCacheDirectory()
-    if err != nil {
-        t.Errorf("Unexpected error getting user cache directory: %s", err)
-    }
-
-    if directory != expectedCacheDirectory {
-        t.Errorf(`User cache directory was "%s", expected "%s"`, directory,
-                 expectedCacheDirectory)
-    }
-}
-
-// Test that getPayUiAppId finds the first .desktop file in the given directory
-func TestGetPayUiAppId(t *testing.T) {
-    // Create temporary directory for this test.
-    directory := setupPayUiAppIdDesktopFiles(t)
-    defer func() {
-        err := os.RemoveAll(directory)
-        if err != nil {
-            t.Errorf("Unexpected error removing temporary directory: %s", err)
-        }
-    }()
-
-    setupClickDirectory(t, directory)
-
-    appId, err := getPayUiAppId()
-    if err != nil {
-        t.Errorf("Unexpected error getting pay UI app ID: %s", err)
-    }
-
-    if appId != "baz_qux_1.2.3" {
-        t.Errorf(`appId was "%s", expected "baz_qux_1.2.3"`, appId)
     }
 }
 

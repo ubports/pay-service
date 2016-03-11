@@ -1,0 +1,85 @@
+pay-service hacking guide
+===============================
+
+Getting pay-service
+-------------------------
+
+To get the main branch of pay-service:
+
+    $ bzr branch lp:pay-service
+
+
+Getting dependencies
+--------------------
+
+To succesfully build pay-service extra packages are required:
+
+    $ sudo apt-get build-dep pay-service
+
+
+Building pay-service
+------------------
+
+This app is built using cmake. Here's an example on how to build it:
+
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    $ make -j 8
+
+
+Running the unit tests
+----------------------
+
+    $ make test
+
+
+Running the autopilot tests
+---------------------------
+
+To run the autopilot tests locally, you first need to build pay-service.
+
+    $ make autopilot
+
+The autopilot tests can also be run against a built debian package, under
+qemu. To do so, you will need some additional packages. Most importantly,
+you will need the latest version of the autopkgtest package. You can download
+it at https://launchpad.net/ubuntu/+source/autopkgtest by selecting the most
+recent build for the most recent version of Ubuntu. 
+
+    $ sudo dpkg -i autopkgtest*.deb
+    $ sudo apt-get install qemu
+
+After installing autopkgtest and qemu, you need to build an image for qemu
+to use. We use vivid here, as building an image to closely resemble the actual
+stable phone images is quite difficult. When this is easier in the future, we
+will switch to using stable phone images for this. The architecture argument
+should match the architecture of the debian package you are trying to test.
+We output the image to ~/ rather than the current directory, so it will be in
+a safer place to avoid rebuilding images every time. You can store it in any
+directory you wish.
+
+    $ adt-buildvm-ubuntu-cloud -r vivid -a amd64 -o ~/
+
+Then the tests may be run using adt-run with the qemu virtualization host.
+The output directory option here can be wherever you like, and is where the
+test artifacts will be placed. The ordering of the arguments to adt-run is
+important so try to keep them in this order.
+
+    $ adt-run --click-source . \
+      --source ../pay-service*.dsc \
+      -o /tmp/adt-payui-test \
+      --setup-commands "add-apt-repository \
+          ppa:ci-train-ppa-service/stable-phone-overlay" \
+      --apt-pocket proposed \
+      --setup-commands "apt-get update" \
+      --setup-commands ubuntu-touch-session \
+      --- qemu ~/adt-vivid-amd64-cloud.img
+
+To examine the test results, which are in subunit format, additional tools are
+required.
+
+    $ sudo add-apt-repository ppa:thomir/trv
+    $ sudo apt-get update
+    $ sudo apt-get install trv
+    $ trv /tmp/adt-payui-test/artifacts/autopilot.subunit

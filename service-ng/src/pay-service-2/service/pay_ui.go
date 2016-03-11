@@ -1,6 +1,6 @@
 /* -*- mode: go; tab-width: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright © 2015 Canonical Ltd.
+ * Copyright © 2015-2016 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -19,12 +19,10 @@
 package service
 
 import (
-    "os"
-    "os/user"
-    "io/ioutil"
     "fmt"
     "path"
-    "path/filepath"
+    "os"
+    "os/exec"
 
     "github.com/ziutek/glib"
     "launchpad.net/go-mir/mir"
@@ -42,7 +40,7 @@ var (
     payUiGetAppIdFunction = ual.TripletToAppId
     payUiNewMirConnectionFunction = mir.NewConnection
     payUiNewMirPromptSessionFunction = mir.NewPromptSession
-    payUiStartSessionHelperFunction = ual.StartSessionHelper
+    payUiExecFunction = execPayUiCommand
 )
 
 // PayUiFeedback allows the LaunchPayUi caller to keep track of Pay UI's status.
@@ -63,6 +61,14 @@ func LaunchPayUi(appId string, purchaseUrl string) PayUiFeedback {
     go launchPayUiAndWait(appId, purchaseUrl, feedback)
 
     return feedback
+}
+
+// execPayUiCommand is a replaceable call to do the actual running of pay-ui
+func execPayUiCommand(purchaseUrl string) {
+    cmd := exec.Command("/usr/lib/payui/pay-ui", purchaseUrl)
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    cmd.Run()
 }
 
 // launchPayUiAndWait is the synchronous worker function that actually
@@ -104,13 +110,6 @@ func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback
     }
     defer connection.Release()
 
-    // Get app ID for Pay UI
-    uiAppId, err := getPayUiAppId()
-    if err != nil {
-        feedback.Error <- fmt.Errorf("Unable to obtain Pay UI app ID: %s", err)
-        return
-    }
-
     // The Mir prompt session will be displayed over a specific process, so
     // we need to get the PID of the app that wants to launch Pay UI.
     pidToOverlay, err := getAppPid(appId)
@@ -129,32 +128,16 @@ func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback
     }
     defer session.Release()
 
-    // Add an observer to UAL that will be run when Pay UI stops
-    helperDone := make(chan struct{})
-    var instanceId string
-    observerId, err := ual.ObserverAddHelperStop(helperName,
-        func(stoppedAppId, stoppedInstanceId, stoppedHelperType string) {
-            // Make sure the helper that stopped was the one we started. If it
-            // wasn't, we'll continue waiting.
-            if (stoppedAppId == uiAppId) && (stoppedInstanceId == instanceId) {
-                close(helperDone)
-            }
-        })
-    if err != nil {
-        feedback.Error <- fmt.Errorf("Unable to add UAL observer: %s", err)
+    // Get the socket path and set the MIR_SOCKET variable
+    sockPath, sockErr := session.GetSocketURI()
+    if sockErr != nil {
+        feedback.Error <- sockErr
         return
     }
-    defer ual.ObserverDeleteHelperStop(observerId)
+    os.Setenv("MIR_SOCKET", sockPath)
 
     // Finally, start the helper with that purchase URL
-    instanceId = payUiStartSessionHelperFunction(helperName, session, uiAppId,
-                                        []string{purchaseUrl})
-    if instanceId == "" {
-        feedback.Error <- fmt.Errorf(`Failed to start helper "%s"`, uiAppId)
-        return
-    }
-
-    <-helperDone // Wait for helper to stop
+    payUiExecFunction(purchaseUrl)
 }
 
 func runGlib(stop chan struct{}, finished chan struct{}) {
@@ -180,54 +163,6 @@ func getUserRuntimeDirectory() (string, error) {
     }
 
     return runtimeDirectory, nil
-}
-
-// getUserCacheDirectory tries to find the user cache directory by first
-// checking the $XDG_CACHE_HOME environment variable, and then trying
-// $HOME/.cache.
-func getUserCacheDirectory() (string, error) {
-    cacheDirectory := os.Getenv("XDG_CACHE_HOME")
-    if cacheDirectory == "" {
-        currentUser, err := user.Current()
-        if err != nil {
-            return "", fmt.Errorf("Unable to get current user: %s", err)
-        }
-
-        if currentUser.HomeDir == "" {
-            return "", fmt.Errorf("Unable to find user's home directory")
-        }
-
-        cacheDirectory = path.Join(currentUser.HomeDir, ".cache")
-    }
-
-    return cacheDirectory, nil
-}
-
-// getPayUiAppId looks through a directory to find the first entry that is a
-// .desktop file and uses that as our AppID. We don't support more than one
-// entry being in a directory.
-func getPayUiAppId() (string, error) {
-    directory := os.Getenv("PAY_SERVICE_CLICK_DIR")
-    if directory == "" {
-        var err error
-        directory, err = getUserCacheDirectory()
-        if err != nil {
-         return "", fmt.Errorf("Unable to obtain user cache directory: %s", err)
-        }
-
-        directory = path.Join(directory, serviceName, helperName)
-    }
-
-    files, _ := ioutil.ReadDir(directory)
-    for _, file := range files {
-        fileName := file.Name()
-        extension := filepath.Ext(fileName)
-        if extension == ".desktop" {
-            return fileName[0:len(fileName)-len(extension)], nil
-        }
-    }
-
-    return "", fmt.Errorf(`Failed to find .desktop file in "%s"`, directory)
 }
 
 // getAppPid attempts to obtain the PID of the given appId. Note that the only

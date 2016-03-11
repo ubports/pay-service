@@ -1,0 +1,106 @@
+# Chinese (Simplified) translation for pay-ui
+# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
+# This file is distributed under the same license as the pay-ui package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pay-service\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2015-02-19 15:01-0500\n"
+"PO-Revision-Date: 2015-02-28 03:06+0000\n"
+"Last-Translator: Luo Lei <luolei@ubuntukylin.com>\n"
+"Language-Team: Chinese (Simplified) <zh_CN@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2015-12-25 05:38+0000\n"
+"X-Generator: Launchpad (build 17865)\n"
+
+#: ../app/payui.qml:148
+msgid "Finish Purchase"
+msgstr "完成购买"
+
+#: ../app/payui.qml:163
+msgid "Incorrect Password, please try again."
+msgstr "密码不正确，请重试。"
+
+#: ../app/payui.qml:276
+msgid "Purchase failed"
+msgstr "购买失败"
+
+#: ../app/payui.qml:277
+msgid "The purchase couldn't be completed."
+msgstr "购买无法完成。"
+
+#: ../app/payui.qml:292
+msgid "Error contacting the server"
+msgstr "服务器联机错误"
+
+#: ../app/payui.qml:293 ../app/payui.qml:309
+msgid "Do you want to try again?"
+msgstr "要重试吗？"
+
+#: ../app/payui.qml:308
+msgid "Adding Credit Card failed"
+msgstr "添加信用卡失败"
+
+#: ../app/payui.qml:327
+msgid "Processing Purchase"
+msgstr "正在处理购买请求"
+
+#: ../app/payui.qml:327
+msgid "Loading"
+msgstr "加载中"
+
+#: ../app/payui.qml:328
+msgid "Please wait…"
+msgstr "请稍候..."
+
+#: ../app/payui.qml:342 ../app/ui/CheckoutPage.qml:370
+msgid "Cancel"
+msgstr "取消"
+
+#: ../app/payui.qml:401
+msgid "Add Payment"
+msgstr "添加支付方式"
+
+#: ../app/ui/CheckoutPage.qml:27
+msgid "Payment"
+msgstr "支付"
+
+#: ../app/ui/CheckoutPage.qml:228
+msgid "Enter your Ubuntu One password"
+msgstr "输入您的 Ubuntu One 密码"
+
+#: ../app/ui/CheckoutPage.qml:271
+msgid "Type your verification code:"
+msgstr "请输入验证码："
+
+#: ../app/ui/CheckoutPage.qml:282
+msgid "2-factor device code"
+msgstr "两步验证设备码"
+
+#: ../app/ui/CheckoutPage.qml:379
+msgid "Buy Now"
+msgstr "立即购买"
+
+#: ../app/ui/CheckoutPage.qml:393
+msgid "Add credit/debit card"
+msgstr "添加信用卡/借记卡"
+
+#: ../app/ui/ErrorDialog.qml:45
+msgid "Retry"
+msgstr "重试"
+
+#: ../app/ui/ErrorDialog.qml:55
+msgid "Close"
+msgstr "关闭"
+
+#: payui_payui.desktop.in.in.h:1
+msgid "Pay UI"
+msgstr "支付界面"
+
+#: payui_payui.desktop.in.in.h:2
+msgid "The application for completing a purchase."
+msgstr "完成购买过程的应用程序。"

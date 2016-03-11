@@ -1,0 +1,1 @@
+GET_CREDENTIALS=0 autopilot3 run -v pay_ui

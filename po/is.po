@@ -1,0 +1,106 @@
+# Icelandic translation for pay-ui
+# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
+# This file is distributed under the same license as the pay-ui package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pay-service\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2015-02-19 15:01-0500\n"
+"PO-Revision-Date: 2015-10-08 05:02+0000\n"
+"Last-Translator: Stefán Örvar Sigmundsson <stefan.orvar.sigmundsson@emi.is>\n"
+"Language-Team: Icelandic <is@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2015-12-25 05:38+0000\n"
+"X-Generator: Launchpad (build 17865)\n"
+
+#: ../app/payui.qml:148
+msgid "Finish Purchase"
+msgstr ""
+
+#: ../app/payui.qml:163
+msgid "Incorrect Password, please try again."
+msgstr ""
+
+#: ../app/payui.qml:276
+msgid "Purchase failed"
+msgstr ""
+
+#: ../app/payui.qml:277
+msgid "The purchase couldn't be completed."
+msgstr ""
+
+#: ../app/payui.qml:292
+msgid "Error contacting the server"
+msgstr ""
+
+#: ../app/payui.qml:293 ../app/payui.qml:309
+msgid "Do you want to try again?"
+msgstr ""
+
+#: ../app/payui.qml:308
+msgid "Adding Credit Card failed"
+msgstr ""
+
+#: ../app/payui.qml:327
+msgid "Processing Purchase"
+msgstr ""
+
+#: ../app/payui.qml:327
+msgid "Loading"
+msgstr "Hleður"
+
+#: ../app/payui.qml:328
+msgid "Please wait…"
+msgstr "Bíddu aðeins..."
+
+#: ../app/payui.qml:342 ../app/ui/CheckoutPage.qml:370
+msgid "Cancel"
+msgstr "Hætta við"
+
+#: ../app/payui.qml:401
+msgid "Add Payment"
+msgstr ""
+
+#: ../app/ui/CheckoutPage.qml:27
+msgid "Payment"
+msgstr "Greiðsla"
+
+#: ../app/ui/CheckoutPage.qml:228
+msgid "Enter your Ubuntu One password"
+msgstr ""
+
+#: ../app/ui/CheckoutPage.qml:271
+msgid "Type your verification code:"
+msgstr ""
+
+#: ../app/ui/CheckoutPage.qml:282
+msgid "2-factor device code"
+msgstr ""
+
+#: ../app/ui/CheckoutPage.qml:379
+msgid "Buy Now"
+msgstr ""
+
+#: ../app/ui/CheckoutPage.qml:393
+msgid "Add credit/debit card"
+msgstr ""
+
+#: ../app/ui/ErrorDialog.qml:45
+msgid "Retry"
+msgstr "Reyna aftur"
+
+#: ../app/ui/ErrorDialog.qml:55
+msgid "Close"
+msgstr "Loka"
+
+#: payui_payui.desktop.in.in.h:1
+msgid "Pay UI"
+msgstr ""
+
+#: payui_payui.desktop.in.in.h:2
+msgid "The application for completing a purchase."
+msgstr ""

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2015 Canonical Ltd.
+# Copyright © 2015-2016 Canonical Ltd.
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 3, as published
@@ -22,4 +22,4 @@ if [ "x${2}" = "xcoverage" -a -z "`go version|grep gccgo`" ]; then
     GO_TEST_OPTIONS="-coverprofile=go.cover"
 fi
 
-go test ${1} ${GO_TEST_OPTIONS}
+go test ${1} ${GO_TEST_OPTIONS} -v
