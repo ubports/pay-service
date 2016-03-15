@@ -209,7 +209,7 @@ MainView {
     }
 
     function showLoading() {
-        if (!mainview.loading) {
+        if (!mainView.loading) {
             mainView.loading = true;
             PopupUtils.open(loadingDialogContainer);
         }
