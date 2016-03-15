@@ -89,6 +89,7 @@ MainView {
             checkout.itemTitle = title;
             checkout.itemSubtitle = publisher;
             checkout.price = formatted_price;
+            purchase.getPaymentTypes(currency);
         }
 
         onPaymentTypesObtained: {
@@ -172,14 +173,13 @@ MainView {
 
             if (mainView.state == "online-accounts") {
                 purchase.checkItemPurchased();
-            } else if (mainView.state != "checkout" && !mainView.purchasing && mainView.state != "buy-interaction") {
-                purchase.getPaymentTypes(suggestedCurrency);
+            } else {
+                purchase.getItemDetails();
             }
-            purchase.getItemDetails();
         }
 
         onItemNotPurchased: {
-            purchase.getPaymentTypes(suggestedCurrency);
+            purchase.getItemDetails();
         }
 
         onCredentialsNotFound: {
