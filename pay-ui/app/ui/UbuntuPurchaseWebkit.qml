@@ -87,7 +87,7 @@ Page {
         beforeUnloadDialog: BeforeUnloadDialog {}
 
         onLoadingStateChanged: {
-            pageWebkit.loading(webView.loading);
+            pageWebkit.loading(webView.loadProgress != 100);
         }
 
         onUrlChanged: {
