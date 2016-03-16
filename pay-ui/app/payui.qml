@@ -143,7 +143,6 @@ MainView {
         }
 
         onBuyInterationRequired: {
-            mainView.purchasing = false;
             webkit.title = i18n.tr("Finish Purchase");
             webkit.url = url;
             mainView.state = "buy-interaction";
