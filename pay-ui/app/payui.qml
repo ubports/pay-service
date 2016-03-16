@@ -173,7 +173,7 @@ MainView {
 
             if (mainView.state == "online-accounts") {
                 purchase.checkItemPurchased();
-            } else {
+            } else if (!mainView.purchasing && mainView.state != "buy-interaction") {
                 purchase.getItemDetails();
             }
         }
