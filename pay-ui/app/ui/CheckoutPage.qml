@@ -24,7 +24,19 @@ import "../components"
 Page {
     id: pageCheckout
 
-    title: i18n.tr("Payment")
+    header: PageHeader {
+        title: i18n.tr("Payment")
+        trailingActionBar.actions: [
+            Action {
+                id: lockAction
+                iconName: pageCheckout.securityStatus.securityLevel == Oxide.SecurityStatus.SecurityLevelSecure ? "lock" : "security-alert"
+                onTriggered: {
+                    PopupUtils.open(popoverComponent, lockIconPlace, {"securityStatus": pageCheckout.securityStatus})
+                }
+            }
+        ]
+        flickable: checkoutFlickable
+    }
 
     property int keyboardSize: Qt.inputMethod.visible ? Qt.inputMethod.keyboardRectangle.height : 0
     property alias selectedItem: paymentTypes.selectedIndex
@@ -83,16 +95,6 @@ Page {
         property var certificate: null
     }
 
-    head.actions:[
-        Action {
-            id: lockAction
-            iconName: pageCheckout.securityStatus.securityLevel == Oxide.SecurityStatus.SecurityLevelSecure ? "lock" : "security-alert"
-            onTriggered: {
-                PopupUtils.open(popoverComponent, lockIconPlace, {"securityStatus": pageCheckout.securityStatus})
-            }
-        }
-    ]
-
     Component {
         id: popoverComponent
 
@@ -109,8 +111,6 @@ Page {
             right: parent.right
             top: parent.top
         }
-
-        contentHeight: contentItem.childrenRect.height + pageCheckout.keyboardSize
 
         Item {
             id: header

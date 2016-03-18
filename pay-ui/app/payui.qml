@@ -110,7 +110,7 @@ MainView {
             checkout.setSelectedItem();
 
             mainView.state = "checkout";
-            pageStack.push(checkout);
+            checkout.visible = true;
 
             hideLoading();
         }
