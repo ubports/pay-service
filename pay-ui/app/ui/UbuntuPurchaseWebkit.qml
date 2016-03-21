@@ -65,7 +65,7 @@ Page {
                 id: lockAction
                 iconName: pageWebkit.securityStatus.securityLevel == Oxide.SecurityStatus.SecurityLevelSecure ? "lock" : "security-alert"
                 onTriggered: {
-                    PopupUtils.open(popoverComponent, lockIconPlace, {"securityStatus": paygeWebkit.securityStatus})
+                    PopupUtils.open(popoverComponent, lockIconPlace, {"securityStatus": pageWebkit.securityStatus})
                 }
             }
         ]
