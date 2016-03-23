@@ -430,6 +430,7 @@ MainView {
             onPurchaseSucceeded: {
                 if (mainView.state == "add-payment") {
                     showLoading();
+                    pageStack.pop();
                     purchase.getPaymentTypes(suggestedCurrency);
                 } else {
                     purchase.quitSuccess();
