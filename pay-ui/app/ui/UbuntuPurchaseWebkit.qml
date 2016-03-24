@@ -86,8 +86,8 @@ Page {
         promptDialog: PromptDialog {}
         beforeUnloadDialog: BeforeUnloadDialog {}
 
-        onLoadingChanged: {
-            pageWebkit.loading(webView.loading);
+        onLoadingStateChanged: {
+            pageWebkit.loading(webView.loadProgress != 100);
         }
 
         onUrlChanged: {

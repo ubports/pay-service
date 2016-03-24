@@ -51,7 +51,7 @@ MainView {
 
     useDeprecatedToolbar: false
 
-    property bool loading: true
+    property bool loading: false
     property bool purchasing: false
     property bool recentLogin: false
     property bool cancellable: true
@@ -209,8 +209,10 @@ MainView {
     }
 
     function showLoading() {
-        mainView.loading = true;
-        PopupUtils.open(loadingDialogContainer);
+        if (!mainView.loading) {
+            mainView.loading = true;
+            PopupUtils.open(loadingDialogContainer);
+        }
     }
 
     function hideLoading() {
