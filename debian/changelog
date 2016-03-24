@@ -1,3 +1,21 @@
+pay-service (15.10+16.04.20160324.1-0ubuntu1) xenial; urgency=medium
+
+  * Add build dep on golang-go > 1.6 for ppc64el for xenial.
+  * Change dependency on pay-ui to be source:Veersion instead of
+    binary:Version. Change dependency on pay-service by libpay2 to a
+    Recommends. (LP: #1561028)
+  * Don't unset purchasing bool when interaction required for purchase.
+    (LP: #1541995)
+  * Get the item details before payment methods, to get correct payment
+    types. (LP: #1541089)
+  * Migrate all usage of Ubuntu.Components to 1.3.
+  * Pop the web view after successfully adding a new card. (LP:
+    #1537105)
+  * Use new loadingStateChanged signal as new Ubuntu.Web breaks
+    loadingChanged. (LP: #1544697, #1542431)
+
+ -- Rodney Dawes <ci-train-bot@canonical.com>  Thu, 24 Mar 2016 19:15:41 +0000
+
 pay-service (15.10+16.04.20160311-0ubuntu1) xenial; urgency=medium
 
   * Merge pay-ui into pay-service. (LP: #1535420, #1432031)
