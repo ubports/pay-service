@@ -213,7 +213,7 @@ Page {
             }
             height: units.gu(2)
             enabled: false
-            delegate: Label {
+            delegate: Text {
                 id: ubuntuIdLabel
                 objectName: "ubuntuIdLabel"
                 text: model.displayName
