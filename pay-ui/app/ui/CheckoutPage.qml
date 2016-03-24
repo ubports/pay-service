@@ -14,17 +14,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.0
-import Ubuntu.Components 1.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
-import Ubuntu.Components.Popups 0.1
+import QtQuick 2.4
+import Ubuntu.Components 1.3
+import Ubuntu.Components.ListItems 1.3 as ListItem
+import Ubuntu.Components.Popups 1.3
 import payui 0.1 as Oxide
 import "../components"
 
 Page {
     id: pageCheckout
 
-    title: i18n.tr("Payment")
+    header: PageHeader {
+        title: i18n.tr("Payment")
+        trailingActionBar.actions: [
+            Action {
+                id: lockAction
+                iconName: pageCheckout.securityStatus.securityLevel == Oxide.SecurityStatus.SecurityLevelSecure ? "lock" : "security-alert"
+                onTriggered: {
+                    PopupUtils.open(popoverComponent, lockIconPlace, {"securityStatus": pageCheckout.securityStatus})
+                }
+            }
+        ]
+        flickable: checkoutFlickable
+    }
 
     property int keyboardSize: Qt.inputMethod.visible ? Qt.inputMethod.keyboardRectangle.height : 0
     property alias selectedItem: paymentTypes.selectedIndex
@@ -83,16 +95,6 @@ Page {
         property var certificate: null
     }
 
-    head.actions:[
-        Action {
-            id: lockAction
-            iconName: pageCheckout.securityStatus.securityLevel == Oxide.SecurityStatus.SecurityLevelSecure ? "lock" : "security-alert"
-            onTriggered: {
-                PopupUtils.open(popoverComponent, lockIconPlace, {"securityStatus": pageCheckout.securityStatus})
-            }
-        }
-    ]
-
     Component {
         id: popoverComponent
 
@@ -109,8 +111,6 @@ Page {
             right: parent.right
             top: parent.top
         }
-
-        contentHeight: contentItem.childrenRect.height + pageCheckout.keyboardSize
 
         Item {
             id: header
@@ -213,7 +213,7 @@ Page {
             }
             height: units.gu(2)
             enabled: false
-            delegate: Label {
+            delegate: Text {
                 id: ubuntuIdLabel
                 objectName: "ubuntuIdLabel"
                 text: model.displayName
