@@ -7,100 +7,96 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pay-service\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-02-19 15:01-0500\n"
-"PO-Revision-Date: 2015-05-06 19:33+0000\n"
+"POT-Creation-Date: 2016-03-08 16:23-0500\n"
+"PO-Revision-Date: 2016-04-08 21:30+0000\n"
 "Last-Translator: Vojtěch Daněk <vdanek@outlook.com>\n"
 "Language-Team: Czech <cs@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-12-25 05:38+0000\n"
-"X-Generator: Launchpad (build 17865)\n"
+"X-Launchpad-Export-Date: 2016-04-09 05:59+0000\n"
+"X-Generator: Launchpad (build 17990)\n"
 
-#: ../app/payui.qml:148
-msgid "Finish Purchase"
-msgstr "Dokončit nákup"
-
-#: ../app/payui.qml:163
-msgid "Incorrect Password, please try again."
-msgstr "Nesprávné heslo, zkuste to, prosím, znovu."
-
-#: ../app/payui.qml:276
-msgid "Purchase failed"
-msgstr "Nákup selhal"
-
-#: ../app/payui.qml:277
-msgid "The purchase couldn't be completed."
-msgstr "Nákup nemohl být dokončen."
-
-#: ../app/payui.qml:292
-msgid "Error contacting the server"
-msgstr "Chyba kontaktování serveru"
-
-#: ../app/payui.qml:293 ../app/payui.qml:309
-msgid "Do you want to try again?"
-msgstr "Chcete to zkusit znovu?"
-
-#: ../app/payui.qml:308
-msgid "Adding Credit Card failed"
-msgstr "Přidání platební karty selhalo"
-
-#: ../app/payui.qml:327
-msgid "Processing Purchase"
-msgstr "Platba probíhá"
-
-#: ../app/payui.qml:327
-msgid "Loading"
-msgstr "Načítá se"
-
-#: ../app/payui.qml:328
-msgid "Please wait…"
-msgstr "Čekejte prosím…"
-
-#: ../app/payui.qml:342 ../app/ui/CheckoutPage.qml:370
-msgid "Cancel"
-msgstr "Zrušit"
-
-#: ../app/payui.qml:401
-msgid "Add Payment"
-msgstr "Přidal platbu"
-
-#: ../app/ui/CheckoutPage.qml:27
+#: ../pay-ui/app/ui/CheckoutPage.qml:27
 msgid "Payment"
 msgstr "Platba"
 
-#: ../app/ui/CheckoutPage.qml:228
+#: ../pay-ui/app/ui/CheckoutPage.qml:228
 msgid "Enter your Ubuntu One password"
 msgstr "Vložte své Ubuntu One heslo"
 
-#: ../app/ui/CheckoutPage.qml:271
+#: ../pay-ui/app/ui/CheckoutPage.qml:271
 msgid "Type your verification code:"
 msgstr "Napište ověřovací kód:"
 
-#: ../app/ui/CheckoutPage.qml:282
+#: ../pay-ui/app/ui/CheckoutPage.qml:282
 msgid "2-factor device code"
 msgstr "Kód zařízení pro dvoufázové ověření"
 
-#: ../app/ui/CheckoutPage.qml:379
+#: ../pay-ui/app/ui/CheckoutPage.qml:370 ../pay-ui/app/payui.qml:342
+msgid "Cancel"
+msgstr "Zrušit"
+
+#: ../pay-ui/app/ui/CheckoutPage.qml:379
 msgid "Buy Now"
 msgstr "Koupit nyní"
 
-#: ../app/ui/CheckoutPage.qml:393
+#: ../pay-ui/app/ui/CheckoutPage.qml:393
 msgid "Add credit/debit card"
 msgstr "Přidat kreditní/debetní kartu"
 
-#: ../app/ui/ErrorDialog.qml:45
+#: ../pay-ui/app/ui/ErrorDialog.qml:45
 msgid "Retry"
 msgstr "Opakovat"
 
-#: ../app/ui/ErrorDialog.qml:55
+#: ../pay-ui/app/ui/ErrorDialog.qml:55
 msgid "Close"
 msgstr "Zavřít"
 
-#: payui_payui.desktop.in.in.h:1
-msgid "Pay UI"
-msgstr "Platební rozehraní"
+#: ../pay-ui/app/payui.qml:147
+msgid "Finish Purchase"
+msgstr "Dokončit nákup"
 
-#: payui_payui.desktop.in.in.h:2
-msgid "The application for completing a purchase."
-msgstr "Aplikace pro dokončení nákupu."
+#: ../pay-ui/app/payui.qml:162
+msgid "Incorrect Password, please try again."
+msgstr "Nesprávné heslo, zkuste to, prosím, znovu."
+
+#: ../pay-ui/app/payui.qml:276
+msgid "Purchase failed"
+msgstr "Nákup selhal"
+
+#: ../pay-ui/app/payui.qml:277
+msgid "The purchase couldn't be completed."
+msgstr "Nákup nemohl být dokončen."
+
+#: ../pay-ui/app/payui.qml:292
+msgid "Error contacting the server"
+msgstr "Chyba kontaktování serveru"
+
+#: ../pay-ui/app/payui.qml:293 ../pay-ui/app/payui.qml:309
+msgid "Do you want to try again?"
+msgstr "Chcete to zkusit znovu?"
+
+#: ../pay-ui/app/payui.qml:308
+msgid "Adding Credit Card failed"
+msgstr "Přidání platební karty selhalo"
+
+#: ../pay-ui/app/payui.qml:327
+msgid "Processing Purchase"
+msgstr "Platba probíhá"
+
+#: ../pay-ui/app/payui.qml:327
+msgid "Loading"
+msgstr "Načítá se"
+
+#: ../pay-ui/app/payui.qml:328
+msgid "Please wait…"
+msgstr "Čekejte prosím…"
+
+#: ../pay-ui/app/payui.qml:403
+msgid "Add Payment"
+msgstr "Přidal platbu"
+
+#: ../service-ng/src/pay-service-2/service/pay_service.go:351
+msgid "Allow requesting in-app purchases?"
+msgstr ""

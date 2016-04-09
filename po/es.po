@@ -7,100 +7,96 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pay-service\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-02-19 15:01-0500\n"
-"PO-Revision-Date: 2015-03-04 19:08+0000\n"
+"POT-Creation-Date: 2016-03-08 16:23-0500\n"
+"PO-Revision-Date: 2016-04-08 21:27+0000\n"
 "Last-Translator: Alejandro J. Cura <alecu@canonical.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-12-25 05:38+0000\n"
-"X-Generator: Launchpad (build 17865)\n"
+"X-Launchpad-Export-Date: 2016-04-09 06:00+0000\n"
+"X-Generator: Launchpad (build 17990)\n"
 
-#: ../app/payui.qml:148
-msgid "Finish Purchase"
-msgstr "Terminar la compra"
-
-#: ../app/payui.qml:163
-msgid "Incorrect Password, please try again."
-msgstr "La contraseña es incorrecta. Inténtelo de nuevo."
-
-#: ../app/payui.qml:276
-msgid "Purchase failed"
-msgstr "La compra falló"
-
-#: ../app/payui.qml:277
-msgid "The purchase couldn't be completed."
-msgstr "La compra no se pudo completar."
-
-#: ../app/payui.qml:292
-msgid "Error contacting the server"
-msgstr "Error al contactar con el servidor"
-
-#: ../app/payui.qml:293 ../app/payui.qml:309
-msgid "Do you want to try again?"
-msgstr "¿Quiere intentar de nuevo?"
-
-#: ../app/payui.qml:308
-msgid "Adding Credit Card failed"
-msgstr "Error al añadir la tarjeta de crédito"
-
-#: ../app/payui.qml:327
-msgid "Processing Purchase"
-msgstr "Procesando la compra"
-
-#: ../app/payui.qml:327
-msgid "Loading"
-msgstr "Cargando"
-
-#: ../app/payui.qml:328
-msgid "Please wait…"
-msgstr "Espere…"
-
-#: ../app/payui.qml:342 ../app/ui/CheckoutPage.qml:370
-msgid "Cancel"
-msgstr "Cancelar"
-
-#: ../app/payui.qml:401
-msgid "Add Payment"
-msgstr "Añadir pago"
-
-#: ../app/ui/CheckoutPage.qml:27
+#: ../pay-ui/app/ui/CheckoutPage.qml:27
 msgid "Payment"
 msgstr "Pago"
 
-#: ../app/ui/CheckoutPage.qml:228
+#: ../pay-ui/app/ui/CheckoutPage.qml:228
 msgid "Enter your Ubuntu One password"
 msgstr "Ingrese su contraseña de Ubuntu One"
 
-#: ../app/ui/CheckoutPage.qml:271
+#: ../pay-ui/app/ui/CheckoutPage.qml:271
 msgid "Type your verification code:"
 msgstr "Escriba su código de verificación:"
 
-#: ../app/ui/CheckoutPage.qml:282
+#: ../pay-ui/app/ui/CheckoutPage.qml:282
 msgid "2-factor device code"
 msgstr "Código de disp. de autent. en 2 pasos"
 
-#: ../app/ui/CheckoutPage.qml:379
+#: ../pay-ui/app/ui/CheckoutPage.qml:370 ../pay-ui/app/payui.qml:342
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: ../pay-ui/app/ui/CheckoutPage.qml:379
 msgid "Buy Now"
 msgstr "Comprar ahora"
 
-#: ../app/ui/CheckoutPage.qml:393
+#: ../pay-ui/app/ui/CheckoutPage.qml:393
 msgid "Add credit/debit card"
 msgstr "Añadir tarjeta de crédito o débito"
 
-#: ../app/ui/ErrorDialog.qml:45
+#: ../pay-ui/app/ui/ErrorDialog.qml:45
 msgid "Retry"
 msgstr "Reintentar"
 
-#: ../app/ui/ErrorDialog.qml:55
+#: ../pay-ui/app/ui/ErrorDialog.qml:55
 msgid "Close"
 msgstr "Cerrar"
 
-#: payui_payui.desktop.in.in.h:1
-msgid "Pay UI"
-msgstr "Interfaz de pagos"
+#: ../pay-ui/app/payui.qml:147
+msgid "Finish Purchase"
+msgstr "Terminar la compra"
 
-#: payui_payui.desktop.in.in.h:2
-msgid "The application for completing a purchase."
-msgstr "La aplicación para completar una compra."
+#: ../pay-ui/app/payui.qml:162
+msgid "Incorrect Password, please try again."
+msgstr "La contraseña es incorrecta. Inténtelo de nuevo."
+
+#: ../pay-ui/app/payui.qml:276
+msgid "Purchase failed"
+msgstr "La compra falló"
+
+#: ../pay-ui/app/payui.qml:277
+msgid "The purchase couldn't be completed."
+msgstr "La compra no se pudo completar."
+
+#: ../pay-ui/app/payui.qml:292
+msgid "Error contacting the server"
+msgstr "Error al contactar con el servidor"
+
+#: ../pay-ui/app/payui.qml:293 ../pay-ui/app/payui.qml:309
+msgid "Do you want to try again?"
+msgstr "¿Quiere intentar de nuevo?"
+
+#: ../pay-ui/app/payui.qml:308
+msgid "Adding Credit Card failed"
+msgstr "Error al añadir la tarjeta de crédito"
+
+#: ../pay-ui/app/payui.qml:327
+msgid "Processing Purchase"
+msgstr "Procesando la compra"
+
+#: ../pay-ui/app/payui.qml:327
+msgid "Loading"
+msgstr "Cargando"
+
+#: ../pay-ui/app/payui.qml:328
+msgid "Please wait…"
+msgstr "Espere…"
+
+#: ../pay-ui/app/payui.qml:403
+msgid "Add Payment"
+msgstr "Añadir pago"
+
+#: ../service-ng/src/pay-service-2/service/pay_service.go:351
+msgid "Allow requesting in-app purchases?"
+msgstr ""
