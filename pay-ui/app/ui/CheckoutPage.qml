@@ -376,7 +376,7 @@ Page {
             Button {
                 id: buyButton
                 objectName: "buyButton"
-                text: i18n.tr("Buy Now")
+                text: i18n.tr("Buy now")
                 color: UbuntuColors.orange
                 width: parent.buttonsWidth
 
