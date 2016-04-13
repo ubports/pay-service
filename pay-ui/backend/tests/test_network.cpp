@@ -97,8 +97,7 @@ void TestNetwork::testNetworkAuthenticationError()
     setenv(PAY_BASE_URL_ENVVAR, "http://localhost:8000/authError/", 1);
     QSignalSpy spy(&network, SIGNAL(authenticationError()));
     network.buyItem("email", "password", "otp", "USD", "appid", "itemid", "paymentid", "backendid", false);
-    // WTF DOES THIS HAPPEN TWICE
-    QTRY_COMPARE(spy.count(), 2);
+    QTRY_COMPARE(spy.count(), 1);
 }
 
 void TestNetwork::testNetworkGetPaymentTypes()
@@ -126,8 +125,7 @@ void TestNetwork::testNetworkGetPaymentTypesFail()
     setenv(PAY_BASE_URL_ENVVAR, "http://localhost:8000/fail/", 1);
     QSignalSpy spy(&network, SIGNAL(error(QString)));
     network.requestPaymentTypes("USD");
-    // WTF DOES THIS HAPPEN TWICE
-    QTRY_COMPARE(spy.count(), 2);
+    QTRY_COMPARE(spy.count(), 1);
     QList<QVariant> arguments = spy.takeFirst();
     QVERIFY(arguments.at(0).toString().startsWith("404:"));
 }
@@ -263,8 +261,7 @@ void TestNetwork::testNetworkGetItemInfoFail()
     unsetenv(CURRENCY_ENVVAR);
     QSignalSpy spy(&network, SIGNAL(error(QString)));
     network.getItemInfo("packagename", "");
-    // WTF DOES THIS HAPPEN TWICE
-    QTRY_COMPARE(spy.count(), 2);
+    QTRY_COMPARE(spy.count(), 1);
 }
 
 void TestNetwork::testUseExistingCredentials()
@@ -288,8 +285,7 @@ void TestNetwork::testCheckAlreadyPurchasedFail()
     setenv(PAY_BASE_URL_ENVVAR, "http://localhost:8000/notpurchased/", 1);
     QSignalSpy spy(&network, SIGNAL(itemNotPurchased()));
     network.checkItemPurchased("com.example.fakeapp", "");
-    // WTF DOES THIS HAPPEN TWICE
-    QTRY_COMPARE(spy.count(), 2);
+    QTRY_COMPARE(spy.count(), 1);
 }
 
 void TestNetwork::testSanitizeUrl()
