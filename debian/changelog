@@ -1,3 +1,11 @@
+pay-service (15.10+16.04.20160413-0ubuntu1) xenial; urgency=medium
+
+  * Change Buy Now to Buy now. (LP: #1541992)
+  * Enable langpacks for pay-service.
+  * Fix the tests to re-align with the fixed Qt.
+
+ -- Rodney Dawes <ci-train-bot@canonical.com>  Wed, 13 Apr 2016 17:26:12 +0000
+
 pay-service (15.10+16.04.20160324.1-0ubuntu1) xenial; urgency=medium
 
   * Add build dep on golang-go > 1.6 for ppc64el for xenial.
