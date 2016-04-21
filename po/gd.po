@@ -7,18 +7,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pay-service\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-03-08 16:23-0500\n"
+"POT-Creation-Date: 2016-04-08 16:51-0400\n"
 "PO-Revision-Date: 2016-04-08 21:31+0000\n"
 "Last-Translator: Akerbeltz <fios@akerbeltz.org>\n"
 "Language-Team: Fòram na Gàidhlig\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-04-09 06:00+0000\n"
-"X-Generator: Launchpad (build 17990)\n"
+"X-Launchpad-Export-Date: 2016-04-21 05:52+0000\n"
+"X-Generator: Launchpad (build 17995)\n"
 "Language: gd\n"
 
-#: ../pay-ui/app/ui/CheckoutPage.qml:27
+#: ../pay-ui/app/ui/CheckoutPage.qml:28
 msgid "Payment"
 msgstr "Pàigheadh"
 
@@ -34,13 +34,13 @@ msgstr "Cuir a-steach an còd dearbhaidh agad:"
 msgid "2-factor device code"
 msgstr "Còd uidheim dà-fhactarail"
 
-#: ../pay-ui/app/ui/CheckoutPage.qml:370 ../pay-ui/app/payui.qml:342
+#: ../pay-ui/app/ui/CheckoutPage.qml:370 ../pay-ui/app/payui.qml:341
 msgid "Cancel"
 msgstr "Sguir dheth"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:379
-msgid "Buy Now"
-msgstr "Ceannaich an-dràsta"
+msgid "Buy now"
+msgstr ""
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:393
 msgid "Add credit/debit card"
@@ -54,47 +54,47 @@ msgstr "Feuch ris a-rithist"
 msgid "Close"
 msgstr "Dùin"
 
-#: ../pay-ui/app/payui.qml:147
+#: ../pay-ui/app/payui.qml:145
 msgid "Finish Purchase"
 msgstr "Coilean an ceannach"
 
-#: ../pay-ui/app/payui.qml:162
+#: ../pay-ui/app/payui.qml:160
 msgid "Incorrect Password, please try again."
 msgstr "Facal-faire cearr, am feuch thu ris a-rithist?"
 
-#: ../pay-ui/app/payui.qml:276
+#: ../pay-ui/app/payui.qml:275
 msgid "Purchase failed"
 msgstr "Cha do shoirbhich leis a' cheannach"
 
-#: ../pay-ui/app/payui.qml:277
+#: ../pay-ui/app/payui.qml:276
 msgid "The purchase couldn't be completed."
 msgstr "Cha b' urrainn dhuinn an ceannach a choileanadh."
 
-#: ../pay-ui/app/payui.qml:292
+#: ../pay-ui/app/payui.qml:291
 msgid "Error contacting the server"
 msgstr "Mearachd a' conaltradh ris an fhrithealaiche"
 
-#: ../pay-ui/app/payui.qml:293 ../pay-ui/app/payui.qml:309
+#: ../pay-ui/app/payui.qml:292 ../pay-ui/app/payui.qml:308
 msgid "Do you want to try again?"
 msgstr "A bheil thu airson feuchainn a-rithist?"
 
-#: ../pay-ui/app/payui.qml:308
+#: ../pay-ui/app/payui.qml:307
 msgid "Adding Credit Card failed"
 msgstr "Cha b' urrainn dhuinn a' chairt-creideis a chur ris."
 
-#: ../pay-ui/app/payui.qml:327
+#: ../pay-ui/app/payui.qml:326
 msgid "Processing Purchase"
 msgstr "A' dèiligeadh ris a' cheannach"
 
-#: ../pay-ui/app/payui.qml:327
+#: ../pay-ui/app/payui.qml:326
 msgid "Loading"
 msgstr "'Ga luchdadh"
 
-#: ../pay-ui/app/payui.qml:328
+#: ../pay-ui/app/payui.qml:327
 msgid "Please wait…"
 msgstr "Fuirich greiseag…"
 
-#: ../pay-ui/app/payui.qml:403
+#: ../pay-ui/app/payui.qml:402
 msgid "Add Payment"
 msgstr "Cuir pàigheadh ris"
 

@@ -7,17 +7,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pay-service\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-03-08 16:23-0500\n"
+"POT-Creation-Date: 2016-04-08 16:51-0400\n"
 "PO-Revision-Date: 2016-04-08 21:30+0000\n"
 "Last-Translator: Vojtěch Daněk <vdanek@outlook.com>\n"
 "Language-Team: Czech <cs@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-04-09 05:59+0000\n"
-"X-Generator: Launchpad (build 17990)\n"
+"X-Launchpad-Export-Date: 2016-04-21 05:52+0000\n"
+"X-Generator: Launchpad (build 17995)\n"
 
-#: ../pay-ui/app/ui/CheckoutPage.qml:27
+#: ../pay-ui/app/ui/CheckoutPage.qml:28
 msgid "Payment"
 msgstr "Platba"
 
@@ -33,13 +33,13 @@ msgstr "Napište ověřovací kód:"
 msgid "2-factor device code"
 msgstr "Kód zařízení pro dvoufázové ověření"
 
-#: ../pay-ui/app/ui/CheckoutPage.qml:370 ../pay-ui/app/payui.qml:342
+#: ../pay-ui/app/ui/CheckoutPage.qml:370 ../pay-ui/app/payui.qml:341
 msgid "Cancel"
 msgstr "Zrušit"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:379
-msgid "Buy Now"
-msgstr "Koupit nyní"
+msgid "Buy now"
+msgstr ""
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:393
 msgid "Add credit/debit card"
@@ -53,47 +53,47 @@ msgstr "Opakovat"
 msgid "Close"
 msgstr "Zavřít"
 
-#: ../pay-ui/app/payui.qml:147
+#: ../pay-ui/app/payui.qml:145
 msgid "Finish Purchase"
 msgstr "Dokončit nákup"
 
-#: ../pay-ui/app/payui.qml:162
+#: ../pay-ui/app/payui.qml:160
 msgid "Incorrect Password, please try again."
 msgstr "Nesprávné heslo, zkuste to, prosím, znovu."
 
-#: ../pay-ui/app/payui.qml:276
+#: ../pay-ui/app/payui.qml:275
 msgid "Purchase failed"
 msgstr "Nákup selhal"
 
-#: ../pay-ui/app/payui.qml:277
+#: ../pay-ui/app/payui.qml:276
 msgid "The purchase couldn't be completed."
 msgstr "Nákup nemohl být dokončen."
 
-#: ../pay-ui/app/payui.qml:292
+#: ../pay-ui/app/payui.qml:291
 msgid "Error contacting the server"
 msgstr "Chyba kontaktování serveru"
 
-#: ../pay-ui/app/payui.qml:293 ../pay-ui/app/payui.qml:309
+#: ../pay-ui/app/payui.qml:292 ../pay-ui/app/payui.qml:308
 msgid "Do you want to try again?"
 msgstr "Chcete to zkusit znovu?"
 
-#: ../pay-ui/app/payui.qml:308
+#: ../pay-ui/app/payui.qml:307
 msgid "Adding Credit Card failed"
 msgstr "Přidání platební karty selhalo"
 
-#: ../pay-ui/app/payui.qml:327
+#: ../pay-ui/app/payui.qml:326
 msgid "Processing Purchase"
 msgstr "Platba probíhá"
 
-#: ../pay-ui/app/payui.qml:327
+#: ../pay-ui/app/payui.qml:326
 msgid "Loading"
 msgstr "Načítá se"
 
-#: ../pay-ui/app/payui.qml:328
+#: ../pay-ui/app/payui.qml:327
 msgid "Please wait…"
 msgstr "Čekejte prosím…"
 
-#: ../pay-ui/app/payui.qml:403
+#: ../pay-ui/app/payui.qml:402
 msgid "Add Payment"
 msgstr "Přidal platbu"
 

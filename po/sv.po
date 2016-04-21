@@ -7,18 +7,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pay-service\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-03-08 16:23-0500\n"
+"POT-Creation-Date: 2016-04-08 16:51-0400\n"
 "PO-Revision-Date: 2016-04-08 21:36+0000\n"
 "Last-Translator: CI Train Bot Account <Unknown>\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-04-09 06:00+0000\n"
-"X-Generator: Launchpad (build 17990)\n"
+"X-Launchpad-Export-Date: 2016-04-21 05:52+0000\n"
+"X-Generator: Launchpad (build 17995)\n"
 "Language: sv\n"
 
-#: ../pay-ui/app/ui/CheckoutPage.qml:27
+#: ../pay-ui/app/ui/CheckoutPage.qml:28
 msgid "Payment"
 msgstr "Betalning"
 
@@ -34,13 +34,13 @@ msgstr "Skriv in din verifieringskod:"
 msgid "2-factor device code"
 msgstr "Tvåvägsenhetskod"
 
-#: ../pay-ui/app/ui/CheckoutPage.qml:370 ../pay-ui/app/payui.qml:342
+#: ../pay-ui/app/ui/CheckoutPage.qml:370 ../pay-ui/app/payui.qml:341
 msgid "Cancel"
 msgstr "Avbryt"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:379
-msgid "Buy Now"
-msgstr "Köp nu"
+msgid "Buy now"
+msgstr ""
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:393
 msgid "Add credit/debit card"
@@ -54,47 +54,47 @@ msgstr "Försök igen"
 msgid "Close"
 msgstr "Stäng"
 
-#: ../pay-ui/app/payui.qml:147
+#: ../pay-ui/app/payui.qml:145
 msgid "Finish Purchase"
 msgstr "Avsluta köp"
 
-#: ../pay-ui/app/payui.qml:162
+#: ../pay-ui/app/payui.qml:160
 msgid "Incorrect Password, please try again."
 msgstr "Felaktigt lösenord, vänligen försök igen."
 
-#: ../pay-ui/app/payui.qml:276
+#: ../pay-ui/app/payui.qml:275
 msgid "Purchase failed"
 msgstr "Köpet misslyckades"
 
-#: ../pay-ui/app/payui.qml:277
+#: ../pay-ui/app/payui.qml:276
 msgid "The purchase couldn't be completed."
 msgstr "Köpet kunde inte slutföras."
 
-#: ../pay-ui/app/payui.qml:292
+#: ../pay-ui/app/payui.qml:291
 msgid "Error contacting the server"
 msgstr "Fel uppstod vid kontakt med server"
 
-#: ../pay-ui/app/payui.qml:293 ../pay-ui/app/payui.qml:309
+#: ../pay-ui/app/payui.qml:292 ../pay-ui/app/payui.qml:308
 msgid "Do you want to try again?"
 msgstr "Vill du försöka igen?"
 
-#: ../pay-ui/app/payui.qml:308
+#: ../pay-ui/app/payui.qml:307
 msgid "Adding Credit Card failed"
 msgstr "Kunde inte lägga till betalkort"
 
-#: ../pay-ui/app/payui.qml:327
+#: ../pay-ui/app/payui.qml:326
 msgid "Processing Purchase"
 msgstr "Behandlar köp"
 
-#: ../pay-ui/app/payui.qml:327
+#: ../pay-ui/app/payui.qml:326
 msgid "Loading"
 msgstr "Laddar"
 
-#: ../pay-ui/app/payui.qml:328
+#: ../pay-ui/app/payui.qml:327
 msgid "Please wait…"
 msgstr "Vänta…"
 
-#: ../pay-ui/app/payui.qml:403
+#: ../pay-ui/app/payui.qml:402
 msgid "Add Payment"
 msgstr "Lägg till betalning"
 
