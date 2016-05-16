@@ -88,18 +88,34 @@ class MyHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes(json.dumps(response), 'UTF-8'))
 
     def response_item_info(self, fail, eurozone, dotar):
-        response = {
-            "title": "title",
-            "publisher": "publisher",
-            "price": 9.99,
-            "prices": {
-                "USD": 1.99,
-                "EUR": 1.69,
-                "GBP": 1.29,
-                "ARS": 18.05,
+        if self.path.find("/items/by-sku/") != -1:
+            response = {
+                "id": 1,
+                "sku": "sku1",
+                "title": "Item 1 Title",
+                "description": "Item 1 Description",
+                "prices": {
+                    "USD": "2.99",
+                    "EUR": "2.49",
+                    "GBP": "1.99"
                 },
-            "icon_url": "icon_url",
-        }
+                "type": "consumable",
+                "state": "available"
+            }
+        else:
+            response = {
+                "title": "title",
+                "publisher": "publisher",
+                "price": 9.99,
+                "prices": {
+                    "USD": 1.99,
+                    "EUR": 1.69,
+                    "GBP": 1.29,
+                    "ARS": 18.05,
+                },
+                "icon_url": "icon_url",
+            }
+
         if fail:
             self.send_response(404)
         else:

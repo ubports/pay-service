@@ -44,6 +44,8 @@ constexpr static const char* CURRENCY_ENVVAR {"U1_SEARCH_CURRENCY"};
 constexpr static const char* SEARCH_BASE_URL_ENVVAR{"U1_SEARCH_BASE_URL"};
 constexpr static const char* SEARCH_BASE_URL{"https://search.apps.ubuntu.com"};
 constexpr static const char* SEARCH_API_ROOT{"/api/v1"};
+constexpr static const char* FALLBACK_ICON_URL{"image://theme/placeholder-app-icon"};
+
 
 class RequestObject : public QObject
 {

@@ -8,7 +8,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-pkg_check_modules(UBUNTUONEAUTH REQUIRED ubuntuoneauth-2.0)
+pkg_check_modules(UBUNTUONEAUTH REQUIRED ubuntuoneauth-2.0 ubuntu-app-launch-2>=0.9)
 add_definitions(${UBUNTUONEAUTH_CFLAGS} ${UBUNTUONEAUTH_CFLAGS_OTHER})
 
 set(

@@ -57,6 +57,7 @@ private slots:
     void testNetworkGetItemInfoOtherCoins();
     void testNetworkGetItemInfoOverride();
     void testNetworkGetItemInfoOverrideOther();
+    void testNetworkGetItemInfoIAPAppIconFallback();
     void testNetworkGetItemInfoFail();
     void testUseExistingCredentials();
     void testCheckAlreadyPurchased();
@@ -252,6 +253,17 @@ void TestNetwork::testNetworkGetItemInfoOverrideOther()
      QList<QVariant> arguments = spy.takeFirst();
      QCOMPARE(arguments.at(2).toString(), QStringLiteral("EUR"));
      QCOMPARE(arguments.at(3).toString(), QStringLiteral("€1.69"));
+     unsetenv(CURRENCY_ENVVAR);
+}
+
+void TestNetwork::testNetworkGetItemInfoIAPAppIconFallback()
+{
+     setenv(PAY_BASE_URL_ENVVAR, "http://localhost:8000/iteminfo/", 1);
+     QSignalSpy spy(&network, SIGNAL(itemDetailsObtained(QString,QString,QString,QString,QString)));
+     network.getItemInfo("donations-ubuntu.canonical", "donate5");
+     QTRY_COMPARE(spy.count(), 1);
+     QList<QVariant> arguments = spy.takeFirst();
+     QCOMPARE(arguments.at(4).toString(), QString(FALLBACK_ICON_URL));
      unsetenv(CURRENCY_ENVVAR);
 }
 
