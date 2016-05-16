@@ -23,6 +23,7 @@ import (
     "path"
     "os"
     "os/exec"
+    "time"
 
     "github.com/ziutek/glib"
     "launchpad.net/go-mir/mir"
@@ -145,11 +146,14 @@ func runGlib(stop chan struct{}, finished chan struct{}) {
 
     for {
         select {
-            case <-stop:
+            case <-stop: {
                 close(finished)
                 return
-            default:
+            }
+            default: {
                 context.Iteration(false)
+                time.Sleep(200 * time.Millisecond)
+            }
         }
     }
 }
