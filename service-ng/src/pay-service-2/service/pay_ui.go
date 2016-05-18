@@ -23,9 +23,7 @@ import (
     "path"
     "os"
     "os/exec"
-    "time"
 
-    "github.com/ziutek/glib"
     "launchpad.net/go-mir/mir"
     "launchpad.net/go-ual/ual"
 )
@@ -76,18 +74,7 @@ func execPayUiCommand(purchaseUrl string) {
 // launches Pay UI via Ubuntu App Launch (UAL) and provides the associated
 // feedback.
 func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback) {
-    // Fire up glib (it's how UAL handles events)
-    glibStop := make(chan struct{})
-    glibFinished := make(chan struct{})
-    go runGlib(glibStop, glibFinished)
-
-    // When this function ends Pay UI will have been closed, so make sure the
-    // glib mainloop quits and we send the correct feedback.
     defer func() {
-        // Ask glib to quit and wait for it
-        close(glibStop)
-        <-glibFinished
-
         close(feedback.Error)
         close(feedback.Finished)
     }()
@@ -139,23 +126,6 @@ func launchPayUiAndWait(appId string, purchaseUrl string, feedback PayUiFeedback
 
     // Finally, start the helper with that purchase URL
     payUiExecFunction(purchaseUrl)
-}
-
-func runGlib(stop chan struct{}, finished chan struct{}) {
-    context := glib.DefaultMainContext()
-
-    for {
-        select {
-            case <-stop: {
-                close(finished)
-                return
-            }
-            default: {
-                context.Iteration(false)
-                time.Sleep(200 * time.Millisecond)
-            }
-        }
-    }
 }
 
 // getUserRuntimeDirectory uses the $XDG_RUNTIME_DIR environment variable to
