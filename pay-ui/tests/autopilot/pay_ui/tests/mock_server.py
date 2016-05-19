@@ -22,7 +22,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 html_success = """
 <html>
-    <body bgcolor="green" onClick="window.location.assign('/paymentmethods/completeadd')">
+    <body bgcolor="green"
+          onClick="window.location.assign('/paymentmethods/completeadd')">
         <h1>Placeholder for web interaction</h1>
         <p>Click anywhere to proceed</p>
     </body>
@@ -31,7 +32,8 @@ html_success = """
 
 html_cancel = """
 <html>
-    <body bgcolor="red" onClick="window.location.assign('/api/2.0/click/cancelled')">
+    <body bgcolor="red"
+          onClick="window.location.assign('/api/2.0/click/cancelled')">
         <h1>Placeholder for web interaction</h1>
         <p>Click anywhere to cancel</p>
     </body>
@@ -233,8 +235,8 @@ class MyHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Respond to a POST request."""
-        #content = self.rfile.read(int(self.headers.get('content-length')))
-        #structure = json.loads(content.decode('utf-8'))
+        # content = self.rfile.read(int(self.headers.get('content-length')))
+        # structure = json.loads(content.decode('utf-8'))
         if self.path.find("purchases/") != -1:
             self.response_buy_item()
 

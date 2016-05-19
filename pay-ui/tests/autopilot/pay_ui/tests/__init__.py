@@ -15,10 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import fixtures
-import json
 import os
 import shutil
-import subprocess
 import tempfile
 import ubuntuuitoolkit as uitk
 

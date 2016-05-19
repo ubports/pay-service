@@ -109,3 +109,15 @@ ENABLE_COVERAGE_REPORT(
   TESTS libpay-iap-tests libpay-package-tests
   FILTER ${filter-list}
 )
+
+
+file(RELATIVE_PATH RELATIVE_SRCDIR ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+##
+##  Python static checking
+##
+add_test(NAME pep8
+  COMMAND pep8 ${RELATIVE_SRCDIR}
+)
+add_test(NAME pyflakes
+  COMMAND pyflakes3 ${RELATIVE_SRCDIR}
+)

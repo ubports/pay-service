@@ -48,6 +48,7 @@ def encode_path_element(element):
             encoded.append('_{:02x}'.format(ord(ch)))
     return ''.join(encoded)
 
+
 def build_store_path(package_name):
     return STORE_PATH_PREFIX + '/' + encode_path_element(package_name)
 
@@ -99,7 +100,7 @@ def store_add_item(store, properties):
 
     item = Item(sku)
     store.items[sku] = item
-    store.set_item (store, sku, properties)
+    store.set_item(store, sku, properties)
 
 
 def store_set_item(store, sku, properties):
@@ -158,7 +159,8 @@ def store_purchase_item(store, sku):
         elif sku != 'cancel':
             item = store.items[sku]
             item.set_property('state', 'approved')
-            item.set_property('purchase_id', dbus.UInt64(store.next_purchase_id))
+            item.set_property('purchase_id',
+                              dbus.UInt64(store.next_purchase_id))
             item.set_property('completed_timestamp', dbus.UInt64(time.time()))
             store.next_purchase_id += 1
         return store_get_item(store, sku)
@@ -177,7 +179,8 @@ def store_refund_item(store, sku):
     try:
         item = store.items[sku]
         if (item.bus_properties['state'] == 'purchased' and
-            item.bus_properties['refundable_until'] > dbus.UInt64(time.time())):
+            (item.bus_properties['refundable_until'] >
+             dbus.UInt64(time.time()))):
             del store.items[sku]
             return dbus.Dictionary({
                 'state': 'available',
@@ -232,17 +235,24 @@ def main_add_store(mock, package_name, items):
     store.refund_item = store_refund_item
     store.acknowledge_item = store_acknowledge_item
     store.AddMethods(STORE_IFACE, [
-                       ('AddItem', 'a{sv}', '', 'self.add_item(self, args[0])'),
-                       ('SetItem', 'sa{sv}', '', 'self.set_item(self, args[0], args[1])'),
-                       ('GetItem', 's', 'a{sv}', 'ret = self.get_item(self, args[0])'),
-                       ('GetPurchasedItems', '', 'aa{sv}', 'ret = self.get_purchased_items(self)'),
-                       ('PurchaseItem', 's', 'a{sv}', 'ret = self.purchase_item(self, args[0])'),
-                       ('RefundItem', 's', 'a{sv}', 'ret = self.refund_item(self, args[0])'),
-                       ('AcknowledgeItem', 's', 'a{sv}', 'ret = self.acknowledge_item(self, args[0])'),
-                     ])
+        ('AddItem', 'a{sv}', '',
+         'self.add_item(self, args[0])'),
+        ('SetItem', 'sa{sv}', '',
+         'self.set_item(self, args[0], args[1])'),
+        ('GetItem', 's', 'a{sv}',
+         'ret = self.get_item(self, args[0])'),
+        ('GetPurchasedItems', '', 'aa{sv}',
+         'ret = self.get_purchased_items(self)'),
+        ('PurchaseItem', 's', 'a{sv}',
+         'ret = self.purchase_item(self, args[0])'),
+        ('RefundItem', 's', 'a{sv}',
+         'ret = self.refund_item(self, args[0])'),
+        ('AcknowledgeItem', 's', 'a{sv}',
+         'ret = self.acknowledge_item(self, args[0])'),
+    ])
 
     for item in items:
-        store.add_item(store, item);
+        store.add_item(store, item)
 
 
 def main_get_stores(mock):
