@@ -1,4 +1,4 @@
-usr/lib/*/pkgconfig/pay*pc
-usr/lib/*/libpay.so
-usr/lib/python3/dist-packages/dbusmock/templates
 usr/include/libpay-*
+usr/lib/*/libpay.so
+usr/lib/*/pkgconfig/pay*pc
+usr/lib/python3/dist-packages/dbusmock/templates

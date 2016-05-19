@@ -45,11 +45,11 @@ X-Ubuntu-Use-Langpack: yes
 Package: pay-service
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends},
-Depends: ${misc:Depends},
-         ${shlibs:Depends},
-         pay-ui (= ${source:Version}),
+Depends: pay-ui (= ${source:Version}),
          sysvinit-utils,
          ubuntu-push-client (>= 0.68+15.04.20151009),
+         ${misc:Depends},
+         ${shlibs:Depends},
 Recommends: gnupg,
             libglib2.0-bin,
 Description: service to allow requesting payment for an item
@@ -62,12 +62,11 @@ Description: service to allow requesting payment for an item
 
 Package: pay-ui
 Architecture: any
-Depends:
- ${misc:Depends},
- ${shlibs:Depends},
- qml-module-ubuntu-web [amd64 armhf i386],
- qml-module-ubuntu-onlineaccounts-client,
- qml-module-ubuntu-components,
+Depends: qml-module-ubuntu-components,
+         qml-module-ubuntu-onlineaccounts-client,
+         qml-module-ubuntu-web [amd64 armhf i386],
+         ${misc:Depends},
+         ${shlibs:Depends},
 Description: service to allow requesting payment for an item - user interface
  Allows applications to request an item be paid for by the user.
  This requires interaction with the server backend to handle the
@@ -79,8 +78,8 @@ Description: service to allow requesting payment for an item - user interface
 Package: libpay2
 Architecture: any
 Section: libs
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
 Recommends: pay-service (= ${source:Version}),
 Multi-Arch: same
 Description: Library for interacting with the in app payments
@@ -90,10 +89,10 @@ Description: Library for interacting with the in app payments
 Package: libpay2-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends},
+Depends: libglib2.0-dev,
+         libpay2 (=${binary:Version}),
          ${misc:Depends},
-         libglib2.0-dev,
-         libpay2 (=${binary:Version})
+         ${shlibs:Depends},
 Multi-Arch: same
 Description: Pay service - library development files
  This library contains information to purchase items and figure out
@@ -101,8 +100,8 @@ Description: Pay service - library development files
 
 Package: pay-test-app
 Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends}
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
 Description: Small application to help test payment
  Not a useful application for users but gives additional
  information about what's happening in the pay-service

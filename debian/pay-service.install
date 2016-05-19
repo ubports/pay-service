@@ -1,5 +1,5 @@
 usr/lib/*/pay-service/pay-service-2
 usr/lib/*/pay-service/setup-staging.sh
-usr/share/locale/*/LC_MESSAGES/pay-service.mo
 usr/share/dbus-1/services/*.service
+usr/share/locale/*/LC_MESSAGES/pay-service.mo
 usr/share/upstart/sessions/*.conf
