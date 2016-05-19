@@ -65,9 +65,9 @@ Architecture: any
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
- qtdeclarative5-ubuntu-web-plugin [amd64 armhf i386],
- qtdeclarative5-online-accounts-client0.1,
- qtdeclarative5-ubuntu-ui-toolkit-plugin,
+ qml-module-ubuntu-web [amd64 armhf i386],
+ qml-module-ubuntu-onlineaccounts-client,
+ qml-module-ubuntu-components,
 Description: service to allow requesting payment for an item - user interface
  Allows applications to request an item be paid for by the user.
  This requires interaction with the server backend to handle the
