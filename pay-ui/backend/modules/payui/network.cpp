@@ -31,6 +31,8 @@
 #include <QDBusReply>
 #include <QDBusConnection>
 
+#include <ubuntu-app-launch/registry.h>
+
 #include "certificateadapter.h"
 
 #define PAY_PURCHASES_PATH "/purchases"
@@ -53,6 +55,8 @@
 
 #define BUY_COMPLETE "Complete"
 #define BUY_IN_PROGRESS "InProgress"
+
+using namespace ubuntu::app_launch;
 
 namespace UbuntuPurchase {
 
@@ -226,6 +230,18 @@ void Network::onReply(QNetworkReply *reply)
                 icon = object.value("icon_url").toString();
             } else if (object.contains("icon")) {
                 icon = object.value("icon").toString();
+            } else {
+                if (m_selectedAppId != "click-scope") {
+                    try {
+                        auto u_appid = AppID::discover(m_selectedAppId.toStdString());
+                        auto u_app = Application::create(u_appid, Registry::getDefault());
+                        if (u_app) {
+                            icon = QString::fromStdString(u_app->info()->iconPath());
+                        }
+                    } catch (std::runtime_error) {
+                        // Just avoid crashing to fall back to the theme icon
+                    }
+                }
             }
 
             QString title = object.value("title").toString();
@@ -253,7 +269,7 @@ void Network::onReply(QNetworkReply *reply)
             QLocale locale;
             QString formatted_price = locale.toCurrencyString(price, getSymbolForCurrency(currency));
             qDebug() << "Sending signal: itemDetailsObtained: " << title << " " << formatted_price;
-            Q_EMIT itemDetailsObtained(title, publisher, currency, formatted_price, icon);
+            Q_EMIT itemDetailsObtained(title, publisher, currency, formatted_price, icon.isEmpty() ? FALLBACK_ICON_URL : icon);
         } else if (state->operation.contains(CHECK_PURCHASED)) {
             QJsonObject object = document.object();
             auto state = object.value("state").toString();
@@ -408,6 +424,9 @@ QString Network::getDeviceId()
 
 void Network::getItemInfo(const QString& packagename, const QString& sku)
 {
+    m_selectedAppId = packagename;
+    m_selectedItemId = sku;
+
     QUrl url;
 
     if (sku.isEmpty()) {

@@ -41,7 +41,7 @@ pkg_check_modules (SERVICE_DEPS REQUIRED
   gio-unix-2.0
   properties-cpp
   trust-store
-  ubuntu-app-launch-2>=0.5
+  ubuntu-app-launch-2>=0.9
 )
 include_directories (SYSTEM ${SERVICE_DEPS_INCLUDE_DIRS})
 
