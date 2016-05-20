@@ -19,19 +19,17 @@ class MyHandler(BaseHTTPRequestHandler):
                 "description": "PayPal",
                 "id": "paypal",
                 "preferred": False,
-                "choices": [
-                    {
-                        "currencies": [
-                            "USD",
-                            "GBP",
-                            "EUR"
-                        ],
-                        "id": 532,
-                        "requires_interaction": False,
-                        "preferred": False,
-                        "description": "PayPal Preapproved Payment (exp. 2014-04-12)"
-                    }
-                ]
+                "choices": [{
+                    "currencies": [
+                        "USD",
+                        "GBP",
+                        "EUR"
+                    ],
+                    "id": 532,
+                    "requires_interaction": False,
+                    "preferred": False,
+                    "description": "PayPal Preapproved (exp. 2014-04-12)"
+                }]
             },
             {
                 "description": "Credit or Debit Card",
@@ -45,7 +43,7 @@ class MyHandler(BaseHTTPRequestHandler):
                         "id": 1767,
                         "requires_interaction": False,
                         "preferred": False,
-                        "description": "**** **** **** 1111 (Visa, exp. 02/2015)"
+                        "description": "**** **** **** 1111 (X, exp. 02/2015)"
                     },
                     {
                         "currencies": [
@@ -54,7 +52,7 @@ class MyHandler(BaseHTTPRequestHandler):
                         "id": 1726,
                         "requires_interaction": False,
                         "preferred": True,
-                        "description": "**** **** **** 1111 (Visa, exp. 03/2015)"
+                        "description": "**** **** **** 1111 (X, exp. 03/2015)"
                     }
                 ]
             }
@@ -136,8 +134,8 @@ class MyHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Respond to a POST request."""
-        #content = self.rfile.read(int(self.headers.get('content-length')))
-        #structure = json.loads(content.decode('utf-8'))
+        # content = self.rfile.read(int(self.headers.get('content-length')))
+        # structure = json.loads(content.decode('utf-8'))
         self.do_GET()
 
     def do_GET(self):
