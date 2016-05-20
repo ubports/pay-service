@@ -1,3 +1,22 @@
+pay-service (15.10+16.10.20160520-0ubuntu1) yakkety; urgency=medium
+
+  [ CI Train Bot ]
+  * Resync trunk.
+
+  [ Rodney Dawes ]
+  * Add pep8 and pyflakes3 test rules. Clean up the warnings from pep8
+    and pyflakes. (LP: #1421343)
+  * Get rid of the glib usage entirely as we don't need it any more.
+    Also remove the vendorized glib bindings. (LP: #1580195)
+  * Use the ual API to get the icon path for the app for in-app
+    purchases. (LP: #1582396)
+
+  [ Timo Jyrinki ]
+  * Stop depending on transitional packages. (LP: #1583079) Run wrap-
+    and-sort -a -t on the packaging. (LP: #1583079)
+
+ -- Rodney Dawes <ci-train-bot@canonical.com>  Fri, 20 May 2016 14:27:32 +0000
+
 pay-service (15.10+16.04.20160413-0ubuntu1) xenial; urgency=medium
 
   * Change Buy Now to Buy now. (LP: #1541992)
