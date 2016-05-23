@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: pay-service\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-04-08 16:51-0400\n"
-"PO-Revision-Date: 2016-04-08 21:33+0000\n"
+"PO-Revision-Date: 2016-05-22 23:22+0000\n"
 "Last-Translator: Ivo Xavier <ivoxavier.8@gmail.com>\n"
 "Language-Team: Portuguese <pt@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-04-21 05:52+0000\n"
-"X-Generator: Launchpad (build 17995)\n"
+"X-Launchpad-Export-Date: 2016-05-23 05:59+0000\n"
+"X-Generator: Launchpad (build 18025)\n"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:28
 msgid "Payment"
@@ -39,7 +39,7 @@ msgstr "Cancelar"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:379
 msgid "Buy now"
-msgstr ""
+msgstr "Comprar agora"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:393
 msgid "Add credit/debit card"
@@ -99,4 +99,4 @@ msgstr "Adicionar pagamento"
 
 #: ../service-ng/src/pay-service-2/service/pay_service.go:351
 msgid "Allow requesting in-app purchases?"
-msgstr ""
+msgstr "Permitir pedidos de compras dentro das apps?"
