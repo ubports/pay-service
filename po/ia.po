@@ -8,95 +8,95 @@ msgstr ""
 "Project-Id-Version: pay-service\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-04-08 16:51-0400\n"
-"PO-Revision-Date: 2016-05-11 06:56+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2016-07-24 06:25+0000\n"
+"Last-Translator: karm <melo@carmu.com>\n"
 "Language-Team: Interlingua <ia@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-06-03 06:22+0000\n"
-"X-Generator: Launchpad (build 18086)\n"
+"X-Launchpad-Export-Date: 2016-07-25 05:37+0000\n"
+"X-Generator: Launchpad (build 18147)\n"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:28
 msgid "Payment"
-msgstr ""
+msgstr "Pagamento"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:228
 msgid "Enter your Ubuntu One password"
-msgstr ""
+msgstr "Insere tu contrasigno de Ubuntu One"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:271
 msgid "Type your verification code:"
-msgstr ""
+msgstr "Introduce tu codice de verification:"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:282
 msgid "2-factor device code"
-msgstr ""
+msgstr "codice del dispositivo a duo factor"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:370 ../pay-ui/app/payui.qml:341
 msgid "Cancel"
-msgstr ""
+msgstr "Cancellar"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:379
 msgid "Buy now"
-msgstr ""
+msgstr "Comprar ora"
 
 #: ../pay-ui/app/ui/CheckoutPage.qml:393
 msgid "Add credit/debit card"
-msgstr ""
+msgstr "Adder un carta de credito/debito"
 
 #: ../pay-ui/app/ui/ErrorDialog.qml:45
 msgid "Retry"
-msgstr ""
+msgstr "Reprobar"
 
 #: ../pay-ui/app/ui/ErrorDialog.qml:55
 msgid "Close"
-msgstr ""
+msgstr "Clauder"
 
 #: ../pay-ui/app/payui.qml:145
 msgid "Finish Purchase"
-msgstr ""
+msgstr "Finir le compra"
 
 #: ../pay-ui/app/payui.qml:160
 msgid "Incorrect Password, please try again."
-msgstr ""
+msgstr "Contrasigno non correcte, per favor reproba."
 
 #: ../pay-ui/app/payui.qml:275
 msgid "Purchase failed"
-msgstr ""
+msgstr "Compra fallite"
 
 #: ../pay-ui/app/payui.qml:276
 msgid "The purchase couldn't be completed."
-msgstr ""
+msgstr "Le compra non pote esser completate."
 
 #: ../pay-ui/app/payui.qml:291
 msgid "Error contacting the server"
-msgstr ""
+msgstr "Error a continger le servitor"
 
 #: ../pay-ui/app/payui.qml:292 ../pay-ui/app/payui.qml:308
 msgid "Do you want to try again?"
-msgstr ""
+msgstr "Desira tu provar ancora?"
 
 #: ../pay-ui/app/payui.qml:307
 msgid "Adding Credit Card failed"
-msgstr ""
+msgstr "Addition de carta de credito fallite"
 
 #: ../pay-ui/app/payui.qml:326
 msgid "Processing Purchase"
-msgstr ""
+msgstr "Tractamento del compra"
 
 #: ../pay-ui/app/payui.qml:326
 msgid "Loading"
-msgstr ""
+msgstr "Cargamento"
 
 #: ../pay-ui/app/payui.qml:327
 msgid "Please wait…"
-msgstr ""
+msgstr "Per favor attende..."
 
 #: ../pay-ui/app/payui.qml:402
 msgid "Add Payment"
-msgstr ""
+msgstr "Adder un pagamento"
 
 #: ../service-ng/src/pay-service-2/service/pay_service.go:351
 msgid "Allow requesting in-app purchases?"
-msgstr ""
+msgstr "Consentir le requesta de compras de in-app?"
