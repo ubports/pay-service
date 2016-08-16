@@ -1,3 +1,9 @@
+pay-service (15.10+16.10.20160816.1-0ubuntu1) yakkety; urgency=medium
+
+  * No change rebuild for UAL ABI change
+
+ -- Ted Gould <ted@gould.cx>  Tue, 16 Aug 2016 14:43:47 +0000
+
 pay-service (15.10+16.10.20160520-0ubuntu1) yakkety; urgency=medium
 
   [ CI Train Bot ]
