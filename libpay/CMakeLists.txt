@@ -34,7 +34,7 @@ set_property(SOURCE ${libpay-sources}
 
 set_target_properties(libpay PROPERTIES
   VERSION ${api-version}.0.0
-  SOVESRION ${abi-version}
+  SOVERSION ${abi-version}
   OUTPUT_NAME "pay"
 )
 
