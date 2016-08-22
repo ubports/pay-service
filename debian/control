@@ -71,7 +71,6 @@ Depends: qml-module-ubuntu-components,
          qml-module-ubuntu-web [amd64 armhf i386],
          ${misc:Depends},
          ${shlibs:Depends},
-Built-Using: ${misc:Built-Using}
 Description: service to allow requesting payment for an item - user interface
  Allows applications to request an item be paid for by the user.
  This requires interaction with the server backend to handle the
@@ -86,7 +85,6 @@ Section: libs
 Depends: ${misc:Depends},
          ${shlibs:Depends},
 Recommends: pay-service (= ${source:Version}),
-Built-Using: ${misc:Built-Using}
 Multi-Arch: same
 Description: Library for interacting with the in app payments
  This library contains information to purchase items and figure out
@@ -99,7 +97,6 @@ Depends: libglib2.0-dev,
          libpay2 (=${binary:Version}),
          ${misc:Depends},
          ${shlibs:Depends},
-Built-Using: ${misc:Built-Using}
 Multi-Arch: same
 Description: Pay service - library development files
  This library contains information to purchase items and figure out
@@ -107,7 +104,6 @@ Description: Pay service - library development files
 
 Package: pay-test-app
 Architecture: any
-Built-Using: ${misc:Built-Using}
 Depends: ${misc:Depends},
          ${shlibs:Depends},
 Description: Small application to help test payment
