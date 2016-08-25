@@ -7,6 +7,7 @@ Build-Depends: cmake,
                dbus,
                dbus-test-runner,
                debhelper (>= 9),
+               dh-golang,
                dh-translations,
                gcovr,
                golang-go (>= 2:1.6) [ppc64el] | gccgo [ppc64el],
@@ -54,6 +55,7 @@ Depends: pay-ui (= ${source:Version}),
          ${shlibs:Depends},
 Recommends: gnupg,
             libglib2.0-bin,
+Built-Using: ${misc:Built-Using}
 Description: service to allow requesting payment for an item
  Allows applications to request an item be paid for by the user.
  This requires interaction with the server backend to handle the
