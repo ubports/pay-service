@@ -1,4 +1,4 @@
-libpay.so.2.0.0 libpay2 #MINVER#
+libpay.so.2 libpay2 #MINVER#
  pay_item_get_purchase_id@Base 2.0.0+15.04.20151103
  pay_item_get_acknowledged_timestamp@Base 2.0.0+15.04.20151103
  pay_item_get_description@Base 2.0.0+15.04.20151103
