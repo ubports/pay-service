@@ -19,7 +19,7 @@
 package service
 
 // #cgo pkg-config: Qt5Core
-// #cgo CXXFLAGS: -Wall
+// #cgo CXXFLAGS: -std=c++11 -Wall
 // #include "currency.h"
 // #include <stdlib.h>
 import "C"
