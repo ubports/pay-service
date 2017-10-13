@@ -97,18 +97,18 @@ add_subdirectory(po)
 ##
 ##  Coverage Reports
 ##
-include(EnableCoverageReport)
+#include(EnableCoverageReport)
 set(filter-list)
 list(APPEND filter-list "/usr/include")
 list(APPEND filter-list "${CMAKE_SOURCE_DIR}/tests/*")
 if (NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
   list(APPEND filter-list "${CMAKE_BINARY_DIR}/*")
 endif()
-ENABLE_COVERAGE_REPORT(
-  TARGETS libpay
-  TESTS libpay-iap-tests libpay-package-tests
-  FILTER ${filter-list}
-)
+#ENABLE_COVERAGE_REPORT(
+#  TARGETS libpay
+#  TESTS libpay-iap-tests libpay-package-tests
+#  FILTER ${filter-list}
+#)
 
 
 file(RELATIVE_PATH RELATIVE_SRCDIR ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
